@@ -49,26 +49,10 @@ type Logger struct {
 	mu sync.RWMutex
 }
 
-// LogLevel is the type representation of the level.
-type LogLevel uint8
-
-// Constants about log level.
-const (
-	DebugLevel LogLevel = iota
-	InfoLevel
-	WarningLevel
-	ErrorLevel
-)
-
-// prefixOfLevels provides a prefix of one level.
-var prefixOfLevels = []string{"(Debug) ", "(Info) ", "Warning! ", "Error!!! "}
-
-// prefixOf get the prefix of this level.
-func prefixOf(level LogLevel) string {
-	return prefixOfLevels[level]
-}
-
-// NewLogger create one Logger with given out and level. Default this Logger is on running status.
+// NewLogger create one Logger with given out and level.
+// The first parameter out is a writer for logging.
+// The second parameter level is the level of this Logger.
+// It returns a new running Logger holder.
 func NewLogger(out io.Writer, level LogLevel) *Logger {
 	return &Logger{
 		logger:  log.New(out, "", log.LstdFlags|log.Lshortfile),
@@ -91,8 +75,7 @@ func (l *Logger) Disable() {
 	l.running = false
 }
 
-// log can output msg to l.writer, notices that level will affect the
-// visibility of this msg.
+// log can output msg to l.writer, notices that level will affect the visibility of this msg.
 func (l *Logger) log(level LogLevel, msg string) {
 
 	// 以下两种条件直接返回，不记录日志：
@@ -111,22 +94,22 @@ func (l *Logger) log(level LogLevel, msg string) {
 	l.logger.Output(3, prefixOf(level)+msg)
 }
 
-// Debug will output msg as a debug message
+// Debug will output msg as a debug message.
 func (l *Logger) Debug(msg string) {
 	l.log(DebugLevel, msg)
 }
 
-// Info will output msg as an info message
+// Info will output msg as an info message.
 func (l *Logger) Info(msg string) {
 	l.log(InfoLevel, msg)
 }
 
-// Warning will output msg as a warning message
+// Warning will output msg as a warning message.
 func (l *Logger) Warning(msg string) {
 	l.log(WarningLevel, msg)
 }
 
-// Error will output msg as an error message
+// Error will output msg as an error message.
 func (l *Logger) Error(msg string) {
 	l.log(ErrorLevel, msg)
 }

@@ -6,8 +6,7 @@
 
 ### 🥇 Features
 
-* log to anywhere that can be wrote.
-* support time rolling file.
+* level-based logging, and there are four levels to use
 
 ### 🚀 Installation
 
@@ -43,21 +42,39 @@ logit has no more external dependencies.
 package main
 
 import (
-    //"github.com/FishGoddess/logit"
+    "os"
+    
+    "github.com/FishGoddess/logit"
 )
 
 func main() {
-    // TODO developing...
+    logger := logit.NewLogger(os.Stdout, logit.DebugLevel)
+
+    // Then you will be easy to log!
+    logger.Debug("this is a debug message!")
+    logger.Info("this is a info message!")
+    logger.Warning("this is a warning message!")
+    logger.Error("this is a error message!")
 }
 ```
 
-#### Examples
+### 📖 Examples
 
-* developing...
+* [basic](./_examples/basic.go)
+* [enable_disable](./_examples/enable_disable.go)
+
+_Check more examples in [_examples](./_examples)._ 
 
 ### 🔥 Benchmarks
 
-* developing...
+```bash
+$ go test -v -bench=. -benchtime=20s
+```
+
+| test case | times ran (large is better) |  ns/op (small is better) | B/op (small is better) | allocs/op (small is better) |
+| -----------|--------|-------------|-------------|-------------|
+| **[logit](./logger_test.go)** | 4800000 | 5062 ns/op | 864 B/op | 8 allocs/op |
+| [Golang log](./logger_test.go) | 5400000 | 4730 ns/op | 928 B/op | 12 allocs/op |
 
 ### 👥 Contributing
 
