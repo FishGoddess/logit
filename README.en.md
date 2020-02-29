@@ -2,6 +2,8 @@
 
 **logit** is a easy-to-use and level-based logger for [GoLang](https://golang.org) applications.
 
+[阅读中文版的 Read me](./README.md).
+
 ### 🥇 Features
 
 * log to anywhere that can be wrote.

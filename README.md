@@ -2,6 +2,8 @@
 
 **logit** 是一个简单易用并且是基于级别控制的日志库，可以应用于所有的 [GoLang](https://golang.org) 应用程序中。
 
+[Read me in English](./README.en.md).
+
 ### 🥇 功能特性
 
 * 可以向所有能写的地方写出日志。
