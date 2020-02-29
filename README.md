@@ -1,4 +1,4 @@
-# 📝️logit
+# 📝 logit
 
 **logit** 是一个简单易用并且是基于级别控制的日志库，可以应用于所有的 [GoLang](https://golang.org) 应用程序中。
 

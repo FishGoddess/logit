@@ -1,4 +1,4 @@
-# ✒️logit
+# 📝 logit
 
 **logit** is a easy-to-use and level-based logger for [GoLang](https://golang.org) applications.
 
