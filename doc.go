@@ -21,10 +21,20 @@ Package logit provides an easy way to use foundation for your logging operations
 
 1. The basic usage:
 
-    // NewLogger creates a new Logger holder.
-    // The first parameter "os.Stdout" is a writer for logging.
-    // The second parameter "logit.DebugLevel" is the level of this Logger
-    logger := logit.NewLogger(os.Stdout, logit.DebugLevel)
+    // Log messages with four levels.
+    // Notice that the default level is info, so first line of debug message
+    // will not be logged! If you want to change level, see logit.ChangeLevelTo
+    logit.Debug("I am a debug message! But I will not be logged in default level!")
+    logit.Info("I am an info message!")
+    logit.Warning("I am a warning message!")
+    logit.Error("I am an error message!")
+
+    // Also, you can create a new independent Logger to use. See logit.NewLogger.
+
+2. logger:
+
+    // NewStdoutLogger creates a new Logger holder to standard output, generally a terminal or a console.
+    logger := logit.NewStdoutLogger(logit.DebugLevel)
 
     // Then you will be easy to log!
     logger.Debug("this is a debug message!")
@@ -32,25 +42,40 @@ Package logit provides an easy way to use foundation for your logging operations
     logger.Warning("this is a warning message!")
     logger.Error("this is a error message!")
 
-2. enable or disable:
+    // NewLogger creates a new Logger holder.
+    // The first parameter "os.Stdout" is a writer for logging.
+    // As you know, file also can be written, just replace "os.Stdout" with your file!
+    // The second parameter "logit.DebugLevel" is the level of this Logger.
+    logger = logit.NewLogger(os.Stdout, logit.DebugLevel)
+
+3. enable or disable:
 
     // Every new Logger is running.
     logger := logit.NewLogger(os.Stdout, logit.DebugLevel)
     logger.Info("I am running!")
 
     // Shutdown the Logger.
-    // So the info message next line will be not logged!
+    // So the info message next line will not be logged!
     logger.Disable()
-    logger.Info("I will be not logged!")
+    logger.Info("I will not be logged!")
 
     // Enable the Logger.
     // The info message next line will be logged again!
     logger.Enable()
     logger.Info("I am running again!")
 
+4. change log level:
+
+    logit.Debug("Default log level is info, so debug message will not be logged!")
+
+    // Change log level to debug level.
+    logit.ChangeLevelTo(logit.DebugLevel)
+
+    logit.Debug("Now debug message will be logged!")
+
 
 */
 package logit // import "github.com/FishGoddess/logit"
 
 // Version is the version string representation of the "logit" package.
-const Version = "0.0.1"
+const Version = "0.0.2"

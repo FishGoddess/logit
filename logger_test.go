@@ -52,6 +52,18 @@ func TestLoggerLevel(t *testing.T) {
     logger.Warning("这条 warning 级别的内容可以显示吗？")
 }
 
+// 测试更改日志级别是否可用
+func TestLoggerChangeLevelTo(t *testing.T) {
+    logger := NewStdoutLogger(WarningLevel)
+    logger.Info("Log level is warning, so info message will not be logged!")
+
+    logger.ChangeLevelTo(InfoLevel)
+    logger.Info("Now info message will be logged!")
+
+    logger.ChangeLevelTo(ErrorLevel)
+    logger.Warning("Now only error messages will be logged!")
+}
+
 // ==============================================================
 // Benchmarks
 // ==============================================================

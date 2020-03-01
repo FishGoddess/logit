@@ -9,6 +9,7 @@
 ### 🥇 功能特性
 
 * 支持日志级别控制，目前一共有四个日志级别
+* 支持开启或者关闭日志功能，线上环境可以关闭或调高日志级别
 
 ### 🚀 安装方式
 
@@ -17,7 +18,7 @@
 > Go modules
 
 ```bash
-$ go get github.com/FishGoddess/logit@v0.0.1
+$ go get github.com/FishGoddess/logit@v0.0.2
 ```
 
 您也可以直接编辑 go.mod 文件，然后执行 _**go build**_.
@@ -28,7 +29,7 @@ module your_project_name
 go 1.14
 
 require (
-    github.com/FishGoddess/logit v0.0.1
+    github.com/FishGoddess/logit v0.0.2
 )
 ```
 
@@ -44,28 +45,30 @@ logit 没有任何其他额外的依赖，纯使用 [Golang 标准库](https://g
 package main
 
 import (
-    "os"
-    
     "github.com/FishGoddess/logit"
 )
 
 func main() {
-    logger := logit.NewLogger(os.Stdout, logit.DebugLevel)
-
-    // Then you will be easy to log!
-    logger.Debug("this is a debug message!")
-    logger.Info("this is a info message!")
-    logger.Warning("this is a warning message!")
-    logger.Error("this is a error message!")
+    
+    // log as you want.
+    logit.Debug("I am a debug message! But I will not be logged in default level!")
+    logit.Info("I am an info message!")
+    logit.Warning("I am a warning message!")
+    logit.Error("I am an error message!")
+    
+    // change log level.
+    logit.ChangeLevelTo(logit.DebugLevel)
 }
 ```
 
 ### 📖 参考案例
 
 * [basic](./_examples/basic.go)
+* [logger](./_examples/logger.go)
 * [enable_disable](./_examples/enable_disable.go)
+* [change_log_level](./_examples/change_log_level.go)
 
-_更多使用案例请查看 [_examples](./_examples) 目录_
+_更多使用案例请查看 [_examples](./_examples) 目录。_
 
 ### 🔥 性能测试
 
@@ -77,6 +80,8 @@ $ go test -v -bench=. -benchtime=20s
 | -----------|--------|-------------|-------------|-------------|
 | **[logit](./logger_test.go)** | 4800000 | 5062 ns/op | 864 B/op | 8 allocs/op |
 | [Golang log](./logger_test.go) | 5400000 | 4730 ns/op | 928 B/op | 12 allocs/op |
+
+_由于目前的 logit 是基于 Golang log 的，所以成绩相比更差，后续会重新设计内部日志输出模块，所以当前成绩仅供参考！_
 
 ### 👥 贡献者
 

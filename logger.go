@@ -75,15 +75,30 @@ func (l *Logger) Disable() {
     l.running = false
 }
 
+// ChangeLevelTo will change the level of current Logger to newLevel.
+func (l *Logger) ChangeLevelTo(newLevel LogLevel) {
+    l.mu.Lock()
+    defer l.mu.Unlock()
+    l.level = newLevel
+}
+
 // log can output msg to l.writer, notices that level will affect the visibility of this msg.
 func (l *Logger) log(level LogLevel, msg string) {
+
+    // 加上读锁
+    l.mu.RLock()
 
     // 以下两种条件直接返回，不记录日志：
     // 1. 日志处于禁用状态，也就是 l.running = false
     // 2. 日志记录器的日志级别高于这条记录的日志级别
     if !l.running || l.level > level {
+        // 释放读锁
+        l.mu.RUnlock()
         return
     }
+
+    // 提前释放读锁，后续操作不需要加锁
+    l.mu.RUnlock()
 
     // 记录日志
     // 这个 3 是 runtime.Caller 方法的参数，表示上面三层调用者信息

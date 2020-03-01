@@ -14,28 +14,18 @@
 //
 // Author: fish
 // Email: fishinlove@163.com
-// Created at 2020/02/29 22:20:35
+// Created at 2020/03/01 15:10:19
+
 package main
 
-import (
-    "os"
-
-    "github.com/FishGoddess/logit"
-)
+import "github.com/FishGoddess/logit"
 
 func main() {
 
-    // Every new Logger is running.
-    logger := logit.NewLogger(os.Stdout, logit.DebugLevel)
-    logger.Info("I am running!")
+    logit.Debug("Default log level is info, so debug message will not be logged!")
 
-    // Shutdown the Logger.
-    // So the info message next line will not be logged!
-    logger.Disable()
-    logger.Info("I will not be logged!")
+    // Change log level to debug level.
+    logit.ChangeLevelTo(logit.DebugLevel)
 
-    // Enable the Logger.
-    // The info message next line will be logged again!
-    logger.Enable()
-    logger.Info("I am running again!")
+    logit.Debug("Now debug message will be logged!")
 }
