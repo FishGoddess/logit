@@ -14,28 +14,25 @@
 //
 // Author: fish
 // Email: fishinlove@163.com
-// Created at 2020/02/29 22:20:35
-package main
+// Created at 2020/03/01 14:18:33
 
-import (
-    "os"
+package logit
 
-    "github.com/FishGoddess/logit"
+// LogLevel is the type representation of the level.
+type LogLevel uint8
+
+// Constants about log level.
+const (
+    DebugLevel LogLevel = iota
+    InfoLevel
+    WarningLevel
+    ErrorLevel
 )
 
-func main() {
+// prefixOfLevels provides a prefix of one level.
+var prefixOfLevels = []string{"(Debug) ", "(Info) ", "Warning! ", "Error!!! "}
 
-    // Every new Logger is running.
-    logger := logit.NewLogger(os.Stdout, logit.DebugLevel)
-    logger.Info("I am running!")
-
-    // Shutdown the Logger.
-    // So the info message next line will not be logged!
-    logger.Disable()
-    logger.Info("I will not be logged!")
-
-    // Enable the Logger.
-    // The info message next line will be logged again!
-    logger.Enable()
-    logger.Info("I am running again!")
+// prefixOf get the prefix of this level.
+func prefixOf(level LogLevel) string {
+    return prefixOfLevels[level]
 }

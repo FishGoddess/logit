@@ -18,21 +18,47 @@
 
 package logit
 
-// LogLevel is the type representation of the level.
-type LogLevel uint8
+import "os"
 
-// Constants about log level.
-const (
-	DebugLevel LogLevel = iota
-	InfoLevel
-	WarningLevel
-	ErrorLevel
-)
+// Logger holder for global usage.
+var defaultLogger = NewStdoutLogger(InfoLevel)
 
-// prefixOfLevels provides a prefix of one level.
-var prefixOfLevels = []string{"(Debug) ", "(Info) ", "Warning! ", "Error!!! "}
+// NewStdoutLogger returns a Logger holder with given log level.
+func NewStdoutLogger(level LogLevel) *Logger {
+    return NewLogger(os.Stdout, level)
+}
 
-// prefixOf get the prefix of this level.
-func prefixOf(level LogLevel) string {
-	return prefixOfLevels[level]
+// ChangeLevelTo will change the level of logit to newLevel.
+func ChangeLevelTo(level LogLevel) {
+    defaultLogger.ChangeLevelTo(level)
+}
+
+// Enable sets logit on running status.
+func Enable() {
+    defaultLogger.Enable()
+}
+
+// Disable sets logit on shutdown status.
+func Disable() {
+    defaultLogger.Disable()
+}
+
+// Debug will output msg as a debug message.
+func Debug(msg string) {
+    defaultLogger.Debug(msg)
+}
+
+// Info will output msg as an info message.
+func Info(msg string) {
+    defaultLogger.Info(msg)
+}
+
+// Warning will output msg as a warning message.
+func Warning(msg string) {
+    defaultLogger.Warning(msg)
+}
+
+// Error will output msg as an error message.
+func Error(msg string) {
+    defaultLogger.Error(msg)
 }

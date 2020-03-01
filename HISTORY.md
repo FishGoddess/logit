@@ -1,6 +1,14 @@
-# history version
+## ✒ 历史版本的特性介绍 (Features in old version)
+
+### v0.0.2
+> 此版本发布于 2020-03-01
+* 扩展 Logger 的使用方法，主要是创建日志记录器一类的方法
+* 扩展 logit 的全局使用方法，增加一个默认的日志记录器
+* 支持更改日志级别，参考 Logger#ChangeLevelTo 方法
+* 修复 Logger#log 方法中漏加读锁导致并发安全的问题
 
 ### v0.0.1
-> published on 2020-02-29
-* It has four log level: _debug_, _info_, _warning_, _error_.
-* It has four log way the same as log level.
+> 此版本发布于 2020-02-29
+* 实现最简单的日志输出功能
+* 支持四种日志级别：_debug_, _info_, _warning_, _error_。
+* 对应四种日志级别分别有四个方法。
