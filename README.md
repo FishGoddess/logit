@@ -21,7 +21,7 @@
 $ go get github.com/FishGoddess/logit@v0.0.2
 ```
 
-您也可以直接编辑 go.mod 文件，然后执行 _**go build**_.
+您也可以直接编辑 go.mod 文件，然后执行 _**go build**_。
 
 ```bash
 module your_project_name
