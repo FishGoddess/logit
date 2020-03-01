@@ -1,5 +1,7 @@
 # 📝 logit
 
+[![License](./license.svg)](https://www.apache.org/licenses/LICENSE-2.0.html)
+
 **logit** 是一个简单易用并且是基于级别控制的日志库，可以应用于所有的 [GoLang](https://golang.org) 应用程序中。
 
 [Read me in English](./README.en.md).
