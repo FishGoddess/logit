@@ -1,9 +1,21 @@
-# future version
+## ✒ 未来版本的新特性 (Features in future version)
+
+### v0.0.4
+* 尝试丢弃标准库的 log 实现，自己实现日志的输出
+* 结合上一点，以 “并发、缓冲” 为特点进行设计
+
+### v0.0.3
+* 按照时间间隔自动划分日志文件
+* 按照时间定时自动划分日志文件
 
 ### v0.0.2
-* Try to concurrency.
-* Add more useful method to use logger.
+* 扩展 Logger 的使用方法，主要是创建日志记录器一类的方法
+* 扩展 logit 的全局使用方法，增加一个默认的日志记录器
 
 ### v0.0.1
-* It has four log level: _debug_, _info_, _warning_, _error_.
-* It has four log way the same as log level.
+* 实现最简单的日志输出功能
+* 支持四种日志级别：_debug_, _info_, _warning_, _error_
+* 对应四种日志级别分别有四个方法
+* ~~给日志输出增加颜色显示~~
+    > 取消颜色是因为考虑到线上生产环境主要使用文件，这个终端颜色显示的特性不是这么必须。
+    > 如果要实现，还要针对不同的操作系统处理，代价大于价值，所以废弃这个新特性。

@@ -18,7 +18,37 @@
 
 /*
 Package logit provides an easy way to use foundation for your logging operations.
-TODO examples
+
+1. The basic usage:
+
+    // NewLogger creates a new Logger holder.
+    // The first parameter "os.Stdout" is a writer for logging.
+    // The second parameter "logit.DebugLevel" is the level of this Logger
+    logger := logit.NewLogger(os.Stdout, logit.DebugLevel)
+
+    // Then you will be easy to log!
+    logger.Debug("this is a debug message!")
+    logger.Info("this is a info message!")
+    logger.Warning("this is a warning message!")
+    logger.Error("this is a error message!")
+
+2. enable or disable:
+
+    // Every new Logger is running.
+    logger := logit.NewLogger(os.Stdout, logit.DebugLevel)
+    logger.Info("I am running!")
+
+    // Shutdown the Logger.
+    // So the info message next line will be not logged!
+    logger.Disable()
+    logger.Info("I will be not logged!")
+
+    // Enable the Logger.
+    // The info message next line will be logged again!
+    logger.Enable()
+    logger.Info("I am running again!")
+
+
 */
 package logit // import "github.com/FishGoddess/logit"
 

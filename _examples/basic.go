@@ -18,21 +18,21 @@
 package main
 
 import (
-	"os"
+    "os"
 
-	"github.com/FishGoddess/logit"
+    "github.com/FishGoddess/logit"
 )
 
 func main() {
 
-	// NewLogger creates a new Logger holder.
-	// The first parameter "os.Stdout" is a writer for logging.
-	// The second parameter "logit.DebugLevel" is the level of this Logger
-	logger := logit.NewLogger(os.Stdout, logit.DebugLevel)
+    // NewLogger creates a new Logger holder.
+    // The first parameter "os.Stdout" is a writer for logging.
+    // The second parameter "logit.DebugLevel" is the level of this Logger
+    logger := logit.NewLogger(os.Stdout, logit.DebugLevel)
 
-	// Then you will be easy to log!
-	logger.Debug("this is a debug message!")
-	logger.Info("this is a info message!")
-	logger.Warning("this is a warning message!")
-	logger.Error("this is a error message!")
+    // Then you will be easy to log!
+    logger.Debug("this is a debug message!")
+    logger.Info("this is a info message!")
+    logger.Warning("this is a warning message!")
+    logger.Error("this is a error message!")
 }

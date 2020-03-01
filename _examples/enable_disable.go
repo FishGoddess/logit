@@ -18,24 +18,24 @@
 package main
 
 import (
-	"os"
+    "os"
 
-	"github.com/FishGoddess/logit"
+    "github.com/FishGoddess/logit"
 )
 
 func main() {
 
-	// Every new Logger is running.
-	logger := logit.NewLogger(os.Stdout, logit.DebugLevel)
-	logger.Info("I am running!")
+    // Every new Logger is running.
+    logger := logit.NewLogger(os.Stdout, logit.DebugLevel)
+    logger.Info("I am running!")
 
-	// Shutdown the Logger.
-	// So the info message next line will be not logged!
-	logger.Disable()
-	logger.Info("I will be not logged!")
+    // Shutdown the Logger.
+    // So the info message next line will be not logged!
+    logger.Disable()
+    logger.Info("I will be not logged!")
 
-	// Enable the Logger.
-	// The info message next line will be logged again!
-	logger.Enable()
-	logger.Info("I am running again!")
+    // Enable the Logger.
+    // The info message next line will be logged again!
+    logger.Enable()
+    logger.Info("I am running again!")
 }

@@ -23,10 +23,10 @@ type LogLevel uint8
 
 // Constants about log level.
 const (
-	DebugLevel LogLevel = iota
-	InfoLevel
-	WarningLevel
-	ErrorLevel
+    DebugLevel LogLevel = iota
+    InfoLevel
+    WarningLevel
+    ErrorLevel
 )
 
 // prefixOfLevels provides a prefix of one level.
@@ -34,5 +34,5 @@ var prefixOfLevels = []string{"(Debug) ", "(Info) ", "Warning! ", "Error!!! "}
 
 // prefixOf get the prefix of this level.
 func prefixOf(level LogLevel) string {
-	return prefixOfLevels[level]
+    return prefixOfLevels[level]
 }
