@@ -18,7 +18,7 @@
 > Go modules
 
 ```bash
-$ go get github.com/FishGoddess/logit@v0.0.2
+$ go get -u github.com/FishGoddess/logit
 ```
 
 您也可以直接编辑 go.mod 文件，然后执行 _**go build**_。
@@ -29,7 +29,7 @@ module your_project_name
 go 1.14
 
 require (
-    github.com/FishGoddess/logit v0.0.2
+    github.com/FishGoddess/logit v0.0.3
 )
 ```
 
@@ -50,14 +50,17 @@ import (
 
 func main() {
     
-    // log as you want.
+    // Log as you want.
     logit.Debug("I am a debug message! But I will not be logged in default level!")
     logit.Info("I am an info message!")
     logit.Warning("I am a warning message!")
     logit.Error("I am an error message!")
     
-    // change log level.
+    // Change log level.
     logit.ChangeLevelTo(logit.DebugLevel)
+
+    // If you want format your message, just add arguments!
+    logit.Info("format info message! id = %d, content = %s", 1, "info!")
 }
 ```
 
@@ -78,8 +81,10 @@ $ go test -v -bench=. -benchtime=20s
 
 | 测试 | 单位时间内运行次数 (large is better) |  ns/op (small is better) | B/op (small is better) | allocs/op (small is better) |
 | -----------|--------|-------------|-------------|-------------|
-| **[logit](./logger_test.go)** | 4800000 | 5062 ns/op | 864 B/op | 8 allocs/op |
-| [Golang log](./logger_test.go) | 5400000 | 4730 ns/op | 928 B/op | 12 allocs/op |
+| **[logit](./logger_test.go)** | 4300000 | 5600 ns/op | 904 B/op | 12 allocs/op |
+| [Golang log](./logger_test.go) | 5150000 | 4769 ns/op | 920 B/op | 12 allocs/op |
+
+> 测试环境：I7-6700HQ CPU @ 2.6 GHZ，16 GB RAM
 
 _由于目前的 logit 是基于 Golang log 的，所以成绩相比更差，后续会重新设计内部日志输出模块，所以当前成绩仅供参考！_
 
