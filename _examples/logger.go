@@ -40,4 +40,7 @@ func main() {
     // As you know, file also can be written, just replace "os.Stdout" with your file!
     // The second parameter "logit.DebugLevel" is the level of this Logger.
     logger = logit.NewLogger(os.Stdout, logit.DebugLevel)
+
+    // If you want format your message, just add arguments!
+    logger.Error("format info message! id = %d, content = %s", 1, "info!")
 }
