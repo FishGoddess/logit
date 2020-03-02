@@ -31,6 +31,9 @@ Package logit provides an easy way to use foundation for your logging operations
 
     // Also, you can create a new independent Logger to use. See logit.NewLogger.
 
+    // If you want format your message, just add arguments!
+    logit.Info("format info message! id = %d, content = %s", 1, "info!")
+
 2. logger:
 
     // NewStdoutLogger creates a new Logger holder to standard output, generally a terminal or a console.
@@ -47,6 +50,9 @@ Package logit provides an easy way to use foundation for your logging operations
     // As you know, file also can be written, just replace "os.Stdout" with your file!
     // The second parameter "logit.DebugLevel" is the level of this Logger.
     logger = logit.NewLogger(os.Stdout, logit.DebugLevel)
+
+    // If you want format your message, just add arguments!
+    logger.Info("format info message! id = %d, content = %s", 1, "info!")
 
 3. enable or disable:
 
@@ -78,4 +84,4 @@ Package logit provides an easy way to use foundation for your logging operations
 package logit // import "github.com/FishGoddess/logit"
 
 // Version is the version string representation of the "logit" package.
-const Version = "0.0.2"
+const Version = "0.0.3"

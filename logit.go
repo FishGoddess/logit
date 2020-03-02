@@ -19,6 +19,7 @@
 package logit
 
 // Logger holder for global usage.
+// Default level is info level.
 var defaultLogger = NewStdoutLogger(InfoLevel)
 
 // ChangeLevelTo will change the level of logit to newLevel.
