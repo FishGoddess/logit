@@ -81,8 +81,10 @@ $ go test -v -bench=. -benchtime=20s
 
 | test case | times ran (large is better) |  ns/op (small is better) | B/op (small is better) | allocs/op (small is better) |
 | -----------|--------|-------------|-------------|-------------|
-| **[logit](./logger_test.go)** | 4300000 | 5600 ns/op | 904 B/op | 12 allocs/op |
-| [Golang log](./logger_test.go) | 5150000 | 4769 ns/op | 920 B/op | 12 allocs/op |
+| **[logit](./_examples/benchmarks_test.go)** | 4405342 | 5409 ns/op | 904 B/op | 12 allocs/op |
+| [logrus](./_examples/benchmarks_test.go) | 2990408 | 7991 ns/op | 1633 B/op | 52 allocs/op |
+| [Golang log](./_examples/benchmarks_test.go) | 5308578 | 4539 ns/op | 920 B/op | 12 allocs/op |
+| [Golog](./_examples/benchmarks_test.go) | 15536137 | 1556 ns/op | 232 B/op | 16 allocs/op |
 
 > Environment：I7-6700HQ CPU @ 2.6 GHZ, 16 GB RAM
 

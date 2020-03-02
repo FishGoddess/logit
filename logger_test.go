@@ -19,7 +19,6 @@
 package logit
 
 import (
-    "log"
     "os"
     "testing"
 )
@@ -76,61 +75,4 @@ func TestLoggerChangeLevelTo(t *testing.T) {
 
     logger.ChangeLevelTo(ErrorLevel)
     logger.Warning("Now only error messages will be logged!")
-}
-
-// ==============================================================
-// Benchmarks
-// ==============================================================
-
-// 仅为测试用，不输出任何信息的写出器
-type nopWriter struct{}
-
-func (w *nopWriter) Write(p []byte) (n int, err error) {
-    return 0, nil
-}
-
-// 测试 logit 日志记录器的速度
-func BenchmarkLogitLogger(b *testing.B) {
-
-    // 测试用的日志记录器
-    logger := NewLogger(&nopWriter{}, DebugLevel)
-
-    // 测试用的日志任务
-    logTask := func() {
-        logger.Debug("debug...")
-        logger.Info("info...")
-        logger.Warning("warning...")
-        logger.Error("error...")
-    }
-
-    // 开始性能测试
-    b.ReportAllocs()
-    b.StartTimer()
-
-    for i := 0; i < b.N; i++ {
-        logTask()
-    }
-}
-
-// 测试标准库 log.Logger 日志记录器的速度
-func BenchmarkLogLogger(b *testing.B) {
-
-    // 测试用的日志记录器
-    logger := log.New(&nopWriter{}, "", log.LstdFlags|log.Lshortfile)
-
-    // 测试用的日志任务
-    logTask := func() {
-        logger.Println("debug...")
-        logger.Println("info...")
-        logger.Println("warning...")
-        logger.Println("error...")
-    }
-
-    // 开始性能测试
-    b.ReportAllocs()
-    b.StartTimer()
-
-    for i := 0; i < b.N; i++ {
-        logTask()
-    }
 }
