@@ -18,7 +18,7 @@ The only requirement is the [Golang Programming Language](https://golang.org).
 > Go modules
 
 ```bash
-$ go get github.com/FishGoddess/logit@v0.0.2
+$ go get -u github.com/FishGoddess/logit
 ```
 
 Or edit your project's go.mod file and execute _**go build**_.
@@ -29,7 +29,7 @@ module your_project_name
 go 1.14
 
 require (
-    github.com/FishGoddess/logit v0.0.2
+    github.com/FishGoddess/logit v0.0.3
 )
 ```
 
@@ -50,14 +50,17 @@ import (
 
 func main() {
     
-    // log as you want.
+    // Log as you want.
     logit.Debug("I am a debug message! But I will not be logged in default level!")
     logit.Info("I am an info message!")
     logit.Warning("I am a warning message!")
     logit.Error("I am an error message!")
     
-    // change log level.
+    // Change log level.
     logit.ChangeLevelTo(logit.DebugLevel)
+
+    // If you want format your message, just add arguments!
+    logit.Info("format info message! id = %d, content = %s", 1, "info!")
 }
 ```
 
@@ -78,8 +81,10 @@ $ go test -v -bench=. -benchtime=20s
 
 | test case | times ran (large is better) |  ns/op (small is better) | B/op (small is better) | allocs/op (small is better) |
 | -----------|--------|-------------|-------------|-------------|
-| **[logit](./logger_test.go)** | 4800000 | 5062 ns/op | 864 B/op | 8 allocs/op |
-| [Golang log](./logger_test.go) | 5400000 | 4730 ns/op | 928 B/op | 12 allocs/op |
+| **[logit](./logger_test.go)** | 4300000 | 5600 ns/op | 904 B/op | 12 allocs/op |
+| [Golang log](./logger_test.go) | 5150000 | 4769 ns/op | 920 B/op | 12 allocs/op |
+
+> Environment：I7-6700HQ CPU @ 2.6 GHZ, 16 GB RAM
 
 _Logit is based on Golang log, so it looks like not better than Golang log. Don't worry, we will redesign the implement of log output!_
 

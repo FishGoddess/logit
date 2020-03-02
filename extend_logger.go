@@ -14,30 +14,13 @@
 //
 // Author: fish
 // Email: fishinlove@163.com
-// Created at 2020/03/01 14:18:33
+// Created at 2020/03/02 15:36:49
 
 package logit
 
-// LogLevel is the type representation of the level.
-type LogLevel uint8
+import "os"
 
-// Constants about log level.
-const (
-    DebugLevel LogLevel = iota
-    InfoLevel
-    WarningLevel
-    ErrorLevel
-)
-
-// prefixOfLevels provides a prefix of one level.
-var prefixOfLevels = map[LogLevel]string{
-    DebugLevel:   "(Debug) ",
-    InfoLevel:    "(Info) ",
-    WarningLevel: "Warning! ",
-    ErrorLevel:   "Error!!! ",
-}
-
-// prefixOf get the prefix of this level.
-func prefixOf(level LogLevel) string {
-    return prefixOfLevels[level]
+// NewStdoutLogger returns a Logger holder with given log level.
+func NewStdoutLogger(level LogLevel) *Logger {
+    return NewLogger(os.Stdout, level)
 }

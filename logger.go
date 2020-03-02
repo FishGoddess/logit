@@ -19,6 +19,7 @@
 package logit
 
 import (
+    "fmt"
     "io"
     "log"
     "sync"
@@ -82,8 +83,12 @@ func (l *Logger) ChangeLevelTo(newLevel LogLevel) {
     l.level = newLevel
 }
 
+// callDepth is the depth of the method calling stack, which is about file name and line.
+const callDepth = 3
+
 // log can output msg to l.writer, notices that level will affect the visibility of this msg.
-func (l *Logger) log(level LogLevel, msg string) {
+// Notice that callDepth is caller sensitive, and the value is about file name and line.
+func (l *Logger) log(callDepth int, level LogLevel, msg string) {
 
     // 加上读锁
     l.mu.RLock()
@@ -106,25 +111,31 @@ func (l *Logger) log(level LogLevel, msg string) {
     // 第 1 层是 l.logger.Output 这一行代码
     // 第 2 层是调用这个 log 方法那一层
     // 第 3 层是调用这个 log 方法的那个方法的外部调用上一层，比如调用 Debug 方法的那一层
-    l.logger.Output(3, prefixOf(level)+msg)
+    // 以此类推....
+    l.logger.Output(callDepth, prefixOf(level)+msg)
+}
+
+// formatMessage return the formatted message with given args
+func formatMessage(msg string, args ...interface{}) string {
+    return fmt.Sprintf(msg, args...)
 }
 
 // Debug will output msg as a debug message.
-func (l *Logger) Debug(msg string) {
-    l.log(DebugLevel, msg)
+func (l *Logger) Debug(msg string, args ...interface{}) {
+    l.log(callDepth, DebugLevel, formatMessage(msg, args...))
 }
 
 // Info will output msg as an info message.
-func (l *Logger) Info(msg string) {
-    l.log(InfoLevel, msg)
+func (l *Logger) Info(msg string, args ...interface{}) {
+    l.log(callDepth, InfoLevel, formatMessage(msg, args...))
 }
 
 // Warning will output msg as a warning message.
-func (l *Logger) Warning(msg string) {
-    l.log(WarningLevel, msg)
+func (l *Logger) Warning(msg string, args ...interface{}) {
+    l.log(callDepth, WarningLevel, formatMessage(msg, args...))
 }
 
 // Error will output msg as an error message.
-func (l *Logger) Error(msg string) {
-    l.log(ErrorLevel, msg)
+func (l *Logger) Error(msg string, args ...interface{}) {
+    l.log(callDepth, ErrorLevel, formatMessage(msg, args...))
 }

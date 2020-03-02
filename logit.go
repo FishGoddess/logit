@@ -18,15 +18,9 @@
 
 package logit
 
-import "os"
-
 // Logger holder for global usage.
+// Default level is info level.
 var defaultLogger = NewStdoutLogger(InfoLevel)
-
-// NewStdoutLogger returns a Logger holder with given log level.
-func NewStdoutLogger(level LogLevel) *Logger {
-    return NewLogger(os.Stdout, level)
-}
 
 // ChangeLevelTo will change the level of logit to newLevel.
 func ChangeLevelTo(level LogLevel) {
@@ -43,22 +37,25 @@ func Disable() {
     defaultLogger.Disable()
 }
 
+// callDepth is the depth of the method calling stack, which is about file name and line.
+const callDepthOfDefaultLogger = 3
+
 // Debug will output msg as a debug message.
-func Debug(msg string) {
-    defaultLogger.Debug(msg)
+func Debug(msg string, args ...interface{}) {
+    defaultLogger.log(callDepthOfDefaultLogger, DebugLevel, formatMessage(msg, args...))
 }
 
 // Info will output msg as an info message.
-func Info(msg string) {
-    defaultLogger.Info(msg)
+func Info(msg string, args ...interface{}) {
+    defaultLogger.log(callDepthOfDefaultLogger, InfoLevel, formatMessage(msg, args...))
 }
 
 // Warning will output msg as a warning message.
-func Warning(msg string) {
-    defaultLogger.Warning(msg)
+func Warning(msg string, args ...interface{}) {
+    defaultLogger.log(callDepthOfDefaultLogger, WarningLevel, formatMessage(msg, args...))
 }
 
 // Error will output msg as an error message.
-func Error(msg string) {
-    defaultLogger.Error(msg)
+func Error(msg string, args ...interface{}) {
+    defaultLogger.log(callDepthOfDefaultLogger, ErrorLevel, formatMessage(msg, args...))
 }

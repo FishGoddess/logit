@@ -32,4 +32,7 @@ func main() {
     logit.Error("I am an error message!")
 
     // Also, you can create a new independent Logger to use. See logit.NewLogger.
+
+    // If you want format your message, just add arguments!
+    logit.Info("format info message! id = %d, content = %s", 1, "info!")
 }
