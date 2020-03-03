@@ -84,10 +84,10 @@ $ go test -v -bench=. -benchtime=20s
 
 | 测试 | 单位时间内运行次数 (large is better) |  ns/op (small is better) | B/op (small is better) | allocs/op (small is better) |
 | -----------|--------|-------------|-------------|-------------|
-| **[logit](./_examples/benchmarks_test.go)** | 4405342 | 5409 ns/op | 904 B/op | 12 allocs/op |
-| [logrus](./_examples/benchmarks_test.go) | 2990408 | 7991 ns/op | 1633 B/op | 52 allocs/op |
-| [Golang log](./_examples/benchmarks_test.go) | 5308578 | 4539 ns/op | 920 B/op | 12 allocs/op |
-| [Golog](./_examples/benchmarks_test.go) | 15536137 | 1556 ns/op | 232 B/op | 16 allocs/op |
+| **[logit](./_examples/benchmarks_test.go)** | &nbsp; 4405342 | 5409 ns/op | &nbsp; 904 B/op | 12 allocs/op |
+| [logrus](./_examples/benchmarks_test.go) | &nbsp; 2990408 | 7991 ns/op | 1633 B/op | 52 allocs/op |
+| [Golang log](./_examples/benchmarks_test.go) | &nbsp; 5308578 | 4539 ns/op | &nbsp; 920 B/op | 12 allocs/op |
+| [Golog](./_examples/benchmarks_test.go) | 15536137 | 1556 ns/op | &nbsp; 232 B/op | 16 allocs/op |
 
 > 测试环境：I7-6700HQ CPU @ 2.6 GHZ，16 GB RAM
 
