@@ -10,8 +10,9 @@
 
 * Level-based logging, and there are four levels to use
 * Enable or disable Logger, you can disable or switch to a higher level in your production environment
+* Log file supports, and it will split the file by duration automatically.
 
-_Check [HISTORY.md](./HISTORY.md) and [FUTURE.md](./FUTURE.md) to more information._
+_Check [HISTORY.md](./HISTORY.md) and [FUTURE.md](./FUTURE.md) to get more information._
 
 ### 🚀 Installation
 
