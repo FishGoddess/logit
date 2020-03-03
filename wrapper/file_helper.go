@@ -14,26 +14,18 @@
 //
 // Author: fish
 // Email: fishinlove@163.com
-// Created at 2020/03/02 15:36:49
+// Created at 2020/03/03 15:10:45
 
-package logit
+package wrapper
 
-import (
-    "os"
+import "os"
 
-    "github.com/FishGoddess/logit/wrapper"
-)
+// PrefixOfLogFile is the prefix of log file.
+const PrefixOfLogFile = ".log"
 
-// NewStdoutLogger returns a Logger holder with given logger level.
-func NewStdoutLogger(level LoggerLevel) *Logger {
-    return NewLogger(os.Stdout, level)
-}
-
-// NewFileLogger returns a Logger holder which log to a file with given logFile and level.
-func NewFileLogger(logFile string, level LoggerLevel) *Logger {
-    file, err := wrapper.NewFile(logFile)
-    if err != nil {
-        panic(err)
-    }
-    return NewLogger(file, level)
+// NewFile creates a new file with given filePath.
+// Return a new File or an error if failed.
+// Notice that the permission of new file is 0644, which means rw-rw-r-- in unix-like os.
+func NewFile(filePath string) (*os.File, error) {
+    return os.OpenFile(filePath, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0664)
 }

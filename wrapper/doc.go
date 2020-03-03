@@ -14,26 +14,21 @@
 //
 // Author: fish
 // Email: fishinlove@163.com
-// Created at 2020/03/02 15:36:49
+// Created at 2020/03/03 14:59:08
 
-package logit
+/*
+Package wrapper provides some writers to extend your Logger.
 
-import (
-    "os"
+1. DurationRollingFile:
 
-    "github.com/FishGoddess/logit/wrapper"
-)
+    // DurationRollingFile is a time sensitive file.
+    file := NewDurationRollingFile(time.Second, func(lastTime, currentTime time.Time) string {
+        return "D:/" + currentTime.Format("20060102-150405") + ".txt"
+    })
+    defer file.Close()
 
-// NewStdoutLogger returns a Logger holder with given logger level.
-func NewStdoutLogger(level LoggerLevel) *Logger {
-    return NewLogger(os.Stdout, level)
-}
+    // You can use it like using os.File!
+    file.Write([]byte("Hello!")
 
-// NewFileLogger returns a Logger holder which log to a file with given logFile and level.
-func NewFileLogger(logFile string, level LoggerLevel) *Logger {
-    file, err := wrapper.NewFile(logFile)
-    if err != nil {
-        panic(err)
-    }
-    return NewLogger(file, level)
-}
+*/
+package wrapper // import "github.com/FishGoddess/logit/wrapper"

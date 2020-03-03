@@ -16,7 +16,7 @@ import (
 // 仅为测试用，不输出任何信息的写出器
 type nopWriter struct{}
 
-func (w *nopWriter) Write(p []byte) (n int, err error) {
+func (nw *nopWriter) Write(p []byte) (n int, err error) {
     return 0, nil
 }
 
