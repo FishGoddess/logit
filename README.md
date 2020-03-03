@@ -31,7 +31,7 @@ module your_project_name
 go 1.14
 
 require (
-    github.com/FishGoddess/logit v0.0.3
+    github.com/FishGoddess/logit v0.0.4
 )
 ```
 
