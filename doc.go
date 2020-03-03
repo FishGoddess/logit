@@ -26,7 +26,7 @@ Package logit provides an easy way to use foundation for your logging operations
     // will not be logged! If you want to change level, see logit.ChangeLevelTo
     logit.Debug("I am a debug message! But I will not be logged in default level!")
     logit.Info("I am an info message!")
-    logit.Warning("I am a warning message!")
+    logit.Warn("I am a warn message!")
     logit.Error("I am an error message!")
 
     // Also, you can create a new independent Logger to use. See logit.NewLogger.
@@ -42,7 +42,7 @@ Package logit provides an easy way to use foundation for your logging operations
     // Then you will be easy to log!
     logger.Debug("this is a debug message!")
     logger.Info("this is a info message!")
-    logger.Warning("this is a warning message!")
+    logger.Warn("this is a warn message!")
     logger.Error("this is a error message!")
 
     // NewLogger creates a new Logger holder.
@@ -70,11 +70,11 @@ Package logit provides an easy way to use foundation for your logging operations
     logger.Enable()
     logger.Info("I am running again!")
 
-4. change log level:
+4. change logger level:
 
-    logit.Debug("Default log level is info, so debug message will not be logged!")
+    logit.Debug("Default logger level is info, so debug message will not be logged!")
 
-    // Change log level to debug level.
+    // Change logger level to debug level.
     logit.ChangeLevelTo(logit.DebugLevel)
 
     logit.Debug("Now debug message will be logged!")
@@ -84,4 +84,4 @@ Package logit provides an easy way to use foundation for your logging operations
 package logit // import "github.com/FishGoddess/logit"
 
 // Version is the version string representation of the "logit" package.
-const Version = "0.0.3"
+const Version = "0.0.4"

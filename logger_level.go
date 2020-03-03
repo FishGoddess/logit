@@ -18,26 +18,26 @@
 
 package logit
 
-// LogLevel is the type representation of the level.
-type LogLevel uint8
+// LoggerLevel is the type representation of the level.
+type LoggerLevel uint8
 
-// Constants about log level.
+// Constants about logger level.
 const (
-    DebugLevel LogLevel = iota
+    DebugLevel LoggerLevel = iota
     InfoLevel
-    WarningLevel
+    WarnLevel
     ErrorLevel
 )
 
 // prefixOfLevels provides a prefix of one level.
-var prefixOfLevels = map[LogLevel]string{
+var prefixOfLevels = map[LoggerLevel]string{
     DebugLevel:   "(Debug) ",
     InfoLevel:    "(Info) ",
-    WarningLevel: "Warning! ",
+    WarnLevel: "Warn! ",
     ErrorLevel:   "Error!!! ",
 }
 
 // prefixOf get the prefix of this level.
-func prefixOf(level LogLevel) string {
+func prefixOf(level LoggerLevel) string {
     return prefixOfLevels[level]
 }

@@ -35,12 +35,12 @@ type Logger struct {
     // level is the level representation of the Logger.
     // In this version of logit, there are four levels:
     //
-    //  DebugLevel, InfoLevel, WarningLevel, ErrorLevel.
+    //  DebugLevel, InfoLevel, WarnLevel, ErrorLevel.
     //
     // The righter level has higher visibility which means
     // one debug message will not be logged in one Logger in InfoLevel.
     // That's we called level-based logging.
-    level LogLevel
+    level LoggerLevel
 
     // running is the status of the Logger.
     // true means the Logger is running, false means the Logger is shutdown.
@@ -54,7 +54,7 @@ type Logger struct {
 // The first parameter out is a writer for logging.
 // The second parameter level is the level of this Logger.
 // It returns a new running Logger holder.
-func NewLogger(out io.Writer, level LogLevel) *Logger {
+func NewLogger(out io.Writer, level LoggerLevel) *Logger {
     return &Logger{
         logger:  log.New(out, "", log.LstdFlags|log.Lshortfile),
         level:   level,
@@ -77,7 +77,7 @@ func (l *Logger) Disable() {
 }
 
 // ChangeLevelTo will change the level of current Logger to newLevel.
-func (l *Logger) ChangeLevelTo(newLevel LogLevel) {
+func (l *Logger) ChangeLevelTo(newLevel LoggerLevel) {
     l.mu.Lock()
     defer l.mu.Unlock()
     l.level = newLevel
@@ -88,7 +88,7 @@ const callDepth = 3
 
 // log can output msg to l.writer, notices that level will affect the visibility of this msg.
 // Notice that callDepth is caller sensitive, and the value is about file name and line.
-func (l *Logger) log(callDepth int, level LogLevel, msg string) {
+func (l *Logger) log(callDepth int, level LoggerLevel, msg string) {
 
     // 加上读锁
     l.mu.RLock()
@@ -130,9 +130,9 @@ func (l *Logger) Info(msg string, args ...interface{}) {
     l.log(callDepth, InfoLevel, formatMessage(msg, args...))
 }
 
-// Warning will output msg as a warning message.
-func (l *Logger) Warning(msg string, args ...interface{}) {
-    l.log(callDepth, WarningLevel, formatMessage(msg, args...))
+// Warn will output msg as a warn message.
+func (l *Logger) Warn(msg string, args ...interface{}) {
+    l.log(callDepth, WarnLevel, formatMessage(msg, args...))
 }
 
 // Error will output msg as an error message.

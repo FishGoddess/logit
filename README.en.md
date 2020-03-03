@@ -11,6 +11,8 @@
 * Level-based logging, and there are four levels to use
 * Enable or disable Logger, you can disable or switch to a higher level in your production environment
 
+_Check [HISTORY.md](./HISTORY.md) and [FUTURE.md](./FUTURE.md) to more information._
+
 ### 🚀 Installation
 
 The only requirement is the [Golang Programming Language](https://golang.org).
@@ -29,7 +31,7 @@ module your_project_name
 go 1.14
 
 require (
-    github.com/FishGoddess/logit v0.0.3
+    github.com/FishGoddess/logit v0.0.4
 )
 ```
 
@@ -53,10 +55,10 @@ func main() {
     // Log as you want.
     logit.Debug("I am a debug message! But I will not be logged in default level!")
     logit.Info("I am an info message!")
-    logit.Warning("I am a warning message!")
+    logit.Warn("I am a warn message!")
     logit.Error("I am an error message!")
     
-    // Change log level.
+    // Change logger level.
     logit.ChangeLevelTo(logit.DebugLevel)
 
     // If you want format your message, just add arguments!
@@ -81,8 +83,10 @@ $ go test -v -bench=. -benchtime=20s
 
 | test case | times ran (large is better) |  ns/op (small is better) | B/op (small is better) | allocs/op (small is better) |
 | -----------|--------|-------------|-------------|-------------|
-| **[logit](./logger_test.go)** | 4300000 | 5600 ns/op | 904 B/op | 12 allocs/op |
-| [Golang log](./logger_test.go) | 5150000 | 4769 ns/op | 920 B/op | 12 allocs/op |
+| **[logit](./_examples/benchmarks_test.go)** | 4405342 | 5409 ns/op | 904 B/op | 12 allocs/op |
+| [logrus](./_examples/benchmarks_test.go) | 2990408 | 7991 ns/op | 1633 B/op | 52 allocs/op |
+| [Golang log](./_examples/benchmarks_test.go) | 5308578 | 4539 ns/op | 920 B/op | 12 allocs/op |
+| [Golog](./_examples/benchmarks_test.go) | 15536137 | 1556 ns/op | 232 B/op | 16 allocs/op |
 
 > Environment：I7-6700HQ CPU @ 2.6 GHZ, 16 GB RAM
 

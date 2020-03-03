@@ -28,7 +28,7 @@ func main() {
     // will not be logged! If you want to change level, see logit.ChangeLevelTo
     logit.Debug("I am a debug message! But I will not be logged in default level!")
     logit.Info("I am an info message!")
-    logit.Warning("I am a warning message!")
+    logit.Warn("I am a warn message!")
     logit.Error("I am an error message!")
 
     // Also, you can create a new independent Logger to use. See logit.NewLogger.
