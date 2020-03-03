@@ -20,9 +20,18 @@ package logit
 
 import (
     "os"
+    "path"
+    "time"
 
     "github.com/FishGoddess/logit/wrapper"
 )
+
+func nextFilename(directory string) func(lastTime, currentTime time.Time) string {
+    // TODO 这个文件函数可能需要调整参数为 currentTime 和 duration
+    return func(lastTime, currentTime time.Time) string {
+        return path.Join(directory)
+    }
+}
 
 // NewStdoutLogger returns a Logger holder with given logger level.
 func NewStdoutLogger(level LoggerLevel) *Logger {
@@ -36,4 +45,9 @@ func NewFileLogger(logFile string, level LoggerLevel) *Logger {
         panic(err)
     }
     return NewLogger(file, level)
+}
+
+func NewDurationRollingLogger(directory string, duration time.Duration, level LoggerLevel) *Logger {
+    // TODO 创建一个文件名生成器，返回时间间隔滚动的日志记录器
+    return nil
 }

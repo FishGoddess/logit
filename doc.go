@@ -79,6 +79,12 @@ Package logit provides an easy way to use foundation for your logging operations
 
     logit.Debug("Now debug message will be logged!")
 
+5. log to file:
+
+    // NewFileLogger creates a new logger which logs to file.
+    // It just need a file path like "D:/test.log" and a logger level.
+    logger := logit.NewFileLogger("D:/test.log", logit.DebugLevel)
+    logger.Info("我是 info 日志！")
 
 */
 package logit // import "github.com/FishGoddess/logit"
