@@ -32,7 +32,7 @@ func main() {
     // Then you will be easy to log!
     logger.Debug("this is a debug message!")
     logger.Info("this is a info message!")
-    logger.Warning("this is a warning message!")
+    logger.Warn("this is a warn message!")
     logger.Error("this is a error message!")
 
     // NewLogger creates a new Logger holder.

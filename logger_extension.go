@@ -20,7 +20,7 @@ package logit
 
 import "os"
 
-// NewStdoutLogger returns a Logger holder with given log level.
-func NewStdoutLogger(level LogLevel) *Logger {
+// NewStdoutLogger returns a Logger holder with given logger level.
+func NewStdoutLogger(level LoggerLevel) *Logger {
     return NewLogger(os.Stdout, level)
 }

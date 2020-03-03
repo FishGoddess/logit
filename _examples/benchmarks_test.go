@@ -30,7 +30,7 @@ func BenchmarkLogitLogger(b *testing.B) {
     logTask := func() {
         logger.Debug("debug...")
         logger.Info("info...")
-        logger.Warning("warning...")
+        logger.Warn("warn...")
         logger.Error("error...")
     }
 
@@ -53,7 +53,7 @@ func BenchmarkLogLogger(b *testing.B) {
     logTask := func() {
         logger.Println("debug...")
         logger.Println("info...")
-        logger.Println("warning...")
+        logger.Println("warn...")
         logger.Println("error...")
     }
 
@@ -77,7 +77,7 @@ func BenchmarkLogLogger(b *testing.B) {
 //    logTask := func() {
 //        golog.Debug("debug...")
 //        golog.Info("info...")
-//        golog.Warn("warning...")
+//        golog.Warn("warn...")
 //        golog.Error("error...")
 //    }
 //
@@ -100,7 +100,7 @@ func BenchmarkLogLogger(b *testing.B) {
 //    logTask := func() {
 //        logrus.Debug("debug...")
 //        logrus.Info("info...")
-//        logrus.Warn("warning...")
+//        logrus.Warn("warn...")
 //        logrus.Error("error...")
 //    }
 //

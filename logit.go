@@ -23,7 +23,7 @@ package logit
 var defaultLogger = NewStdoutLogger(InfoLevel)
 
 // ChangeLevelTo will change the level of logit to newLevel.
-func ChangeLevelTo(level LogLevel) {
+func ChangeLevelTo(level LoggerLevel) {
     defaultLogger.ChangeLevelTo(level)
 }
 
@@ -50,9 +50,9 @@ func Info(msg string, args ...interface{}) {
     defaultLogger.log(callDepthOfDefaultLogger, InfoLevel, formatMessage(msg, args...))
 }
 
-// Warning will output msg as a warning message.
-func Warning(msg string, args ...interface{}) {
-    defaultLogger.log(callDepthOfDefaultLogger, WarningLevel, formatMessage(msg, args...))
+// Warn will output msg as a warn message.
+func Warn(msg string, args ...interface{}) {
+    defaultLogger.log(callDepthOfDefaultLogger, WarnLevel, formatMessage(msg, args...))
 }
 
 // Error will output msg as an error message.
