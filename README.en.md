@@ -11,6 +11,8 @@
 * Level-based logging, and there are four levels to use
 * Enable or disable Logger, you can disable or switch to a higher level in your production environment
 
+_Check [HISTORY.md](./HISTORY.md) and [FUTURE.md](./FUTURE.md) to more information._
+
 ### 🚀 Installation
 
 The only requirement is the [Golang Programming Language](https://golang.org).
