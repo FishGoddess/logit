@@ -73,6 +73,7 @@ func main() {
 * [logger](./_examples/logger.go)
 * [enable_disable](./_examples/enable_disable.go)
 * [change_log_level](./_examples/change_log_level.go)
+* [log_to_file](./_examples/log_to_file.go)
 
 _Check more examples in [_examples](./_examples)._
 
