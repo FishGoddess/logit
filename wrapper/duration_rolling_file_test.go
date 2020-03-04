@@ -24,7 +24,7 @@ import (
     "time"
 )
 
-const formatOfTime = "20060102150405000"
+const formatOfTime = "20060102150405.000"
 
 // 测试时间间隔滚动文件
 func TestNewDurationRollingFile(t *testing.T) {
@@ -39,8 +39,8 @@ func TestNewDurationRollingFile(t *testing.T) {
     os.RemoveAll(root)   // 先删除现有文件夹
     os.Mkdir(root, 0666) // 再创建测试文件夹
 
-    file := NewDurationRollingFile(time.Second, func(lastTime, currentTime time.Time) string {
-        return root + currentTime.Format(formatOfTime) + PrefixOfLogFile
+    file := NewDurationRollingFile(time.Second, func(now time.Time) string {
+        return root + now.Format(formatOfTime) + PrefixOfLogFile
     })
     defer file.Close()
 
@@ -51,20 +51,20 @@ func TestNewDurationRollingFile(t *testing.T) {
 
     dir, err := os.Open(root)
     if err != nil {
-        t.Errorf("获取测试文件夹失败！")
+        t.Fatal("获取测试文件夹失败！")
     }
 
     fileInfos, err := dir.Readdir(0)
     if err != nil {
-        t.Errorf("获取测试文件夹信息失败！")
+        t.Fatal("获取测试文件夹信息失败！")
     }
 
     // 如果创建的文件数不符合，直接报错
     if len(fileInfos) != 3 {
-        t.Errorf("文件滚动出现问题！")
+        t.Fatal("文件滚动出现问题！")
     }
 
-    file = NewDurationRollingFile(999*time.Microsecond, func(lastTime, currentTime time.Time) string {
+    file = NewDurationRollingFile(999*time.Millisecond, func(now time.Time) string {
         return ""
     })
 }

@@ -18,7 +18,10 @@
 
 package logit
 
-import "testing"
+import (
+    "testing"
+    "time"
+)
 
 // 测试创建标准输出的日志记录器
 func TestNewStdoutLogger(t *testing.T) {
@@ -26,12 +29,13 @@ func TestNewStdoutLogger(t *testing.T) {
     logger.Info("stdout logger...")
 }
 
+// 测试创建文件日志记录器
 func TestNewFileLogger(t *testing.T) {
 
     defer func() {
         err := recover()
         if err == nil {
-            t.Error("创建文件日志记录器测试出现问题！")
+            t.Fatal("创建文件日志记录器测试出现问题！")
         }
     }()
 
@@ -41,4 +45,13 @@ func TestNewFileLogger(t *testing.T) {
     }
 
     logger = NewFileLogger("https://test.io", DebugLevel)
+}
+
+// 创建随时间间隔滚动的文件日志记录器
+func TestNewDurationRollingLogger(t *testing.T) {
+
+    logger := NewDurationRollingLogger("Z:/", time.Second, DebugLevel)
+    logger.Info("1. info!!!!!!!!%d", time.Now().Unix())
+    time.Sleep(time.Second)
+    logger.Info("2. info!!!!!!!!%d", time.Now().Unix())
 }

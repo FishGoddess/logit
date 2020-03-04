@@ -45,22 +45,21 @@ type DurationRollingFile struct {
     // duration is the core property of this struct.
     // Every times currentTime - lastTime >= duration, the file will
     // roll to an entire new file for writing.
-    // Notice that its min value is time.Millisecond. See minDuration.
+    // Notice that its min value is time.Second. See minDuration.
     duration time.Duration
 
     // nextFilename is a function for generating a new file name.
     // Every times rolling to next file will call it first.
-    // lastTime is the time of previous file using.
-    // currentTime is the time of calling this function, also the
+    // now is the time of calling this function, also the
     // created time of next file.
-    nextFilename func(lastTime, currentTime time.Time) string
+    nextFilename func(now time.Time) string
 
     // mu is a lock for safe concurrency.
     mu sync.Mutex
 }
 
 // minDuration prevents io system from creating file too fast.
-const minDuration = time.Millisecond
+const minDuration = time.Second
 
 // NewDurationRollingFile creates a new duration rolling file.
 // duration is how long did it roll to next file.
@@ -70,7 +69,7 @@ const minDuration = time.Millisecond
 // currentTime is the time of calling this function, also the
 // created time of next file.
 // Notice that its min value is time.Millisecond. See minDuration.
-func NewDurationRollingFile(duration time.Duration, nextFilename func(lastTime, currentTime time.Time) string) *DurationRollingFile {
+func NewDurationRollingFile(duration time.Duration, nextFilename func(now time.Time) string) *DurationRollingFile {
 
     // 防止时间间隔太小导致滚动文件时 IO 的疯狂蠕动
     if duration < minDuration {
@@ -79,7 +78,7 @@ func NewDurationRollingFile(duration time.Duration, nextFilename func(lastTime, 
 
     // 获取当前时间，并生成第一个文件
     now := time.Now()
-    file, err := NewFile(nextFilename(now, now))
+    file, err := NewFile(nextFilename(now))
     if err != nil {
         panic(err)
     }
@@ -97,7 +96,7 @@ func NewDurationRollingFile(duration time.Duration, nextFilename func(lastTime, 
 func (drf *DurationRollingFile) rollingToNextFile(now time.Time) {
 
     // 如果创建新文件发生错误，就继续使用当前的文件，等到下一次时间间隔再重试
-    newFile, err := NewFile(drf.nextFilename(drf.lastTime, now))
+    newFile, err := NewFile(drf.nextFilename(now))
     if err != nil {
         return
     }

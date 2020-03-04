@@ -86,8 +86,17 @@ Package logit provides an easy way to use foundation for your logging operations
     logger := logit.NewFileLogger("D:/test.log", logit.DebugLevel)
     logger.Info("我是 info 日志！")
 
+    // NewDurationRollingLogger creates a duration rolling logger with given duration.
+    // You should appoint a directory to store all log files generated in this time.
+    // Notice that duration must not less than minDuration (generally time.Second), see wrapper.minDuration.
+    // Also, default filename of log file is like "20200304-145246-45.log", see wrapper.NewFilename.
+    // If you want to appoint another filename, check this and do it by this way.
+    // See wrapper.NewDurationRollingFile (it is an implement of io.writer).
+    logger = logit.NewDurationRollingLogger("D:/", time.Second, logit.DebugLevel)
+    logger.Info("Rolling!!!")
+
 */
 package logit // import "github.com/FishGoddess/logit"
 
 // Version is the version string representation of the "logit" package.
-const Version = "0.0.4"
+const Version = "0.0.5"

@@ -26,13 +26,6 @@ import (
     "github.com/FishGoddess/logit/wrapper"
 )
 
-func nextFilename(directory string) func(lastTime, currentTime time.Time) string {
-    // TODO 这个文件函数可能需要调整参数为 currentTime 和 duration
-    return func(lastTime, currentTime time.Time) string {
-        return path.Join(directory)
-    }
-}
-
 // NewStdoutLogger returns a Logger holder with given logger level.
 func NewStdoutLogger(level LoggerLevel) *Logger {
     return NewLogger(os.Stdout, level)
@@ -47,7 +40,15 @@ func NewFileLogger(logFile string, level LoggerLevel) *Logger {
     return NewLogger(file, level)
 }
 
+// NewDurationRollingLogger creates a duration rolling logger with given duration.
+// You should appoint a directory to store all log files generated in this time.
+// Notice that duration must not less than minDuration (generally time.Second), see wrapper.minDuration.
+// Also, default filename of log file is like "20200304-145246-45.log", see wrapper.NewFilename.
+// If you want to appoint another filename, check this and do it by this way.
+// See wrapper.NewDurationRollingFile (it is an implement of io.writer).
 func NewDurationRollingLogger(directory string, duration time.Duration, level LoggerLevel) *Logger {
-    // TODO 创建一个文件名生成器，返回时间间隔滚动的日志记录器
-    return nil
+    file := wrapper.NewDurationRollingFile(duration, func(now time.Time) string {
+        return path.Join(directory, wrapper.NewFilename(now))
+    })
+    return NewLogger(file, level)
 }

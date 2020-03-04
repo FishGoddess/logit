@@ -22,7 +22,7 @@ Package wrapper provides some writers to extend your Logger.
 1. DurationRollingFile:
 
     // DurationRollingFile is a time sensitive file.
-    file := NewDurationRollingFile(time.Second, func(lastTime, currentTime time.Time) string {
+    file := NewDurationRollingFile(24 * time.Hour, func(now time.Time) string {
         return "D:/" + currentTime.Format("20060102-150405") + ".txt"
     })
     defer file.Close()
