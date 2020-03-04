@@ -19,12 +19,28 @@
 package logit
 
 import (
+    "math/rand"
     "os"
     "path"
+    "strconv"
     "time"
 
     "github.com/FishGoddess/logit/wrapper"
 )
+
+// PrefixOfLogFile is the prefix of log file.
+const PrefixOfLogFile = ".log"
+
+// nextFilename creates a time-relative filename with given now time.
+// Also, it uses random number to ensure this filename is available.
+// The filename will be like "20200304-145246-45.log".
+// Notice that directory stores all log files generated in this time.
+func nextFilename(directory string) func(now time.Time) string {
+    return func(now time.Time) string {
+        name := now.Format("20060102-150405") + "-" + strconv.Itoa(rand.Intn(100)) + PrefixOfLogFile
+        return path.Join(directory, name)
+    }
+}
 
 // NewStdoutLogger returns a Logger holder with given logger level.
 func NewStdoutLogger(level LoggerLevel) *Logger {
@@ -47,8 +63,13 @@ func NewFileLogger(logFile string, level LoggerLevel) *Logger {
 // If you want to appoint another filename, check this and do it by this way.
 // See wrapper.NewDurationRollingFile (it is an implement of io.writer).
 func NewDurationRollingLogger(directory string, duration time.Duration, level LoggerLevel) *Logger {
-    file := wrapper.NewDurationRollingFile(duration, func(now time.Time) string {
-        return path.Join(directory, wrapper.NewFilename(now))
-    })
+    file := wrapper.NewDurationRollingFile(duration, nextFilename(directory))
     return NewLogger(file, level)
+}
+
+// NewDayRollingLogger creates a day rolling logger.
+// You should appoint a directory to store all log files generated in this time.
+// See NewDurationRollingLogger.
+func NewDayRollingLogger(directory string, level LoggerLevel) *Logger {
+    return NewDurationRollingLogger(directory, 24*time.Hour, level)
 }

@@ -10,7 +10,8 @@
 
 * Level-based logging, and there are four levels to use
 * Enable or disable Logger, you can disable or switch to a higher level in your production environment
-* Log file supports, and it will split the file by duration automatically.
+* Log file supports, and you can customer the name of your log file.
+* Duration rolling supports, which means it will roll to a new log file by duration automatically, such as one day one log file.
 
 _Check [HISTORY.md](./HISTORY.md) and [FUTURE.md](./FUTURE.md) to get more information._
 

@@ -24,8 +24,6 @@ import (
     "time"
 )
 
-const formatOfTime = "20060102150405.000"
-
 // 测试时间间隔滚动文件
 func TestNewDurationRollingFile(t *testing.T) {
 
@@ -40,7 +38,7 @@ func TestNewDurationRollingFile(t *testing.T) {
     os.Mkdir(root, 0666) // 再创建测试文件夹
 
     file := NewDurationRollingFile(time.Second, func(now time.Time) string {
-        return root + now.Format(formatOfTime) + PrefixOfLogFile
+        return root + now.Format("20060102150405.000") + ".log"
     })
     defer file.Close()
 

@@ -39,4 +39,10 @@ func main() {
     // See wrapper.NewDurationRollingFile (it is an implement of io.writer).
     logger = logit.NewDurationRollingLogger("D:/", 24*time.Hour, logit.DebugLevel)
     logger.Info("Rolling!!!")
+
+    // NewDayRollingLogger creates a day rolling logger.
+    // You should appoint a directory to store all log files generated in this time.
+    // See logit.NewDurationRollingLogger.
+    logger = logit.NewDayRollingLogger("D:/", logit.DebugLevel)
+    logger.Info("Today is Friday!!!")
 }

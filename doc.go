@@ -95,6 +95,12 @@ Package logit provides an easy way to use foundation for your logging operations
     logger = logit.NewDurationRollingLogger("D:/", time.Second, logit.DebugLevel)
     logger.Info("Rolling!!!")
 
+    // NewDayRollingLogger creates a day rolling logger.
+    // You should appoint a directory to store all log files generated in this time.
+    // See logit.NewDurationRollingLogger.
+    logger = logit.NewDayRollingLogger("D:/", logit.DebugLevel)
+    logger.Info("Today is Friday!!!")
+
 */
 package logit // import "github.com/FishGoddess/logit"
 

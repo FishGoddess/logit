@@ -19,28 +19,12 @@
 package wrapper
 
 import (
-    "math/rand"
     "os"
-    "strconv"
-    "time"
 )
-
-// PrefixOfLogFile is the prefix of log file.
-const PrefixOfLogFile = ".log"
-
-// FormatOfTime is the format of time.
-const FormatOfTime = "20060102-150405"
 
 // NewFile creates a new file with given filePath.
 // Return a new File or an error if failed.
 // Notice that the permission of new file is 0644, which means rw-rw-r-- in unix-like os.
 func NewFile(filePath string) (*os.File, error) {
     return os.OpenFile(filePath, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0664)
-}
-
-// NewFilename creates a time-relative filename with given now time.
-// Also, it uses random number to ensure this filename is available.
-// The filename will be like "20200304-145246-45.log".
-func NewFilename(now time.Time) string {
-    return now.Format(FormatOfTime) + "-" + strconv.Itoa(rand.Intn(100)) + PrefixOfLogFile
 }
