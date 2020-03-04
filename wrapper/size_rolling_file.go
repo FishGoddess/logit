@@ -30,12 +30,18 @@ type SizeRollingFile struct {
     // file points the writer which will be used this moment.
     file *os.File
 
-    // maxSize 是指一个文件最大的大小，达到这个大小之后就会自动划分为另一个文件
-    maxSize int64
+    // limitedSize 是指这个文件限制的大小，达到这个大小之后就会自动划分为另一个文件
+    // 注意：出于对写操作的性能优化，采取了自计数方式的设计方案，参考 currentSize
+    limitedSize int64
 
     // currentSize 表示当前文件大小
     // 由于每一次写操作都需要获取文件大小，这样会发起一次系统调用，比较耗时
     // 这里将文件大小记录起来，每一次写操作直接使用这个大小进行判断
+    // 这在没有外界修改过文件的情况下一般是没有问题的，而且能提高性能
+    // 只有当判断到 currentSize >= limitedSize 的时候，才进行一次系统调用查询真实的文件大小
+    // 如果真实的文件大小小于 currentSize，重新设置 currentSize，此时不划分文件
+    // 如果真实的文件大小大于 currentSize，此时需要划分文件，并设置 currentSize 为 0
+    // 注意：这个设计方案可以保证文件不小于 limitedSize 的大小
     currentSize int64
 
     // nextFilename is a function for generating a new file name.
