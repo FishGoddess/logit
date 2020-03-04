@@ -18,9 +18,37 @@
 
 package logit
 
-import "os"
+import (
+    "os"
+    "path"
+    "time"
+
+    "github.com/FishGoddess/logit/wrapper"
+)
 
 // NewStdoutLogger returns a Logger holder with given logger level.
 func NewStdoutLogger(level LoggerLevel) *Logger {
     return NewLogger(os.Stdout, level)
+}
+
+// NewFileLogger returns a Logger holder which log to a file with given logFile and level.
+func NewFileLogger(logFile string, level LoggerLevel) *Logger {
+    file, err := wrapper.NewFile(logFile)
+    if err != nil {
+        panic(err)
+    }
+    return NewLogger(file, level)
+}
+
+// NewDurationRollingLogger creates a duration rolling logger with given duration.
+// You should appoint a directory to store all log files generated in this time.
+// Notice that duration must not less than minDuration (generally time.Second), see wrapper.minDuration.
+// Also, default filename of log file is like "20200304-145246-45.log", see wrapper.NewFilename.
+// If you want to appoint another filename, check this and do it by this way.
+// See wrapper.NewDurationRollingFile (it is an implement of io.writer).
+func NewDurationRollingLogger(directory string, duration time.Duration, level LoggerLevel) *Logger {
+    file := wrapper.NewDurationRollingFile(duration, func(now time.Time) string {
+        return path.Join(directory, wrapper.NewFilename(now))
+    })
+    return NewLogger(file, level)
 }

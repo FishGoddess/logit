@@ -10,8 +10,9 @@
 
 * 支持日志级别控制，目前一共有四个日志级别
 * 支持开启或者关闭日志功能，线上环境可以关闭或调高日志级别
+* 支持记录日志到文件中，并且可以按照时间间隔进行自动分割
 
-_历史版本的特性请参考 [HISTORY.md](./HISTORY.md)。未来版本的新特性和计划请参考 [FUTURE.md](./FUTURE.md)。_
+_历史版本的特性请查看 [HISTORY.md](./HISTORY.md)。未来版本的新特性和计划请查看 [FUTURE.md](./FUTURE.md)。_
 
 ### 🚀 安装方式
 
@@ -31,7 +32,7 @@ module your_project_name
 go 1.14
 
 require (
-    github.com/FishGoddess/logit v0.0.4
+    github.com/FishGoddess/logit v0.0.5
 )
 ```
 
@@ -72,23 +73,31 @@ func main() {
 * [logger](./_examples/logger.go)
 * [enable_disable](./_examples/enable_disable.go)
 * [change_log_level](./_examples/change_log_level.go)
+* [log_to_file](./_examples/log_to_file.go)
 
 _更多使用案例请查看 [_examples](./_examples) 目录。_
 
 ### 🔥 性能测试
 
 ```bash
-$ go test -v -bench=. -benchtime=20s
+$ go test -v ./_examples/benchmarks_test.go -bench=. -benchtime=20s
 ```
+
+> 测试文件：[_examples/benchmarks_test.go](./_examples/benchmarks_test.go)
 
 | 测试 | 单位时间内运行次数 (large is better) |  ns/op (small is better) | B/op (small is better) | allocs/op (small is better) |
 | -----------|--------|-------------|-------------|-------------|
-| **[logit](./_examples/benchmarks_test.go)** | 4405342 | 5409 ns/op | 904 B/op | 12 allocs/op |
-| [logrus](./_examples/benchmarks_test.go) | 2990408 | 7991 ns/op | 1633 B/op | 52 allocs/op |
-| [Golang log](./_examples/benchmarks_test.go) | 5308578 | 4539 ns/op | 920 B/op | 12 allocs/op |
-| [Golog](./_examples/benchmarks_test.go) | 15536137 | 1556 ns/op | 232 B/op | 16 allocs/op |
+| **logit** | &nbsp; 4405342 | 5409 ns/op | &nbsp; 904 B/op | 12 allocs/op |
+| **logit (关闭文件信息)** | 20341443 | 1130 ns/op | &nbsp; &nbsp; 32 B/op | &nbsp; 4 allocs/op |
+| logrus | &nbsp; 2990408 | 7991 ns/op | 1633 B/op | 52 allocs/op |
+| Golang log | &nbsp; 5308578 | 4539 ns/op | &nbsp; 920 B/op | 12 allocs/op |
+| Golog | 15536137 | 1556 ns/op | &nbsp; 232 B/op | 16 allocs/op |
 
 > 测试环境：I7-6700HQ CPU @ 2.6 GHZ，16 GB RAM
+
+**注意：golog 库是不会输出文件信息的，也就是少了运行时操作（runtime.Caller 方法），性能自然会高很多，**
+**但是这个功能感觉还是比较实用的，尤其是在查找错误的时候，所以我们还是加了这个功能！**
+**如果你更在乎性能，那我们也提供了一个选项可以关闭文件信息的查询（开发中）！**
 
 _由于目前的 logit 是基于 Golang log 的，所以成绩相比更差，后续会重新设计内部日志输出模块，所以当前成绩仅供参考！_
 
