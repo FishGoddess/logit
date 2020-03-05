@@ -20,6 +20,18 @@ package wrapper
 
 import (
     "os"
+    "time"
+)
+
+// These are units representation of file size.
+//
+// KB = 1024 bytes.
+// MB = 1024 * 1024 bytes.
+// GB = 1024 * 1024 * 1024 bytes.
+const (
+    KB int64 = 1 << (10 * (iota + 1))
+    MB
+    GB
 )
 
 // NewFile creates a new file with given filePath.
@@ -27,4 +39,14 @@ import (
 // Notice that the permission of new file is 0644, which means rw-rw-r-- in unix-like os.
 func NewFile(filePath string) (*os.File, error) {
     return os.OpenFile(filePath, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0664)
+}
+
+// generateFirstFile creates the first file with given nextFilename function.
+func generateFirstFile(nextFilename func(now time.Time) string) (*os.File, time.Time) {
+    now := time.Now()
+    file, err := NewFile(nextFilename(now))
+    if err != nil {
+        panic(err)
+    }
+    return file, now
 }

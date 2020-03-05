@@ -27,8 +27,8 @@ import (
 
 // DurationRollingFile is a time sensitive file.
 //
-//  file := NewDurationRollingFile(time.Second, func(lastTime, currentTime time.Time) string {
-//      return root + currentTime.Format(formatOfTime) + PrefixOfLogFile
+//  file := NewDurationRollingFile(time.Second, func(now time.Time) string {
+//      return "D:/" + now.Format(formatOfTime) + ".txt"
 //  })
 //  defer file.Close()
 //  file.Write([]byte("Hello!"))
@@ -45,7 +45,7 @@ type DurationRollingFile struct {
     // duration is the core property of this struct.
     // Every times currentTime - lastTime >= duration, the file will
     // roll to an entire new file for writing.
-    // Notice that its min value is time.Second. See minDuration.
+    // Notice that its min value is one Second. See minDuration.
     duration time.Duration
 
     // nextFilename is a function for generating a new file name.
@@ -59,16 +59,15 @@ type DurationRollingFile struct {
 }
 
 // minDuration prevents io system from creating file too fast.
-const minDuration = time.Second
+// Default is one second.
+const minDuration = 1 * time.Second
 
 // NewDurationRollingFile creates a new duration rolling file.
 // duration is how long did it roll to next file.
 // nextFilename is a function for generating a new file name.
 // Every times rolling to next file will call nextFilename first.
-// lastTime is the time of previous file using.
-// currentTime is the time of calling this function, also the
-// created time of next file.
-// Notice that its min value is time.Millisecond. See minDuration.
+// now is the time of calling this function, also the created time of next file.
+// Notice that duration's min value is one second. See minDuration.
 func NewDurationRollingFile(duration time.Duration, nextFilename func(now time.Time) string) *DurationRollingFile {
 
     // 防止时间间隔太小导致滚动文件时 IO 的疯狂蠕动
@@ -77,12 +76,7 @@ func NewDurationRollingFile(duration time.Duration, nextFilename func(now time.T
     }
 
     // 获取当前时间，并生成第一个文件
-    now := time.Now()
-    file, err := NewFile(nextFilename(now))
-    if err != nil {
-        panic(err)
-    }
-
+    file, now := generateFirstFile(nextFilename)
     return &DurationRollingFile{
         file:         file,
         lastTime:     now,
