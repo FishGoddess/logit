@@ -19,17 +19,20 @@
 package wrapper
 
 import (
-    "math/rand"
     "os"
-    "strconv"
     "time"
 )
 
-// PrefixOfLogFile is the prefix of log file.
-const PrefixOfLogFile = ".log"
-
-// FormatOfTime is the format of time.
-const FormatOfTime = "20060102-150405"
+// These are units representation of file size.
+//
+// KB = 1024 bytes.
+// MB = 1024 * 1024 bytes.
+// GB = 1024 * 1024 * 1024 bytes.
+const (
+    KB int64 = 1 << (10 * (iota + 1))
+    MB
+    GB
+)
 
 // NewFile creates a new file with given filePath.
 // Return a new File or an error if failed.
@@ -38,9 +41,12 @@ func NewFile(filePath string) (*os.File, error) {
     return os.OpenFile(filePath, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0664)
 }
 
-// NewFilename creates a time-relative filename with given now time.
-// Also, it uses random number to ensure this filename is available.
-// The filename will be like "20200304-145246-45.log".
-func NewFilename(now time.Time) string {
-    return now.Format(FormatOfTime) + "-" + strconv.Itoa(rand.Intn(100)) + PrefixOfLogFile
+// generateFirstFile creates the first file with given nextFilename function.
+func generateFirstFile(nextFilename func(now time.Time) string) (*os.File, time.Time) {
+    now := time.Now()
+    file, err := NewFile(nextFilename(now))
+    if err != nil {
+        panic(err)
+    }
+    return file, now
 }

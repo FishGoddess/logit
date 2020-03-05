@@ -10,7 +10,9 @@
 
 * Level-based logging, and there are four levels to use
 * Enable or disable Logger, you can disable or switch to a higher level in your production environment
-* Log file supports, and it will split the file by duration automatically.
+* Log file supports, and you can customer the name of your log file.
+* Duration rolling supports, which means it will roll to a new log file by duration automatically, such as one day one log file.
+* File size rolling supports, which means it will roll to a new log file by file size automatically, such as one 64 MB one log file.
 
 _Check [HISTORY.md](./HISTORY.md) and [FUTURE.md](./FUTURE.md) to get more information._
 
@@ -32,7 +34,7 @@ module your_project_name
 go 1.14
 
 require (
-    github.com/FishGoddess/logit v0.0.5
+    github.com/FishGoddess/logit v0.0.6
 )
 ```
 
@@ -74,6 +76,7 @@ func main() {
 * [enable_disable](./_examples/enable_disable.go)
 * [change_log_level](./_examples/change_log_level.go)
 * [log_to_file](./_examples/log_to_file.go)
+* [wrapper](./_examples/wrapper.go)
 
 _Check more examples in [_examples](./_examples)._
 

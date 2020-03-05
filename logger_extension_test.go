@@ -21,6 +21,8 @@ package logit
 import (
     "testing"
     "time"
+
+    "github.com/FishGoddess/logit/wrapper"
 )
 
 // 测试创建标准输出的日志记录器
@@ -47,11 +49,46 @@ func TestNewFileLogger(t *testing.T) {
     logger = NewFileLogger("https://test.io", DebugLevel)
 }
 
-// 创建随时间间隔滚动的文件日志记录器
+// 测试创建随时间间隔滚动的文件日志记录器
 func TestNewDurationRollingLogger(t *testing.T) {
 
     logger := NewDurationRollingLogger("Z:/", time.Second, DebugLevel)
+    for i := 0; i < 10; i++ {
+        logger.Info("1. info!!!!!!!!%d", time.Now().Unix())
+        time.Sleep(time.Second)
+        logger.Info("2. info!!!!!!!!%d", time.Now().Unix())
+    }
+}
+
+// 测试按天自动划分日志文件的日志记录器
+func TestNewDayRollingLogger(t *testing.T) {
+
+    logger := NewDayRollingLogger("Z:/", DebugLevel)
     logger.Info("1. info!!!!!!!!%d", time.Now().Unix())
     time.Sleep(time.Second)
     logger.Info("2. info!!!!!!!!%d", time.Now().Unix())
+}
+
+// 测试按照文件大小自动划分日志文件的日志记录器
+func TestNewSizeRollingLogger(t *testing.T) {
+
+    logger := NewSizeRollingLogger("Z:/", 64*wrapper.KB, DebugLevel)
+    for i := 0; i < 1000; i++ {
+        logger.Debug("debug...%d", i)
+        logger.Info("info...%d", i)
+        logger.Warn("warn...%d", i)
+        logger.Error("error...%d", i)
+    }
+}
+
+// 测试按照默认文件大小自动划分日志文件的日志记录器
+func TestNewDefaultSizeRollingLogger(t *testing.T) {
+
+    logger := NewDefaultSizeRollingLogger("Z:/", DebugLevel)
+    for i := 0; i < 1000; i++ {
+        logger.Debug("debug...%d", i)
+        logger.Info("info...%d", i)
+        logger.Warn("warn...%d", i)
+        logger.Error("error...%d", i)
+    }
 }
