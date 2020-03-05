@@ -22,6 +22,7 @@ import (
     "time"
 
     "github.com/FishGoddess/logit"
+    "github.com/FishGoddess/logit/wrapper"
 )
 
 func main() {
@@ -45,4 +46,20 @@ func main() {
     // See logit.NewDurationRollingLogger.
     logger = logit.NewDayRollingLogger("D:/", logit.DebugLevel)
     logger.Info("Today is Friday!!!")
+
+    // NewSizeRollingLogger creates a file size rolling logger with given limitedSize.
+    // You should appoint a directory to store all log files generated in this time.
+    // Notice that limitedSize must not less than minLimitedSize (generally 64 KB), see wrapper.minLimitedSize.
+    // Check wrapper.KB, wrapper.MB, wrapper.GB to know what unit you gonna to use.
+    // Also, default filename of log file is like "20200304-145246-45.log", see nextFilename.
+    // If you want to appoint another filename, check this and do it by this way.
+    // See wrapper.NewSizeRollingFile (it is an implement of io.writer).
+    logger = logit.NewSizeRollingLogger("D:/", 64*wrapper.KB, logit.DebugLevel)
+    logger.Info("file size???")
+
+    // NewDayRollingLogger creates a file size rolling logger.
+    // You should appoint a directory to store all log files generated in this time.
+    // Default means limitedSize is 64 MB. See NewSizeRollingLogger.
+    logger = logit.NewDefaultSizeRollingLogger("D:/", logit.DebugLevel)
+    logger.Info("64 MB rolling!!!")
 }

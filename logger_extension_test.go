@@ -21,6 +21,8 @@ package logit
 import (
     "testing"
     "time"
+
+    "github.com/FishGoddess/logit/wrapper"
 )
 
 // 测试创建标准输出的日志记录器
@@ -65,4 +67,28 @@ func TestNewDayRollingLogger(t *testing.T) {
     logger.Info("1. info!!!!!!!!%d", time.Now().Unix())
     time.Sleep(time.Second)
     logger.Info("2. info!!!!!!!!%d", time.Now().Unix())
+}
+
+// 测试按照文件大小自动划分日志文件的日志记录器
+func TestNewSizeRollingLogger(t *testing.T) {
+
+    logger := NewSizeRollingLogger("Z:/", 64*wrapper.KB, DebugLevel)
+    for i := 0; i < 1000; i++ {
+        logger.Debug("debug...%d", i)
+        logger.Info("info...%d", i)
+        logger.Warn("warn...%d", i)
+        logger.Error("error...%d", i)
+    }
+}
+
+// 测试按照默认文件大小自动划分日志文件的日志记录器
+func TestNewDefaultSizeRollingLogger(t *testing.T) {
+
+    logger := NewDefaultSizeRollingLogger("Z:/", DebugLevel)
+    for i := 0; i < 1000; i++ {
+        logger.Debug("debug...%d", i)
+        logger.Info("info...%d", i)
+        logger.Warn("warn...%d", i)
+        logger.Error("error...%d", i)
+    }
 }
