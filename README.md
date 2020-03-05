@@ -11,7 +11,8 @@
 * 支持日志级别控制，目前一共有四个日志级别
 * 支持开启或者关闭日志功能，线上环境可以关闭或调高日志级别
 * 支持记录日志到文件中，自定义日志文件名
-* 支持按照时间间隔进行自动划分日志文件，比如按天划分日志文件
+* 支持按照时间间隔进行自动划分日志文件，比如每一天划分一个日志文件
+* 支持按照文件大小进行自动划分日志文件，比如每 64 MB 划分一个日志文件
 
 _历史版本的特性请查看 [HISTORY.md](./HISTORY.md)。未来版本的新特性和计划请查看 [FUTURE.md](./FUTURE.md)。_
 
@@ -75,6 +76,7 @@ func main() {
 * [enable_disable](./_examples/enable_disable.go)
 * [change_log_level](./_examples/change_log_level.go)
 * [log_to_file](./_examples/log_to_file.go)
+* [wrapper](./_examples/wrapper.go)
 
 _更多使用案例请查看 [_examples](./_examples) 目录。_
 

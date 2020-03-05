@@ -25,24 +25,40 @@ import (
     "time"
 )
 
-// SizeRollingFile 是按照文件大小自动划分的文件类型
+// SizeRollingFile is a file size sensitive file.
+//
+//  file := NewSizeRollingFile(64*KB, func (now time.Time) string {
+//      return "D:/" + now.Format("20060102150405.000") + ".log"
+//  })
+//  defer file.Close()
+//  file.Write([]byte("Hello!"))
+//
+// You can use it like using os.File!
 type SizeRollingFile struct {
 
     // file points the writer which will be used this moment.
     file *os.File
 
-    // limitedSize 是指这个文件限制的大小，达到这个大小之后就会自动划分为另一个文件
-    // 注意：出于对写操作的性能优化，采取了自计数方式的设计方案，参考 currentSize
+    // limitedSize is the limited size of this file.
+    // File will roll to next file if its size reaches limitedSize.
+    // This field should be always larger than minLimitedSize for some safe considerations.
+    // Notice that it doesn't mean every files must be this size due to our performance optimization
+    // scheme. Generally it equals to file size, however, it will not equal to file size
+    // if someone modified this file. See currentSize.
     limitedSize int64
 
-    // currentSize 表示当前文件大小
-    // 由于每一次写操作都需要获取文件大小，这样会发起一次系统调用，file.Stat() 非常耗时
-    // 这里将文件大小记录起来，每一次写操作直接使用这个大小进行判断
-    // 这在没有外界修改过文件的情况下一般是没有问题的，而且能提高性能
-    // 只有当判断到 currentSize >= limitedSize 的时候，才进行一次系统调用查询真实的文件大小
-    // 如果真实的文件大小大于 currentSize，此时需要划分文件，并设置 currentSize 为 0
-    // 如果真实的文件大小小于 currentSize，重新设置 currentSize，此时不划分文件
-    // 注意：这个设计方案可以保证文件不小于 limitedSize 的大小
+    // currentSize equals to the size of current file.
+    // If current file have changed, currentSize will reset to 0.
+    // The reason why we set this field is file.Stat() is too expensive!
+    // Every writing operations will fetch file size, that means each operation
+    // will call file.Stat() for size. It's not a good way to fetch file size.
+    // So we keep one field inside, and record current size of current file with it.
+    // Each time fetching file size, the only thing wo do is checking this field.
+    // This way is cheaper, even cheapest. Of course, we should maintain this field
+    // inside for precision. Also, it doesn't mean we won't call file.Stat() anymore.
+    // If currentSize >= limitedSize, we will still call file.Stat() for precision.
+    // Certainly, we will set currentSize to the real size of file. Hey, you know we
+    // won't waste the time we spent on file.Stat() ^_^.
     currentSize int64
 
     // nextFilename is a function for generating a new file name.

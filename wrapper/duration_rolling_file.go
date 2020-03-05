@@ -42,7 +42,7 @@ type DurationRollingFile struct {
     // lastTime is the created time of current file above.
     lastTime time.Time
 
-    // duration is the core property of this struct.
+    // duration is the core field of this struct.
     // Every times currentTime - lastTime >= duration, the file will
     // roll to an entire new file for writing.
     // Notice that its min value is one Second. See minDuration.
