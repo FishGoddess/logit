@@ -31,13 +31,13 @@ const (
 
 // prefixOfLevels provides a prefix of one level.
 var prefixOfLevels = map[LoggerLevel]string{
-    DebugLevel:   "(Debug) ",
-    InfoLevel:    "(Info) ",
-    WarnLevel: "Warn! ",
-    ErrorLevel:   "Error!!! ",
+    DebugLevel: "Debug",
+    InfoLevel:  "Info",
+    WarnLevel:  "Warn",
+    ErrorLevel: "Error",
 }
 
-// prefixOf get the prefix of this level.
+// prefixOf gets the prefix of this level.
 func prefixOf(level LoggerLevel) string {
     return prefixOfLevels[level]
 }

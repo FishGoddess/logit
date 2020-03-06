@@ -18,7 +18,7 @@
 
 package logit
 
-// Logger holder for global usage.
+// defaultLogger is a Logger holder for global usage.
 // Default level is info level.
 var defaultLogger = NewStdoutLogger(InfoLevel)
 
@@ -35,6 +35,41 @@ func Enable() {
 // Disable sets logit on shutdown status.
 func Disable() {
     defaultLogger.Disable()
+}
+
+// EnableFileInfo means every log will contain file info like line number.
+// However, you should know that this is expensive in time.
+// So be sure you really need it or keep it disabled.
+func EnableFileInfo() {
+    defaultLogger.EnableFileInfo()
+}
+
+// DisableFileInfo means every log will not contain file info like line number.
+// If you want file info again, try logit.EnableFileInfo().
+func DisableFileInfo() {
+    defaultLogger.DisableFileInfo()
+}
+
+// AddHandlers adds more handlers to logit, and all handlers added before will be retained.
+// If you want to remove all handlers, try logit.SetHandlers().
+// See logit.DefaultLoggerHandler.
+func AddHandlers(handlers ...LoggerHandler) {
+    defaultLogger.AddHandlers(handlers...)
+}
+
+// SetHandlers replaces logit's handlers with handlers, all handlers added before will be removed.
+// If you want to add more handlers rather than replace them, try logit.AddHandlers().
+// Notice that at least one handler should be added, so if len(handlers) < 1, it returns false
+// which means setting failed. Return true if setting is successful.
+// See logit.DefaultLoggerHandler.
+func SetHandlers(handlers ...LoggerHandler) bool {
+    return defaultLogger.SetHandlers(handlers...)
+}
+
+// SetFormatOfTime sets format of time as you want.
+// Default is "2006-01-02 15:04:05", see logit.DefaultFormatOfTime.
+func SetFormatOfTime(formatOfTime string) {
+    defaultLogger.SetFormatOfTime(formatOfTime)
 }
 
 // callDepth is the depth of the method calling stack, which is about file name and line.
