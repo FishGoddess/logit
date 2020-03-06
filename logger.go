@@ -21,16 +21,24 @@ package logit
 import (
     "fmt"
     "io"
-    "log"
+    "runtime"
     "sync"
+    "time"
 )
 
 // Logger is a struct based on "log.Logger".
 type Logger struct {
 
-    // logger is an inside logger for really logging.
-    // Any operations do on the Logger will finally do on this logger.
-    logger *log.Logger
+    // writer is the output of this Logger.
+    writer io.Writer
+
+    // handlers is the slice of log handlers.
+    // You can add your handler for some situations.
+    handlers []LoggerHandler
+
+    // formatOfTime is the format for formatting time.
+    // Default is "2006-01-02 15:04:05", see DefaultFormatOfTime.
+    formatOfTime string
 
     // level is the level representation of the Logger.
     // In this version of logit, there are four levels:
@@ -46,19 +54,44 @@ type Logger struct {
     // true means the Logger is running, false means the Logger is shutdown.
     running bool
 
+    // needFileInfo is a flag to check if msg should contain file info.
+    // This step is useful but too expensive, so default is false.
+    needFileInfo bool
+
     // mu is for safe concurrency.
     mu sync.RWMutex
 }
 
+// DefaultFormatOfTime is the default format for formatting time.
+const DefaultFormatOfTime = "2006-01-02 15:04:05"
+
 // NewLogger create one Logger with given out and level.
-// The first parameter out is a writer for logging.
+// The first parameter writer is the writer for logging.
 // The second parameter level is the level of this Logger.
 // It returns a new running Logger holder.
-func NewLogger(out io.Writer, level LoggerLevel) *Logger {
+func NewLogger(writer io.Writer, level LoggerLevel) *Logger {
+    return NewLoggerWithHandlers(writer, level, DefaultLoggerHandler)
+}
+
+// NewLoggerWithHandlers create one Logger with given out and level and handlers.
+// The first parameter writer is the writer for logging.
+// The second parameter level is the level of this Logger.
+// The third parameter handlers is all logger handlers for handling each log.
+// It returns a new running Logger holder.
+func NewLoggerWithHandlers(writer io.Writer, level LoggerLevel, handlers ...LoggerHandler) *Logger {
+
+    // 至少添加一个日志处理器，否则直接报错
+    if len(handlers) < 1 {
+        panic("You must add at least one handler!")
+    }
+
     return &Logger{
-        logger:  log.New(out, "", log.LstdFlags|log.Lshortfile),
-        level:   level,
-        running: true,
+        writer:       writer,
+        formatOfTime: DefaultFormatOfTime,
+        handlers:     handlers,
+        level:        level,
+        running:      true,
+        needFileInfo: false,
     }
 }
 
@@ -83,6 +116,56 @@ func (l *Logger) ChangeLevelTo(newLevel LoggerLevel) {
     l.level = newLevel
 }
 
+// EnableFileInfo means every log will contain file info like line number.
+// However, you should know that this is expensive in time.
+// So be sure you really need it or keep it disabled.
+func (l *Logger) EnableFileInfo() {
+    l.mu.Lock()
+    defer l.mu.Unlock()
+    l.needFileInfo = true
+}
+
+// DisableFileInfo means every log will not contain file info like line number.
+// If you want file info again, try l.EnableFileInfo().
+func (l *Logger) DisableFileInfo() {
+    l.mu.Lock()
+    defer l.mu.Unlock()
+    l.needFileInfo = false
+}
+
+// AddHandlers adds more handlers to l, and all handlers added before will be retained.
+// If you want to remove all handlers, try l.SetHandlers().
+func (l *Logger) AddHandlers(handlers ...LoggerHandler) {
+    l.mu.Lock()
+    defer l.mu.Unlock()
+    l.handlers = append(l.handlers, handlers...)
+}
+
+// SetHandlers replaces l.handlers with handlers, all handlers added before will be removed.
+// If you want to add more handlers rather than replace them, try l.AddHandlers.
+// Notice that at least one handler should be added, so if len(handlers) < 1, it returns false
+// which means setting failed. Return true if setting is successful.
+func (l *Logger) SetHandlers(handlers ...LoggerHandler) bool {
+
+    // 必须添加至少一个处理器
+    if len(handlers) < 1 {
+        return false
+    }
+
+    l.mu.Lock()
+    defer l.mu.Unlock()
+    l.handlers = handlers
+    return true
+}
+
+// SetFormatOfTime sets format of time as you want.
+// Default is "2006-01-02 15:04:05", see DefaultFormatOfTime.
+func (l *Logger) SetFormatOfTime(formatOfTime string) {
+    l.mu.Lock()
+    defer l.mu.Unlock()
+    l.formatOfTime = formatOfTime
+}
+
 // callDepth is the depth of the method calling stack, which is about file name and line.
 const callDepth = 3
 
@@ -92,27 +175,46 @@ func (l *Logger) log(callDepth int, level LoggerLevel, msg string) {
 
     // 加上读锁
     l.mu.RLock()
+    defer l.mu.RUnlock()
 
     // 以下两种条件直接返回，不记录日志：
     // 1. 日志处于禁用状态，也就是 l.running = false
     // 2. 日志记录器的日志级别高于这条记录的日志级别
     if !l.running || l.level > level {
-        // 释放读锁
-        l.mu.RUnlock()
         return
     }
 
-    // 提前释放读锁，后续操作不需要加锁
-    l.mu.RUnlock()
+    // 如果需要文件信息，对当前的 msg 进行包装
+    if l.needFileInfo {
+        // 提前释放读锁，后续操作非常消耗时间，等获取完文件信息再上读锁
+        l.mu.RUnlock()
+        msg = wrapMessageWithFileInfo(callDepth, msg)
+        l.mu.RLock()
+    }
 
-    // 记录日志
-    // 这个 3 是 runtime.Caller 方法的参数，表示上面三层调用者信息
-    // 第 0 层是 l.logger.Output 里面调用的 runtime.Caller 的那一行代码
-    // 第 1 层是 l.logger.Output 这一行代码
-    // 第 2 层是调用这个 log 方法那一层
-    // 第 3 层是调用这个 log 方法的那个方法的外部调用上一层，比如调用 Debug 方法的那一层
-    // 以此类推....
-    l.logger.Output(callDepth, prefixOf(level)+msg)
+    // 处理日志
+    l.handleLog(level, time.Now(), msg)
+}
+
+// TODO 注释
+func (l *Logger) handleLog(level LoggerLevel, now time.Time, msg string) {
+    for _, handler := range l.handlers {
+        if !handler.handle(l, level, now, msg) {
+            break
+        }
+    }
+}
+
+// TODO 注释
+func wrapMessageWithFileInfo(callDepth int, msg string) string {
+
+    // 这个 callDepth 是 runtime.Caller 方法的参数，表示上面第几层调用者信息
+    _, file, line, ok := runtime.Caller(callDepth)
+    if !ok {
+        return fmt.Sprintf("[unknown file:unknown line] %s", msg)
+    }
+
+    return fmt.Sprintf("[%s:%d] %s", file, line, msg)
 }
 
 // formatMessage return the formatted message with given args

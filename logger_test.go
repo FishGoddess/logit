@@ -21,6 +21,7 @@ package logit
 import (
     "os"
     "testing"
+    "time"
 )
 
 // 测试日志记录器的 Debug 方法
@@ -75,4 +76,61 @@ func TestLoggerChangeLevelTo(t *testing.T) {
 
     logger.ChangeLevelTo(ErrorLevel)
     logger.Warn("Now only error messages will be logged!")
+}
+
+// 测试使用日志处理器创建日志记录器的方法
+func TestNewLoggerWithHandlers(t *testing.T) {
+
+    defer func() {
+        err := recover()
+        if err == nil {
+            t.Fatal("没有传入日志处理器，应该报错的，但是没有报！")
+        }
+    }()
+
+    NewLoggerWithHandlers(os.Stdout, DebugLevel)
+}
+
+// 测试文件信息显示的开关是否可用
+func TestLoggerEnableAndDisableFileInfo(t *testing.T) {
+    logger := NewLogger(os.Stdout, WarnLevel)
+    logger.Warn("没有文件信息！")
+    logger.EnableFileInfo()
+    logger.Warn("有文件信息？是否正确？")
+    logger.DisableFileInfo()
+    logger.Warn("现在应该没有文件信息了吧！")
+}
+
+// 测试增加处理器是否可用
+func TestLoggerAddHandlersAndSetHandlers(t *testing.T) {
+    logger := NewLogger(os.Stdout, InfoLevel)
+    logger.Info("当前的日志处理器：%v", logger.handlers)
+
+    handlers1 := func(logger *Logger, level LoggerLevel, now time.Time, msg string) bool {
+        logger.writer.Write([]byte("第一个日志处理器！\n"))
+        return true
+    }
+
+    handlers2 := func(logger *Logger, level LoggerLevel, now time.Time, msg string) bool {
+        logger.writer.Write([]byte("第二个日志处理器！\n"))
+        return true
+    }
+
+    logger.AddHandlers(handlers1, handlers2)
+    logger.Info("当前的日志处理器：%v", logger.handlers)
+
+    ok := logger.SetHandlers()
+    if ok {
+        t.Fatal("SetHandlers 应该返回 false！")
+    }
+    logger.SetHandlers(handlers1, handlers2)
+    logger.Info("当前的日志处理器：%v", logger.handlers)
+}
+
+// 测试更改时间格式化标准的方法
+func TestLoggerSetFormatOfTime(t *testing.T) {
+    logger := NewLogger(os.Stdout, InfoLevel)
+    logger.Info("当前时间格式化信息！")
+    logger.SetFormatOfTime("2006年01月02日 15点04分05秒")
+    logger.Info("更改之后的时间格式化信息！")
 }

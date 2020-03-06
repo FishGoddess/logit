@@ -14,30 +14,25 @@
 //
 // Author: fish
 // Email: fishinlove@163.com
-// Created at 2020/03/01 14:18:33
+// Created at 2020/03/06 13:36:28
 
 package logit
 
-// LoggerLevel is the type representation of the level.
-type LoggerLevel uint8
-
-// Constants about logger level.
-const (
-    DebugLevel LoggerLevel = iota
-    InfoLevel
-    WarnLevel
-    ErrorLevel
+import (
+    "fmt"
+    "time"
 )
 
-// prefixOfLevels provides a prefix of one level.
-var prefixOfLevels = map[LoggerLevel]string{
-    DebugLevel: "Debug",
-    InfoLevel:  "Info",
-    WarnLevel:  "Warn",
-    ErrorLevel: "Error",
+// TODO 注释
+type LoggerHandler func(logger *Logger, level LoggerLevel, now time.Time, msg string) bool
+
+// TODO 注释
+func (lh LoggerHandler) handle(logger *Logger, level LoggerLevel, now time.Time, msg string) bool {
+    return lh(logger, level, now, msg)
 }
 
-// prefixOf get the prefix of this level.
-func prefixOf(level LoggerLevel) string {
-    return prefixOfLevels[level]
+// TODO 注释
+func DefaultLoggerHandler(logger *Logger, level LoggerLevel, now time.Time, msg string) bool {
+    fmt.Fprintf(logger.writer, "[%s] [%s] %s\n", prefixOf(level), now.Format(logger.formatOfTime), msg)
+    return true
 }

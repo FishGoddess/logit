@@ -14,30 +14,10 @@
 //
 // Author: fish
 // Email: fishinlove@163.com
-// Created at 2020/03/01 14:18:33
+// Created at 2020/03/06 16:01:00
 
-package logit
+package main
 
-// LoggerLevel is the type representation of the level.
-type LoggerLevel uint8
+func main() {
 
-// Constants about logger level.
-const (
-    DebugLevel LoggerLevel = iota
-    InfoLevel
-    WarnLevel
-    ErrorLevel
-)
-
-// prefixOfLevels provides a prefix of one level.
-var prefixOfLevels = map[LoggerLevel]string{
-    DebugLevel: "Debug",
-    InfoLevel:  "Info",
-    WarnLevel:  "Warn",
-    ErrorLevel: "Error",
-}
-
-// prefixOf get the prefix of this level.
-func prefixOf(level LoggerLevel) string {
-    return prefixOfLevels[level]
 }

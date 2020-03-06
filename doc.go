@@ -54,6 +54,15 @@ Package logit provides an easy way to use foundation for your logging operations
     // If you want format your message, just add arguments!
     logger.Info("format info message! id = %d, content = %s", 1, "info!")
 
+    // If you want format your time, try this:
+    logger.SetFormatOfTime("2006/01/02 15:04:05")
+    logger.Info("What time is it now?")
+
+    // If you want to output log with file info, try this:
+    logger.EnableFileInfo()
+    logger.Info("What file is it? Which line?")
+    logger.DisableFileInfo()
+
 3. enable or disable:
 
     // Every new Logger is running.
