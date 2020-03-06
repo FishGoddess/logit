@@ -95,19 +95,16 @@ $ go test -v ./_examples/benchmarks_test.go -bench=. -benchtime=20s
 
 | 测试 | 单位时间内运行次数 (large is better) |  ns/op (small is better) | B/op (small is better) | allocs/op (small is better) |
 | -----------|--------|-------------|-------------|-------------|
-| **logit** | &nbsp; 4405342 | 5409 ns/op | &nbsp; 904 B/op | 12 allocs/op |
-| **logit (关闭文件信息)** | 20341443 | 1130 ns/op | &nbsp; &nbsp; 32 B/op | &nbsp; 4 allocs/op |
+| **logit** | &nbsp; 8617952 | 2807 ns/op | &nbsp; 352 B/op | 20 allocs/op |
 | logrus | &nbsp; 2990408 | 7991 ns/op | 1633 B/op | 52 allocs/op |
 | Golang log | &nbsp; 5308578 | 4539 ns/op | &nbsp; 920 B/op | 12 allocs/op |
 | Golog | 15536137 | 1556 ns/op | &nbsp; 232 B/op | 16 allocs/op |
 
 > 测试环境：I7-6700HQ CPU @ 2.6 GHZ，16 GB RAM
 
-**注意：golog 库是不会输出文件信息的，也就是少了运行时操作（runtime.Caller 方法），性能自然会高很多，**
+**注意：输出文件信息会有运行时操作（runtime.Caller 方法），非常影响性能，**
 **但是这个功能感觉还是比较实用的，尤其是在查找错误的时候，所以我们还是加了这个功能！**
-**如果你更在乎性能，那我们也提供了一个选项可以关闭文件信息的查询（开发中）！**
-
-_由于目前的 logit 是基于 Golang log 的，所以成绩相比更差，后续会重新设计内部日志输出模块，所以当前成绩仅供参考！_
+**如果你更在乎性能，那我们也提供了一个选项可以关闭文件信息的查询！**
 
 ### 👥 贡献者
 
