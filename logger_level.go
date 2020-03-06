@@ -37,7 +37,7 @@ var prefixOfLevels = map[LoggerLevel]string{
     ErrorLevel: "Error",
 }
 
-// prefixOf get the prefix of this level.
+// prefixOf gets the prefix of this level.
 func prefixOf(level LoggerLevel) string {
     return prefixOfLevels[level]
 }

@@ -43,7 +43,7 @@ func TestNewFileLogger(t *testing.T) {
 
     logger := NewFileLogger("Z:/test.log", DebugLevel)
     for i := 0; i < 100; i++ {
-        logger.Info("我是第 %d 条日志！\n", i)
+        logger.Info("我是第 %d 条日志！", i)
     }
 
     logger = NewFileLogger("https://test.io", DebugLevel)

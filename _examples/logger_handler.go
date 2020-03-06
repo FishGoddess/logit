@@ -18,6 +18,42 @@
 
 package main
 
+import (
+    "fmt"
+    "os"
+    "time"
+
+    "github.com/FishGoddess/logit"
+)
+
 func main() {
 
+    // Create a logger holder.
+    // Default handler is logit.DefaultLoggerHandler.
+    logger := logit.NewLogger(os.Stdout, logit.InfoLevel)
+    logger.Info("before logging...")
+
+    // Customize your own handler.
+    handlers1 := func(logger *logit.Logger, level logit.LoggerLevel, now time.Time, msg string) bool {
+        logger.Writer().Write([]byte("handlers1: " + msg + "\n"))
+        return true
+    }
+
+    handlers2 := func(logger *logit.Logger, level logit.LoggerLevel, now time.Time, msg string) bool {
+        logger.Writer().Write([]byte("handlers2: " + msg + "\n"))
+        return true
+    }
+
+    // Add handlers to logger.
+    // There are three handlers in logger because logger has a default handler inside after creating.
+    // See logit.DefaultLoggerHandler.
+    logger.AddHandlers(handlers1, handlers2)
+    fmt.Println("fmt =========================================")
+    logger.Info("after adding handlers...")
+
+    // Set handlers to logger.
+    // There are two handlers in logger because the default handler inside was removed.
+    logger.SetHandlers(handlers1, handlers2)
+    fmt.Println("fmt =========================================")
+    logger.Info("after setting handlers...")
 }

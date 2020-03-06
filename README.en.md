@@ -8,11 +8,15 @@
 
 ### 🥇 Features
 
+* Modularization design, easy to extend your logger with wrapper and handler
 * Level-based logging, and there are four levels to use
 * Enable or disable Logger, you can disable or switch to a higher level in your production environment
 * Log file supports, and you can customer the name of your log file.
 * Duration rolling supports, which means it will roll to a new log file by duration automatically, such as one day one log file.
 * File size rolling supports, which means it will roll to a new log file by file size automatically, such as one 64 MB one log file.
+* Log handler supports, you can extend logger with your own log handler easily.
+* High-performance supports, by avoiding to call runtime.Caller
+* Time format supports, you can format time in your way.
 
 _Check [HISTORY.md](./HISTORY.md) and [FUTURE.md](./FUTURE.md) to get more information._
 
@@ -34,7 +38,7 @@ module your_project_name
 go 1.14
 
 require (
-    github.com/FishGoddess/logit v0.0.6
+    github.com/FishGoddess/logit v0.0.7
 )
 ```
 
@@ -77,6 +81,7 @@ func main() {
 * [change_log_level](./_examples/change_log_level.go)
 * [log_to_file](./_examples/log_to_file.go)
 * [wrapper](./_examples/wrapper.go)
+* [handler](./_examples/logger_handler.go)
 
 _Check more examples in [_examples](./_examples)._
 

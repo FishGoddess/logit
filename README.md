@@ -8,11 +8,15 @@
 
 ### 🥇 功能特性
 
-* 支持日志级别控制，目前一共有四个日志级别
+* 独特的日志输出模块设计，使用 wrapper 和 handler 装载特定的模块，实现扩展功能
+* 支持日志级别控制，一共有四个日志级别，分别是 debug，info，warn 和 error。
 * 支持开启或者关闭日志功能，线上环境可以关闭或调高日志级别
 * 支持记录日志到文件中，自定义日志文件名
 * 支持按照时间间隔进行自动划分日志文件，比如每一天划分一个日志文件
 * 支持按照文件大小进行自动划分日志文件，比如每 64 MB 划分一个日志文件
+* 增加日志处理器模块，支持用户自定义日志处理逻辑，具有很高的扩展能力
+* 支持不输出文件信息，避免 runtime.Caller 方法的调用，具有很高的性能
+* 支持调整时间格式化输出，让用户自定义时间输出的格式
 
 _历史版本的特性请查看 [HISTORY.md](./HISTORY.md)。未来版本的新特性和计划请查看 [FUTURE.md](./FUTURE.md)。_
 
@@ -34,7 +38,7 @@ module your_project_name
 go 1.14
 
 require (
-    github.com/FishGoddess/logit v0.0.6
+    github.com/FishGoddess/logit v0.0.7
 )
 ```
 
@@ -77,6 +81,7 @@ func main() {
 * [change_log_level](./_examples/change_log_level.go)
 * [log_to_file](./_examples/log_to_file.go)
 * [wrapper](./_examples/wrapper.go)
+* [handler](./_examples/logger_handler.go)
 
 _更多使用案例请查看 [_examples](./_examples) 目录。_
 

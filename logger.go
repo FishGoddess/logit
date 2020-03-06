@@ -26,7 +26,7 @@ import (
     "time"
 )
 
-// Logger is a struct based on "log.Logger".
+// Logger is a struct to log.
 type Logger struct {
 
     // writer is the output of this Logger.
@@ -34,6 +34,7 @@ type Logger struct {
 
     // handlers is the slice of log handlers.
     // You can add your handler for some situations.
+    // See LoggerHandler.
     handlers []LoggerHandler
 
     // formatOfTime is the format for formatting time.
@@ -65,7 +66,7 @@ type Logger struct {
 // DefaultFormatOfTime is the default format for formatting time.
 const DefaultFormatOfTime = "2006-01-02 15:04:05"
 
-// NewLogger create one Logger with given out and level.
+// NewLogger creates one Logger with given out and level.
 // The first parameter writer is the writer for logging.
 // The second parameter level is the level of this Logger.
 // It returns a new running Logger holder.
@@ -73,7 +74,7 @@ func NewLogger(writer io.Writer, level LoggerLevel) *Logger {
     return NewLoggerWithHandlers(writer, level, DefaultLoggerHandler)
 }
 
-// NewLoggerWithHandlers create one Logger with given out and level and handlers.
+// NewLoggerWithHandlers creates one Logger with given out and level and handlers.
 // The first parameter writer is the writer for logging.
 // The second parameter level is the level of this Logger.
 // The third parameter handlers is all logger handlers for handling each log.
@@ -135,6 +136,7 @@ func (l *Logger) DisableFileInfo() {
 
 // AddHandlers adds more handlers to l, and all handlers added before will be retained.
 // If you want to remove all handlers, try l.SetHandlers().
+// See logit.DefaultLoggerHandler.
 func (l *Logger) AddHandlers(handlers ...LoggerHandler) {
     l.mu.Lock()
     defer l.mu.Unlock()
@@ -145,6 +147,7 @@ func (l *Logger) AddHandlers(handlers ...LoggerHandler) {
 // If you want to add more handlers rather than replace them, try l.AddHandlers.
 // Notice that at least one handler should be added, so if len(handlers) < 1, it returns false
 // which means setting failed. Return true if setting is successful.
+// See logit.DefaultLoggerHandler.
 func (l *Logger) SetHandlers(handlers ...LoggerHandler) bool {
 
     // 必须添加至少一个处理器
@@ -164,6 +167,11 @@ func (l *Logger) SetFormatOfTime(formatOfTime string) {
     l.mu.Lock()
     defer l.mu.Unlock()
     l.formatOfTime = formatOfTime
+}
+
+// Writer returns the writer of l.
+func (l *Logger) Writer() io.Writer {
+    return l.writer
 }
 
 // callDepth is the depth of the method calling stack, which is about file name and line.
@@ -196,7 +204,9 @@ func (l *Logger) log(callDepth int, level LoggerLevel, msg string) {
     l.handleLog(level, time.Now(), msg)
 }
 
-// TODO 注释
+// handleLog handles log with l.handlers.
+// Notice that if one handler returns false, then all handlers after it
+// will not use anymore.
 func (l *Logger) handleLog(level LoggerLevel, now time.Time, msg string) {
     for _, handler := range l.handlers {
         if !handler.handle(l, level, now, msg) {
@@ -205,7 +215,9 @@ func (l *Logger) handleLog(level LoggerLevel, now time.Time, msg string) {
     }
 }
 
-// TODO 注释
+// wrapMessageWithFileInfo wraps msg with file info.
+// This function is too expensive because of runtime.Caller.
+// Notice that callDepth is the depth of calling stack. See callDepth.
 func wrapMessageWithFileInfo(callDepth int, msg string) string {
 
     // 这个 callDepth 是 runtime.Caller 方法的参数，表示上面第几层调用者信息
@@ -217,7 +229,7 @@ func wrapMessageWithFileInfo(callDepth int, msg string) string {
     return fmt.Sprintf("[%s:%d] %s", file, line, msg)
 }
 
-// formatMessage return the formatted message with given args
+// formatMessage returns the formatted message with given args
 func formatMessage(msg string, args ...interface{}) string {
     return fmt.Sprintf(msg, args...)
 }

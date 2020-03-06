@@ -18,7 +18,7 @@
 
 package logit
 
-// Logger holder for global usage.
+// defaultLogger is a Logger holder for global usage.
 // Default level is info level.
 var defaultLogger = NewStdoutLogger(InfoLevel)
 
@@ -52,6 +52,7 @@ func DisableFileInfo() {
 
 // AddHandlers adds more handlers to logit, and all handlers added before will be retained.
 // If you want to remove all handlers, try logit.SetHandlers().
+// See logit.DefaultLoggerHandler.
 func AddHandlers(handlers ...LoggerHandler) {
     defaultLogger.AddHandlers(handlers...)
 }
@@ -60,6 +61,7 @@ func AddHandlers(handlers ...LoggerHandler) {
 // If you want to add more handlers rather than replace them, try logit.AddHandlers().
 // Notice that at least one handler should be added, so if len(handlers) < 1, it returns false
 // which means setting failed. Return true if setting is successful.
+// See logit.DefaultLoggerHandler.
 func SetHandlers(handlers ...LoggerHandler) bool {
     return defaultLogger.SetHandlers(handlers...)
 }
