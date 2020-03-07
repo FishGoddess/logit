@@ -102,9 +102,15 @@ $ go test -v ./_examples/benchmarks_test.go -bench=. -benchtime=20s
 
 > Environment：I7-6700HQ CPU @ 2.6 GHZ, 16 GB RAM
 
-**Notice that fetch file info will call runtime.Caller, which is expensive.**
+**Notice:**
+
+**1. Fetching file info will call runtime.Caller, which is expensive.**
 **However, we think file info is useful in check errors,**
 **so we keep this feature, and provide a switch to turn off it for high-performance.**
+
+**2. For now logit uses some functions of fmt, and these functions is expensive**
+**because of reflect (for judging the parameter v interface{}). Actually, these judgements**
+**are redundant in a logger. The more effective output will be used in next version!**
 
 ### 👥 Contributing
 
