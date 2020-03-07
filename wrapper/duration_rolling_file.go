@@ -19,7 +19,7 @@
 package wrapper
 
 import (
-    "fmt"
+    "errors"
     "os"
     "sync"
     "time"
@@ -72,7 +72,7 @@ func NewDurationRollingFile(duration time.Duration, nextFilename func(now time.T
 
     // 防止时间间隔太小导致滚动文件时 IO 的疯狂蠕动
     if duration < minDuration {
-        panic(fmt.Errorf("Duration is smaller than %v!\n", minDuration))
+        panic(errors.New("Duration is smaller than " + minDuration.String() + "\n"))
     }
 
     // 获取当前时间，并生成第一个文件

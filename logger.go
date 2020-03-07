@@ -19,9 +19,9 @@
 package logit
 
 import (
-    "fmt"
     "io"
     "runtime"
+    "strconv"
     "sync"
     "time"
 )
@@ -223,15 +223,15 @@ func wrapMessageWithFileInfo(callDepth int, msg string) string {
     // 这个 callDepth 是 runtime.Caller 方法的参数，表示上面第几层调用者信息
     _, file, line, ok := runtime.Caller(callDepth)
     if !ok {
-        return fmt.Sprintf("[unknown file:unknown line] %s", msg)
+        return "[unknown file:unknown line] " + msg
     }
 
-    return fmt.Sprintf("[%s:%d] %s", file, line, msg)
+    return "[" + file + ":" + strconv.Itoa(line) + "] " + msg
 }
 
 // formatMessage returns the formatted message with given args
 func formatMessage(msg string, args ...interface{}) string {
-    return fmt.Sprintf(msg, args...)
+    return msg
 }
 
 // Debug will output msg as a debug message.
