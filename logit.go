@@ -76,21 +76,21 @@ func SetFormatOfTime(formatOfTime string) {
 const callDepthOfDefaultLogger = 3
 
 // Debug will output msg as a debug message.
-func Debug(msg string, args ...interface{}) {
-    defaultLogger.log(callDepthOfDefaultLogger, DebugLevel, formatMessage(msg, args...))
+func Debug(msg string) {
+    defaultLogger.log(callDepthOfDefaultLogger, DebugLevel, msg)
 }
 
 // Info will output msg as an info message.
-func Info(msg string, args ...interface{}) {
-    defaultLogger.log(callDepthOfDefaultLogger, InfoLevel, formatMessage(msg, args...))
+func Info(msg string) {
+    defaultLogger.log(callDepthOfDefaultLogger, InfoLevel, msg)
 }
 
 // Warn will output msg as a warn message.
-func Warn(msg string, args ...interface{}) {
-    defaultLogger.log(callDepthOfDefaultLogger, WarnLevel, formatMessage(msg, args...))
+func Warn(msg string) {
+    defaultLogger.log(callDepthOfDefaultLogger, WarnLevel, msg)
 }
 
 // Error will output msg as an error message.
-func Error(msg string, args ...interface{}) {
-    defaultLogger.log(callDepthOfDefaultLogger, ErrorLevel, formatMessage(msg, args...))
+func Error(msg string) {
+    defaultLogger.log(callDepthOfDefaultLogger, ErrorLevel, msg)
 }

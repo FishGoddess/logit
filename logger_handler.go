@@ -19,7 +19,6 @@
 package logit
 
 import (
-    "fmt"
     "time"
 )
 
@@ -40,6 +39,6 @@ func (lh LoggerHandler) handle(logger *Logger, level LoggerLevel, now time.Time,
 // The log handled by this handler will be like "[Info] [2020-03-06 16:10:44] msg".
 // If you want to customize, just code your own handler, then replace it!
 func DefaultLoggerHandler(logger *Logger, level LoggerLevel, now time.Time, msg string) bool {
-    fmt.Fprintf(logger.Writer(), "[%s] [%s] %s\n", prefixOf(level), now.Format(logger.formatOfTime), msg)
+    logger.Writer().Write([]byte("[" + prefixOf(level) + "] [" + now.Format(logger.formatOfTime) + "] " + msg + "\n"))
     return true
 }

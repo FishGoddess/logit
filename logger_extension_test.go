@@ -19,6 +19,7 @@
 package logit
 
 import (
+    "strconv"
     "testing"
     "time"
 
@@ -43,7 +44,7 @@ func TestNewFileLogger(t *testing.T) {
 
     logger := NewFileLogger("Z:/test.log", DebugLevel)
     for i := 0; i < 100; i++ {
-        logger.Info("我是第 %d 条日志！", i)
+        logger.Info("我是第 " + strconv.Itoa(i) + " 条日志！")
     }
 
     logger = NewFileLogger("https://test.io", DebugLevel)
@@ -54,9 +55,9 @@ func TestNewDurationRollingLogger(t *testing.T) {
 
     logger := NewDurationRollingLogger("Z:/", time.Second, DebugLevel)
     for i := 0; i < 10; i++ {
-        logger.Info("1. info!!!!!!!!%d", time.Now().Unix())
+        logger.Info("1. info!!!!!!!! " + strconv.FormatInt(time.Now().Unix(), 10))
         time.Sleep(time.Second)
-        logger.Info("2. info!!!!!!!!%d", time.Now().Unix())
+        logger.Info("2. info!!!!!!!! " + strconv.FormatInt(time.Now().Unix(), 10))
     }
 }
 
@@ -64,9 +65,9 @@ func TestNewDurationRollingLogger(t *testing.T) {
 func TestNewDayRollingLogger(t *testing.T) {
 
     logger := NewDayRollingLogger("Z:/", DebugLevel)
-    logger.Info("1. info!!!!!!!!%d", time.Now().Unix())
+    logger.Info("1. info!!!!!!!! " + strconv.FormatInt(time.Now().Unix(), 10))
     time.Sleep(time.Second)
-    logger.Info("2. info!!!!!!!!%d", time.Now().Unix())
+    logger.Info("2. info!!!!!!!! " + strconv.FormatInt(time.Now().Unix(), 10))
 }
 
 // 测试按照文件大小自动划分日志文件的日志记录器
@@ -74,10 +75,10 @@ func TestNewSizeRollingLogger(t *testing.T) {
 
     logger := NewSizeRollingLogger("Z:/", 64*wrapper.KB, DebugLevel)
     for i := 0; i < 1000; i++ {
-        logger.Debug("debug...%d", i)
-        logger.Info("info...%d", i)
-        logger.Warn("warn...%d", i)
-        logger.Error("error...%d", i)
+        logger.Debug("debug...")
+        logger.Info("info...")
+        logger.Warn("warn...")
+        logger.Error("error...")
     }
 }
 
@@ -86,9 +87,9 @@ func TestNewDefaultSizeRollingLogger(t *testing.T) {
 
     logger := NewDefaultSizeRollingLogger("Z:/", DebugLevel)
     for i := 0; i < 1000; i++ {
-        logger.Debug("debug...%d", i)
-        logger.Info("info...%d", i)
-        logger.Warn("warn...%d", i)
-        logger.Error("error...%d", i)
+        logger.Debug("debug...")
+        logger.Info("info...")
+        logger.Warn("warn...")
+        logger.Error("error...")
     }
 }

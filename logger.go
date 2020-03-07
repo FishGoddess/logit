@@ -19,9 +19,9 @@
 package logit
 
 import (
-    "fmt"
     "io"
     "runtime"
+    "strconv"
     "sync"
     "time"
 )
@@ -223,33 +223,28 @@ func wrapMessageWithFileInfo(callDepth int, msg string) string {
     // 这个 callDepth 是 runtime.Caller 方法的参数，表示上面第几层调用者信息
     _, file, line, ok := runtime.Caller(callDepth)
     if !ok {
-        return fmt.Sprintf("[unknown file:unknown line] %s", msg)
+        return "[unknown file:unknown line] " + msg
     }
 
-    return fmt.Sprintf("[%s:%d] %s", file, line, msg)
-}
-
-// formatMessage returns the formatted message with given args
-func formatMessage(msg string, args ...interface{}) string {
-    return fmt.Sprintf(msg, args...)
+    return "[" + file + ":" + strconv.Itoa(line) + "] " + msg
 }
 
 // Debug will output msg as a debug message.
-func (l *Logger) Debug(msg string, args ...interface{}) {
-    l.log(callDepth, DebugLevel, formatMessage(msg, args...))
+func (l *Logger) Debug(msg string) {
+    l.log(callDepth, DebugLevel, msg)
 }
 
 // Info will output msg as an info message.
-func (l *Logger) Info(msg string, args ...interface{}) {
-    l.log(callDepth, InfoLevel, formatMessage(msg, args...))
+func (l *Logger) Info(msg string) {
+    l.log(callDepth, InfoLevel, msg)
 }
 
 // Warn will output msg as a warn message.
-func (l *Logger) Warn(msg string, args ...interface{}) {
-    l.log(callDepth, WarnLevel, formatMessage(msg, args...))
+func (l *Logger) Warn(msg string) {
+    l.log(callDepth, WarnLevel, msg)
 }
 
 // Error will output msg as an error message.
-func (l *Logger) Error(msg string, args ...interface{}) {
-    l.log(callDepth, ErrorLevel, formatMessage(msg, args...))
+func (l *Logger) Error(msg string) {
+    l.log(callDepth, ErrorLevel, msg)
 }

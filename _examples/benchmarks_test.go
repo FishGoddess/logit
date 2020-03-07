@@ -47,7 +47,7 @@ func BenchmarkLogitLogger(b *testing.B) {
 func BenchmarkLogLogger(b *testing.B) {
 
     // 测试用的日志记录器
-    logger := log.New(&nopWriter{}, "", log.LstdFlags|log.Lshortfile)
+    logger := log.New(&nopWriter{}, "", log.LstdFlags)
 
     // 测试用的日志任务
     logTask := func() {

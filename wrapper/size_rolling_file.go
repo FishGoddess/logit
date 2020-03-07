@@ -19,8 +19,9 @@
 package wrapper
 
 import (
-    "fmt"
+    "errors"
     "os"
+    "strconv"
     "sync"
     "time"
 )
@@ -85,7 +86,7 @@ func NewSizeRollingFile(limitedSize int64, nextFilename func(now time.Time) stri
 
     // 防止文件限制尺寸太小导致滚动文件时 IO 的疯狂蠕动
     if limitedSize < minLimitedSize {
-        panic(fmt.Errorf("LimitedSize is smaller than %v KB!\n", uint64(minLimitedSize)>>10))
+        panic(errors.New("LimitedSize is smaller than " + strconv.FormatUint(uint64(minLimitedSize)>>10, 10) + " KB!\n"))
     }
 
     // 获取当前时间，并生成第一个文件

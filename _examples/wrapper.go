@@ -39,7 +39,7 @@ func main() {
 
     // 2. SizeRollingFile is a file size sensitive file.
     sizeRollingFile := wrapper.NewSizeRollingFile(64*wrapper.KB, func(now time.Time) string {
-        return "D:/" + now.Format("20060102150405.000") + ".log"
+        return "D:/" + now.Format("20060102150405.000") + ".txt"
     })
     defer sizeRollingFile.Close()
 

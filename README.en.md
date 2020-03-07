@@ -38,7 +38,7 @@ module your_project_name
 go 1.14
 
 require (
-    github.com/FishGoddess/logit v0.0.7
+    github.com/FishGoddess/logit v0.0.8
 )
 ```
 
@@ -68,8 +68,9 @@ func main() {
     // Change logger level.
     logit.ChangeLevelTo(logit.DebugLevel)
 
-    // If you want format your message, just add arguments!
-    logit.Info("format info message! id = %d, content = %s", 1, "info!")
+    // If you want to output log with file info, try this:
+    logit.EnableFileInfo()
+    logit.Info("Show file info!")
 }
 ```
 
@@ -93,18 +94,24 @@ $ go test -v ./_examples/benchmarks_test.go -bench=. -benchtime=20s
 
 > Benchmark file：[_examples/benchmarks_test.go](./_examples/benchmarks_test.go)
 
-| test case | times ran (large is better) |  ns/op (small is better) | B/op (small is better) | allocs/op (small is better) |
+| test case | times ran (large is better) |  ns/op (small is better) | features | extension |
 | -----------|--------|-------------|-------------|-------------|
-| **logit** | &nbsp; 8617952 | 2807 ns/op | &nbsp; 352 B/op | 20 allocs/op |
-| logrus | &nbsp; 2990408 | 7991 ns/op | 1633 B/op | 52 allocs/op |
-| Golang log | &nbsp; 5308578 | 4539 ns/op | &nbsp; 920 B/op | 12 allocs/op |
-| Golog | 15536137 | 1556 ns/op | &nbsp; 232 B/op | 16 allocs/op |
+| **logit** | 12448242 | 2161 ns/op | powerful | high |
+| logrus | &nbsp; 2990408 | 7991 ns/op | normal | normal |
+| Golog | 15536137 | 1556 ns/op | normal | normal |
+| Golang log | 25268450 | &nbsp; 945 ns/op | not good | none |
 
 > Environment：I7-6700HQ CPU @ 2.6 GHZ, 16 GB RAM
 
-**Notice that fetch file info will call runtime.Caller, which is expensive.**
+**Notice:**
+
+**1. Fetching file info will call runtime.Caller, which is expensive.**
 **However, we think file info is useful in check errors,**
 **so we keep this feature, and provide a switch to turn off it for high-performance.**
+
+**2. For now logit uses some functions of fmt, and these functions is expensive**
+**because of reflect (for judging the parameter v interface{}). Actually, these judgements**
+**are redundant in a logger. The more effective output will be used in v0.0.8 and higher versions.**
 
 ### 👥 Contributing
 
