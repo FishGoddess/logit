@@ -31,9 +31,6 @@ Package logit provides an easy way to use foundation for your logging operations
 
     // Also, you can create a new independent Logger to use. See logit.NewLogger.
 
-    // If you want format your message, just add arguments!
-    logit.Info("format info message! id = %d, content = %s", 1, "info!")
-
     // If you want to output log with file info, try this:
     logit.EnableFileInfo()
     logit.Info("Show file info!")
@@ -54,9 +51,6 @@ Package logit provides an easy way to use foundation for your logging operations
     // As you know, file also can be written, just replace "os.Stdout" with your file!
     // The second parameter "logit.DebugLevel" is the level of this Logger.
     logger = logit.NewLogger(os.Stdout, logit.DebugLevel)
-
-    // If you want format your message, just add arguments!
-    logger.Info("format info message! id = %d, content = %s", 1, "info!")
 
     // If you want format your time, try this:
     logger.SetFormatOfTime("2006/01/02 15:04:05")

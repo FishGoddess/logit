@@ -229,27 +229,22 @@ func wrapMessageWithFileInfo(callDepth int, msg string) string {
     return "[" + file + ":" + strconv.Itoa(line) + "] " + msg
 }
 
-// formatMessage returns the formatted message with given args
-func formatMessage(msg string, args ...interface{}) string {
-    return msg
-}
-
 // Debug will output msg as a debug message.
-func (l *Logger) Debug(msg string, args ...interface{}) {
-    l.log(callDepth, DebugLevel, formatMessage(msg, args...))
+func (l *Logger) Debug(msg string) {
+    l.log(callDepth, DebugLevel, msg)
 }
 
 // Info will output msg as an info message.
-func (l *Logger) Info(msg string, args ...interface{}) {
-    l.log(callDepth, InfoLevel, formatMessage(msg, args...))
+func (l *Logger) Info(msg string) {
+    l.log(callDepth, InfoLevel, msg)
 }
 
 // Warn will output msg as a warn message.
-func (l *Logger) Warn(msg string, args ...interface{}) {
-    l.log(callDepth, WarnLevel, formatMessage(msg, args...))
+func (l *Logger) Warn(msg string) {
+    l.log(callDepth, WarnLevel, msg)
 }
 
 // Error will output msg as an error message.
-func (l *Logger) Error(msg string, args ...interface{}) {
-    l.log(callDepth, ErrorLevel, formatMessage(msg, args...))
+func (l *Logger) Error(msg string) {
+    l.log(callDepth, ErrorLevel, msg)
 }

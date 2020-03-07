@@ -19,6 +19,7 @@
 package logit
 
 import (
+    "fmt"
     "os"
     "testing"
     "time"
@@ -104,7 +105,7 @@ func TestLoggerEnableAndDisableFileInfo(t *testing.T) {
 // 测试增加处理器是否可用
 func TestLoggerAddHandlersAndSetHandlers(t *testing.T) {
     logger := NewLogger(os.Stdout, InfoLevel)
-    logger.Info("当前的日志处理器：%v", logger.handlers)
+    logger.Info("当前的日志处理器：" + fmt.Sprintf("%v", logger.handlers))
 
     handlers1 := func(logger *Logger, level LoggerLevel, now time.Time, msg string) bool {
         logger.writer.Write([]byte("第一个日志处理器！\n"))
@@ -117,14 +118,14 @@ func TestLoggerAddHandlersAndSetHandlers(t *testing.T) {
     }
 
     logger.AddHandlers(handlers1, handlers2)
-    logger.Info("当前的日志处理器：%v", logger.handlers)
+    logger.Info("当前的日志处理器：" + fmt.Sprintf("%v", logger.handlers))
 
     ok := logger.SetHandlers()
     if ok {
         t.Fatal("SetHandlers 应该返回 false！")
     }
     logger.SetHandlers(handlers1, handlers2)
-    logger.Info("当前的日志处理器：%v", logger.handlers)
+    logger.Info("当前的日志处理器：" + fmt.Sprintf("%v", logger.handlers))
 }
 
 // 测试更改时间格式化标准的方法

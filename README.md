@@ -68,8 +68,9 @@ func main() {
     // Change logger level.
     logit.ChangeLevelTo(logit.DebugLevel)
 
-    // If you want format your message, just add arguments!
-    logit.Info("format info message! id = %d, content = %s", 1, "info!")
+    // If you want to output log with file info, try this:
+    logit.EnableFileInfo()
+    logit.Info("Show file info!")
 }
 ```
 
@@ -93,12 +94,12 @@ $ go test -v ./_examples/benchmarks_test.go -bench=. -benchtime=20s
 
 > 测试文件：[_examples/benchmarks_test.go](./_examples/benchmarks_test.go)
 
-| 测试 | 单位时间内运行次数 (large is better) |  ns/op (small is better) | B/op (small is better) | allocs/op (small is better) |
+| 测试 | 单位时间内运行次数 (越大越好) |  每个操作消耗时间 (越小越好) | 功能性 | 扩展性 |
 | -----------|--------|-------------|-------------|-------------|
-| **logit** | &nbsp; 8617952 | 2807 ns/op | &nbsp; 352 B/op | 20 allocs/op |
-| logrus | &nbsp; 2990408 | 7991 ns/op | 1633 B/op | 52 allocs/op |
-| Golang log | &nbsp; 5308578 | 4539 ns/op | &nbsp; 920 B/op | 12 allocs/op |
-| Golog | 15536137 | 1556 ns/op | &nbsp; 232 B/op | 16 allocs/op |
+| **logit** | 12448242 | 2161 ns/op | 强大 | 高 |
+| logrus | &nbsp; 2990408 | 7991 ns/op | 正常 | 正常 |
+| Golog | 15536137 | 1556 ns/op | 正常 | 正常 |
+| Golang log | 25268450 | &nbsp; 945 ns/op | 一般 | 无 |
 
 > 测试环境：I7-6700HQ CPU @ 2.6 GHZ，16 GB RAM
 
@@ -110,7 +111,7 @@ $ go test -v ./_examples/benchmarks_test.go -bench=. -benchtime=20s
 
 **2. 目前的日志输出使用了 fmt 包的一些方法，经过性能检测发现这些方法存在大量使用反射的**
 **行为，主要体现在对参数 v interface{} 进行类型检测的逻辑上，而日志输出都是字符串，这一个**
-**判断是可以省略的，可以减少很多运行时操作时间！下一个版本将会使用更有效率的输出方式！**
+**判断是可以省略的，可以减少很多运行时操作时间！v0.0.8 版本开始使用了更有效率的输出方式！**
 
 ### 👥 贡献者
 

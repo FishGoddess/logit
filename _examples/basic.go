@@ -33,9 +33,6 @@ func main() {
 
     // Also, you can create a new independent Logger to use. See logit.NewLogger.
 
-    // If you want format your message, just add arguments!
-    logit.Info("format info message! id = %d, content = %s", 1, "info!")
-
     // If you want to output log with file info, try this:
     logit.EnableFileInfo()
     logit.Info("Show file info!")
