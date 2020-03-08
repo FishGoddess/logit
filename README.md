@@ -89,17 +89,17 @@ _更多使用案例请查看 [_examples](./_examples) 目录。_
 ### 🔥 性能测试
 
 ```bash
-$ go test -v ./_examples/benchmarks_test.go -bench=. -benchtime=20s
+$ go test -v ./_examples/benchmarks_test.go -bench=. -benchtime=1s
 ```
 
 > 测试文件：[_examples/benchmarks_test.go](./_examples/benchmarks_test.go)
 
 | 测试 | 单位时间内运行次数 (越大越好) |  每个操作消耗时间 (越小越好) | 功能性 | 扩展性 |
 | -----------|--------|-------------|-------------|-------------|
-| **logit** | 12448242 | 2161 ns/op | 强大 | 高 |
-| logrus | &nbsp; 2990408 | 7991 ns/op | 正常 | 正常 |
-| Golog | 15536137 | 1556 ns/op | 正常 | 正常 |
-| Golang log | 25268450 | &nbsp; 945 ns/op | 一般 | 无 |
+| **logit** | &nbsp; 572947 | 1939 ns/op | 强大 | 高 |
+| logrus | &nbsp; 158262 | 7751 ns/op | 正常 | 正常 |
+| Golog | &nbsp; 751064 | 1614 ns/op | 正常 | 正常 |
+| Golang log | 1000000 | 1019 ns/op | 一般 | 无 |
 
 > 测试环境：I7-6700HQ CPU @ 2.6 GHZ，16 GB RAM
 
@@ -109,9 +109,12 @@ $ go test -v ./_examples/benchmarks_test.go -bench=. -benchtime=20s
 **但是这个功能感觉还是比较实用的，尤其是在查找错误的时候，所以我们还是加了这个功能！**
 **如果你更在乎性能，那我们也提供了一个选项可以关闭文件信息的查询！**
 
-**2. 目前的日志输出使用了 fmt 包的一些方法，经过性能检测发现这些方法存在大量使用反射的**
+**2. v0.0.7 及以前版本的日志输出使用了 fmt 包的一些方法，经过性能检测发现这些方法存在大量使用反射的**
 **行为，主要体现在对参数 v interface{} 进行类型检测的逻辑上，而日志输出都是字符串，这一个**
 **判断是可以省略的，可以减少很多运行时操作时间！v0.0.8 版本开始使用了更有效率的输出方式！**
+
+**3. 经过对 v0.0.8 版本的性能检测，发现时间格式化操作消耗了接近一般的处理时间，**
+**主要体现在 time.Time.AppendFormat 的调用上。目前正在思考优化方案，或许会在下一个版本解决！**
 
 ### 👥 贡献者
 
