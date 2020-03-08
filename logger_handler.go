@@ -19,7 +19,6 @@
 package logit
 
 import (
-    "strconv"
     "time"
 )
 
@@ -40,14 +39,6 @@ func (lh LoggerHandler) handle(logger *Logger, level LoggerLevel, now time.Time,
 // The log handled by this handler will be like "[Info] [2020-03-06 16:10:44] msg".
 // If you want to customize, just code your own handler, then replace it!
 func DefaultLoggerHandler(logger *Logger, level LoggerLevel, now time.Time, msg string) bool {
-    //logger.Writer().Write([]byte("[" + PrefixOf(level) + "] [" + formatTimeEffectively(now) + "] " + msg + "\n"))
     logger.Writer().Write([]byte("[" + PrefixOf(level) + "] [" + now.Format(logger.formatOfTime) + "] " + msg + "\n"))
     return true
-}
-
-// TODO 尝试使用时间缓存？值不值得？
-// 这种方式性能没有提升，字符串拼接消耗和时间格式化消耗相当
-func formatTimeEffectively(now time.Time) string {
-    return strconv.Itoa(now.Year()) + "-" + strconv.Itoa(int(now.Month())) + "-" + strconv.Itoa(now.Day()) +
-        " " + strconv.Itoa(now.Hour()) + ":" + strconv.Itoa(now.Minute()) + ":" + strconv.Itoa(now.Second())
 }

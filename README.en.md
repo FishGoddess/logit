@@ -10,6 +10,7 @@
 
 * Modularization design, easy to extend your logger with wrapper and handler
 * Level-based logging, and there are four levels to use
+* Log Function supports, it is a better way to output a very long log.
 * Enable or disable Logger, you can disable or switch to a higher level in your production environment
 * Log file supports, and you can customer the name of your log file.
 * Duration rolling supports, which means it will roll to a new log file by duration automatically, such as one day one log file.
@@ -38,7 +39,7 @@ module your_project_name
 go 1.14
 
 require (
-    github.com/FishGoddess/logit v0.0.8
+    github.com/FishGoddess/logit v0.0.9
 )
 ```
 
@@ -54,6 +55,10 @@ logit has no more external dependencies.
 package main
 
 import (
+    "math/rand"
+    "strconv"
+    "time"
+    
     "github.com/FishGoddess/logit"
 )
 
@@ -71,6 +76,14 @@ func main() {
     // If you want to output log with file info, try this:
     logit.EnableFileInfo()
     logit.Info("Show file info!")
+
+    // If you have a long log and it is made of many variables, try this:
+    // The msg is the return value of msgGenerator.
+    logit.DebugFunction(func() string {
+        // Use time as the source of random number generator.
+        r := rand.New(rand.NewSource(time.Now().Unix()))
+        return "debug rand int: " + strconv.Itoa(r.Intn(100))
+    })
 }
 ```
 

@@ -19,6 +19,7 @@
 package logit
 
 import (
+    "math/rand"
     "strconv"
     "testing"
     "time"
@@ -92,4 +93,21 @@ func TestNewDefaultSizeRollingLogger(t *testing.T) {
         logger.Warn("warn...")
         logger.Error("error...")
     }
+}
+
+// 测试输出日志是从函数中生成的几个方法
+func TestLoggerLogFunction(t *testing.T) {
+    logger := NewStdoutLogger(DebugLevel)
+    logger.DebugFunction(func() string {
+        return "debug rand int: " + strconv.Itoa(rand.Intn(100))
+    })
+    logger.InfoFunction(func() string {
+        return "info rand int: " + strconv.Itoa(rand.Intn(100))
+    })
+    logger.WarnFunction(func() string {
+        return "warn rand int: " + strconv.Itoa(rand.Intn(100))
+    })
+    logger.ErrorFunction(func() string {
+        return "error rand int: " + strconv.Itoa(rand.Intn(100))
+    })
 }

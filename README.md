@@ -10,8 +10,9 @@
 
 * 独特的日志输出模块设计，使用 wrapper 和 handler 装载特定的模块，实现扩展功能
 * 支持日志级别控制，一共有四个日志级别，分别是 debug，info，warn 和 error。
+* 支持日志记录函数，使用回调的形式获取日志内容，对长日志内容的组织逻辑会更清晰
 * 支持开启或者关闭日志功能，线上环境可以关闭或调高日志级别
-* 支持记录日志到文件中，自定义日志文件名
+* 支持记录日志到文件中，并且可以自定义日志文件名
 * 支持按照时间间隔进行自动划分日志文件，比如每一天划分一个日志文件
 * 支持按照文件大小进行自动划分日志文件，比如每 64 MB 划分一个日志文件
 * 增加日志处理器模块，支持用户自定义日志处理逻辑，具有很高的扩展能力
@@ -38,7 +39,7 @@ module your_project_name
 go 1.14
 
 require (
-    github.com/FishGoddess/logit v0.0.8
+    github.com/FishGoddess/logit v0.0.9
 )
 ```
 
@@ -54,6 +55,10 @@ logit 没有任何其他额外的依赖，纯使用 [Golang 标准库](https://g
 package main
 
 import (
+    "math/rand"
+    "strconv"
+    "time"
+    
     "github.com/FishGoddess/logit"
 )
 
@@ -71,6 +76,14 @@ func main() {
     // If you want to output log with file info, try this:
     logit.EnableFileInfo()
     logit.Info("Show file info!")
+
+    // If you have a long log and it is made of many variables, try this:
+    // The msg is the return value of msgGenerator.
+    logit.DebugFunction(func() string {
+        // Use time as the source of random number generator.
+        r := rand.New(rand.NewSource(time.Now().Unix()))
+        return "debug rand int: " + strconv.Itoa(r.Intn(100))
+    })
 }
 ```
 
