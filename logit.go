@@ -94,3 +94,31 @@ func Warn(msg string) {
 func Error(msg string) {
     defaultLogger.log(callDepthOfDefaultLogger, ErrorLevel, msg)
 }
+
+// DebugFunction will output msg as a debug message.
+// The msg is the return value of msgGenerator.
+// This is a better way to output a long log made of many variables.
+func DebugFunction(msgGenerator func() string) {
+    defaultLogger.DebugFunction(msgGenerator)
+}
+
+// InfoFunction will output msg as an info message.
+// The msg is the return value of msgGenerator.
+// This is a better way to output a long log made of many variables.
+func InfoFunction(msgGenerator func() string) {
+    defaultLogger.InfoFunction(msgGenerator)
+}
+
+// WarnFunction will output msg as a warn message.
+// The msg is the return value of messageGenerator.
+// This is a better way to output a long log made of many variables.
+func WarnFunction(msgGenerator func() string) {
+    defaultLogger.WarnFunction(msgGenerator)
+}
+
+// ErrorFunction will output msg as an error message.
+// The msg is the return value of messageGenerator.
+// This is a better way to output a long log made of many variables.
+func ErrorFunction(messageGenerator func() string) {
+    defaultLogger.ErrorFunction(messageGenerator)
+}

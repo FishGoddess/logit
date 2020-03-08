@@ -61,6 +61,14 @@ Package logit provides an easy way to use foundation for your logging operations
     logger.Info("What file is it? Which line?")
     logger.DisableFileInfo()
 
+    // If you have a long log and it is made of many variables, try this:
+    // The msg is the return value of msgGenerator.
+    logger.DebugFunction(func() string {
+        // Use time as the source of random number generator.
+        r := rand.New(rand.NewSource(time.Now().Unix()))
+        return "debug rand int: " + strconv.Itoa(r.Intn(100))
+    })
+
 3. enable or disable:
 
     // Every new Logger is running.
@@ -159,4 +167,4 @@ Package logit provides an easy way to use foundation for your logging operations
 package logit // import "github.com/FishGoddess/logit"
 
 // Version is the version string representation of the "logit" package.
-const Version = "0.0.8"
+const Version = "0.0.9"

@@ -19,7 +19,10 @@
 package main
 
 import (
+    "math/rand"
     "os"
+    "strconv"
+    "time"
 
     "github.com/FishGoddess/logit"
 )
@@ -49,4 +52,12 @@ func main() {
     logger.EnableFileInfo()
     logger.Info("What file is it? Which line?")
     logger.DisableFileInfo()
+
+    // If you have a long log and it is made of many variables, try this:
+    // The msg is the return value of msgGenerator.
+    logger.DebugFunction(func() string {
+        // Use time as the source of random number generator.
+        r := rand.New(rand.NewSource(time.Now().Unix()))
+        return "debug rand int: " + strconv.Itoa(r.Intn(100))
+    })
 }

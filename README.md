@@ -10,8 +10,9 @@
 
 * 独特的日志输出模块设计，使用 wrapper 和 handler 装载特定的模块，实现扩展功能
 * 支持日志级别控制，一共有四个日志级别，分别是 debug，info，warn 和 error。
+* 支持日志记录函数，使用回调的形式获取日志内容，对长日志内容的组织逻辑会更清晰
 * 支持开启或者关闭日志功能，线上环境可以关闭或调高日志级别
-* 支持记录日志到文件中，自定义日志文件名
+* 支持记录日志到文件中，并且可以自定义日志文件名
 * 支持按照时间间隔进行自动划分日志文件，比如每一天划分一个日志文件
 * 支持按照文件大小进行自动划分日志文件，比如每 64 MB 划分一个日志文件
 * 增加日志处理器模块，支持用户自定义日志处理逻辑，具有很高的扩展能力
@@ -38,7 +39,7 @@ module your_project_name
 go 1.14
 
 require (
-    github.com/FishGoddess/logit v0.0.8
+    github.com/FishGoddess/logit v0.0.9
 )
 ```
 
@@ -54,6 +55,10 @@ logit 没有任何其他额外的依赖，纯使用 [Golang 标准库](https://g
 package main
 
 import (
+    "math/rand"
+    "strconv"
+    "time"
+    
     "github.com/FishGoddess/logit"
 )
 
@@ -71,6 +76,14 @@ func main() {
     // If you want to output log with file info, try this:
     logit.EnableFileInfo()
     logit.Info("Show file info!")
+
+    // If you have a long log and it is made of many variables, try this:
+    // The msg is the return value of msgGenerator.
+    logit.DebugFunction(func() string {
+        // Use time as the source of random number generator.
+        r := rand.New(rand.NewSource(time.Now().Unix()))
+        return "debug rand int: " + strconv.Itoa(r.Intn(100))
+    })
 }
 ```
 
@@ -89,17 +102,17 @@ _更多使用案例请查看 [_examples](./_examples) 目录。_
 ### 🔥 性能测试
 
 ```bash
-$ go test -v ./_examples/benchmarks_test.go -bench=. -benchtime=20s
+$ go test -v ./_examples/benchmarks_test.go -bench=. -benchtime=1s
 ```
 
 > 测试文件：[_examples/benchmarks_test.go](./_examples/benchmarks_test.go)
 
 | 测试 | 单位时间内运行次数 (越大越好) |  每个操作消耗时间 (越小越好) | 功能性 | 扩展性 |
 | -----------|--------|-------------|-------------|-------------|
-| **logit** | 12448242 | 2161 ns/op | 强大 | 高 |
-| logrus | &nbsp; 2990408 | 7991 ns/op | 正常 | 正常 |
-| Golog | 15536137 | 1556 ns/op | 正常 | 正常 |
-| Golang log | 25268450 | &nbsp; 945 ns/op | 一般 | 无 |
+| **logit** | &nbsp; 572947 | 1939 ns/op | 强大 | 高 |
+| logrus | &nbsp; 158262 | 7751 ns/op | 正常 | 正常 |
+| Golog | &nbsp; 751064 | 1614 ns/op | 正常 | 正常 |
+| Golang log | 1000000 | 1019 ns/op | 一般 | 无 |
 
 > 测试环境：I7-6700HQ CPU @ 2.6 GHZ，16 GB RAM
 
@@ -109,9 +122,12 @@ $ go test -v ./_examples/benchmarks_test.go -bench=. -benchtime=20s
 **但是这个功能感觉还是比较实用的，尤其是在查找错误的时候，所以我们还是加了这个功能！**
 **如果你更在乎性能，那我们也提供了一个选项可以关闭文件信息的查询！**
 
-**2. 目前的日志输出使用了 fmt 包的一些方法，经过性能检测发现这些方法存在大量使用反射的**
+**2. v0.0.7 及以前版本的日志输出使用了 fmt 包的一些方法，经过性能检测发现这些方法存在大量使用反射的**
 **行为，主要体现在对参数 v interface{} 进行类型检测的逻辑上，而日志输出都是字符串，这一个**
 **判断是可以省略的，可以减少很多运行时操作时间！v0.0.8 版本开始使用了更有效率的输出方式！**
+
+**3. 经过对 v0.0.8 版本的性能检测，发现时间格式化操作消耗了接近一般的处理时间，**
+**主要体现在 time.Time.AppendFormat 的调用上。目前正在思考优化方案，或许会在之后的版本中解决！**
 
 ### 👥 贡献者
 

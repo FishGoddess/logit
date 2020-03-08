@@ -10,6 +10,7 @@
 
 * Modularization design, easy to extend your logger with wrapper and handler
 * Level-based logging, and there are four levels to use
+* Log Function supports, it is a better way to output a very long log.
 * Enable or disable Logger, you can disable or switch to a higher level in your production environment
 * Log file supports, and you can customer the name of your log file.
 * Duration rolling supports, which means it will roll to a new log file by duration automatically, such as one day one log file.
@@ -38,7 +39,7 @@ module your_project_name
 go 1.14
 
 require (
-    github.com/FishGoddess/logit v0.0.8
+    github.com/FishGoddess/logit v0.0.9
 )
 ```
 
@@ -54,6 +55,10 @@ logit has no more external dependencies.
 package main
 
 import (
+    "math/rand"
+    "strconv"
+    "time"
+    
     "github.com/FishGoddess/logit"
 )
 
@@ -71,6 +76,14 @@ func main() {
     // If you want to output log with file info, try this:
     logit.EnableFileInfo()
     logit.Info("Show file info!")
+
+    // If you have a long log and it is made of many variables, try this:
+    // The msg is the return value of msgGenerator.
+    logit.DebugFunction(func() string {
+        // Use time as the source of random number generator.
+        r := rand.New(rand.NewSource(time.Now().Unix()))
+        return "debug rand int: " + strconv.Itoa(r.Intn(100))
+    })
 }
 ```
 
@@ -89,17 +102,17 @@ _Check more examples in [_examples](./_examples)._
 ### 🔥 Benchmarks
 
 ```bash
-$ go test -v ./_examples/benchmarks_test.go -bench=. -benchtime=20s
+$ go test -v ./_examples/benchmarks_test.go -bench=. -benchtime=1s
 ```
 
 > Benchmark file：[_examples/benchmarks_test.go](./_examples/benchmarks_test.go)
 
 | test case | times ran (large is better) |  ns/op (small is better) | features | extension |
 | -----------|--------|-------------|-------------|-------------|
-| **logit** | 12448242 | 2161 ns/op | powerful | high |
-| logrus | &nbsp; 2990408 | 7991 ns/op | normal | normal |
-| Golog | 15536137 | 1556 ns/op | normal | normal |
-| Golang log | 25268450 | &nbsp; 945 ns/op | not good | none |
+| **logit** | &nbsp; 572947 | 1939 ns/op | powerful | high |
+| logrus | &nbsp; 158262 | 7751 ns/op | normal | normal |
+| Golog | &nbsp; 751064 | 1614 ns/op | normal | normal |
+| Golang log | 1000000 | 1019 ns/op | not good | none |
 
 > Environment：I7-6700HQ CPU @ 2.6 GHZ, 16 GB RAM
 
@@ -109,9 +122,12 @@ $ go test -v ./_examples/benchmarks_test.go -bench=. -benchtime=20s
 **However, we think file info is useful in check errors,**
 **so we keep this feature, and provide a switch to turn off it for high-performance.**
 
-**2. For now logit uses some functions of fmt, and these functions is expensive**
+**2. v0.0.7 and lower versions use some functions of fmt, and these functions is expensive**
 **because of reflect (for judging the parameter v interface{}). Actually, these judgements**
 **are redundant in a logger. The more effective output will be used in v0.0.8 and higher versions.**
+
+**3. After checking the benchmarks of v0.0.8 version, we found that time format takes a lots of time**
+**because of time.Time.AppendFormat. We are finding a more effective way to fix it, maybe fixed in higher version!**
 
 ### 👥 Contributing
 

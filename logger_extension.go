@@ -93,3 +93,31 @@ func NewSizeRollingLogger(directory string, limitedSize int64, level LoggerLevel
 func NewDefaultSizeRollingLogger(directory string, level LoggerLevel) *Logger {
     return NewSizeRollingLogger(directory, 64*wrapper.MB, level)
 }
+
+// DebugFunction will output msg as a debug message.
+// The msg is the return value of msgGenerator.
+// This is a better way to output a long log made of many variables.
+func (l *Logger) DebugFunction(msgGenerator func() string) {
+    l.Debug(msgGenerator())
+}
+
+// InfoFunction will output msg as an info message.
+// The msg is the return value of msgGenerator.
+// This is a better way to output a long log made of many variables.
+func (l *Logger) InfoFunction(msgGenerator func() string) {
+    l.Info(msgGenerator())
+}
+
+// WarnFunction will output msg as a warn message.
+// The msg is the return value of messageGenerator.
+// This is a better way to output a long log made of many variables.
+func (l *Logger) WarnFunction(msgGenerator func() string) {
+    l.Warn(msgGenerator())
+}
+
+// ErrorFunction will output msg as an error message.
+// The msg is the return value of messageGenerator.
+// This is a better way to output a long log made of many variables.
+func (l *Logger) ErrorFunction(messageGenerator func() string) {
+    l.Error(messageGenerator())
+}
