@@ -37,7 +37,13 @@ var prefixOfLevels = map[LoggerLevel]string{
     ErrorLevel: "Error",
 }
 
+// The String method is used to print values passed as an operand
+// to any format that accepts a string or to an printer without format such as Print.
+func (ll LoggerLevel) String() string {
+    return prefixOfLevels[ll]
+}
+
 // prefixOf gets the prefix of this level.
-func prefixOf(level LoggerLevel) string {
-    return prefixOfLevels[level]
+func PrefixOf(level LoggerLevel) string {
+    return level.String()
 }
