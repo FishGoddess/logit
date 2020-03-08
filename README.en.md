@@ -127,7 +127,7 @@ $ go test -v ./_examples/benchmarks_test.go -bench=. -benchtime=1s
 **are redundant in a logger. The more effective output will be used in v0.0.8 and higher versions.**
 
 **3. After checking the benchmarks of v0.0.8 version, we found that time format takes a lots of time**
-**because of time.Time.AppendFormat. We are finding a more effective way to fix it, maybe fixed in next version!**
+**because of time.Time.AppendFormat. We are finding a more effective way to fix it, maybe fixed in higher version!**
 
 ### 👥 Contributing
 
