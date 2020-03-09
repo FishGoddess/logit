@@ -21,6 +21,9 @@ package logit
 import (
     "fmt"
     "os"
+    "strconv"
+    "strings"
+    "sync"
     "testing"
     "time"
 )
@@ -62,6 +65,7 @@ func TestLoggerEnable(t *testing.T) {
 // 测试日志记录器的级别控制是否可用
 func TestLoggerLevel(t *testing.T) {
     logger := NewLogger(os.Stdout, WarnLevel)
+    logger.Warn(logger.Level().String())
     logger.Info("这条 info 级别的内容可以显示吗？")
     logger.Error("这条 error 级别的内容可以显示吗？")
     logger.Warn("这条 warn 级别的内容可以显示吗？")
@@ -131,7 +135,71 @@ func TestLoggerAddHandlersAndSetHandlers(t *testing.T) {
 // 测试更改时间格式化标准的方法
 func TestLoggerSetFormatOfTime(t *testing.T) {
     logger := NewLogger(os.Stdout, InfoLevel)
-    logger.Info("当前时间格式化信息！")
+    logger.Info("当前时间格式化信息！" + logger.FormatOfTime())
     logger.SetFormatOfTime("2006年01月02日 15点04分05秒")
-    logger.Info("更改之后的时间格式化信息！")
+    logger.Info("更改之后的时间格式化信息！" + logger.FormatOfTime())
+}
+
+// 测试获取日志处理器的方法
+func TestLoggerHandlers(t *testing.T) {
+    logger := NewStdoutLogger(InfoLevel)
+    handlers := logger.Handlers()
+
+    // 需要判断地址是否一样，一样说明有问题
+    if &handlers[0] == &logger.handlers[0] {
+        t.Fatal("handlers 获取的数据和底层数据地址一样！这是有问题的！")
+    }
+
+    // 显示每个日志处理器的地址
+    logger.Info("handlers 个数：" + strconv.Itoa(len(handlers)))
+    logger.InfoFunction(func() string {
+        builder := strings.Builder{}
+        for _, handler := range handlers {
+            builder.WriteString(fmt.Sprintf("%p ", &handler))
+        }
+        return builder.String()
+    })
+
+    // 尝试非法篡改日志处理器
+    handlers[0] = func(logger *Logger, level LoggerLevel, now time.Time, msg string) bool {
+        fmt.Println("哈哈哈被非法篡改了！！！")
+        return false
+    }
+    logger.Warn("这条信息需要显示出来！")
+}
+
+// 测试更改写出器的方法
+func TestLoggerChangeWriterTo(t *testing.T) {
+    logger := NewStdoutLogger(DebugLevel)
+    fmt.Println(logger.writer)
+    logger.Debug("哈哈哈")
+
+    file, _ := os.Create("Z:/TestLoggerChangeWriterTo.log")
+    logger.ChangeWriterTo(file)
+    fmt.Println(logger.writer)
+    logger.Debug("哈哈哈文件？")
+}
+
+// 测试并发情况下使用 Logger
+func TestLoggerInConcurrency(t *testing.T) {
+
+    logger := NewFileLogger("Z:/TestLoggerInConcurrency.log", DebugLevel)
+    //logger := NewStdoutLogger(DebugLevel)
+
+    group := sync.WaitGroup{}
+    for i := 0; i < 100; i++ {
+        group.Add(1)
+        go func(num int) {
+            if num == 30 || num == 60 {
+                logger.ChangeLevelTo(InfoLevel)
+            }
+            logger.Info(strconv.Itoa(num))
+            if num == 60 || num == 90 {
+                logger.ChangeWriterTo(os.Stdout)
+            }
+            group.Done()
+        }(i)
+    }
+
+    group.Wait()
 }

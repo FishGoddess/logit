@@ -117,6 +117,13 @@ func (l *Logger) ChangeLevelTo(newLevel LoggerLevel) {
     l.level = newLevel
 }
 
+// Level returns the logger level of l.
+func (l *Logger) Level() LoggerLevel {
+    l.mu.RLock()
+    defer l.mu.RUnlock()
+    return l.level
+}
+
 // EnableFileInfo means every log will contain file info like line number.
 // However, you should know that this is expensive in time.
 // So be sure you really need it or keep it disabled.
@@ -155,10 +162,22 @@ func (l *Logger) SetHandlers(handlers ...LoggerHandler) bool {
         return false
     }
 
+    // 先清空原本的日志处理器，再添加新的日志处理器
     l.mu.Lock()
     defer l.mu.Unlock()
-    l.handlers = handlers
+    l.handlers = nil
+    l.handlers = append(l.handlers, handlers...)
     return true
+}
+
+// Handlers returns all handlers of l in a copy slice.
+func (l *Logger) Handlers() []LoggerHandler {
+    l.mu.RLock()
+    defer l.mu.RUnlock()
+
+    // 返回的是日志处理器的副本，防止被非法篡改
+    handlers := make([]LoggerHandler, 0, len(l.handlers))
+    return append(handlers, l.handlers...)
 }
 
 // SetFormatOfTime sets format of time as you want.
@@ -169,8 +188,24 @@ func (l *Logger) SetFormatOfTime(formatOfTime string) {
     l.formatOfTime = formatOfTime
 }
 
+// FormatOfTime returns the format of time in l.
+func (l *Logger) FormatOfTime() string {
+    l.mu.RLock()
+    defer l.mu.RUnlock()
+    return l.formatOfTime
+}
+
+// ChangeWriterTo changes current writer to newWriter.
+func (l *Logger) ChangeWriterTo(newWriter io.Writer) {
+    l.mu.Lock()
+    defer l.mu.Unlock()
+    l.writer = newWriter
+}
+
 // Writer returns the writer of l.
 func (l *Logger) Writer() io.Writer {
+    l.mu.RLock()
+    defer l.mu.RUnlock()
     return l.writer
 }
 
@@ -183,21 +218,26 @@ func (l *Logger) log(callDepth int, level LoggerLevel, msg string) {
 
     // 加上读锁
     l.mu.RLock()
-    defer l.mu.RUnlock()
 
     // 以下两种条件直接返回，不记录日志：
     // 1. 日志处于禁用状态，也就是 l.running = false
     // 2. 日志记录器的日志级别高于这条记录的日志级别
     if !l.running || l.level > level {
+        l.mu.RUnlock()
         return
     }
 
+    // 提前释放读锁，后续操作非常消耗时间，可以不用加锁了，彻底释放并发的天性
+    // 但是 needFileInfo 的获取需要保证并发安全，就在释放锁之前拷贝一份副本，
+    // 即使释放锁之后有人修改了这个属性，也和这里无关了，因为在执行这个 log 方法的时间点上
+    // 这个属性的值就已经确定了，并且不允许被修改了，这类似于 copy on write 的解决思路。
+    // 这个解决并发竞争的方案是否没有问题，需要时间的验证才知道
+    needFileInfo := l.needFileInfo
+    l.mu.RUnlock()
+
     // 如果需要文件信息，对当前的 msg 进行包装
-    if l.needFileInfo {
-        // 提前释放读锁，后续操作非常消耗时间，等获取完文件信息再上读锁
-        l.mu.RUnlock()
+    if needFileInfo {
         msg = wrapMessageWithFileInfo(callDepth, msg)
-        l.mu.RLock()
     }
 
     // 处理日志
