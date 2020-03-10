@@ -18,6 +18,8 @@
 
 package logit
 
+import "io"
+
 // defaultLogger is a Logger holder for global usage.
 // Default level is info level.
 var defaultLogger = NewStdoutLogger(InfoLevel)
@@ -121,4 +123,9 @@ func WarnFunction(msgGenerator func() string) {
 // This is a better way to output a long log made of many variables.
 func ErrorFunction(messageGenerator func() string) {
     defaultLogger.ErrorFunction(messageGenerator)
+}
+
+// ChangeWriterTo changes current writer to newWriter.
+func ChangeWriterTo(newWriter io.Writer) {
+    defaultLogger.ChangeWriterTo(newWriter)
 }

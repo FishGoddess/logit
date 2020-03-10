@@ -34,9 +34,9 @@ func main() {
 
     // Then you will be easy to log!
     logger.Debug("this is a debug message!")
-    logger.Info("this is a info message!")
+    logger.Info("this is an info message!")
     logger.Warn("this is a warn message!")
-    logger.Error("this is a error message!")
+    logger.Error("this is an error message!")
 
     // NewLogger creates a new Logger holder.
     // The first parameter "os.Stdout" is a writer for logging.
@@ -60,4 +60,7 @@ func main() {
         r := rand.New(rand.NewSource(time.Now().Unix()))
         return "debug rand int: " + strconv.Itoa(r.Intn(100))
     })
+
+    // If you want to change logger's writer, try this:
+    logger.ChangeWriterTo(os.Stdout)
 }

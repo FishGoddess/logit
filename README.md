@@ -39,7 +39,7 @@ module your_project_name
 go 1.14
 
 require (
-    github.com/FishGoddess/logit v0.0.9
+    github.com/FishGoddess/logit v0.0.10
 )
 ```
 
@@ -126,7 +126,7 @@ $ go test -v ./_examples/benchmarks_test.go -bench=. -benchtime=1s
 **行为，主要体现在对参数 v interface{} 进行类型检测的逻辑上，而日志输出都是字符串，这一个**
 **判断是可以省略的，可以减少很多运行时操作时间！v0.0.8 版本开始使用了更有效率的输出方式！**
 
-**3. 经过对 v0.0.8 版本的性能检测，发现时间格式化操作消耗了接近一般的处理时间，**
+**3. 经过对 v0.0.8 版本的性能检测，发现时间格式化操作消耗了接近一半的处理时间，**
 **主要体现在 time.Time.AppendFormat 的调用上。目前正在思考优化方案，或许会在之后的版本中解决！**
 
 ### 👥 贡献者
