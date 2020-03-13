@@ -10,14 +10,14 @@
 
 * Modularization design, easy to extend your logger with wrapper and handler
 * Level-based logging, and there are four levels to use
-* Log Function supports, it is a better way to output a very long log.
+* Log Function supports, it is a better way to output a very long log
 * Enable or disable Logger, you can disable or switch to a higher level in your production environment
-* Log file supports, and you can customer the name of your log file.
-* Duration rolling supports, which means it will roll to a new log file by duration automatically, such as one day one log file.
-* File size rolling supports, which means it will roll to a new log file by file size automatically, such as one 64 MB one log file.
-* Log handler supports, you can extend logger with your own log handler easily.
+* Log file supports, and you can customer the name of your log file
+* Duration rolling supports, which means it will roll to a new log file by duration automatically, such as one day one log file
+* File size rolling supports, which means it will roll to a new log file by file size automatically, such as one 64 MB one log file
+* Log handler supports, you can extend logger with your own log handler easily
 * High-performance supports, by avoiding to call runtime.Caller
-* Time format supports, you can format time in your way.
+* Time format supports, you can format time in your way
 
 _Check [HISTORY.md](./HISTORY.md) and [FUTURE.md](./FUTURE.md) to get more information._
 
