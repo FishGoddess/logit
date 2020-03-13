@@ -2,7 +2,7 @@
 
 [![License](./license.svg)](https://www.apache.org/licenses/LICENSE-2.0.html)
 
-**logit** is a easy-to-use and level-based logger for [GoLang](https://golang.org) applications.
+**logit** is an easy-to-use and level-based logger for [GoLang](https://golang.org) applications.
 
 [阅读中文版的 Read me](./README.md).
 
