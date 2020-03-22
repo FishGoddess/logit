@@ -118,7 +118,10 @@ func BenchmarkLogLogger(b *testing.B) {
 //func BenchmarkZapLogger(b *testing.B) {
 //
 //    // 测试用的日志记录器
-//    jsonEncoder := zapcore.NewJSONEncoder(zap.NewProductionEncoderConfig())
+//    config := zap.NewProductionEncoderConfig()
+//    config.EncodeTime = zapcore.RFC3339TimeEncoder
+//    // 这里选用了 JSONEncoder，因为 JSONEncoder 比 ConsoleEncoder 的性能提升了接近 63%
+//    jsonEncoder := zapcore.NewJSONEncoder(config)
 //    nopWriteSyncer := zapcore.AddSync(&nopWriter{})
 //    core := zapcore.NewCore(jsonEncoder, nopWriteSyncer, zapcore.DebugLevel)
 //    logger := zap.New(core)
