@@ -79,7 +79,7 @@ func main() {
 
     // If you have a long log and it is made of many variables, try this:
     // The msg is the return value of msgGenerator.
-    logit.DebugFunction(func() string {
+    logit.DebugFunc(func() string {
         // Use time as the source of random number generator.
         r := rand.New(rand.NewSource(time.Now().Unix()))
         return "debug rand int: " + strconv.Itoa(r.Intn(100))
@@ -111,6 +111,7 @@ $ go test -v ./_examples/benchmarks_test.go -bench=. -benchtime=1s
 | -----------|--------|-------------|-------------|-------------|
 | **logit** | &nbsp; 572947 | 1939 ns/op | powerful | high |
 | logrus | &nbsp; 158262 | 7751 ns/op | normal | normal |
+| zap | &nbsp; 523128 | 2236 ns/op | normal | normal |
 | Golog | &nbsp; 751064 | 1614 ns/op | normal | normal |
 | Golang log | 1000000 | 1019 ns/op | not good | none |
 

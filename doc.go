@@ -19,7 +19,7 @@
 /*
 Package logit provides an easy way to use foundation for your logging operations.
 
-1. The basic usage:
+1. the basic usage:
 
     // Log messages with four levels.
     // Notice that the default level is info, so first line of debug message
@@ -63,7 +63,7 @@ Package logit provides an easy way to use foundation for your logging operations
 
     // If you have a long log and it is made of many variables, try this:
     // The msg is the return value of msgGenerator.
-    logger.DebugFunction(func() string {
+    logger.DebugFunc(func() string {
         // Use time as the source of random number generator.
         r := rand.New(rand.NewSource(time.Now().Unix()))
         return "debug rand int: " + strconv.Itoa(r.Intn(100))

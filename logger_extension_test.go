@@ -98,16 +98,16 @@ func TestNewDefaultSizeRollingLogger(t *testing.T) {
 // 测试输出日志是从函数中生成的几个方法
 func TestLoggerLogFunction(t *testing.T) {
     logger := NewStdoutLogger(DebugLevel)
-    logger.DebugFunction(func() string {
+    logger.DebugFunc(func() string {
         return "debug rand int: " + strconv.Itoa(rand.Intn(100))
     })
-    logger.InfoFunction(func() string {
+    logger.InfoFunc(func() string {
         return "info rand int: " + strconv.Itoa(rand.Intn(100))
     })
-    logger.WarnFunction(func() string {
+    logger.WarnFunc(func() string {
         return "warn rand int: " + strconv.Itoa(rand.Intn(100))
     })
-    logger.ErrorFunction(func() string {
+    logger.ErrorFunc(func() string {
         return "error rand int: " + strconv.Itoa(rand.Intn(100))
     })
 }

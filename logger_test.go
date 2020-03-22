@@ -152,7 +152,7 @@ func TestLoggerHandlers(t *testing.T) {
 
     // 显示每个日志处理器的地址
     logger.Info("handlers 个数：" + strconv.Itoa(len(handlers)))
-    logger.InfoFunction(func() string {
+    logger.InfoFunc(func() string {
         builder := strings.Builder{}
         for _, handler := range handlers {
             builder.WriteString(fmt.Sprintf("%p ", &handler))
