@@ -19,6 +19,7 @@
 package logit
 
 import (
+    "sync"
     "time"
 )
 
@@ -39,6 +40,44 @@ func (lh LoggerHandler) handle(logger *Logger, level LoggerLevel, now time.Time,
 // The log handled by this handler will be like "[Info] [2020-03-06 16:10:44] msg".
 // If you want to customize, just code your own handler, then replace it!
 func DefaultLoggerHandler(logger *Logger, level LoggerLevel, now time.Time, msg string) bool {
-    logger.Writer().Write([]byte("[" + PrefixOf(level) + "] [" + now.Format(logger.FormatOfTime()) + "] " + msg + "\n"))
+    //logger.Writer().Write([]byte("[" + PrefixOf(level) + "] [" + now.Format(logger.FormatOfTime()) + "] " + msg + "\n"))
+    logger.Writer().Write([]byte("[" + PrefixOf(level) + "] [" + formatTime(now, logger.FormatOfTime()) + "] " + msg + "\n"))
     return true
 }
+
+// JsonLoggerHandler is the handler which handles log as a Json string.
+// The log handled by this handler will be like `{"level":"debug", "time":"2020-03-22 22:35:00", "msg":"log content..."}`.
+func JsonLoggerHandler(logger *Logger, level LoggerLevel, now time.Time, msg string) bool {
+    //logger.Writer().Write([]byte(`{"level":"` + PrefixOf(level) + `", "time":"` + now.Format(logger.FormatOfTime()) + `", "msg":"` + msg + `"}` + "\n"))
+    logger.Writer().Write([]byte(`{"level":"` + PrefixOf(level) + `", "time":"` + formatTime(now, logger.FormatOfTime()) + `", "msg":"` + msg + `"}` + "\n"))
+    return true
+}
+
+// **********************************************************
+// For experiment.
+// This is a time cache mechanism and you know that this is an experiment.
+// We don't know if this mechanism is worth yet. You should know that time format operation
+// takes lots of time, but concurrent competition does it, too. So is it worth to replace time
+// format operation with concurrent competition? Only time will tell us!
+var nowInUnix = time.Unix(0, 0).Unix()
+var nowFormatOfTime = "0"
+var nowFormatted = "0"
+var mutexForNow = &sync.Mutex{}
+
+// formatTime is for formatting time.
+// Use a global formatted time to cache the current time
+// for avoiding formatting too much times in the same second.
+func formatTime(now time.Time, formatOfTime string) string {
+    mutexForNow.Lock()
+    defer mutexForNow.Unlock()
+
+    // 使用 != 而不是 > 是为了防止时钟回拨时日志记录时间不正确的情况
+    if nowInUnix != now.Unix() || nowFormatOfTime != formatOfTime {
+        nowInUnix = now.Unix()
+        nowFormatOfTime = formatOfTime
+        nowFormatted = now.Format(formatOfTime)
+    }
+    return nowFormatted
+}
+
+// **********************************************************

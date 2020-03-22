@@ -109,7 +109,7 @@ $ go test -v ./_examples/benchmarks_test.go -bench=. -benchtime=1s
 
 | test case | times ran (large is better) |  ns/op (small is better) | features | extension |
 | -----------|--------|-------------|-------------|-------------|
-| **logit** | &nbsp; 572947 | 1939 ns/op | powerful | high |
+| **logit** | 1190984 | 1006 ns/op | powerful | high |
 | zap | &nbsp; 401043 | 2793 ns/op | normal | normal |
 | logrus | &nbsp; 158262 | 7751 ns/op | normal | normal |
 | golog | &nbsp; 751064 | 1614 ns/op | normal | normal |
@@ -125,10 +125,11 @@ $ go test -v ./_examples/benchmarks_test.go -bench=. -benchtime=1s
 
 **2. v0.0.7 and lower versions use some functions of fmt, and these functions is expensive**
 **because of reflect (for judging the parameter v interface{}). Actually, these judgements**
-**are redundant in a logger. The more effective output will be used in v0.0.8 and higher versions.**
+**are redundant in a logger. The more effective output is used in v0.0.8 and higher versions.**
 
 **3. After checking the benchmarks of v0.0.8 version, we found that time format takes a lots of time**
-**because of time.Time.AppendFormat. We are finding a more effective way to fix it, maybe fixed in higher version!**
+**because of time.Time.AppendFormat. In v0.0.11 and higher versions, we use time cache mechanism to**
+**reduce the times of time format. However, is it worth to replace time format operation with concurrent competition?**
 
 ### 👥 Contributing
 

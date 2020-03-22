@@ -111,3 +111,13 @@ func TestLoggerLogFunction(t *testing.T) {
         return "error rand int: " + strconv.Itoa(rand.Intn(100))
     })
 }
+
+// 测试 JsonLoggerHandler 是否正常
+func TestLoggerJsonLoggerHandler(t *testing.T) {
+    logger := NewStdoutLogger(DebugLevel)
+    logger.SetHandlers(JsonLoggerHandler)
+    logger.Debug("Debug message...")
+    logger.Info("Info message...")
+    logger.Warn("Warn message...")
+    logger.Error("Error message...")
+}

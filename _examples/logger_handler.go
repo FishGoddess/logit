@@ -31,7 +31,7 @@ func main() {
     // Create a logger holder.
     // Default handler is logit.DefaultLoggerHandler.
     logger := logit.NewLogger(os.Stdout, logit.InfoLevel)
-    logger.Info("before logging...")
+    logger.Info("before adding handlers...")
 
     // Customize your own handler.
     handlers1 := func(logger *logit.Logger, level logit.LoggerLevel, now time.Time, msg string) bool {
@@ -56,4 +56,8 @@ func main() {
     logger.SetHandlers(handlers1, handlers2)
     fmt.Println("fmt =========================================")
     logger.Info("after setting handlers...")
+
+    // If you want to log as Json string, try JsonLoggerHandler:
+    logger.SetHandlers(logit.JsonLoggerHandler)
+    logger.Info("I am a Json string!")
 }
