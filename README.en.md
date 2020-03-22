@@ -2,7 +2,7 @@
 
 [![License](./license.svg)](https://www.apache.org/licenses/LICENSE-2.0.html)
 
-**logit** is a easy-to-use and level-based logger for [GoLang](https://golang.org) applications.
+**logit** is an easy-to-use and level-based logger for [GoLang](https://golang.org) applications.
 
 [阅读中文版的 Read me](./README.md).
 
@@ -10,16 +10,19 @@
 
 * Modularization design, easy to extend your logger with wrapper and handler
 * Level-based logging, and there are four levels to use
-* Log Function supports, it is a better way to output a very long log.
+* Log Function supports, it is a better way to output a very long log
 * Enable or disable Logger, you can disable or switch to a higher level in your production environment
-* Log file supports, and you can customer the name of your log file.
-* Duration rolling supports, which means it will roll to a new log file by duration automatically, such as one day one log file.
-* File size rolling supports, which means it will roll to a new log file by file size automatically, such as one 64 MB one log file.
-* Log handler supports, you can extend logger with your own log handler easily.
+* Log file supports, and you can customer the name of your log file
+* Duration rolling supports, which means it will roll to a new log file by duration automatically, such as one day one log file
+* File size rolling supports, which means it will roll to a new log file by file size automatically, such as one 64 MB one log file
+* Log handler supports, you can extend logger with your own log handler easily
 * High-performance supports, by avoiding to call runtime.Caller
-* Time format supports, you can format time in your way.
+* Time format supports, you can format time in your way
+* Log as Json string supports, by using provided JsonLoggerHandler
 
 _Check [HISTORY.md](./HISTORY.md) and [FUTURE.md](./FUTURE.md) to get more information._
+
+> We will redesign some part of logit for more concise and convenient, check branch v0.1.x to learn more information.
 
 ### 🚀 Installation
 
@@ -39,7 +42,7 @@ module your_project_name
 go 1.14
 
 require (
-    github.com/FishGoddess/logit v0.0.10
+    github.com/FishGoddess/logit v0.0.11
 )
 ```
 
@@ -79,7 +82,7 @@ func main() {
 
     // If you have a long log and it is made of many variables, try this:
     // The msg is the return value of msgGenerator.
-    logit.DebugFunction(func() string {
+    logit.DebugFunc(func() string {
         // Use time as the source of random number generator.
         r := rand.New(rand.NewSource(time.Now().Unix()))
         return "debug rand int: " + strconv.Itoa(r.Intn(100))
@@ -109,10 +112,11 @@ $ go test -v ./_examples/benchmarks_test.go -bench=. -benchtime=1s
 
 | test case | times ran (large is better) |  ns/op (small is better) | features | extension |
 | -----------|--------|-------------|-------------|-------------|
-| **logit** | &nbsp; 572947 | 1939 ns/op | powerful | high |
+| **logit** | 1190984 | 1006 ns/op | powerful | high |
+| zap | &nbsp; 401043 | 2793 ns/op | normal | normal |
 | logrus | &nbsp; 158262 | 7751 ns/op | normal | normal |
-| Golog | &nbsp; 751064 | 1614 ns/op | normal | normal |
-| Golang log | 1000000 | 1019 ns/op | not good | none |
+| golog | &nbsp; 751064 | 1614 ns/op | normal | normal |
+| golang log | 1000000 | 1019 ns/op | not good | none |
 
 > Environment：I7-6700HQ CPU @ 2.6 GHZ, 16 GB RAM
 
@@ -124,10 +128,11 @@ $ go test -v ./_examples/benchmarks_test.go -bench=. -benchtime=1s
 
 **2. v0.0.7 and lower versions use some functions of fmt, and these functions is expensive**
 **because of reflect (for judging the parameter v interface{}). Actually, these judgements**
-**are redundant in a logger. The more effective output will be used in v0.0.8 and higher versions.**
+**are redundant in a logger. The more effective output is used in v0.0.8 and higher versions.**
 
 **3. After checking the benchmarks of v0.0.8 version, we found that time format takes a lots of time**
-**because of time.Time.AppendFormat. We are finding a more effective way to fix it, maybe fixed in higher version!**
+**because of time.Time.AppendFormat. In v0.0.11 and higher versions, we use time cache mechanism to**
+**reduce the times of time format. However, is it worth to replace time format operation with concurrent competition?**
 
 ### 👥 Contributing
 

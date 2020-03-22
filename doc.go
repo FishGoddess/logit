@@ -19,7 +19,7 @@
 /*
 Package logit provides an easy way to use foundation for your logging operations.
 
-1. The basic usage:
+1. the basic usage:
 
     // Log messages with four levels.
     // Notice that the default level is info, so first line of debug message
@@ -63,7 +63,7 @@ Package logit provides an easy way to use foundation for your logging operations
 
     // If you have a long log and it is made of many variables, try this:
     // The msg is the return value of msgGenerator.
-    logger.DebugFunction(func() string {
+    logger.DebugFunc(func() string {
         // Use time as the source of random number generator.
         r := rand.New(rand.NewSource(time.Now().Unix()))
         return "debug rand int: " + strconv.Itoa(r.Intn(100))
@@ -140,7 +140,7 @@ Package logit provides an easy way to use foundation for your logging operations
     // Create a logger holder.
     // Default handler is logit.DefaultLoggerHandler.
     logger := logit.NewLogger(os.Stdout, logit.InfoLevel)
-    logger.Info("before logging...")
+    logger.Info("before adding handlers...")
 
     // Customize your own handler.
     handlers1 := func(logger *logit.Logger, level logit.LoggerLevel, now time.Time, msg string) bool {
@@ -166,8 +166,12 @@ Package logit provides an easy way to use foundation for your logging operations
     fmt.Println("fmt =========================================")
     logger.Info("after setting handlers...")
 
+    // If you want to log as Json string, try JsonLoggerHandler:
+    logger.SetHandlers(logit.JsonLoggerHandler)
+    logger.Info("I am a Json string!")
+
 */
 package logit // import "github.com/FishGoddess/logit"
 
-// Version is the version string representation of the "logit" package.
-const Version = "0.0.10"
+// Version is the version string representation of logit.
+const Version = "v0.0.11"

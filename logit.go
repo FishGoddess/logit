@@ -97,32 +97,32 @@ func Error(msg string) {
     defaultLogger.log(callDepthOfDefaultLogger, ErrorLevel, msg)
 }
 
-// DebugFunction will output msg as a debug message.
+// DebugFunc will output msg as a debug message.
 // The msg is the return value of msgGenerator.
 // This is a better way to output a long log made of many variables.
-func DebugFunction(msgGenerator func() string) {
-    defaultLogger.DebugFunction(msgGenerator)
+func DebugFunc(msgGenerator func() string) {
+    defaultLogger.DebugFunc(msgGenerator)
 }
 
-// InfoFunction will output msg as an info message.
+// InfoFunc will output msg as an info message.
 // The msg is the return value of msgGenerator.
 // This is a better way to output a long log made of many variables.
-func InfoFunction(msgGenerator func() string) {
-    defaultLogger.InfoFunction(msgGenerator)
+func InfoFunc(msgGenerator func() string) {
+    defaultLogger.InfoFunc(msgGenerator)
 }
 
-// WarnFunction will output msg as a warn message.
-// The msg is the return value of messageGenerator.
+// WarnFunc will output msg as a warn message.
+// The msg is the return value of msgGenerator.
 // This is a better way to output a long log made of many variables.
-func WarnFunction(msgGenerator func() string) {
-    defaultLogger.WarnFunction(msgGenerator)
+func WarnFunc(msgGenerator func() string) {
+    defaultLogger.WarnFunc(msgGenerator)
 }
 
-// ErrorFunction will output msg as an error message.
-// The msg is the return value of messageGenerator.
+// ErrorFunc will output msg as an error message.
+// The msg is the return value of msgGenerator.
 // This is a better way to output a long log made of many variables.
-func ErrorFunction(messageGenerator func() string) {
-    defaultLogger.ErrorFunction(messageGenerator)
+func ErrorFunc(msgGenerator func() string) {
+    defaultLogger.ErrorFunc(msgGenerator)
 }
 
 // ChangeWriterTo changes current writer to newWriter.
