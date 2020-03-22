@@ -18,8 +18,11 @@
 * Log handler supports, you can extend logger with your own log handler easily
 * High-performance supports, by avoiding to call runtime.Caller
 * Time format supports, you can format time in your way
+* Log as Json string supports, by using provided JsonLoggerHandler
 
 _Check [HISTORY.md](./HISTORY.md) and [FUTURE.md](./FUTURE.md) to get more information._
+
+> We will redesign some part of logit for more concise and convenient, check branch v0.1.x to learn more information.
 
 ### 🚀 Installation
 
@@ -39,7 +42,7 @@ module your_project_name
 go 1.14
 
 require (
-    github.com/FishGoddess/logit v0.0.10
+    github.com/FishGoddess/logit v0.0.11
 )
 ```
 

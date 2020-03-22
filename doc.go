@@ -174,4 +174,4 @@ Package logit provides an easy way to use foundation for your logging operations
 package logit // import "github.com/FishGoddess/logit"
 
 // Version is the version string representation of logit.
-const Version = "0.0.10"
+const Version = "v0.0.11"
