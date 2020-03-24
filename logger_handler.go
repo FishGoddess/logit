@@ -41,7 +41,7 @@ func (lh LoggerHandler) handle(logger *Logger, level LoggerLevel, now time.Time,
 // If you want to customize, just code your own handler, then replace it!
 func DefaultLoggerHandler(logger *Logger, level LoggerLevel, now time.Time, msg string) bool {
     //logger.Writer().Write([]byte("[" + PrefixOf(level) + "] [" + now.Format(logger.FormatOfTime()) + "] " + msg + "\n"))
-    logger.Writer().Write([]byte("[" + PrefixOf(level) + "] [" + formatTime(now, logger.FormatOfTime()) + "] " + msg + "\n"))
+    logger.Writer().Write([]byte("[" + level.String() + "] [" + formatTime(now, logger.FormatOfTime()) + "] " + msg + "\n"))
     return true
 }
 
@@ -49,7 +49,7 @@ func DefaultLoggerHandler(logger *Logger, level LoggerLevel, now time.Time, msg 
 // The log handled by this handler will be like `{"level":"debug", "time":"2020-03-22 22:35:00", "msg":"log content..."}`.
 func JsonLoggerHandler(logger *Logger, level LoggerLevel, now time.Time, msg string) bool {
     //logger.Writer().Write([]byte(`{"level":"` + PrefixOf(level) + `", "time":"` + now.Format(logger.FormatOfTime()) + `", "msg":"` + msg + `"}` + "\n"))
-    logger.Writer().Write([]byte(`{"level":"` + PrefixOf(level) + `", "time":"` + formatTime(now, logger.FormatOfTime()) + `", "msg":"` + msg + `"}` + "\n"))
+    logger.Writer().Write([]byte(`{"level":"` + level.String() + `", "time":"` + formatTime(now, logger.FormatOfTime()) + `", "msg":"` + msg + `"}` + "\n"))
     return true
 }
 

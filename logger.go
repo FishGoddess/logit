@@ -29,6 +29,16 @@ import (
 // Logger is a struct to log.
 type Logger struct {
 
+    // level is the level representation of the Logger.
+    // In this version of logit, there are four levels:
+    //
+    //  DebugLevel, InfoLevel, WarnLevel, ErrorLevel.
+    //
+    // The righter level has higher visibility which means
+    // one debug message will not be logged in one Logger in InfoLevel.
+    // That's we called level-based logging.
+    level LoggerLevel
+
     // writer is the output of this Logger.
     writer io.Writer
 
@@ -40,20 +50,6 @@ type Logger struct {
     // formatOfTime is the format for formatting time.
     // Default is "2006-01-02 15:04:05", see DefaultFormatOfTime.
     formatOfTime string
-
-    // level is the level representation of the Logger.
-    // In this version of logit, there are four levels:
-    //
-    //  DebugLevel, InfoLevel, WarnLevel, ErrorLevel.
-    //
-    // The righter level has higher visibility which means
-    // one debug message will not be logged in one Logger in InfoLevel.
-    // That's we called level-based logging.
-    level LoggerLevel
-
-    // running is the status of the Logger.
-    // true means the Logger is running, false means the Logger is shutdown.
-    running bool
 
     // needFileInfo is a flag to check if msg should contain file info.
     // This step is useful but too expensive, so default is false.
@@ -91,23 +87,8 @@ func NewLoggerWithHandlers(writer io.Writer, level LoggerLevel, handlers ...Logg
         formatOfTime: DefaultFormatOfTime,
         handlers:     handlers,
         level:        level,
-        running:      true,
         needFileInfo: false,
     }
-}
-
-// Enable sets l on running status.
-func (l *Logger) Enable() {
-    l.mu.Lock()
-    defer l.mu.Unlock()
-    l.running = true
-}
-
-// Disable sets l on shutdown status.
-func (l *Logger) Disable() {
-    l.mu.Lock()
-    defer l.mu.Unlock()
-    l.running = false
 }
 
 // ChangeLevelTo will change the level of current Logger to newLevel.
@@ -219,10 +200,8 @@ func (l *Logger) log(callDepth int, level LoggerLevel, msg string) {
     // 加上读锁
     l.mu.RLock()
 
-    // 以下两种条件直接返回，不记录日志：
-    // 1. 日志处于禁用状态，也就是 l.running = false
-    // 2. 日志记录器的日志级别高于这条记录的日志级别
-    if !l.running || l.level > level {
+    // 日志记录器的级别高于日志的级别，不进行记录：
+    if l.level > level {
         l.mu.RUnlock()
         return
     }

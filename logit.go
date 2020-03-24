@@ -29,16 +29,6 @@ func ChangeLevelTo(level LoggerLevel) {
     defaultLogger.ChangeLevelTo(level)
 }
 
-// Enable sets logit on running status.
-func Enable() {
-    defaultLogger.Enable()
-}
-
-// Disable sets logit on shutdown status.
-func Disable() {
-    defaultLogger.Disable()
-}
-
 // EnableFileInfo means every log will contain file info like line number.
 // However, you should know that this is expensive in time.
 // So be sure you really need it or keep it disabled.

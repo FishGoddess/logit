@@ -94,8 +94,7 @@ func main() {
 
 * [basic](./_examples/basic.go)
 * [logger](./_examples/logger.go)
-* [enable_disable](./_examples/enable_disable.go)
-* [change_log_level](./_examples/change_log_level.go)
+* [level_and_disable](./_examples/level_and_disable.go)
 * [log_to_file](./_examples/log_to_file.go)
 * [wrapper](./_examples/wrapper.go)
 * [handler](./_examples/logger_handler.go)
