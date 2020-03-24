@@ -46,12 +46,12 @@ func nextFilename(directory string) func(now time.Time) string {
 }
 
 // NewStdoutLogger returns a Logger holder with given logger level.
-func NewStdoutLogger(level LoggerLevel) *Logger {
+func NewStdoutLogger(level Level) *Logger {
     return NewLogger(os.Stdout, level)
 }
 
 // NewFileLogger returns a Logger holder which log to a file with given logFile and level.
-func NewFileLogger(logFile string, level LoggerLevel) *Logger {
+func NewFileLogger(logFile string, level Level) *Logger {
     file, err := wrapper.NewFile(logFile)
     if err != nil {
         panic(err)
@@ -65,14 +65,14 @@ func NewFileLogger(logFile string, level LoggerLevel) *Logger {
 // Also, default filename of log file is like "20200304-145246-45.log", see nextFilename.
 // If you want to appoint another filename, check this and do it by this way.
 // See wrapper.NewDurationRollingFile (it is an implement of io.writer).
-func NewDurationRollingLogger(directory string, duration time.Duration, level LoggerLevel) *Logger {
+func NewDurationRollingLogger(directory string, duration time.Duration, level Level) *Logger {
     return NewLogger(wrapper.NewDurationRollingFile(duration, nextFilename(directory)), level)
 }
 
 // NewDayRollingLogger creates a day rolling logger.
 // You should appoint a directory to store all log files generated in this time.
 // See NewDurationRollingLogger.
-func NewDayRollingLogger(directory string, level LoggerLevel) *Logger {
+func NewDayRollingLogger(directory string, level Level) *Logger {
     return NewDurationRollingLogger(directory, 24*time.Hour, level)
 }
 
@@ -83,14 +83,14 @@ func NewDayRollingLogger(directory string, level LoggerLevel) *Logger {
 // Also, default filename of log file is like "20200304-145246-45.log", see nextFilename.
 // If you want to appoint another filename, check this and do it by this way.
 // See wrapper.NewSizeRollingFile (it is an implement of io.writer).
-func NewSizeRollingLogger(directory string, limitedSize int64, level LoggerLevel) *Logger {
+func NewSizeRollingLogger(directory string, limitedSize int64, level Level) *Logger {
     return NewLogger(wrapper.NewSizeRollingFile(limitedSize, nextFilename(directory)), level)
 }
 
 // NewDayRollingLogger creates a file size rolling logger.
 // You should appoint a directory to store all log files generated in this time.
 // Default means limitedSize is 64 MB. See NewSizeRollingLogger.
-func NewDefaultSizeRollingLogger(directory string, level LoggerLevel) *Logger {
+func NewDefaultSizeRollingLogger(directory string, level Level) *Logger {
     return NewSizeRollingLogger(directory, 64*wrapper.MB, level)
 }
 

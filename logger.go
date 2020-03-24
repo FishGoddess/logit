@@ -37,7 +37,7 @@ type Logger struct {
     // The righter level has higher visibility which means
     // one debug message will not be logged in one Logger in InfoLevel.
     // That's we called level-based logging.
-    level LoggerLevel
+    level Level
 
     // writer is the output of this Logger.
     writer io.Writer
@@ -66,7 +66,7 @@ const DefaultFormatOfTime = "2006-01-02 15:04:05"
 // The first parameter writer is the writer for logging.
 // The second parameter level is the level of this Logger.
 // It returns a new running Logger holder.
-func NewLogger(writer io.Writer, level LoggerLevel) *Logger {
+func NewLogger(writer io.Writer, level Level) *Logger {
     return NewLoggerWithHandlers(writer, level, DefaultLoggerHandler)
 }
 
@@ -75,7 +75,7 @@ func NewLogger(writer io.Writer, level LoggerLevel) *Logger {
 // The second parameter level is the level of this Logger.
 // The third parameter handlers is all logger handlers for handling each log.
 // It returns a new running Logger holder.
-func NewLoggerWithHandlers(writer io.Writer, level LoggerLevel, handlers ...LoggerHandler) *Logger {
+func NewLoggerWithHandlers(writer io.Writer, level Level, handlers ...LoggerHandler) *Logger {
 
     // 至少添加一个日志处理器，否则直接报错
     if len(handlers) < 1 {
@@ -92,14 +92,14 @@ func NewLoggerWithHandlers(writer io.Writer, level LoggerLevel, handlers ...Logg
 }
 
 // ChangeLevelTo will change the level of current Logger to newLevel.
-func (l *Logger) ChangeLevelTo(newLevel LoggerLevel) {
+func (l *Logger) ChangeLevelTo(newLevel Level) {
     l.mu.Lock()
     defer l.mu.Unlock()
     l.level = newLevel
 }
 
 // Level returns the logger level of l.
-func (l *Logger) Level() LoggerLevel {
+func (l *Logger) Level() Level {
     l.mu.RLock()
     defer l.mu.RUnlock()
     return l.level
@@ -195,7 +195,7 @@ const callDepth = 3
 
 // log can output msg to l.writer, notices that level will affect the visibility of this msg.
 // Notice that callDepth is caller sensitive, and the value is about file name and line.
-func (l *Logger) log(callDepth int, level LoggerLevel, msg string) {
+func (l *Logger) log(callDepth int, level Level, msg string) {
 
     // 加上读锁
     l.mu.RLock()
@@ -226,7 +226,7 @@ func (l *Logger) log(callDepth int, level LoggerLevel, msg string) {
 // handleLog handles log with l.handlers.
 // Notice that if one handler returns false, then all handlers after it
 // will not use anymore.
-func (l *Logger) handleLog(level LoggerLevel, now time.Time, msg string) {
+func (l *Logger) handleLog(level Level, now time.Time, msg string) {
     for _, handler := range l.handlers {
         if !handler.handle(l, level, now, msg) {
             break

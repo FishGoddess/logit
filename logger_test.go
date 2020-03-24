@@ -63,7 +63,7 @@ func TestLoggerEnable(t *testing.T) {
 }
 
 // 测试日志记录器的级别控制是否可用
-func TestLoggerLevel(t *testing.T) {
+func TestLevel(t *testing.T) {
     logger := NewLogger(os.Stdout, WarnLevel)
     logger.Warn(logger.Level().String())
     logger.Info("这条 info 级别的内容可以显示吗？")
@@ -111,12 +111,12 @@ func TestLoggerAddHandlersAndSetHandlers(t *testing.T) {
     logger := NewLogger(os.Stdout, InfoLevel)
     logger.Info("当前的日志处理器：" + fmt.Sprintf("%v", logger.handlers))
 
-    handlers1 := func(logger *Logger, level LoggerLevel, now time.Time, msg string) bool {
+    handlers1 := func(logger *Logger, level Level, now time.Time, msg string) bool {
         logger.writer.Write([]byte("第一个日志处理器！\n"))
         return true
     }
 
-    handlers2 := func(logger *Logger, level LoggerLevel, now time.Time, msg string) bool {
+    handlers2 := func(logger *Logger, level Level, now time.Time, msg string) bool {
         logger.writer.Write([]byte("第二个日志处理器！\n"))
         return true
     }
@@ -161,7 +161,7 @@ func TestLoggerHandlers(t *testing.T) {
     })
 
     // 尝试非法篡改日志处理器
-    handlers[0] = func(logger *Logger, level LoggerLevel, now time.Time, msg string) bool {
+    handlers[0] = func(logger *Logger, level Level, now time.Time, msg string) bool {
         fmt.Println("哈哈哈被非法篡改了！！！")
         return false
     }

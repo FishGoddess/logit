@@ -25,7 +25,7 @@ import "io"
 var defaultLogger = NewStdoutLogger(InfoLevel)
 
 // ChangeLevelTo will change the level of logit to newLevel.
-func ChangeLevelTo(level LoggerLevel) {
+func ChangeLevelTo(level Level) {
     defaultLogger.ChangeLevelTo(level)
 }
 

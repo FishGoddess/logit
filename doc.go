@@ -137,12 +137,12 @@ Package logit provides an easy way to use foundation for your logging operations
     logger.Info("before adding handlers...")
 
     // Customize your own handler.
-    handlers1 := func(logger *logit.Logger, level logit.LoggerLevel, now time.Time, msg string) bool {
+    handlers1 := func(logger *logit.Logger, level logit.Level, now time.Time, msg string) bool {
         logger.Writer().Write([]byte("handlers1: " + msg + "\n"))
         return true
     }
 
-    handlers2 := func(logger *logit.Logger, level logit.LoggerLevel, now time.Time, msg string) bool {
+    handlers2 := func(logger *logit.Logger, level logit.Level, now time.Time, msg string) bool {
         logger.Writer().Write([]byte("handlers2: " + msg + "\n"))
         return true
     }

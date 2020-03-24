@@ -20,11 +20,11 @@ package logit
 
 import "math"
 
-// LoggerLevel is the type representation of the level.
-type LoggerLevel uint8
+// Level is the type representation of the level.
+type Level uint8
 
 const (
-    DebugLevel LoggerLevel = iota
+    DebugLevel Level = iota
     InfoLevel
     WarnLevel
     ErrorLevel
@@ -34,7 +34,7 @@ const (
 )
 
 // levels provides the name of all supported level.
-var levels = map[LoggerLevel]string{
+var levels = map[Level]string{
     DebugLevel: "debug",
     InfoLevel:  "info",
     WarnLevel:  "warn",
@@ -44,6 +44,6 @@ var levels = map[LoggerLevel]string{
 
 // The String method is used to print values passed as an operand
 // to any format that accepts a string or to an printer without format such as Print.
-func (ll LoggerLevel) String() string {
+func (ll Level) String() string {
     return levels[ll]
 }
