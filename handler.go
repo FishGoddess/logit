@@ -19,6 +19,7 @@
 package logit
 
 import (
+    "io"
     "os"
     "sync"
     "time"
@@ -27,11 +28,11 @@ import (
 type Handler struct {
     Encode func(logger *Logger, level Level, now time.Time, msg string) []byte
 
-    Output func(logger *Logger, data []byte) bool
+    Output func(data []byte) bool
 }
 
 func (h *Handler) handle(logger *Logger, level Level, now time.Time, msg string) bool {
-    return h.Output(logger, h.Encode(logger, level, now, msg))
+    return h.Output(h.Encode(logger, level, now, msg))
 }
 
 func StandardEncode(logger *Logger, level Level, now time.Time, msg string) []byte {
@@ -42,15 +43,18 @@ func JsonEncode(logger *Logger, level Level, now time.Time, msg string) []byte {
     return []byte(`{"level":"` + level.String() + `", "time":"` + formatTime(now, logger.FormatOfTime()) + `", "msg":"` + msg + `"}` + "\n")
 }
 
-// TODO 使用闭包来实现获取 logger.Writer
-func StandardOutput(logger *Logger, data []byte) bool {
-    logger.Writer().Write(data)
-    return true
+func StandardHandler(writer io.Writer, encode func(logger *Logger, level Level, now time.Time, msg string) []byte) Handler {
+    return Handler{
+        Encode: encode,
+        Output: func(data []byte) bool {
+            writer.Write(data)
+            return true
+        },
+    }
 }
 
-func ConsoleOutput(logger *Logger, data []byte) bool {
-    os.Stdout.Write(data)
-    return true
+func ConsoleHandler(encode func(logger *Logger, level Level, now time.Time, msg string) []byte) Handler {
+    return StandardHandler(os.Stdout, encode)
 }
 
 // **************************************************************************
