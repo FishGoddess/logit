@@ -72,23 +72,7 @@ Package logit provides an easy way to use foundation for your logging operations
     // If you want to change logger's writer, try this:
     logger.ChangeWriterTo(os.Stdout)
 
-3. enable or disable:
-
-    // Every new Logger is running.
-    logger := logit.NewLogger(os.Stdout, logit.DebugLevel)
-    logger.Info("I am running!")
-
-    // Shutdown the Logger.
-    // So the info message next line will not be logged!
-    logger.Disable()
-    logger.Info("I will not be logged!")
-
-    // Enable the Logger.
-    // The info message next line will be logged again!
-    logger.Enable()
-    logger.Info("I am running again!")
-
-4. change logger level:
+3. level_and_disable:
 
     logit.Debug("Default logger level is info, so debug message will not be logged!")
 
@@ -96,6 +80,16 @@ Package logit provides an easy way to use foundation for your logging operations
     logit.ChangeLevelTo(logit.DebugLevel)
 
     logit.Debug("Now debug message will be logged!")
+
+    // In particular, you can change level to OffLevel to disable the logger.
+    // So the info message next line will not be logged!
+    logit.ChangeLevelTo(logit.OffLevel)
+    logit.Info("I will not be logged!")
+
+    // Enable the Logger.
+    // The info message next line will be logged again!
+    logit.ChangeLevelTo(logit.DebugLevel)
+    logit.Info("I am running again!")
 
 5. log to file:
 
@@ -143,12 +137,12 @@ Package logit provides an easy way to use foundation for your logging operations
     logger.Info("before adding handlers...")
 
     // Customize your own handler.
-    handlers1 := func(logger *logit.Logger, level logit.LoggerLevel, now time.Time, msg string) bool {
+    handlers1 := func(logger *logit.Logger, level logit.Level, now time.Time, msg string) bool {
         logger.Writer().Write([]byte("handlers1: " + msg + "\n"))
         return true
     }
 
-    handlers2 := func(logger *logit.Logger, level logit.LoggerLevel, now time.Time, msg string) bool {
+    handlers2 := func(logger *logit.Logger, level logit.Level, now time.Time, msg string) bool {
         logger.Writer().Write([]byte("handlers2: " + msg + "\n"))
         return true
     }

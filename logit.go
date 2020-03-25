@@ -18,25 +18,13 @@
 
 package logit
 
-import "io"
-
 // defaultLogger is a Logger holder for global usage.
 // Default level is info level.
-var defaultLogger = NewStdoutLogger(InfoLevel)
+var defaultLogger = NewDevelopLogger()
 
 // ChangeLevelTo will change the level of logit to newLevel.
-func ChangeLevelTo(level LoggerLevel) {
+func ChangeLevelTo(level Level) {
     defaultLogger.ChangeLevelTo(level)
-}
-
-// Enable sets logit on running status.
-func Enable() {
-    defaultLogger.Enable()
-}
-
-// Disable sets logit on shutdown status.
-func Disable() {
-    defaultLogger.Disable()
 }
 
 // EnableFileInfo means every log will contain file info like line number.
@@ -55,7 +43,7 @@ func DisableFileInfo() {
 // AddHandlers adds more handlers to logit, and all handlers added before will be retained.
 // If you want to remove all handlers, try logit.SetHandlers().
 // See logit.DefaultLoggerHandler.
-func AddHandlers(handlers ...LoggerHandler) {
+func AddHandlers(handlers ...Handler) {
     defaultLogger.AddHandlers(handlers...)
 }
 
@@ -64,14 +52,8 @@ func AddHandlers(handlers ...LoggerHandler) {
 // Notice that at least one handler should be added, so if len(handlers) < 1, it returns false
 // which means setting failed. Return true if setting is successful.
 // See logit.DefaultLoggerHandler.
-func SetHandlers(handlers ...LoggerHandler) bool {
+func SetHandlers(handlers ...Handler) bool {
     return defaultLogger.SetHandlers(handlers...)
-}
-
-// SetFormatOfTime sets format of time as you want.
-// Default is "2006-01-02 15:04:05", see logit.DefaultFormatOfTime.
-func SetFormatOfTime(formatOfTime string) {
-    defaultLogger.SetFormatOfTime(formatOfTime)
 }
 
 // callDepth is the depth of the method calling stack, which is about file name and line.
@@ -123,9 +105,4 @@ func WarnFunc(msgGenerator func() string) {
 // This is a better way to output a long log made of many variables.
 func ErrorFunc(msgGenerator func() string) {
     defaultLogger.ErrorFunc(msgGenerator)
-}
-
-// ChangeWriterTo changes current writer to newWriter.
-func ChangeWriterTo(newWriter io.Writer) {
-    defaultLogger.ChangeWriterTo(newWriter)
 }

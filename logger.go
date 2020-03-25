@@ -19,7 +19,6 @@
 package logit
 
 import (
-    "io"
     "runtime"
     "strconv"
     "sync"
@@ -29,18 +28,6 @@ import (
 // Logger is a struct to log.
 type Logger struct {
 
-    // writer is the output of this Logger.
-    writer io.Writer
-
-    // handlers is the slice of log handlers.
-    // You can add your handler for some situations.
-    // See LoggerHandler.
-    handlers []LoggerHandler
-
-    // formatOfTime is the format for formatting time.
-    // Default is "2006-01-02 15:04:05", see DefaultFormatOfTime.
-    formatOfTime string
-
     // level is the level representation of the Logger.
     // In this version of logit, there are four levels:
     //
@@ -49,11 +36,12 @@ type Logger struct {
     // The righter level has higher visibility which means
     // one debug message will not be logged in one Logger in InfoLevel.
     // That's we called level-based logging.
-    level LoggerLevel
+    level Level
 
-    // running is the status of the Logger.
-    // true means the Logger is running, false means the Logger is shutdown.
-    running bool
+    // handlers is the slice of log handlers.
+    // You can add your handler for some situations.
+    // See LoggerHandler.
+    handlers []Handler
 
     // needFileInfo is a flag to check if msg should contain file info.
     // This step is useful but too expensive, so default is false.
@@ -63,23 +51,12 @@ type Logger struct {
     mu sync.RWMutex
 }
 
-// DefaultFormatOfTime is the default format for formatting time.
-const DefaultFormatOfTime = "2006-01-02 15:04:05"
-
-// NewLogger creates one Logger with given out and level.
-// The first parameter writer is the writer for logging.
-// The second parameter level is the level of this Logger.
-// It returns a new running Logger holder.
-func NewLogger(writer io.Writer, level LoggerLevel) *Logger {
-    return NewLoggerWithHandlers(writer, level, DefaultLoggerHandler)
-}
-
-// NewLoggerWithHandlers creates one Logger with given out and level and handlers.
+// NewLogger creates one Logger with given out and level and handlers.
 // The first parameter writer is the writer for logging.
 // The second parameter level is the level of this Logger.
 // The third parameter handlers is all logger handlers for handling each log.
 // It returns a new running Logger holder.
-func NewLoggerWithHandlers(writer io.Writer, level LoggerLevel, handlers ...LoggerHandler) *Logger {
+func NewLogger(level Level, handlers ...Handler) *Logger {
 
     // 至少添加一个日志处理器，否则直接报错
     if len(handlers) < 1 {
@@ -87,38 +64,21 @@ func NewLoggerWithHandlers(writer io.Writer, level LoggerLevel, handlers ...Logg
     }
 
     return &Logger{
-        writer:       writer,
-        formatOfTime: DefaultFormatOfTime,
-        handlers:     handlers,
         level:        level,
-        running:      true,
+        handlers:     handlers,
         needFileInfo: false,
     }
 }
 
-// Enable sets l on running status.
-func (l *Logger) Enable() {
-    l.mu.Lock()
-    defer l.mu.Unlock()
-    l.running = true
-}
-
-// Disable sets l on shutdown status.
-func (l *Logger) Disable() {
-    l.mu.Lock()
-    defer l.mu.Unlock()
-    l.running = false
-}
-
 // ChangeLevelTo will change the level of current Logger to newLevel.
-func (l *Logger) ChangeLevelTo(newLevel LoggerLevel) {
+func (l *Logger) ChangeLevelTo(newLevel Level) {
     l.mu.Lock()
     defer l.mu.Unlock()
     l.level = newLevel
 }
 
 // Level returns the logger level of l.
-func (l *Logger) Level() LoggerLevel {
+func (l *Logger) Level() Level {
     l.mu.RLock()
     defer l.mu.RUnlock()
     return l.level
@@ -144,7 +104,7 @@ func (l *Logger) DisableFileInfo() {
 // AddHandlers adds more handlers to l, and all handlers added before will be retained.
 // If you want to remove all handlers, try l.SetHandlers().
 // See logit.DefaultLoggerHandler.
-func (l *Logger) AddHandlers(handlers ...LoggerHandler) {
+func (l *Logger) AddHandlers(handlers ...Handler) {
     l.mu.Lock()
     defer l.mu.Unlock()
     l.handlers = append(l.handlers, handlers...)
@@ -155,7 +115,7 @@ func (l *Logger) AddHandlers(handlers ...LoggerHandler) {
 // Notice that at least one handler should be added, so if len(handlers) < 1, it returns false
 // which means setting failed. Return true if setting is successful.
 // See logit.DefaultLoggerHandler.
-func (l *Logger) SetHandlers(handlers ...LoggerHandler) bool {
+func (l *Logger) SetHandlers(handlers ...Handler) bool {
 
     // 必须添加至少一个处理器
     if len(handlers) < 1 {
@@ -171,42 +131,13 @@ func (l *Logger) SetHandlers(handlers ...LoggerHandler) bool {
 }
 
 // Handlers returns all handlers of l in a copy slice.
-func (l *Logger) Handlers() []LoggerHandler {
+func (l *Logger) Handlers() []Handler {
     l.mu.RLock()
     defer l.mu.RUnlock()
 
     // 返回的是日志处理器的副本，防止被非法篡改
-    handlers := make([]LoggerHandler, 0, len(l.handlers))
+    handlers := make([]Handler, 0, len(l.handlers))
     return append(handlers, l.handlers...)
-}
-
-// SetFormatOfTime sets format of time as you want.
-// Default is "2006-01-02 15:04:05", see DefaultFormatOfTime.
-func (l *Logger) SetFormatOfTime(formatOfTime string) {
-    l.mu.Lock()
-    defer l.mu.Unlock()
-    l.formatOfTime = formatOfTime
-}
-
-// FormatOfTime returns the format of time in l.
-func (l *Logger) FormatOfTime() string {
-    l.mu.RLock()
-    defer l.mu.RUnlock()
-    return l.formatOfTime
-}
-
-// ChangeWriterTo changes current writer to newWriter.
-func (l *Logger) ChangeWriterTo(newWriter io.Writer) {
-    l.mu.Lock()
-    defer l.mu.Unlock()
-    l.writer = newWriter
-}
-
-// Writer returns the writer of l.
-func (l *Logger) Writer() io.Writer {
-    l.mu.RLock()
-    defer l.mu.RUnlock()
-    return l.writer
 }
 
 // callDepth is the depth of the method calling stack, which is about file name and line.
@@ -214,15 +145,13 @@ const callDepth = 3
 
 // log can output msg to l.writer, notices that level will affect the visibility of this msg.
 // Notice that callDepth is caller sensitive, and the value is about file name and line.
-func (l *Logger) log(callDepth int, level LoggerLevel, msg string) {
+func (l *Logger) log(callDepth int, level Level, msg string) {
 
     // 加上读锁
     l.mu.RLock()
 
-    // 以下两种条件直接返回，不记录日志：
-    // 1. 日志处于禁用状态，也就是 l.running = false
-    // 2. 日志记录器的日志级别高于这条记录的日志级别
-    if !l.running || l.level > level {
+    // 日志记录器的级别高于日志的级别，不进行记录：
+    if l.level > level {
         l.mu.RUnlock()
         return
     }
@@ -247,10 +176,10 @@ func (l *Logger) log(callDepth int, level LoggerLevel, msg string) {
 // handleLog handles log with l.handlers.
 // Notice that if one handler returns false, then all handlers after it
 // will not use anymore.
-func (l *Logger) handleLog(level LoggerLevel, now time.Time, msg string) {
+func (l *Logger) handleLog(level Level, now time.Time, msg string) {
     for _, handler := range l.handlers {
-        if !handler.handle(l, level, now, msg) {
-            break
+        if !handler.Handle(NewLog(l, level, now, msg)) {
+            return
         }
     }
 }

@@ -28,4 +28,14 @@ func main() {
     logit.ChangeLevelTo(logit.DebugLevel)
 
     logit.Debug("Now debug message will be logged!")
+
+    // In particular, you can change level to OffLevel to disable the logger.
+    // So the info message next line will not be logged!
+    logit.ChangeLevelTo(logit.OffLevel)
+    logit.Info("I will not be logged!")
+
+    // Enable the Logger.
+    // The info message next line will be logged again!
+    logit.ChangeLevelTo(logit.DebugLevel)
+    logit.Info("I am running again!")
 }

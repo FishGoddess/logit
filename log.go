@@ -14,28 +14,49 @@
 //
 // Author: fish
 // Email: fishinlove@163.com
-// Created at 2020/02/29 22:20:35
-package main
+// Created at 2020/03/25 22:01:26
 
-import (
-    "os"
+package logit
 
-    "github.com/FishGoddess/logit"
-)
+import "time"
 
-func main() {
+type Log struct {
+    logger *Logger
 
-    // Every new Logger is running.
-    logger := logit.NewLogger(os.Stdout, logit.DebugLevel)
-    logger.Info("I am running!")
+    level Level
 
-    // Shutdown the Logger.
-    // So the info message next line will not be logged!
-    logger.Disable()
-    logger.Info("I will not be logged!")
+    now time.Time
 
-    // Enable the Logger.
-    // The info message next line will be logged again!
-    logger.Enable()
-    logger.Info("I am running again!")
+    msg string
+
+    extra map[string]interface{}
+}
+
+func NewLog(logger *Logger, level Level, now time.Time, msg string) *Log {
+    return &Log{
+        logger: logger,
+        level:  level,
+        now:    now,
+        msg:    msg,
+    }
+}
+
+func (l *Log) Logger() *Logger {
+    return l.logger
+}
+
+func (l *Log) Level() Level {
+    return l.level
+}
+
+func (l *Log) Now() time.Time {
+    return l.now
+}
+
+func (l *Log) Msg() string {
+    return l.msg
+}
+
+func (l *Log) Extra() map[string]interface{} {
+    return l.extra
 }
