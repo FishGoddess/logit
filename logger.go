@@ -19,7 +19,6 @@
 package logit
 
 import (
-    "io"
     "runtime"
     "strconv"
     "sync"
@@ -39,17 +38,10 @@ type Logger struct {
     // That's we called level-based logging.
     level Level
 
-    // writer is the output of this Logger.
-    writer io.Writer
-
     // handlers is the slice of log handlers.
     // You can add your handler for some situations.
     // See LoggerHandler.
-    handlers []LoggerHandler
-
-    // formatOfTime is the format for formatting time.
-    // Default is "2006-01-02 15:04:05", see DefaultFormatOfTime.
-    formatOfTime string
+    handlers []Handler
 
     // needFileInfo is a flag to check if msg should contain file info.
     // This step is useful but too expensive, so default is false.
@@ -59,23 +51,12 @@ type Logger struct {
     mu sync.RWMutex
 }
 
-// DefaultFormatOfTime is the default format for formatting time.
-const DefaultFormatOfTime = "2006-01-02 15:04:05"
-
-// NewLogger creates one Logger with given out and level.
-// The first parameter writer is the writer for logging.
-// The second parameter level is the level of this Logger.
-// It returns a new running Logger holder.
-func NewLogger(writer io.Writer, level Level) *Logger {
-    return NewLoggerWithHandlers(writer, level, DefaultLoggerHandler)
-}
-
-// NewLoggerWithHandlers creates one Logger with given out and level and handlers.
+// NewLogger creates one Logger with given out and level and handlers.
 // The first parameter writer is the writer for logging.
 // The second parameter level is the level of this Logger.
 // The third parameter handlers is all logger handlers for handling each log.
 // It returns a new running Logger holder.
-func NewLoggerWithHandlers(writer io.Writer, level Level, handlers ...LoggerHandler) *Logger {
+func NewLogger(level Level, handlers ...Handler) *Logger {
 
     // 至少添加一个日志处理器，否则直接报错
     if len(handlers) < 1 {
@@ -83,10 +64,8 @@ func NewLoggerWithHandlers(writer io.Writer, level Level, handlers ...LoggerHand
     }
 
     return &Logger{
-        writer:       writer,
-        formatOfTime: DefaultFormatOfTime,
-        handlers:     handlers,
         level:        level,
+        handlers:     handlers,
         needFileInfo: false,
     }
 }
@@ -125,7 +104,7 @@ func (l *Logger) DisableFileInfo() {
 // AddHandlers adds more handlers to l, and all handlers added before will be retained.
 // If you want to remove all handlers, try l.SetHandlers().
 // See logit.DefaultLoggerHandler.
-func (l *Logger) AddHandlers(handlers ...LoggerHandler) {
+func (l *Logger) AddHandlers(handlers ...Handler) {
     l.mu.Lock()
     defer l.mu.Unlock()
     l.handlers = append(l.handlers, handlers...)
@@ -136,7 +115,7 @@ func (l *Logger) AddHandlers(handlers ...LoggerHandler) {
 // Notice that at least one handler should be added, so if len(handlers) < 1, it returns false
 // which means setting failed. Return true if setting is successful.
 // See logit.DefaultLoggerHandler.
-func (l *Logger) SetHandlers(handlers ...LoggerHandler) bool {
+func (l *Logger) SetHandlers(handlers ...Handler) bool {
 
     // 必须添加至少一个处理器
     if len(handlers) < 1 {
@@ -152,42 +131,13 @@ func (l *Logger) SetHandlers(handlers ...LoggerHandler) bool {
 }
 
 // Handlers returns all handlers of l in a copy slice.
-func (l *Logger) Handlers() []LoggerHandler {
+func (l *Logger) Handlers() []Handler {
     l.mu.RLock()
     defer l.mu.RUnlock()
 
     // 返回的是日志处理器的副本，防止被非法篡改
-    handlers := make([]LoggerHandler, 0, len(l.handlers))
+    handlers := make([]Handler, 0, len(l.handlers))
     return append(handlers, l.handlers...)
-}
-
-// SetFormatOfTime sets format of time as you want.
-// Default is "2006-01-02 15:04:05", see DefaultFormatOfTime.
-func (l *Logger) SetFormatOfTime(formatOfTime string) {
-    l.mu.Lock()
-    defer l.mu.Unlock()
-    l.formatOfTime = formatOfTime
-}
-
-// FormatOfTime returns the format of time in l.
-func (l *Logger) FormatOfTime() string {
-    l.mu.RLock()
-    defer l.mu.RUnlock()
-    return l.formatOfTime
-}
-
-// ChangeWriterTo changes current writer to newWriter.
-func (l *Logger) ChangeWriterTo(newWriter io.Writer) {
-    l.mu.Lock()
-    defer l.mu.Unlock()
-    l.writer = newWriter
-}
-
-// Writer returns the writer of l.
-func (l *Logger) Writer() io.Writer {
-    l.mu.RLock()
-    defer l.mu.RUnlock()
-    return l.writer
 }
 
 // callDepth is the depth of the method calling stack, which is about file name and line.
@@ -228,8 +178,8 @@ func (l *Logger) log(callDepth int, level Level, msg string) {
 // will not use anymore.
 func (l *Logger) handleLog(level Level, now time.Time, msg string) {
     for _, handler := range l.handlers {
-        if !handler.handle(l, level, now, msg) {
-            break
+        if !handler.Handle(NewLog(l, level, now, msg)) {
+            return
         }
     }
 }

@@ -30,7 +30,7 @@ import (
 func main() {
 
     // NewStdoutLogger creates a new Logger holder to standard output, generally a terminal or a console.
-    logger := logit.NewStdoutLogger(logit.DebugLevel)
+    logger := logit.NewDevelopLogger()
 
     // Then you will be easy to log!
     logger.Debug("this is a debug message!")
@@ -38,14 +38,10 @@ func main() {
     logger.Warn("this is a warn message!")
     logger.Error("this is an error message!")
 
-    // NewLogger creates a new Logger holder.
-    // The first parameter "os.Stdout" is a writer for logging.
-    // As you know, file also can be written, just replace "os.Stdout" with your file!
-    // The second parameter "logit.DebugLevel" is the level of this Logger.
-    logger = logit.NewLogger(os.Stdout, logit.DebugLevel)
-
+    // NewLogger creates a new Logger holder
+    // As you know, file also can be written, just replace os.Stdout with your file!
     // If you want format your time, try this:
-    logger.SetFormatOfTime("2006/01/02 15:04:05")
+    logger = logit.NewLogger(logit.DebugLevel, logit.NewDefaultHandler(os.Stdout, logit.NewDefaultEncoder("2006/01/02 15:04:05")))
     logger.Info("What time is it now?")
 
     // If you want to output log with file info, try this:
@@ -60,7 +56,4 @@ func main() {
         r := rand.New(rand.NewSource(time.Now().Unix()))
         return "debug rand int: " + strconv.Itoa(r.Intn(100))
     })
-
-    // If you want to change logger's writer, try this:
-    logger.ChangeWriterTo(os.Stdout)
 }
