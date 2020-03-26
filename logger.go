@@ -47,8 +47,10 @@ type Logger struct {
     // This step is useful but too expensive, so default is false.
     needFileInfo bool
 
+    logs *sync.Pool
+
     // mu is for safe concurrency.
-    mu sync.RWMutex
+    mu *sync.RWMutex
 }
 
 // NewLogger creates one Logger with given out and level and handlers.
@@ -67,6 +69,12 @@ func NewLogger(level Level, handlers ...Handler) *Logger {
         level:        level,
         handlers:     handlers,
         needFileInfo: false,
+        logs: &sync.Pool{
+            New: func() interface{} {
+                return &Log{}
+            },
+        },
+        mu: &sync.RWMutex{},
     }
 }
 
@@ -140,6 +148,19 @@ func (l *Logger) Handlers() []Handler {
     return append(handlers, l.handlers...)
 }
 
+func (l *Logger) newLog(level Level, msg string) *Log {
+    log := l.logs.Get().(*Log)
+    log.logger = l
+    log.level = level
+    log.now = time.Now()
+    log.msg = msg
+    return log
+}
+
+func (l *Logger) releaseLog(log *Log) {
+    l.logs.Put(log)
+}
+
 // callDepth is the depth of the method calling stack, which is about file name and line.
 const callDepth = 3
 
@@ -170,15 +191,17 @@ func (l *Logger) log(callDepth int, level Level, msg string) {
     }
 
     // 处理日志
-    l.handleLog(level, time.Now(), msg)
+    log := l.newLog(level, msg)
+    defer l.releaseLog(log)
+    l.handleLog(log)
 }
 
 // handleLog handles log with l.handlers.
 // Notice that if one handler returns false, then all handlers after it
 // will not use anymore.
-func (l *Logger) handleLog(level Level, now time.Time, msg string) {
+func (l *Logger) handleLog(log *Log) {
     for _, handler := range l.handlers {
-        if !handler.Handle(NewLog(l, level, now, msg)) {
+        if !handler.Handle(log) {
             return
         }
     }

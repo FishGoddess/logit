@@ -32,15 +32,6 @@ type Log struct {
     extra map[string]interface{}
 }
 
-func NewLog(logger *Logger, level Level, now time.Time, msg string) *Log {
-    return &Log{
-        logger: logger,
-        level:  level,
-        now:    now,
-        msg:    msg,
-    }
-}
-
 func (l *Log) Logger() *Logger {
     return l.logger
 }

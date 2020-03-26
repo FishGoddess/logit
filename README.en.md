@@ -111,11 +111,11 @@ $ go test -v ./_examples/benchmarks_test.go -bench=. -benchtime=1s
 
 | test case | times ran (large is better) |  ns/op (small is better) | features | extension |
 | -----------|--------|-------------|-------------|-------------|
-| **logit** | 1190984 | 1006 ns/op | powerful | high |
+| **logit** | **1242982** | &nbsp; **960 ns/op** | powerful | high |
 | zap | &nbsp; 401043 | 2793 ns/op | normal | normal |
 | logrus | &nbsp; 158262 | 7751 ns/op | normal | normal |
 | golog | &nbsp; 751064 | 1614 ns/op | normal | normal |
-| golang log | 1000000 | 1019 ns/op | not good | none |
+| golang log | 1269531 | &nbsp; 938 ns/op | not good | none |
 
 > Environment：I7-6700HQ CPU @ 2.6 GHZ, 16 GB RAM
 
