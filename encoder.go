@@ -19,12 +19,23 @@
 package logit
 
 import (
+    "bytes"
     "strconv"
     "sync"
     "time"
 )
 
+// Encoder is how to encode a log to be writable.
+// There are two encoders for you:
+//     1. DefaultEncoder
+//     2. JsonEncoder
+//
+// DefaultEncoder encodes a log to a plain string like "[Info] [2020-03-06 16:10:44] msg" in bytes.
+// JsonEncoder encodes a log to a Json string like `{"level":"debug", "time":"2020-03-22 22:35:00", "msg":"log content..."}` in bytes.
+// Of cause, you can implement Encoder interface to do you encoding job in you own way.
 type Encoder interface {
+
+    // Encode encode a log to bytes.
     Encode(log *Log) []byte
 }
 
@@ -34,15 +45,37 @@ type DefaultEncoder struct {
     timeFormatter *timeCachedFormatter
 }
 
+// NewDefaultEncoder returns a DefaultEncoder with given timeFormat.
 func NewDefaultEncoder(timeFormat string) Encoder {
     return &DefaultEncoder{
         timeFormatter: NewTimeCachedFormatter(timeFormat),
     }
 }
 
-// Encode encodes log to a plain string like "[Info] [2020-03-06 16:10:44] msg" in bytes.
+// Encode encodes a log to a plain string like "[Info] [2020-03-06 16:10:44] msg" in bytes.
 func (de *DefaultEncoder) Encode(log *Log) []byte {
-    return []byte("[" + log.Level().String() + "] [" + de.timeFormatter.format(log.Now()) + "] " + log.Msg() + "\n")
+
+    // 组装 log
+    buffer := bytes.NewBuffer(make([]byte, 0, 64))
+    buffer.WriteString("[")
+    buffer.WriteString(log.Level().String())
+    buffer.WriteString("] [")
+    buffer.WriteString(de.timeFormatter.format(log.Now()))
+    buffer.WriteString("] ")
+
+    // 如果有文件信息，就把文件信息也加进去
+    file, hasFile := log.extra["file"]
+    line, hasLine := log.extra["line"]
+    if hasFile && hasLine {
+        buffer.WriteString("[")
+        buffer.WriteString(file + ":" + line)
+        buffer.WriteString("] ")
+    }
+
+    buffer.WriteString(log.Msg())
+    buffer.WriteString("\n")
+
+    return buffer.Bytes()
 }
 
 // JsonEncoder is an encoder which encodes log to a Json string.
@@ -52,6 +85,9 @@ type JsonEncoder struct {
     timeFormatter      *timeCachedFormatter
 }
 
+// NewJsonEncoder returns a JsonEncoder with given timeFormat.
+// needFormattingTime is to check you want a formatted time or time in unix.
+// Only needFormattingTime is true then timeFormat is valid.
 func NewJsonEncoder(timeFormat string, needFormattingTime bool) Encoder {
     return &JsonEncoder{
         needFormattingTime: needFormattingTime,
@@ -59,13 +95,34 @@ func NewJsonEncoder(timeFormat string, needFormattingTime bool) Encoder {
     }
 }
 
-// Encode encodes log to a Json string like `{"level":"debug", "time":"2020-03-22 22:35:00", "msg":"log content..."}` in bytes.
+// Encode encodes a log to a Json string like `{"level":"debug", "time":"2020-03-22 22:35:00", "msg":"log content..."}` in bytes.
 func (je *JsonEncoder) Encode(log *Log) []byte {
 
+    // 组装 log
+    buffer := bytes.NewBuffer(make([]byte, 0, 64))
+    buffer.WriteString(`{"level":"`)
+    buffer.WriteString(log.Level().String())
+    buffer.WriteString(`", "time":`)
+
+    // 判断是否需要格式化时间
     if je.needFormattingTime {
-        return []byte(`{"level":"` + log.Level().String() + `", "time":"` + je.timeFormatter.format(log.Now()) + `", "msg":"` + log.Msg() + `"}` + "\n")
+        buffer.WriteString(strconv.Quote(je.timeFormatter.format(log.Now())))
+    } else {
+        buffer.WriteString(strconv.FormatInt(log.Now().Unix(), 10))
     }
-    return []byte(`{"level":"` + log.Level().String() + `", "time":` + strconv.FormatInt(log.Now().Unix(), 10) + `, "msg":"` + log.Msg() + `"}` + "\n")
+
+    // 如果有文件信息，就把文件信息也加进去
+    file, hasFile := log.extra["file"]
+    line, hasLine := log.extra["line"]
+    if hasFile && hasLine {
+        buffer.WriteString(`, "file":"` + file)
+        buffer.WriteString(`", "line":` + line)
+    }
+
+    buffer.WriteString(`, "msg":"`)
+    buffer.WriteString(log.Msg())
+    buffer.WriteString("\"}\n")
+    return buffer.Bytes()
 }
 
 // **********************************************************
@@ -82,6 +139,8 @@ type timeCachedFormatter struct {
     mu            *sync.Mutex
 }
 
+// NewTimeCachedFormatter returns a *timeCachedFormatter holder with given timeFormat.
+// Notice that this method is for experiment, so you better not use it directly.
 func NewTimeCachedFormatter(timeFormat string) *timeCachedFormatter {
     return &timeCachedFormatter{
         timeFormat: timeFormat,
@@ -93,6 +152,8 @@ func NewTimeCachedFormatter(timeFormat string) *timeCachedFormatter {
 // Use a global formatted time to cache the current time
 // for avoiding formatting too much times in the same second.
 func (tcf *timeCachedFormatter) format(now time.Time) string {
+
+    // 并发激烈的时候或许会成为瓶颈，反而得不偿失，这个需要经过大量试验才知道是否值得
     tcf.mu.Lock()
     defer tcf.mu.Unlock()
 

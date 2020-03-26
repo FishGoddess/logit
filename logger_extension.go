@@ -51,11 +51,14 @@ func nextFilename(directory string) func(now time.Time) string {
     }
 }
 
+// NewLoggerFrom returns a logger with given config.
+// It uses DefaultHandler to handle all logs.
+// See logit.Config.
 func NewLoggerFrom(config Config) *Logger {
     return NewLogger(config.Level, NewDefaultHandler(config.Writer, config.Encoder))
 }
 
-// NewDevelopLogger returns a logger for develop.
+// NewDevelopLogger returns a logger for developing.
 // A logger for develop should be easy-to-read and output to console.
 // Also, the level should be DebugLevel.
 func NewDevelopLogger() *Logger {

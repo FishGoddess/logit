@@ -47,6 +47,8 @@ type Logger struct {
     // This step is useful but too expensive, so default is false.
     needFileInfo bool
 
+    // logs is an object pool cache some Log holder.
+    // Use a pool is for reducing memory allocation.
     logs *sync.Pool
 
     // mu is for safe concurrency.
@@ -65,17 +67,25 @@ func NewLogger(level Level, handlers ...Handler) *Logger {
         panic("You must add at least one handler!")
     }
 
-    return &Logger{
+    // 创建 logger 对象
+    logger := &Logger{
         level:        level,
         handlers:     handlers,
         needFileInfo: false,
-        logs: &sync.Pool{
-            New: func() interface{} {
-                return &Log{}
-            },
-        },
-        mu: &sync.RWMutex{},
+        mu:           &sync.RWMutex{},
     }
+
+    // 初始化 logs 对象池
+    logger.logs = &sync.Pool{
+        New: func() interface{} {
+            return &Log{
+                logger: logger,
+                extra:  map[string]string{},
+            }
+        },
+    }
+
+    return logger
 }
 
 // ChangeLevelTo will change the level of current Logger to newLevel.
@@ -111,7 +121,7 @@ func (l *Logger) DisableFileInfo() {
 
 // AddHandlers adds more handlers to l, and all handlers added before will be retained.
 // If you want to remove all handlers, try l.SetHandlers().
-// See logit.DefaultLoggerHandler.
+// See logit.Handler.
 func (l *Logger) AddHandlers(handlers ...Handler) {
     l.mu.Lock()
     defer l.mu.Unlock()
@@ -122,7 +132,7 @@ func (l *Logger) AddHandlers(handlers ...Handler) {
 // If you want to add more handlers rather than replace them, try l.AddHandlers.
 // Notice that at least one handler should be added, so if len(handlers) < 1, it returns false
 // which means setting failed. Return true if setting is successful.
-// See logit.DefaultLoggerHandler.
+// See logit.Handler.
 func (l *Logger) SetHandlers(handlers ...Handler) bool {
 
     // 必须添加至少一个处理器
@@ -148,16 +158,19 @@ func (l *Logger) Handlers() []Handler {
     return append(handlers, l.handlers...)
 }
 
+// newLog returns a Log holder from object pool.
+// Notice that not every holder returned is new, as you know, that is why we use a pool.
 func (l *Logger) newLog(level Level, msg string) *Log {
     log := l.logs.Get().(*Log)
-    log.logger = l
     log.level = level
     log.now = time.Now()
     log.msg = msg
     return log
 }
 
+// releaseLog releases log to object pool so that this log can be reused next time.
 func (l *Logger) releaseLog(log *Log) {
+    log.extra = map[string]string{}
     l.logs.Put(log)
 }
 
@@ -185,14 +198,14 @@ func (l *Logger) log(callDepth int, level Level, msg string) {
     needFileInfo := l.needFileInfo
     l.mu.RUnlock()
 
-    // 如果需要文件信息，对当前的 msg 进行包装
-    if needFileInfo {
-        msg = wrapMessageWithFileInfo(callDepth, msg)
-    }
-
     // 处理日志
     log := l.newLog(level, msg)
     defer l.releaseLog(log)
+
+    // 如果需要文件信息，对当前的 msg 进行包装
+    if needFileInfo {
+        wrapLogWithFileInfo(callDepth, log)
+    }
     l.handleLog(log)
 }
 
@@ -207,18 +220,20 @@ func (l *Logger) handleLog(log *Log) {
     }
 }
 
-// wrapMessageWithFileInfo wraps msg with file info.
+// wrapLogWithFileInfo wraps log with file info.
 // This function is too expensive because of runtime.Caller.
 // Notice that callDepth is the depth of calling stack. See callDepth.
-func wrapMessageWithFileInfo(callDepth int, msg string) string {
+func wrapLogWithFileInfo(callDepth int, log *Log) {
 
     // 这个 callDepth 是 runtime.Caller 方法的参数，表示上面第几层调用者信息
     _, file, line, ok := runtime.Caller(callDepth)
     if !ok {
-        return "[unknown file:unknown line] " + msg
+        log.extra["file"] = "unknown file"
+        log.extra["line"] = "-1"
     }
 
-    return "[" + file + ":" + strconv.Itoa(line) + "] " + msg
+    log.extra["file"] = file
+    log.extra["line"] = strconv.Itoa(line)
 }
 
 // Debug will output msg as a debug message.

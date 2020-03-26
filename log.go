@@ -20,34 +20,46 @@ package logit
 
 import "time"
 
+// Log is representation of a logging message, including all information about this message.
 type Log struct {
+
+    // logger is the publisher of this log.
     logger *Logger
 
+    // level is the level of this log.
     level Level
 
+    // now is the publishing time of this log.
     now time.Time
 
+    // msg is the message of this log.
     msg string
 
-    extra map[string]interface{}
+    // extra is the additional data of this log.
+    extra map[string]string
 }
 
+// Logger returns the publisher of this log.
 func (l *Log) Logger() *Logger {
     return l.logger
 }
 
+// Level returns the level of this log.
 func (l *Log) Level() Level {
     return l.level
 }
 
+// Now returns the publishing time of this log.
 func (l *Log) Now() time.Time {
     return l.now
 }
 
+// Msg returns the message of this log.
 func (l *Log) Msg() string {
     return l.msg
 }
 
-func (l *Log) Extra() map[string]interface{} {
+// Extra returns the additional data of this log.
+func (l *Log) Extra() map[string]string {
     return l.extra
 }
