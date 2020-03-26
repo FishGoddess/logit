@@ -20,10 +20,25 @@ package logit
 
 import "io"
 
+// Config is for configuring a Logger.
+// You can use a config to create a Logger to use.
+// See NewLoggerFrom(config Config).
 type Config struct {
+
+    // Level is the level of Logger.
+    // If the level of log is smaller than this Level, this log will be ignored.
     Level Level
 
+    // Writer is where to write a log.
     Writer io.Writer
 
+    // Encoder is how to encode a log to be writable.
+    // There are two encoders for you:
+    //     1. DefaultEncoder
+    //     2. JsonEncoder
+    //
+    // DefaultEncoder encodes a log to a plain string like "[Info] [2020-03-06 16:10:44] msg" in bytes.
+    // JsonEncoder encodes a log to a Json string like `{"level":"debug", "time":"2020-03-22 22:35:00", "msg":"log content..."}` in bytes.
+    // Of cause, you can implement Encoder interface to do you encoding job in you own way.
     Encoder Encoder
 }

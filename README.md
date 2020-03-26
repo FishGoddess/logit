@@ -111,11 +111,11 @@ $ go test -v ./_examples/benchmarks_test.go -bench=. -benchtime=1s
 
 | 测试 | 单位时间内运行次数 (越大越好) |  每个操作消耗时间 (越小越好) | 功能性 | 扩展性 |
 | -----------|--------|-------------|-------------|-------------|
-| **logit** | 1190984 | 1006 ns/op | 强大 | 高 |
+| **logit** | **1242982** | &nbsp; **960 ns/op** | 强大 | 高 |
 | zap | &nbsp; 401043 | 2793 ns/op | 正常 | 正常 |
 | logrus | &nbsp; 158262 | 7751 ns/op | 正常 | 正常 |
 | golog | &nbsp; 751064 | 1614 ns/op | 正常 | 正常 |
-| golang log | 1000000 | 1019 ns/op | 一般 | 无 |
+| golang log | 1269531 | &nbsp; 938 ns/op | 一般 | 无 |
 
 > 测试环境：I7-6700HQ CPU @ 2.6 GHZ，16 GB RAM
 
