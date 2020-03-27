@@ -31,8 +31,6 @@ func main() {
     logit.Warn("I am a warn message!")
     logit.Error("I am an error message!")
 
-    // Also, you can create a new independent Logger to use. See logit.NewLogger.
-
     // If you want to output log with file info, try this:
     logit.EnableFileInfo()
     logit.Info("Show file info!")
