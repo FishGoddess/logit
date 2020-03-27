@@ -68,7 +68,7 @@ import (
 func main() {
     
     // Log as you want.
-    logit.Debug("I am a debug message! But I will not be logged in default level!")
+    logit.Debug("I am a debug message!")
     logit.Info("I am an info message!")
     logit.Warn("I am a warn message!")
     logit.Error("I am an error message!")
