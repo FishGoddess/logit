@@ -27,12 +27,6 @@ import (
     "github.com/FishGoddess/logit/wrapper"
 )
 
-// 测试创建标准输出的日志记录器
-func TestNewStdoutLogger(t *testing.T) {
-    logger := NewStdoutLogger(InfoLevel)
-    logger.Info("stdout logger...")
-}
-
 // 测试创建文件日志记录器
 func TestNewFileLogger(t *testing.T) {
 
@@ -43,18 +37,18 @@ func TestNewFileLogger(t *testing.T) {
         }
     }()
 
-    logger := NewFileLogger("Z:/test.log", DebugLevel)
+    logger := NewFileLogger("Z:/test.log")
     for i := 0; i < 100; i++ {
         logger.Info("我是第 " + strconv.Itoa(i) + " 条日志！")
     }
 
-    logger = NewFileLogger("https://test.io", DebugLevel)
+    logger = NewFileLogger("https://test.io")
 }
 
 // 测试创建随时间间隔滚动的文件日志记录器
 func TestNewDurationRollingLogger(t *testing.T) {
 
-    logger := NewDurationRollingLogger("Z:/", time.Second, DebugLevel)
+    logger := NewDurationRollingLogger("Z:/", time.Second)
     for i := 0; i < 10; i++ {
         logger.Info("1. info!!!!!!!! " + strconv.FormatInt(time.Now().Unix(), 10))
         time.Sleep(time.Second)
@@ -65,7 +59,7 @@ func TestNewDurationRollingLogger(t *testing.T) {
 // 测试按天自动划分日志文件的日志记录器
 func TestNewDayRollingLogger(t *testing.T) {
 
-    logger := NewDayRollingLogger("Z:/", DebugLevel)
+    logger := NewDayRollingLogger("Z:/")
     logger.Info("1. info!!!!!!!! " + strconv.FormatInt(time.Now().Unix(), 10))
     time.Sleep(time.Second)
     logger.Info("2. info!!!!!!!! " + strconv.FormatInt(time.Now().Unix(), 10))
@@ -74,7 +68,7 @@ func TestNewDayRollingLogger(t *testing.T) {
 // 测试按照文件大小自动划分日志文件的日志记录器
 func TestNewSizeRollingLogger(t *testing.T) {
 
-    logger := NewSizeRollingLogger("Z:/", 64*wrapper.KB, DebugLevel)
+    logger := NewSizeRollingLogger("Z:/", 64*wrapper.KB)
     for i := 0; i < 1000; i++ {
         logger.Debug("debug...")
         logger.Info("info...")
@@ -86,7 +80,7 @@ func TestNewSizeRollingLogger(t *testing.T) {
 // 测试按照默认文件大小自动划分日志文件的日志记录器
 func TestNewDefaultSizeRollingLogger(t *testing.T) {
 
-    logger := NewDefaultSizeRollingLogger("Z:/", DebugLevel)
+    logger := NewDefaultSizeRollingLogger("Z:/")
     for i := 0; i < 1000; i++ {
         logger.Debug("debug...")
         logger.Info("info...")
@@ -97,7 +91,7 @@ func TestNewDefaultSizeRollingLogger(t *testing.T) {
 
 // 测试输出日志是从函数中生成的几个方法
 func TestLoggerLogFunction(t *testing.T) {
-    logger := NewStdoutLogger(DebugLevel)
+    logger := NewDevelopLogger()
     logger.DebugFunc(func() string {
         return "debug rand int: " + strconv.Itoa(rand.Intn(100))
     })
@@ -110,14 +104,4 @@ func TestLoggerLogFunction(t *testing.T) {
     logger.ErrorFunc(func() string {
         return "error rand int: " + strconv.Itoa(rand.Intn(100))
     })
-}
-
-// 测试 JsonLoggerHandler 是否正常
-func TestLoggerJsonLoggerHandler(t *testing.T) {
-    logger := NewStdoutLogger(DebugLevel)
-    logger.SetHandlers(JsonLoggerHandler)
-    logger.Debug("Debug message...")
-    logger.Info("Info message...")
-    logger.Warn("Warn message...")
-    logger.Error("Error message...")
 }

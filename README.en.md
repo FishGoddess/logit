@@ -42,7 +42,7 @@ module your_project_name
 go 1.14
 
 require (
-    github.com/FishGoddess/logit v0.0.11
+    github.com/FishGoddess/logit v0.1.0
 )
 ```
 
@@ -68,7 +68,7 @@ import (
 func main() {
     
     // Log as you want.
-    logit.Debug("I am a debug message! But I will not be logged in default level!")
+    logit.Debug("I am a debug message!")
     logit.Info("I am an info message!")
     logit.Warn("I am a warn message!")
     logit.Error("I am an error message!")
@@ -94,11 +94,11 @@ func main() {
 
 * [basic](./_examples/basic.go)
 * [logger](./_examples/logger.go)
-* [enable_disable](./_examples/enable_disable.go)
-* [change_log_level](./_examples/change_log_level.go)
+* [level_and_disable](./_examples/level_and_disable.go)
 * [log_to_file](./_examples/log_to_file.go)
+* [handler](./_examples/handler.go)
 * [wrapper](./_examples/wrapper.go)
-* [handler](./_examples/logger_handler.go)
+* [encoder](./_examples/encoder.go)
 
 _Check more examples in [_examples](./_examples)._
 
@@ -112,11 +112,11 @@ $ go test -v ./_examples/benchmarks_test.go -bench=. -benchtime=1s
 
 | test case | times ran (large is better) |  ns/op (small is better) | features | extension |
 | -----------|--------|-------------|-------------|-------------|
-| **logit** | 1190984 | 1006 ns/op | powerful | high |
+| **logit** | **1242982** | &nbsp; **960 ns/op** | powerful | high |
 | zap | &nbsp; 401043 | 2793 ns/op | normal | normal |
 | logrus | &nbsp; 158262 | 7751 ns/op | normal | normal |
 | golog | &nbsp; 751064 | 1614 ns/op | normal | normal |
-| golang log | 1000000 | 1019 ns/op | not good | none |
+| golang log | 1269531 | &nbsp; 938 ns/op | not good | none |
 
 > Environment：I7-6700HQ CPU @ 2.6 GHZ, 16 GB RAM
 

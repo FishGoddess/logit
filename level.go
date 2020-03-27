@@ -18,32 +18,32 @@
 
 package logit
 
-// LoggerLevel is the type representation of the level.
-type LoggerLevel uint8
+import "math"
 
-// Constants about logger level.
+// Level is the type representation of the level.
+type Level uint8
+
 const (
-    DebugLevel LoggerLevel = iota
+    DebugLevel Level = iota
     InfoLevel
     WarnLevel
     ErrorLevel
+
+    // OffLevel is for disabling a logger
+    OffLevel = math.MaxUint8
 )
 
-// prefixOfLevels provides a prefix of one level.
-var prefixOfLevels = map[LoggerLevel]string{
-    DebugLevel: "Debug",
-    InfoLevel:  "Info",
-    WarnLevel:  "Warn",
-    ErrorLevel: "Error",
+// levels provides the name of all supported level.
+var levels = map[Level]string{
+    DebugLevel: "debug",
+    InfoLevel:  "info",
+    WarnLevel:  "warn",
+    ErrorLevel: "error",
+    OffLevel:   "off",
 }
 
 // The String method is used to print values passed as an operand
 // to any format that accepts a string or to an printer without format such as Print.
-func (ll LoggerLevel) String() string {
-    return prefixOfLevels[ll]
-}
-
-// prefixOf gets the prefix of this level.
-func PrefixOf(level LoggerLevel) string {
-    return level.String()
+func (ll Level) String() string {
+    return levels[ll]
 }

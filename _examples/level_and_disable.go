@@ -22,10 +22,20 @@ import "github.com/FishGoddess/logit"
 
 func main() {
 
-    logit.Debug("Default logger level is info, so debug message will not be logged!")
+    logit.Debug("Default logger level is debug.")
 
-    // Change logger level to debug level.
-    logit.ChangeLevelTo(logit.DebugLevel)
+    // Change logger level to warn level.
+    // So debug and info log will be ignored.
+    logit.ChangeLevelTo(logit.WarnLevel)
+    logit.Debug("You never see me!")
 
-    logit.Debug("Now debug message will be logged!")
+    // In particular, you can change level to OffLevel to disable the logger.
+    // So the info message next line will not be logged!
+    logit.ChangeLevelTo(logit.OffLevel)
+    logit.Info("I will not be logged!")
+
+    // Enable the Logger.
+    // The info message next line will be logged again!
+    logit.ChangeLevelTo(logit.InfoLevel)
+    logit.Info("I am running again!")
 }

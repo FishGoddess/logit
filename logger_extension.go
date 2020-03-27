@@ -19,6 +19,7 @@
 package logit
 
 import (
+    "io"
     "math/rand"
     "os"
     "path"
@@ -28,8 +29,13 @@ import (
     "github.com/FishGoddess/logit/wrapper"
 )
 
-// PrefixOfLogFile is the prefix of log file.
-const PrefixOfLogFile = ".log"
+const (
+    // PrefixOfLogFile is the prefix of log file.
+    PrefixOfLogFile = ".log"
+
+    // DefaultTimeFormat is the default format for formatting time.
+    DefaultTimeFormat = "2006-01-02 15:04:05"
+)
 
 // random is a generator for random number.
 var random = rand.New(rand.NewSource(time.Now().UnixNano()))
@@ -45,18 +51,46 @@ func nextFilename(directory string) func(now time.Time) string {
     }
 }
 
-// NewStdoutLogger returns a Logger holder with given logger level.
-func NewStdoutLogger(level LoggerLevel) *Logger {
-    return NewLogger(os.Stdout, level)
+// NewLoggerFrom returns a logger with given config.
+// It uses DefaultHandler to handle all logs.
+// See logit.Config.
+func NewLoggerFrom(config Config) *Logger {
+    return NewLogger(config.Level, NewDefaultHandler(config.Writer, config.Encoder))
+}
+
+// NewDevelopLogger returns a logger for developing.
+// A logger for develop should be easy-to-read and output to console.
+// Also, the level should be DebugLevel.
+func NewDevelopLogger() *Logger {
+    return NewLoggerFrom(Config{
+        Level:   DebugLevel,
+        Writer:  os.Stdout,
+        Encoder: NewDefaultEncoder(DefaultTimeFormat),
+    })
+}
+
+// NewProductionLogger returns a logger for production.
+// A logger for production should be easy-to-resolve and output to somewhere not only console.
+// Also, the level should be WarnLevel.
+func NewProductionLogger(writer io.Writer) *Logger {
+    return NewLoggerFrom(Config{
+        Level:   WarnLevel,
+        Writer:  writer,
+        Encoder: NewJsonEncoder(DefaultTimeFormat, false),
+    })
 }
 
 // NewFileLogger returns a Logger holder which log to a file with given logFile and level.
-func NewFileLogger(logFile string, level LoggerLevel) *Logger {
+func NewFileLogger(logFile string) *Logger {
     file, err := wrapper.NewFile(logFile)
     if err != nil {
         panic(err)
     }
-    return NewLogger(file, level)
+    return NewLoggerFrom(Config{
+        Level:   InfoLevel,
+        Writer:  file,
+        Encoder: NewDefaultEncoder(DefaultTimeFormat),
+    })
 }
 
 // NewDurationRollingLogger creates a duration rolling logger with given duration.
@@ -65,15 +99,19 @@ func NewFileLogger(logFile string, level LoggerLevel) *Logger {
 // Also, default filename of log file is like "20200304-145246-45.log", see nextFilename.
 // If you want to appoint another filename, check this and do it by this way.
 // See wrapper.NewDurationRollingFile (it is an implement of io.writer).
-func NewDurationRollingLogger(directory string, duration time.Duration, level LoggerLevel) *Logger {
-    return NewLogger(wrapper.NewDurationRollingFile(duration, nextFilename(directory)), level)
+func NewDurationRollingLogger(directory string, duration time.Duration) *Logger {
+    return NewLoggerFrom(Config{
+        Level:   InfoLevel,
+        Writer:  wrapper.NewDurationRollingFile(duration, nextFilename(directory)),
+        Encoder: NewDefaultEncoder(DefaultTimeFormat),
+    })
 }
 
 // NewDayRollingLogger creates a day rolling logger.
 // You should appoint a directory to store all log files generated in this time.
 // See NewDurationRollingLogger.
-func NewDayRollingLogger(directory string, level LoggerLevel) *Logger {
-    return NewDurationRollingLogger(directory, 24*time.Hour, level)
+func NewDayRollingLogger(directory string) *Logger {
+    return NewDurationRollingLogger(directory, 24*time.Hour)
 }
 
 // NewSizeRollingLogger creates a file size rolling logger with given limitedSize.
@@ -83,15 +121,19 @@ func NewDayRollingLogger(directory string, level LoggerLevel) *Logger {
 // Also, default filename of log file is like "20200304-145246-45.log", see nextFilename.
 // If you want to appoint another filename, check this and do it by this way.
 // See wrapper.NewSizeRollingFile (it is an implement of io.writer).
-func NewSizeRollingLogger(directory string, limitedSize int64, level LoggerLevel) *Logger {
-    return NewLogger(wrapper.NewSizeRollingFile(limitedSize, nextFilename(directory)), level)
+func NewSizeRollingLogger(directory string, limitedSize int64) *Logger {
+    return NewLoggerFrom(Config{
+        Level:   InfoLevel,
+        Writer:  wrapper.NewSizeRollingFile(limitedSize, nextFilename(directory)),
+        Encoder: NewDefaultEncoder(DefaultTimeFormat),
+    })
 }
 
 // NewDayRollingLogger creates a file size rolling logger.
 // You should appoint a directory to store all log files generated in this time.
 // Default means limitedSize is 64 MB. See NewSizeRollingLogger.
-func NewDefaultSizeRollingLogger(directory string, level LoggerLevel) *Logger {
-    return NewSizeRollingLogger(directory, 64*wrapper.MB, level)
+func NewDefaultSizeRollingLogger(directory string) *Logger {
+    return NewSizeRollingLogger(directory, 64*wrapper.MB)
 }
 
 // DebugFunc will output msg as a debug message.

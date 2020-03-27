@@ -1,5 +1,10 @@
 ## ✒ 历史版本的特性介绍 (Features in old version)
 
+### v0.1.0
+* 重新设计 Logger，主要是轻量化处理和重构 handler 的设计
+* 增加 Encoder 接口，方便用户扩展 Logger，并内置 Json 编码器
+* Json 编码器允许时间不做格式化，使用 Unix 形式处理时间，方便解析处理
+
 ### v0.0.11
 > 此版本发布于 2020-03-23
 * 支持日志输出为 Json 形式，通过增加 JSON 日志处理器实现
