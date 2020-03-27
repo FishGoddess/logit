@@ -42,7 +42,7 @@ module your_project_name
 go 1.14
 
 require (
-    github.com/FishGoddess/logit v0.0.11
+    github.com/FishGoddess/logit v0.1.0
 )
 ```
 
@@ -96,8 +96,9 @@ func main() {
 * [logger](./_examples/logger.go)
 * [level_and_disable](./_examples/level_and_disable.go)
 * [log_to_file](./_examples/log_to_file.go)
+* [handler](./_examples/handler.go)
 * [wrapper](./_examples/wrapper.go)
-* [handler](./_examples/logger_handler.go)
+* [encoder](./_examples/encoder.go)
 
 _更多使用案例请查看 [_examples](./_examples) 目录。_
 

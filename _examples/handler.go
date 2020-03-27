@@ -20,36 +20,36 @@ package main
 
 import (
     "fmt"
+    "os"
 
     "github.com/FishGoddess/logit"
 )
 
+type myHandler struct{}
+
+// Customize your own handler.
+func (mh *myHandler) Handle(log *logit.Log) bool {
+    os.Stdout.WriteString("handler1: " + log.Msg() + "\n")
+    return true
+}
+
 func main() {
 
     // Create a logger holder.
-    // Default handler is logit.DefaultLoggerHandler.
+    // Default handler is logit.DefaultHandler.
     logger := logit.NewDevelopLogger()
     logger.Info("before adding handlers...")
 
-    // Customize your own handler.
-    //handlers1 := nil
-
-    //handlers2 := nil
-
     // Add handlers to logger.
-    // There are three handlers in logger because logger has a default handler inside after creating.
-    // See logit.DefaultLoggerHandler.
-    //logger.AddHandlers(handlers1, handlers2)
+    // There are two handlers in logger because logger has a default handler inside after creating.
+    // See logit.DefaultHandler.
+    logger.AddHandlers(&myHandler{})
     fmt.Println("fmt =========================================")
     logger.Info("after adding handlers...")
 
     // Set handlers to logger.
     // There are two handlers in logger because the default handler inside was removed.
-    //logger.SetHandlers(handlers1, handlers2)
+    logger.SetHandlers(&myHandler{})
     fmt.Println("fmt =========================================")
     logger.Info("after setting handlers...")
-
-    // If you want to log as Json string, try JsonLoggerHandler:
-    //logger.SetHandlers(logit.JsonLoggerHandler)
-    logger.Info("I am a Json string!")
 }
