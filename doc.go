@@ -87,19 +87,19 @@ Package logit provides an easy way to use foundation for your logging operations
 
     logit.Debug("Default logger level is debug.")
 
-    // Change logger level to warn level.
-    // So debug and info log will be ignored.
-    logit.ChangeLevelTo(logit.WarnLevel)
+    // Change logger level to info level.
+    // So debug log will be ignored.
+    logit.ChangeLevelTo(logit.InfoLevel)
     logit.Debug("You never see me!")
 
     // In particular, you can change level to OffLevel to disable the logger.
     // So the info message next line will not be logged!
-    logit.ChangeLevelTo(logit.OffLevel)
+    level := logit.ChangeLevelTo(logit.OffLevel)
     logit.Info("I will not be logged!")
 
     // Enable the Logger.
     // The info message next line will be logged again!
-    logit.ChangeLevelTo(logit.InfoLevel)
+    logit.ChangeLevelTo(level)
     logit.Info("I am running again!")
 
 4. log to file:

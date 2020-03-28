@@ -64,11 +64,9 @@ func (de *DefaultEncoder) Encode(log *Log) []byte {
     buffer.WriteString("] ")
 
     // 如果有文件信息，就把文件信息也加进去
-    file, hasFile := log.extra["file"]
-    line, hasLine := log.extra["line"]
-    if hasFile && hasLine {
+    if log.file != "" && log.Line() != 0 {
         buffer.WriteString("[")
-        buffer.WriteString(file + ":" + line)
+        buffer.WriteString(log.File() + ":" + strconv.Itoa(log.Line()))
         buffer.WriteString("] ")
     }
 
@@ -111,11 +109,9 @@ func (je *JsonEncoder) Encode(log *Log) []byte {
     }
 
     // 如果有文件信息，就把文件信息也加进去
-    file, hasFile := log.extra["file"]
-    line, hasLine := log.extra["line"]
-    if hasFile && hasLine {
-        buffer.WriteString(`, "file":"` + file)
-        buffer.WriteString(`", "line":` + line)
+    if log.file != "" && log.Line() != 0 {
+        buffer.WriteString(`, "file":"` + log.File())
+        buffer.WriteString(`", "line":` + strconv.Itoa(log.Line()))
     }
 
     buffer.WriteString(`, "msg":"`)

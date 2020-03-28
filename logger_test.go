@@ -55,9 +55,9 @@ func TestLoggerError(t *testing.T) {
 func TestLoggerEnable(t *testing.T) {
     logger := NewLogger(DebugLevel, NewDefaultEncoder(DefaultTimeFormat), NewDefaultHandler(os.Stdout))
     logger.Debug("1. 这是 debug 信息。。。")
-    logger.ChangeLevelTo(OffLevel)
+    level := logger.ChangeLevelTo(OffLevel)
     logger.Debug("2. 这是 debug 信息。。。")
-    logger.ChangeLevelTo(DebugLevel)
+    logger.ChangeLevelTo(level)
     logger.Debug("3. 这是 debug 信息。。。")
 }
 

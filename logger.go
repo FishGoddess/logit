@@ -20,7 +20,6 @@ package logit
 
 import (
     "runtime"
-    "strconv"
     "sync"
     "time"
 )
@@ -87,7 +86,6 @@ func NewLogger(level Level, encoder Encoder, handlers ...Handler) *Logger {
         New: func() interface{} {
             return &Log{
                 logger: logger,
-                extra:  map[string]string{},
             }
         },
     }
@@ -197,7 +195,8 @@ func (l *Logger) newLog(level Level, msg string) *Log {
 
 // releaseLog releases log to object pool so that this log can be reused next time.
 func (l *Logger) releaseLog(log *Log) {
-    log.extra = map[string]string{}
+    log.file = ""
+    log.line = 0
     l.logs.Put(log)
 }
 
@@ -256,12 +255,12 @@ func wrapLogWithFileInfo(callDepth int, log *Log) {
     // 这个 callDepth 是 runtime.Caller 方法的参数，表示上面第几层调用者信息
     _, file, line, ok := runtime.Caller(callDepth)
     if !ok {
-        log.extra["file"] = "unknown file"
-        log.extra["line"] = "-1"
+        log.file = "unknown file"
+        log.line = -1
     }
 
-    log.extra["file"] = file
-    log.extra["line"] = strconv.Itoa(line)
+    log.file = file
+    log.line = line
 }
 
 // Debug will output msg as a debug message.
