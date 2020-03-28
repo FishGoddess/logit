@@ -38,6 +38,8 @@ type Logger struct {
     // That's we called level-based logging.
     level Level
 
+    encoder Encoder
+
     // handlers is the slice of log handlers.
     // You can add your handler for some situations.
     // See LoggerHandler.
@@ -55,12 +57,41 @@ type Logger struct {
     mu *sync.RWMutex
 }
 
-// NewLogger creates one Logger with given out and level and handlers.
+func NewLogger(level Level, encoder Encoder, handlers ...Handler) *Logger {
+
+    // 至少添加一个日志处理器，否则直接报错
+    if len(handlers) < 1 {
+        panic("You must add at least one handler!")
+    }
+
+    // 创建 logger 对象
+    logger := &Logger{
+        level:        level,
+        encoder:      encoder,
+        handlers:     handlers,
+        needFileInfo: false,
+        mu:           &sync.RWMutex{},
+    }
+
+    // 初始化 logs 对象池
+    logger.logs = &sync.Pool{
+        New: func() interface{} {
+            return &Log{
+                logger: logger,
+                extra:  map[string]string{},
+            }
+        },
+    }
+
+    return logger
+}
+
+// NewLoggerWithoutEncoder creates one Logger with given out and level and handlers.
 // The first parameter writer is the writer for logging.
 // The second parameter level is the level of this Logger.
 // The third parameter handlers is all logger handlers for handling each log.
 // It returns a new running Logger holder.
-func NewLogger(level Level, handlers ...Handler) *Logger {
+func NewLoggerWithoutEncoder(level Level, handlers ...Handler) *Logger {
 
     // 至少添加一个日志处理器，否则直接报错
     if len(handlers) < 1 {
@@ -89,10 +120,12 @@ func NewLogger(level Level, handlers ...Handler) *Logger {
 }
 
 // ChangeLevelTo will change the level of current Logger to newLevel.
-func (l *Logger) ChangeLevelTo(newLevel Level) {
+func (l *Logger) ChangeLevelTo(newLevel Level) Level {
     l.mu.Lock()
     defer l.mu.Unlock()
+    oldLevel := l.level
     l.level = newLevel
+    return oldLevel
 }
 
 // Level returns the logger level of l.
@@ -158,6 +191,20 @@ func (l *Logger) Handlers() []Handler {
     return append(handlers, l.handlers...)
 }
 
+func (l *Logger) ChangeEncoderTo(newEncoder Encoder) Encoder {
+    l.mu.Lock()
+    defer l.mu.Unlock()
+    oldEncoder := l.encoder
+    l.encoder = newEncoder
+    return oldEncoder
+}
+
+func (l *Logger) Encoder() Encoder {
+    l.mu.RLock()
+    defer l.mu.RUnlock()
+    return l.encoder
+}
+
 // newLog returns a Log holder from object pool.
 // Notice that not every holder returned is new, as you know, that is why we use a pool.
 func (l *Logger) newLog(level Level, msg string) *Log {
@@ -206,15 +253,15 @@ func (l *Logger) log(callDepth int, level Level, msg string) {
     if needFileInfo {
         wrapLogWithFileInfo(callDepth, log)
     }
-    l.handleLog(log)
+    l.handleLog(l.Encoder().Encode(log), log)
 }
 
 // handleLog handles log with l.handlers.
 // Notice that if one handler returns false, then all handlers after it
 // will not use anymore.
-func (l *Logger) handleLog(log *Log) {
+func (l *Logger) handleLog(encodedLog []byte, log *Log) {
     for _, handler := range l.handlers {
-        if !handler.Handle(log) {
+        if !handler.Handle(encodedLog, log) {
             return
         }
     }

@@ -40,11 +40,11 @@ func main() {
     logger.Warn("this is a warn message!")
     logger.Error("this is an error message!")
 
-    // NewLogger creates a new Logger holder with given level and handlers.
+    // NewLoggerWithoutEncoder creates a new Logger holder with given level and handlers.
     // As you know, file also can be written, just replace os.Stdout with your file!
     // A logger is made of level and handlers, so we provide some handlers for use, see logit.Handler.
     // This method is the most original way to create a logger for use.
-    logger = logit.NewLogger(logit.DebugLevel, logit.NewDefaultHandler(os.Stdout, logit.NewDefaultEncoder("2006/01/02 15:04:05")))
+    logger = logit.NewLogger(logit.DebugLevel, logit.NewDefaultEncoder("2006/01/02 15:04:05"), logit.NewDefaultHandler(os.Stdout))
     logger.Info("What time is it now?")
 
     // NewLoggerFrom creates a new Logger holder with given config.
@@ -52,9 +52,9 @@ func main() {
     // We provide some encoders: default encoder and json encoder.
     // See logit.Encoder to check more information.
     logger = logit.NewLoggerFrom(logit.Config{
-        Level:   logit.DebugLevel,
-        Writer:  os.Stdout,
-        Encoder: logit.NewJsonEncoder("2006/01/02 15:04:05", false),
+        Level:    logit.DebugLevel,
+        Encoder:  logit.NewJsonEncoder("2006/01/02 15:04:05", false),
+        Handlers: []logit.Handler{logit.NewDefaultHandler(os.Stdout)},
     })
     logger.Info("I am a json log!")
 

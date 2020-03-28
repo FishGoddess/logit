@@ -28,8 +28,9 @@ import (
 type myHandler struct{}
 
 // Customize your own handler.
-func (mh *myHandler) Handle(log *logit.Log) bool {
-    os.Stdout.WriteString("handler1: " + log.Msg() + "\n")
+func (mh *myHandler) Handle(log []byte, raw *logit.Log) bool {
+    os.Stdout.Write([]byte("myHandler: "))
+    os.Stdout.Write(log)
     return true
 }
 

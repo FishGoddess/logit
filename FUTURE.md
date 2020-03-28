@@ -4,10 +4,10 @@
 * 完善 DurationRollingFile 结构，加入文件个数限制
 * 完善 SizeRollingFile 结构，加入文件个数限制
 
-### v0.1.1
+### v0.1.1-alpha
 * 加入配置文件的支持
 
-### v0.1.0
+### v0.1.0-alpha
 * 重新设计 Logger，主要是轻量化处理和重构 handler 的设计
 * 增加 Encoder 接口，方便用户扩展 Logger，并内置 Json 编码器
 * Json 编码器允许时间不做格式化，使用 Unix 形式处理时间，方便解析处理

@@ -33,28 +33,26 @@ type Handler interface {
     // Handle should handle this log in someway.
     // If you don't want next handler to be used, just return false.
     // Then all handlers after current handler will not be used.
-    Handle(log *Log) bool
+    Handle(log []byte, raw *Log) bool
 }
 
 // DefaultHandler is a default handler for use.
 // Generally speaking, encoding a log to bytes then written by writer is the most of
 // handlers do. So we provide a default handler, which only need a writer and an encoder.
 type DefaultHandler struct {
-    writer  io.Writer
-    encoder Encoder
+    writer io.Writer
 }
 
-// NewDefaultHandler returns a DefaultHandler holder with given writer and encoder.
-func NewDefaultHandler(writer io.Writer, encoder Encoder) Handler {
+// NewDefaultHandler returns a DefaultHandler holder with given writer.
+func NewDefaultHandler(writer io.Writer) Handler {
     return &DefaultHandler{
-        writer:  writer,
-        encoder: encoder,
+        writer: writer,
     }
 }
 
 // Handle will encode log to bytes with internal encoder and written by internal writer.
 // Return true so that handlers after it will be used.
-func (dh *DefaultHandler) Handle(log *Log) bool {
-    dh.writer.Write(dh.encoder.Encode(log))
+func (dh *DefaultHandler) Handle(log []byte, raw *Log) bool {
+    dh.writer.Write(log)
     return true
 }

@@ -19,8 +19,6 @@
 package main
 
 import (
-    "os"
-
     "github.com/FishGoddess/logit"
 )
 
@@ -29,31 +27,25 @@ type myEncoder struct{}
 // Customize you own encoder.
 func (me *myEncoder) Encode(log *logit.Log) []byte {
     if log.Level() == logit.DebugLevel {
-        return []byte("I am debug log ===> " + log.Msg() + "\n")
+        return []byte("I am debug log ==> " + log.Msg() + "\n")
     }
-    return []byte("Normal log +++> " + log.Msg() + "\n")
+    return []byte("Normal log --> " + log.Msg() + "\n")
 }
 
 func main() {
 
     // logit.NewDefaultEncoder returns a default encoder with given time format.
-    logger := logit.NewLogger(logit.DebugLevel, logit.NewDefaultHandler(os.Stdout, logit.NewDefaultEncoder("2006/01/02 15:04:05")))
-    logger.Info("What time is it now?")
+    // ChangeEncoderTo will change current encoder to new encoder, and return old encoder.
+    logger := logit.NewDevelopLogger()
+    logger.ChangeEncoderTo(logit.NewDefaultEncoder("2006/01/02 15:04:05"))
+    logger.Info("What encoder is it now?")
 
     // logit.NewJsonEncoder returns a json encoder with given time format and need formatting time.
-    logger = logit.NewLoggerFrom(logit.Config{
-        Level:   logit.DebugLevel,
-        Writer:  os.Stdout,
-        Encoder: logit.NewJsonEncoder("2006/01/02 15:04:05", false),
-    })
+    logger.ChangeEncoderTo(logit.NewJsonEncoder(logit.DefaultTimeFormat, false))
     logger.Info("I am json log!")
 
     // You can customize you own encoder, see myEncoder.
-    logger = logit.NewLoggerFrom(logit.Config{
-        Level:   logit.DebugLevel,
-        Writer:  os.Stdout,
-        Encoder: &myEncoder{},
-    })
+    logger.ChangeEncoderTo(&myEncoder{})
     logger.Debug("Ha ha!")
     logger.Info("Hello!")
 }

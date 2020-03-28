@@ -46,11 +46,11 @@ Package logit provides an easy way to use foundation for your logging operations
     logger.Warn("this is a warn message!")
     logger.Error("this is an error message!")
 
-    // NewLogger creates a new Logger holder with given level and handlers.
+    // NewLoggerWithoutEncoder creates a new Logger holder with given level and handlers.
     // As you know, file also can be written, just replace os.Stdout with your file!
     // A logger is made of level and handlers, so we provide some handlers for use, see logit.Handler.
     // This method is the most original way to create a logger for use.
-    logger = logit.NewLogger(logit.DebugLevel, logit.NewDefaultHandler(os.Stdout, logit.NewDefaultEncoder("2006/01/02 15:04:05")))
+    logger = logit.NewLoggerWithoutEncoder(logit.DebugLevel, logit.NewDefaultHandler(os.Stdout, logit.NewDefaultEncoder("2006/01/02 15:04:05")))
     logger.Info("What time is it now?")
 
     // NewLoggerFrom creates a new Logger holder with given config.
@@ -175,7 +175,7 @@ Package logit provides an easy way to use foundation for your logging operations
     }
 
     // logit.NewDefaultEncoder returns a default encoder with given time format.
-    logger := logit.NewLogger(logit.DebugLevel, logit.NewDefaultHandler(os.Stdout, logit.NewDefaultEncoder("2006/01/02 15:04:05")))
+    logger := logit.NewLoggerWithoutEncoder(logit.DebugLevel, logit.NewDefaultHandler(os.Stdout, logit.NewDefaultEncoder("2006/01/02 15:04:05")))
     logger.Info("What time is it now?")
 
     // logit.NewJsonEncoder returns a json encoder with given time format and need formatting time.
@@ -199,4 +199,4 @@ Package logit provides an easy way to use foundation for your logging operations
 package logit // import "github.com/FishGoddess/logit"
 
 // Version is the version string representation of logit.
-const Version = "v0.1.0"
+const Version = "v0.1.0-alpha"
