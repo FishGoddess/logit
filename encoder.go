@@ -74,7 +74,6 @@ func (de *DefaultEncoder) Encode(log *Log) []byte {
 
     buffer.WriteString(log.Msg())
     buffer.WriteString("\n")
-
     return buffer.Bytes()
 }
 

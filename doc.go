@@ -22,9 +22,7 @@ Package logit provides an easy way to use foundation for your logging operations
 1. the basic usage:
 
     // Log messages with four levels.
-    // Notice that the default level is info, so first line of debug message
-    // will not be logged! If you want to change level, see logit.ChangeLevelTo
-    logit.Debug("I am a debug message! But I will not be logged in default level!")
+    logit.Debug("I am a debug message!")
     logit.Info("I am an info message!")
     logit.Warn("I am a warn message!")
     logit.Error("I am an error message!")
@@ -32,6 +30,14 @@ Package logit provides an easy way to use foundation for your logging operations
     // If you want to output log with file info, try this:
     logit.EnableFileInfo()
     logit.Info("Show file info!")
+
+    // If you have a long log and it is made of many variables, try this:
+    // The msg is the return value of msgGenerator.
+    logit.DebugFunc(func() string {
+        // Use time as the source of random number generator.
+        r := rand.New(rand.NewSource(time.Now().Unix()))
+        return "debug rand int: " + strconv.Itoa(r.Intn(100))
+    })
 
 2. logger:
 
@@ -50,7 +56,7 @@ Package logit provides an easy way to use foundation for your logging operations
     // As you know, file also can be written, just replace os.Stdout with your file!
     // A logger is made of level and handlers, so we provide some handlers for use, see logit.Handler.
     // This method is the most original way to create a logger for use.
-    logger = logit.NewLoggerWithoutEncoder(logit.DebugLevel, logit.NewDefaultHandler(os.Stdout, logit.NewDefaultEncoder("2006/01/02 15:04:05")))
+    logger = logit.NewLogger(logit.DebugLevel, logit.NewDefaultEncoder("2006/01/02 15:04:05"), logit.NewDefaultHandler(os.Stdout))
     logger.Info("What time is it now?")
 
     // NewLoggerFrom creates a new Logger holder with given config.
@@ -58,9 +64,9 @@ Package logit provides an easy way to use foundation for your logging operations
     // We provide some encoders: default encoder and json encoder.
     // See logit.Encoder to check more information.
     logger = logit.NewLoggerFrom(logit.Config{
-        Level:   logit.DebugLevel,
-        Writer:  os.Stdout,
-        Encoder: logit.NewJsonEncoder("2006/01/02 15:04:05", false),
+        Level:    logit.DebugLevel,
+        Encoder:  logit.NewJsonEncoder("2006/01/02 15:04:05", false),
+        Handlers: []logit.Handler{logit.NewDefaultHandler(os.Stdout)},
     })
     logger.Info("I am a json log!")
 
@@ -139,8 +145,9 @@ Package logit provides an easy way to use foundation for your logging operations
     type myHandler struct{}
 
     // Customize your own handler.
-    func (mh *myHandler) Handle(log *logit.Log) bool {
-        os.Stdout.WriteString("handler1: " + log.Msg() + "\n")
+    func (mh *myHandler) Handle(log []byte, raw *logit.Log) bool {
+        os.Stdout.Write([]byte("myHandler: "))
+        os.Stdout.Write(log) // Try `os.Stdout.WriteString(raw.Msg())` ?
         return true
     }
 
@@ -164,34 +171,28 @@ Package logit provides an easy way to use foundation for your logging operations
 
 6. encoder:
 
-    type myEncoder struct {}
+    type myEncoder struct{}
 
     // Customize you own encoder.
     func (me *myEncoder) Encode(log *logit.Log) []byte {
         if log.Level() == logit.DebugLevel {
-            return []byte("I am debug log ===> " + log.Msg() + "\n")
+            return []byte("I am debug log ==> " + log.Msg() + "\n")
         }
-        return []byte("Normal log +++> " + log.Msg() + "\n")
+        return []byte("Normal log --> " + log.Msg() + "\n")
     }
 
     // logit.NewDefaultEncoder returns a default encoder with given time format.
-    logger := logit.NewLoggerWithoutEncoder(logit.DebugLevel, logit.NewDefaultHandler(os.Stdout, logit.NewDefaultEncoder("2006/01/02 15:04:05")))
-    logger.Info("What time is it now?")
+    // ChangeEncoderTo will change current encoder to new encoder, and return old encoder.
+    logger := logit.NewDevelopLogger()
+    logger.ChangeEncoderTo(logit.NewDefaultEncoder("2006/01/02 15:04:05"))
+    logger.Info("What encoder is it now?")
 
     // logit.NewJsonEncoder returns a json encoder with given time format and need formatting time.
-    logger = logit.NewLoggerFrom(logit.Config{
-        Level:   logit.DebugLevel,
-        Writer:  os.Stdout,
-        Encoder: logit.NewJsonEncoder("2006/01/02 15:04:05", false),
-    })
+    logger.ChangeEncoderTo(logit.NewJsonEncoder(logit.DefaultTimeFormat, false))
     logger.Info("I am json log!")
 
     // You can customize you own encoder, see myEncoder.
-    logger = logit.NewLoggerFrom(logit.Config{
-        Level:   logit.DebugLevel,
-        Writer:  os.Stdout,
-        Encoder: &myEncoder{},
-    })
+    logger.ChangeEncoderTo(&myEncoder{})
     logger.Debug("Ha ha!")
     logger.Info("Hello!")
 

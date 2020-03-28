@@ -42,7 +42,10 @@ type Config struct {
     Handlers []Handler
 }
 
+// FileConfig is the config mapping a file.
 type FileConfig struct {
+
+    // Config means that a file config is also a config.
     Config
 
     // Writer is where to write a log.

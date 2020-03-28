@@ -95,10 +95,10 @@ func main() {
 * [basic](./_examples/basic.go)
 * [logger](./_examples/logger.go)
 * [level_and_disable](./_examples/level_and_disable.go)
-* [log_to_file](./_examples/log_to_file.go)
+* [encoder](./_examples/encoder.go)
 * [handler](./_examples/handler.go)
 * [wrapper](./_examples/wrapper.go)
-* [encoder](./_examples/encoder.go)
+* [log_to_file](./_examples/log_to_file.go)
 
 _Check more examples in [_examples](./_examples)._
 

@@ -30,7 +30,7 @@ type myHandler struct{}
 // Customize your own handler.
 func (mh *myHandler) Handle(log []byte, raw *logit.Log) bool {
     os.Stdout.Write([]byte("myHandler: "))
-    os.Stdout.Write(log)
+    os.Stdout.Write(log) // Try `os.Stdout.WriteString(raw.Msg())` ?
     return true
 }
 

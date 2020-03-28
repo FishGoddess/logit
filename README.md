@@ -67,14 +67,11 @@ import (
 
 func main() {
     
-    // Log as you want.
+    // Log messages with four levels.
     logit.Debug("I am a debug message!")
     logit.Info("I am an info message!")
     logit.Warn("I am a warn message!")
     logit.Error("I am an error message!")
-    
-    // Change logger level.
-    logit.ChangeLevelTo(logit.DebugLevel)
 
     // If you want to output log with file info, try this:
     logit.EnableFileInfo()
@@ -95,10 +92,10 @@ func main() {
 * [basic](./_examples/basic.go)
 * [logger](./_examples/logger.go)
 * [level_and_disable](./_examples/level_and_disable.go)
-* [log_to_file](./_examples/log_to_file.go)
+* [encoder](./_examples/encoder.go)
 * [handler](./_examples/handler.go)
 * [wrapper](./_examples/wrapper.go)
-* [encoder](./_examples/encoder.go)
+* [log_to_file](./_examples/log_to_file.go)
 
 _更多使用案例请查看 [_examples](./_examples) 目录。_
 

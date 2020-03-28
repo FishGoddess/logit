@@ -5,7 +5,9 @@
 * 完善 SizeRollingFile 结构，加入文件个数限制
 
 ### v0.1.1-alpha
-* 加入配置文件的支持
+* 再次对 Handler 进行重构，尽量优化 Logger 的设计
+* 时间缓存机制更新为时间缓冲池机制，减少并发竞争性
+* 加入 FileConfig，为后续支持配置文件做准备
 
 ### v0.1.0-alpha
 * 重新设计 Logger，主要是轻量化处理和重构 handler 的设计

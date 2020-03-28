@@ -30,7 +30,7 @@ import (
 )
 
 const (
-    // SuffixOfLogFile is the prefix of log file.
+    // SuffixOfLogFile is the suffix of log file.
     SuffixOfLogFile = ".log"
 
     // DefaultTimeFormat is the default format for formatting time.
@@ -50,14 +50,13 @@ func nextFilename(directory string) func(now time.Time) string {
 }
 
 // NewLoggerFrom returns a logger with given config.
-// It uses DefaultHandler to handle all logs.
 // See logit.Config.
 func NewLoggerFrom(config Config) *Logger {
     return NewLogger(config.Level, config.Encoder, config.Handlers...)
 }
 
 // NewDevelopLogger returns a logger for developing.
-// A logger for develop should be easy-to-read and output to console.
+// A logger for developing should be easy-to-read and output to console.
 // Also, the level should be DebugLevel.
 func NewDevelopLogger() *Logger {
     return NewLoggerFrom(Config{
@@ -78,7 +77,7 @@ func NewProductionLogger(writer io.Writer) *Logger {
     })
 }
 
-// NewFileLogger returns a Logger holder which log to a file with given logFile and level.
+// NewFileLogger returns a Logger holder which log to a file with given logFile.
 func NewFileLogger(logFile string) *Logger {
     file, err := wrapper.NewFile(logFile)
     if err != nil {
@@ -108,7 +107,7 @@ func NewDurationRollingLogger(directory string, duration time.Duration) *Logger 
 
 // NewDayRollingLogger creates a day rolling logger.
 // You should appoint a directory to store all log files generated in this time.
-// See NewDurationRollingLogger.
+// See logit.NewDurationRollingLogger.
 func NewDayRollingLogger(directory string) *Logger {
     return NewDurationRollingLogger(directory, 24*time.Hour)
 }
@@ -131,7 +130,7 @@ func NewSizeRollingLogger(directory string, limitedSize int64) *Logger {
 
 // NewDayRollingLogger creates a file size rolling logger.
 // You should appoint a directory to store all log files generated in this time.
-// Default means limitedSize is 64 MB. See NewSizeRollingLogger.
+// Default means limitedSize is 64 MB. See logit.NewSizeRollingLogger.
 func NewDefaultSizeRollingLogger(directory string) *Logger {
     return NewSizeRollingLogger(directory, 64*wrapper.MB)
 }

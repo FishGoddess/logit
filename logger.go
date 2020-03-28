@@ -38,11 +38,16 @@ type Logger struct {
     // That's we called level-based logging.
     level Level
 
+    // encoder is how to encode a log to bytes for writing.
+    // We know that log has its format, for example, some users want to log as
+    // a json string and some users want to log as other formats.
+    // So we let logit supports customizing your own encoder to log as what you want.
+    // See logit.Encoder.
     encoder Encoder
 
     // handlers is the slice of log handlers.
     // You can add your handler for some situations.
-    // See LoggerHandler.
+    // See logit.Handler.
     handlers []Handler
 
     // needFileInfo is a flag to check if msg should contain file info.
@@ -57,6 +62,10 @@ type Logger struct {
     mu *sync.RWMutex
 }
 
+// NewLogger creates one Logger with given parameters.
+// The first parameter level is the level of this Logger.
+// The second parameter encoder is the encoder of this Logger.
+// The third parameter handlers is all logger handlers for handling each log.
 func NewLogger(level Level, encoder Encoder, handlers ...Handler) *Logger {
 
     // 至少添加一个日志处理器，否则直接报错
@@ -86,40 +95,8 @@ func NewLogger(level Level, encoder Encoder, handlers ...Handler) *Logger {
     return logger
 }
 
-// NewLoggerWithoutEncoder creates one Logger with given out and level and handlers.
-// The first parameter writer is the writer for logging.
-// The second parameter level is the level of this Logger.
-// The third parameter handlers is all logger handlers for handling each log.
-// It returns a new running Logger holder.
-func NewLoggerWithoutEncoder(level Level, handlers ...Handler) *Logger {
-
-    // 至少添加一个日志处理器，否则直接报错
-    if len(handlers) < 1 {
-        panic("You must add at least one handler!")
-    }
-
-    // 创建 logger 对象
-    logger := &Logger{
-        level:        level,
-        handlers:     handlers,
-        needFileInfo: false,
-        mu:           &sync.RWMutex{},
-    }
-
-    // 初始化 logs 对象池
-    logger.logs = &sync.Pool{
-        New: func() interface{} {
-            return &Log{
-                logger: logger,
-                extra:  map[string]string{},
-            }
-        },
-    }
-
-    return logger
-}
-
 // ChangeLevelTo will change the level of current Logger to newLevel.
+// It returns old level of current logger.
 func (l *Logger) ChangeLevelTo(newLevel Level) Level {
     l.mu.Lock()
     defer l.mu.Unlock()
@@ -128,31 +105,31 @@ func (l *Logger) ChangeLevelTo(newLevel Level) Level {
     return oldLevel
 }
 
-// Level returns the logger level of l.
+// Level returns the logger level of current Logger.
 func (l *Logger) Level() Level {
     l.mu.RLock()
     defer l.mu.RUnlock()
     return l.level
 }
 
-// EnableFileInfo means every log will contain file info like line number.
-// However, you should know that this is expensive in time.
-// So be sure you really need it or keep it disabled.
-func (l *Logger) EnableFileInfo() {
+// ChangeEncoderTo will change the encoder of current Logger to newEncoder.
+// It returns old encoder of current logger.
+func (l *Logger) ChangeEncoderTo(newEncoder Encoder) Encoder {
     l.mu.Lock()
     defer l.mu.Unlock()
-    l.needFileInfo = true
+    oldEncoder := l.encoder
+    l.encoder = newEncoder
+    return oldEncoder
 }
 
-// DisableFileInfo means every log will not contain file info like line number.
-// If you want file info again, try l.EnableFileInfo().
-func (l *Logger) DisableFileInfo() {
-    l.mu.Lock()
-    defer l.mu.Unlock()
-    l.needFileInfo = false
+// Encoder returns the encoder of current Logger.
+func (l *Logger) Encoder() Encoder {
+    l.mu.RLock()
+    defer l.mu.RUnlock()
+    return l.encoder
 }
 
-// AddHandlers adds more handlers to l, and all handlers added before will be retained.
+// AddHandlers adds more handlers to current Logger, and all handlers added before will be retained.
 // If you want to remove all handlers, try l.SetHandlers().
 // See logit.Handler.
 func (l *Logger) AddHandlers(handlers ...Handler) {
@@ -181,7 +158,7 @@ func (l *Logger) SetHandlers(handlers ...Handler) bool {
     return true
 }
 
-// Handlers returns all handlers of l in a copy slice.
+// Handlers returns all handlers of current logger in a copy slice.
 func (l *Logger) Handlers() []Handler {
     l.mu.RLock()
     defer l.mu.RUnlock()
@@ -191,18 +168,21 @@ func (l *Logger) Handlers() []Handler {
     return append(handlers, l.handlers...)
 }
 
-func (l *Logger) ChangeEncoderTo(newEncoder Encoder) Encoder {
+// EnableFileInfo means every log will contain file info like line number.
+// However, you should know that this is expensive in time.
+// So be sure you really need it or keep it disabled.
+func (l *Logger) EnableFileInfo() {
     l.mu.Lock()
     defer l.mu.Unlock()
-    oldEncoder := l.encoder
-    l.encoder = newEncoder
-    return oldEncoder
+    l.needFileInfo = true
 }
 
-func (l *Logger) Encoder() Encoder {
-    l.mu.RLock()
-    defer l.mu.RUnlock()
-    return l.encoder
+// DisableFileInfo means every log will not contain file info like line number.
+// If you want file info again, try l.EnableFileInfo().
+func (l *Logger) DisableFileInfo() {
+    l.mu.Lock()
+    defer l.mu.Unlock()
+    l.needFileInfo = false
 }
 
 // newLog returns a Log holder from object pool.
@@ -231,16 +211,16 @@ func (l *Logger) log(callDepth int, level Level, msg string) {
     // 加上读锁
     l.mu.RLock()
 
-    // 日志记录器的级别高于日志的级别，不进行记录：
+    // 日志记录器的级别高于日志的级别，不进行记录
     if l.level > level {
         l.mu.RUnlock()
         return
     }
 
     // 提前释放读锁，后续操作非常消耗时间，可以不用加锁了，彻底释放并发的天性
-    // 但是 needFileInfo 的获取需要保证并发安全，就在释放锁之前拷贝一份副本，
-    // 即使释放锁之后有人修改了这个属性，也和这里无关了，因为在执行这个 log 方法的时间点上
-    // 这个属性的值就已经确定了，并且不允许被修改了，这类似于 copy on write 的解决思路。
+    // 但是 needFileInfo 的获取需要保证并发安全，就在释放锁之前拷贝一份副本
+    // 即使释放锁之后有人修改了这个属性，也和这里无关了，因为在执行这个 log 方法的时间点上，
+    // 这个属性的值就已经确定了，并且不允许被修改了，这类似于 copy on write 的解决思路
     // 这个解决并发竞争的方案是否没有问题，需要时间的验证才知道
     needFileInfo := l.needFileInfo
     l.mu.RUnlock()
@@ -253,13 +233,14 @@ func (l *Logger) log(callDepth int, level Level, msg string) {
     if needFileInfo {
         wrapLogWithFileInfo(callDepth, log)
     }
-    l.handleLog(l.Encoder().Encode(log), log)
+    l.handleLog(log)
 }
 
 // handleLog handles log with l.handlers.
 // Notice that if one handler returns false, then all handlers after it
 // will not use anymore.
-func (l *Logger) handleLog(encodedLog []byte, log *Log) {
+func (l *Logger) handleLog(log *Log) {
+    encodedLog := l.Encoder().Encode(log)
     for _, handler := range l.handlers {
         if !handler.Handle(encodedLog, log) {
             return
