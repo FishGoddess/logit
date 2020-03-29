@@ -1,5 +1,13 @@
 ## ✒ 历史版本的特性介绍 (Features in old version)
 
+### v0.1.1-alpha
+> 此版本发布于 2020-03-29
+* 再次对 Handler 进行重构，尽量优化 Logger 的设计
+* 去除 Encoder，减少多余的设计，轻量化 Logger
+* 取消时间缓存机制，减少并发竞争性
+* 优化 releaseLog 的 extra 内存分配
+* 加入 FileConfig，为后续支持配置文件做准备
+
 ### v0.1.0-alpha
 > 此版本发布于 2020-03-27
 * 重新设计 Logger，主要是轻量化处理和重构 handler 的设计

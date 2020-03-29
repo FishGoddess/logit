@@ -32,9 +32,6 @@ import (
 const (
     // SuffixOfLogFile is the suffix of log file.
     SuffixOfLogFile = ".log"
-
-    // DefaultTimeFormat is the default format for formatting time.
-    DefaultTimeFormat = "2006-01-02 15:04:05"
 )
 
 // nextFilename creates a time-relative filename with given now time.

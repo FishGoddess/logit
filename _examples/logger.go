@@ -47,6 +47,10 @@ func main() {
     logger = logit.NewLogger(logit.DebugLevel, logit.NewDefaultHandler(os.Stdout, "2006/01/02 15:04:05"))
     logger.Info("What time is it now?")
 
+    // For convenience, we provide a register mechanism and you can use handlers like this:
+    logger = logit.NewLogger(logit.DebugLevel, logit.HandlerOf("default"))
+    logger.Info("What handler is it now?")
+
     // NewLoggerFrom creates a new Logger holder with given config.
     // The config has all the things to create a logger, such as level.
     // We provide some encoders: default encoder and json encoder.

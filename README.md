@@ -42,7 +42,7 @@ module your_project_name
 go 1.14
 
 require (
-    github.com/FishGoddess/logit v0.1.0-alpha
+    github.com/FishGoddess/logit v0.1.1-alpha
 )
 ```
 
@@ -129,6 +129,7 @@ $ go test -v ./_examples/benchmarks_test.go -bench=. -benchtime=1s
 **3. 经过对 v0.0.8 版本的性能检测，发现时间格式化操作消耗了接近一半的处理时间，**
 **主要体现在 time.Time.AppendFormat 的调用上。在 v0.0.11 版本中使用了时间缓存机制进行优化，**
 **目前存在一个疑惑就是使用并发竞争去换取时间格式化的性能消耗究竟值不值得？**
+**答案是不值得，我们在 v0.1.1-alpha 及更高版本中取消了这个时间缓存机制。**
 
 ### 👥 贡献者
 

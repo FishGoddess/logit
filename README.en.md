@@ -42,7 +42,7 @@ module your_project_name
 go 1.14
 
 require (
-    github.com/FishGoddess/logit v0.1.0-alpha
+    github.com/FishGoddess/logit v0.1.1-alpha
 )
 ```
 
@@ -132,6 +132,7 @@ $ go test -v ./_examples/benchmarks_test.go -bench=. -benchtime=1s
 **3. After checking the benchmarks of v0.0.8 version, we found that time format takes a lots of time**
 **because of time.Time.AppendFormat. In v0.0.11 and higher versions, we use time cache mechanism to**
 **reduce the times of time format. However, is it worth to replace time format operation with concurrent competition?**
+**The answer is no, so we cancel this mechanism in v0.1.1-alpha and higher versions.**
 
 ### 👥 Contributing
 

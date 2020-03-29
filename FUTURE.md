@@ -9,7 +9,8 @@
 
 ### v0.1.1-alpha
 * 再次对 Handler 进行重构，尽量优化 Logger 的设计
-* 时间缓存机制更新为时间缓冲池机制，减少并发竞争性
+* 去除 Encoder，减少多余的设计，轻量化 Logger
+* 取消时间缓存机制，减少并发竞争性
 * 优化 releaseLog 的 extra 内存分配
 * 加入 FileConfig，为后续支持配置文件做准备
 

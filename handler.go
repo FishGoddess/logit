@@ -20,8 +20,11 @@ package logit
 
 import (
     "bytes"
+    "errors"
     "io"
+    "os"
     "strconv"
+    "sync"
 )
 
 // Handler is an interface representation of log handler.
@@ -36,6 +39,55 @@ type Handler interface {
     // If you don't want next handler to be used, just return false.
     // Then all handlers after current handler will not be used.
     Handle(log *Log) bool
+}
+
+func init() {
+    RegisterHandler("default", func() Handler {
+        return NewDefaultHandler(os.Stdout, DefaultTimeFormat)
+    })
+    RegisterHandler("json", func() Handler {
+        return NewJsonHandler(os.Stdout, "")
+    })
+}
+
+const (
+    // DefaultTimeFormat is the default format for formatting time.
+    DefaultTimeFormat = "2006-01-02 15:04:05"
+)
+
+var (
+    // handlers stores all registered handlers.
+    // mutexOfHandlers is for concurrency.
+    handlers        = map[string]func() Handler{}
+    mutexOfHandlers = &sync.RWMutex{}
+
+    // HandlerIsExistedError is an error happens on repeat handler name.
+    HandlerIsExistedError = errors.New("the name of handler you want to register already exists! May be you should give it an another name")
+)
+
+// RegisterHandler registers your handler to logit so that you can use them easily.
+// Return an error if the name is existed.
+func RegisterHandler(name string, newHandler func() Handler) error {
+    mutexOfHandlers.Lock()
+    defer mutexOfHandlers.Unlock()
+    if _, ok := handlers[name]; ok {
+        return HandlerIsExistedError
+    }
+    handlers[name] = newHandler
+    return nil
+}
+
+// HandlerOf returns handler whose name is given name.
+// Notice that we don't use an error mechanism or ok mechanism to check the name but
+// a default handler returning mechanism. This is a more convenient way to use handlers (we think).
+func HandlerOf(name string) Handler {
+    mutexOfHandlers.RLock()
+    defer mutexOfHandlers.RUnlock()
+    newHandler, ok := handlers[name]
+    if !ok {
+        return NewDefaultHandler(os.Stdout, DefaultTimeFormat)
+    }
+    return newHandler()
 }
 
 // EncodeToText encodes a log to a plain string like "[Info] [2020-03-06 16:10:44] msg" in bytes.
