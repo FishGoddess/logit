@@ -42,11 +42,19 @@ type Handler interface {
 }
 
 func init() {
-    RegisterHandler("default", func() Handler {
-        return NewDefaultHandler(os.Stdout, DefaultTimeFormat)
+    RegisterHandler("default", func(params map[string]string) Handler {
+        timeFormat := DefaultTimeFormat
+        if format, ok := params["timeFormat"]; ok && format != "" {
+            timeFormat = format
+        }
+        return NewDefaultHandler(os.Stdout, timeFormat)
     })
-    RegisterHandler("json", func() Handler {
-        return NewJsonHandler(os.Stdout, "")
+    RegisterHandler("json", func(params map[string]string) Handler {
+        timeFormat := ""
+        if format, ok := params["timeFormat"]; ok {
+            timeFormat = format
+        }
+        return NewJsonHandler(os.Stdout, timeFormat)
     })
 }
 
@@ -58,7 +66,7 @@ const (
 var (
     // handlers stores all registered handlers.
     // mutexOfHandlers is for concurrency.
-    handlers        = map[string]func() Handler{}
+    handlers        = map[string]func(params map[string]string) Handler{}
     mutexOfHandlers = &sync.RWMutex{}
 
     // HandlerIsExistedError is an error happens on repeat handler name.
@@ -66,8 +74,11 @@ var (
 )
 
 // RegisterHandler registers your handler to logit so that you can use them easily.
-// Return an error if the name is existed.
-func RegisterHandler(name string, newHandler func() Handler) error {
+// Return an error if the name is existed, and you should change another name for your handler.
+// Notice that newHandler has a parameter called params, which will inject into newHandler
+// by logit automatically. Different handler may have different params, so what params should
+// inject into newHandler is dependent to specific handler.
+func RegisterHandler(name string, newHandler func(params map[string]string) Handler) error {
     mutexOfHandlers.Lock()
     defer mutexOfHandlers.Unlock()
     if _, ok := handlers[name]; ok {
@@ -77,17 +88,19 @@ func RegisterHandler(name string, newHandler func() Handler) error {
     return nil
 }
 
-// HandlerOf returns handler whose name is given name.
+// HandlerOf returns handler whose name is given name and params.
+// Different handler may have different params, so what params should
+// inject into newHandler is dependent to specific handler.
 // Notice that we don't use an error mechanism or ok mechanism to check the name but
 // a default handler returning mechanism. This is a more convenient way to use handlers (we think).
-func HandlerOf(name string) Handler {
+func HandlerOf(name string, params map[string]string) Handler {
     mutexOfHandlers.RLock()
     defer mutexOfHandlers.RUnlock()
     newHandler, ok := handlers[name]
     if !ok {
         return NewDefaultHandler(os.Stdout, DefaultTimeFormat)
     }
-    return newHandler()
+    return newHandler(params)
 }
 
 // EncodeToText encodes a log to a plain string like "[Info] [2020-03-06 16:10:44] msg" in bytes.
@@ -145,6 +158,26 @@ func EncodeToJson(log *Log, timeFormat string) []byte {
 // DefaultHandler is a default handler for use.
 // Generally speaking, encoding a log to bytes then written by writer is the most of
 // handlers do. So we provide a default handler, which only need a writer and an encoder.
+//
+// For config:
+//     If you want to use this handler in your logger by config file, try this:
+//
+//         "handlers":[
+//             {
+//                 "name":"default"
+//             }
+//         ]
+//
+//     This will use logit.DefaultTimeFormat to format time, and if you want to
+//     use your layout to format time, try this:
+//
+//         "handlers":[
+//             {
+//                 "name":"default",
+//                 "timeFormat": "2006-01-02"
+//             }
+//         ]
+//
 type DefaultHandler struct {
     writer     io.Writer
     timeFormat string
@@ -166,6 +199,26 @@ func (dh *DefaultHandler) Handle(log *Log) bool {
 }
 
 // JsonHandler is a json handler for use.
+//
+// For config:
+//     If you want to use this handler in your logger by config file, try this:
+//
+//         "handlers":[
+//             {
+//                 "name":"json"
+//             }
+//         ]
+//
+//     This config will not format time, and keep time in unix form. If you want to
+//     use your layout to format time, try this:
+//
+//         "handlers":[
+//             {
+//                 "name":"json",
+//                 "timeFormat": "2006-01-02"
+//             }
+//         ]
+//
 type JsonHandler struct {
     writer     io.Writer
     timeFormat string

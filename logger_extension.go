@@ -52,6 +52,24 @@ func NewLoggerFrom(config Config) *Logger {
     return NewLogger(config.Level, config.Handlers...)
 }
 
+// NewLoggerFromConfigFile returns a logger with config file.
+// A config file is a file like "xxx.cfg", and its content looks like:
+//
+//     "handlers":[
+//         {
+//             "name":"json"
+//         }
+//     ]
+//
+// Check examples to get more information. See logit.ParseConfigFile.
+func NewLoggerFromConfigFile(configFile string) *Logger {
+    config, err := ParseConfigFile(configFile)
+    if err != nil {
+        panic(err)
+    }
+    return NewLoggerFrom(config)
+}
+
 // NewDevelopLogger returns a logger for developing.
 // A logger for developing should be easy-to-read and output to console.
 // Also, the level should be DebugLevel.

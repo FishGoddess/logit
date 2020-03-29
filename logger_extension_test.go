@@ -105,3 +105,9 @@ func TestLoggerLogFunction(t *testing.T) {
         return "error rand int: " + strconv.Itoa(rand.Intn(100))
     })
 }
+
+// 测试从配置文件中创建一个 logger
+func TestNewLoggerFromConfigFile(t *testing.T) {
+    logger := NewLoggerFromConfigFile("Z:/logit.cfg")
+    logger.Info("Does it work?")
+}
