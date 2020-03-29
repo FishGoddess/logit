@@ -52,7 +52,7 @@ func nextFilename(directory string) func(now time.Time) string {
 // NewLoggerFrom returns a logger with given config.
 // See logit.Config.
 func NewLoggerFrom(config Config) *Logger {
-    return NewLogger(config.Level, config.Encoder, config.Handlers...)
+    return NewLogger(config.Level, config.Handlers...)
 }
 
 // NewDevelopLogger returns a logger for developing.
@@ -61,8 +61,7 @@ func NewLoggerFrom(config Config) *Logger {
 func NewDevelopLogger() *Logger {
     return NewLoggerFrom(Config{
         Level:    DebugLevel,
-        Encoder:  NewDefaultEncoder(DefaultTimeFormat),
-        Handlers: []Handler{NewDefaultHandler(os.Stdout)},
+        Handlers: []Handler{NewDefaultHandler(os.Stdout, DefaultTimeFormat)},
     })
 }
 
@@ -72,8 +71,7 @@ func NewDevelopLogger() *Logger {
 func NewProductionLogger(writer io.Writer) *Logger {
     return NewLoggerFrom(Config{
         Level:    WarnLevel,
-        Encoder:  NewJsonEncoder(DefaultTimeFormat, false),
-        Handlers: []Handler{NewDefaultHandler(writer)},
+        Handlers: []Handler{NewJsonHandler(writer, "")},
     })
 }
 
@@ -85,8 +83,7 @@ func NewFileLogger(logFile string) *Logger {
     }
     return NewLoggerFrom(Config{
         Level:    InfoLevel,
-        Encoder:  NewDefaultEncoder(DefaultTimeFormat),
-        Handlers: []Handler{NewDefaultHandler(file)},
+        Handlers: []Handler{NewDefaultHandler(file, DefaultTimeFormat)},
     })
 }
 
@@ -100,8 +97,7 @@ func NewDurationRollingLogger(directory string, duration time.Duration) *Logger 
     file := wrapper.NewDurationRollingFile(duration, nextFilename(directory))
     return NewLoggerFrom(Config{
         Level:    InfoLevel,
-        Encoder:  NewDefaultEncoder(DefaultTimeFormat),
-        Handlers: []Handler{NewDefaultHandler(file)},
+        Handlers: []Handler{NewDefaultHandler(file, DefaultTimeFormat)},
     })
 }
 
@@ -123,8 +119,7 @@ func NewSizeRollingLogger(directory string, limitedSize int64) *Logger {
     file := wrapper.NewSizeRollingFile(limitedSize, nextFilename(directory))
     return NewLoggerFrom(Config{
         Level:    InfoLevel,
-        Encoder:  NewDefaultEncoder(DefaultTimeFormat),
-        Handlers: []Handler{NewDefaultHandler(file)},
+        Handlers: []Handler{NewDefaultHandler(file, DefaultTimeFormat)},
     })
 }
 

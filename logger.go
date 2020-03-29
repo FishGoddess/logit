@@ -37,13 +37,6 @@ type Logger struct {
     // That's we called level-based logging.
     level Level
 
-    // encoder is how to encode a log to bytes for writing.
-    // We know that log has its format, for example, some users want to log as
-    // a json string and some users want to log as other formats.
-    // So we let logit supports customizing your own encoder to log as what you want.
-    // See logit.Encoder.
-    encoder Encoder
-
     // handlers is the slice of log handlers.
     // You can add your handler for some situations.
     // See logit.Handler.
@@ -63,9 +56,8 @@ type Logger struct {
 
 // NewLogger creates one Logger with given parameters.
 // The first parameter level is the level of this Logger.
-// The second parameter encoder is the encoder of this Logger.
-// The third parameter handlers is all logger handlers for handling each log.
-func NewLogger(level Level, encoder Encoder, handlers ...Handler) *Logger {
+// The second parameter handlers is all logger handlers for handling each log.
+func NewLogger(level Level, handlers ...Handler) *Logger {
 
     // 至少添加一个日志处理器，否则直接报错
     if len(handlers) < 1 {
@@ -75,7 +67,6 @@ func NewLogger(level Level, encoder Encoder, handlers ...Handler) *Logger {
     // 创建 logger 对象
     logger := &Logger{
         level:        level,
-        encoder:      encoder,
         handlers:     handlers,
         needFileInfo: false,
         mu:           &sync.RWMutex{},
@@ -108,23 +99,6 @@ func (l *Logger) Level() Level {
     l.mu.RLock()
     defer l.mu.RUnlock()
     return l.level
-}
-
-// ChangeEncoderTo will change the encoder of current Logger to newEncoder.
-// It returns old encoder of current logger.
-func (l *Logger) ChangeEncoderTo(newEncoder Encoder) Encoder {
-    l.mu.Lock()
-    defer l.mu.Unlock()
-    oldEncoder := l.encoder
-    l.encoder = newEncoder
-    return oldEncoder
-}
-
-// Encoder returns the encoder of current Logger.
-func (l *Logger) Encoder() Encoder {
-    l.mu.RLock()
-    defer l.mu.RUnlock()
-    return l.encoder
 }
 
 // AddHandlers adds more handlers to current Logger, and all handlers added before will be retained.
@@ -239,9 +213,8 @@ func (l *Logger) log(callDepth int, level Level, msg string) {
 // Notice that if one handler returns false, then all handlers after it
 // will not use anymore.
 func (l *Logger) handleLog(log *Log) {
-    encodedLog := l.Encoder().Encode(log)
     for _, handler := range l.handlers {
-        if !handler.Handle(encodedLog, log) {
+        if !handler.Handle(log) {
             return
         }
     }

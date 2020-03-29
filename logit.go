@@ -32,11 +32,6 @@ func ChangeLevelTo(level Level) Level {
     return globalLogger.ChangeLevelTo(level)
 }
 
-// ChangeEncoderTo will change the encoder of logit to newEncoder.
-func ChangeEncoderTo(newEncoder Encoder) Encoder {
-    return globalLogger.ChangeEncoderTo(newEncoder)
-}
-
 // AddHandlers adds more handlers to logit, and all handlers added before will be retained.
 // If you want to remove all handlers, try logit.SetHandlers().
 // See logit.DefaultLoggerHandler.
