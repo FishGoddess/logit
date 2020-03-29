@@ -18,15 +18,17 @@
 package main
 
 import (
+    "math/rand"
+    "strconv"
+    "time"
+
     "github.com/FishGoddess/logit"
 )
 
 func main() {
 
     // Log messages with four levels.
-    // Notice that the default level is info, so first line of debug message
-    // will not be logged! If you want to change level, see logit.ChangeLevelTo
-    logit.Debug("I am a debug message! But I will not be logged in default level!")
+    logit.Debug("I am a debug message!")
     logit.Info("I am an info message!")
     logit.Warn("I am a warn message!")
     logit.Error("I am an error message!")
@@ -34,4 +36,12 @@ func main() {
     // If you want to output log with file info, try this:
     logit.EnableFileInfo()
     logit.Info("Show file info!")
+
+    // If you have a long log and it is made of many variables, try this:
+    // The msg is the return value of msgGenerator.
+    logit.DebugFunc(func() string {
+        // Use time as the source of random number generator.
+        r := rand.New(rand.NewSource(time.Now().Unix()))
+        return "debug rand int: " + strconv.Itoa(r.Intn(100))
+    })
 }

@@ -30,42 +30,35 @@ import (
 )
 
 const (
-    // PrefixOfLogFile is the prefix of log file.
-    PrefixOfLogFile = ".log"
-
-    // DefaultTimeFormat is the default format for formatting time.
-    DefaultTimeFormat = "2006-01-02 15:04:05"
+    // SuffixOfLogFile is the suffix of log file.
+    SuffixOfLogFile = ".log"
 )
-
-// random is a generator for random number.
-var random = rand.New(rand.NewSource(time.Now().UnixNano()))
 
 // nextFilename creates a time-relative filename with given now time.
 // Also, it uses random number to ensure this filename is available.
 // The filename will be like "20200304-145246-45.log".
 // Notice that directory stores all log files generated in this time.
 func nextFilename(directory string) func(now time.Time) string {
+    rand.Seed(time.Now().UnixNano())
     return func(now time.Time) string {
-        name := now.Format("20060102-150405") + "-" + strconv.Itoa(random.Intn(1000)) + PrefixOfLogFile
+        name := now.Format("20060102-150405") + "-" + strconv.Itoa(rand.Intn(1000)) + SuffixOfLogFile
         return path.Join(directory, name)
     }
 }
 
 // NewLoggerFrom returns a logger with given config.
-// It uses DefaultHandler to handle all logs.
 // See logit.Config.
 func NewLoggerFrom(config Config) *Logger {
-    return NewLogger(config.Level, NewDefaultHandler(config.Writer, config.Encoder))
+    return NewLogger(config.Level, config.Handlers...)
 }
 
 // NewDevelopLogger returns a logger for developing.
-// A logger for develop should be easy-to-read and output to console.
+// A logger for developing should be easy-to-read and output to console.
 // Also, the level should be DebugLevel.
 func NewDevelopLogger() *Logger {
     return NewLoggerFrom(Config{
-        Level:   DebugLevel,
-        Writer:  os.Stdout,
-        Encoder: NewDefaultEncoder(DefaultTimeFormat),
+        Level:    DebugLevel,
+        Handlers: []Handler{NewDefaultHandler(os.Stdout, DefaultTimeFormat)},
     })
 }
 
@@ -74,22 +67,20 @@ func NewDevelopLogger() *Logger {
 // Also, the level should be WarnLevel.
 func NewProductionLogger(writer io.Writer) *Logger {
     return NewLoggerFrom(Config{
-        Level:   WarnLevel,
-        Writer:  writer,
-        Encoder: NewJsonEncoder(DefaultTimeFormat, false),
+        Level:    WarnLevel,
+        Handlers: []Handler{NewJsonHandler(writer, "")},
     })
 }
 
-// NewFileLogger returns a Logger holder which log to a file with given logFile and level.
+// NewFileLogger returns a Logger holder which log to a file with given logFile.
 func NewFileLogger(logFile string) *Logger {
     file, err := wrapper.NewFile(logFile)
     if err != nil {
         panic(err)
     }
     return NewLoggerFrom(Config{
-        Level:   InfoLevel,
-        Writer:  file,
-        Encoder: NewDefaultEncoder(DefaultTimeFormat),
+        Level:    InfoLevel,
+        Handlers: []Handler{NewDefaultHandler(file, DefaultTimeFormat)},
     })
 }
 
@@ -100,16 +91,16 @@ func NewFileLogger(logFile string) *Logger {
 // If you want to appoint another filename, check this and do it by this way.
 // See wrapper.NewDurationRollingFile (it is an implement of io.writer).
 func NewDurationRollingLogger(directory string, duration time.Duration) *Logger {
+    file := wrapper.NewDurationRollingFile(duration, nextFilename(directory))
     return NewLoggerFrom(Config{
-        Level:   InfoLevel,
-        Writer:  wrapper.NewDurationRollingFile(duration, nextFilename(directory)),
-        Encoder: NewDefaultEncoder(DefaultTimeFormat),
+        Level:    InfoLevel,
+        Handlers: []Handler{NewDefaultHandler(file, DefaultTimeFormat)},
     })
 }
 
 // NewDayRollingLogger creates a day rolling logger.
 // You should appoint a directory to store all log files generated in this time.
-// See NewDurationRollingLogger.
+// See logit.NewDurationRollingLogger.
 func NewDayRollingLogger(directory string) *Logger {
     return NewDurationRollingLogger(directory, 24*time.Hour)
 }
@@ -122,16 +113,16 @@ func NewDayRollingLogger(directory string) *Logger {
 // If you want to appoint another filename, check this and do it by this way.
 // See wrapper.NewSizeRollingFile (it is an implement of io.writer).
 func NewSizeRollingLogger(directory string, limitedSize int64) *Logger {
+    file := wrapper.NewSizeRollingFile(limitedSize, nextFilename(directory))
     return NewLoggerFrom(Config{
-        Level:   InfoLevel,
-        Writer:  wrapper.NewSizeRollingFile(limitedSize, nextFilename(directory)),
-        Encoder: NewDefaultEncoder(DefaultTimeFormat),
+        Level:    InfoLevel,
+        Handlers: []Handler{NewDefaultHandler(file, DefaultTimeFormat)},
     })
 }
 
 // NewDayRollingLogger creates a file size rolling logger.
 // You should appoint a directory to store all log files generated in this time.
-// Default means limitedSize is 64 MB. See NewSizeRollingLogger.
+// Default means limitedSize is 64 MB. See logit.NewSizeRollingLogger.
 func NewDefaultSizeRollingLogger(directory string) *Logger {
     return NewSizeRollingLogger(directory, 64*wrapper.MB)
 }

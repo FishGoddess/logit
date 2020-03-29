@@ -32,11 +32,14 @@ type Log struct {
     // now is the publishing time of this log.
     now time.Time
 
+    // file is the file of this log.
+    file string
+
+    // line is the line number in file.
+    line int
+
     // msg is the message of this log.
     msg string
-
-    // extra is the additional data of this log.
-    extra map[string]string
 }
 
 // Logger returns the publisher of this log.
@@ -59,7 +62,12 @@ func (l *Log) Msg() string {
     return l.msg
 }
 
-// Extra returns the additional data of this log.
-func (l *Log) Extra() map[string]string {
-    return l.extra
+// File returns the file of this log.
+func (l *Log) File() string {
+    return l.file
+}
+
+// Line returns the line number in file of this log.
+func (l *Log) Line() int {
+    return l.line
 }

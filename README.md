@@ -42,7 +42,7 @@ module your_project_name
 go 1.14
 
 require (
-    github.com/FishGoddess/logit v0.1.0
+    github.com/FishGoddess/logit v0.1.1-alpha
 )
 ```
 
@@ -67,14 +67,11 @@ import (
 
 func main() {
     
-    // Log as you want.
+    // Log messages with four levels.
     logit.Debug("I am a debug message!")
     logit.Info("I am an info message!")
     logit.Warn("I am a warn message!")
     logit.Error("I am an error message!")
-    
-    // Change logger level.
-    logit.ChangeLevelTo(logit.DebugLevel)
 
     // If you want to output log with file info, try this:
     logit.EnableFileInfo()
@@ -95,10 +92,9 @@ func main() {
 * [basic](./_examples/basic.go)
 * [logger](./_examples/logger.go)
 * [level_and_disable](./_examples/level_and_disable.go)
-* [log_to_file](./_examples/log_to_file.go)
 * [handler](./_examples/handler.go)
 * [wrapper](./_examples/wrapper.go)
-* [encoder](./_examples/encoder.go)
+* [log_to_file](./_examples/log_to_file.go)
 
 _更多使用案例请查看 [_examples](./_examples) 目录。_
 
@@ -112,7 +108,7 @@ $ go test -v ./_examples/benchmarks_test.go -bench=. -benchtime=1s
 
 | 测试 | 单位时间内运行次数 (越大越好) |  每个操作消耗时间 (越小越好) | 功能性 | 扩展性 |
 | -----------|--------|-------------|-------------|-------------|
-| **logit** | **1242982** | &nbsp; **960 ns/op** | 强大 | 高 |
+| **logit** | &nbsp; **667340** | **1844 ns/op** | 强大 | 高 |
 | zap | &nbsp; 401043 | 2793 ns/op | 正常 | 正常 |
 | logrus | &nbsp; 158262 | 7751 ns/op | 正常 | 正常 |
 | golog | &nbsp; 751064 | 1614 ns/op | 正常 | 正常 |
@@ -133,6 +129,7 @@ $ go test -v ./_examples/benchmarks_test.go -bench=. -benchtime=1s
 **3. 经过对 v0.0.8 版本的性能检测，发现时间格式化操作消耗了接近一半的处理时间，**
 **主要体现在 time.Time.AppendFormat 的调用上。在 v0.0.11 版本中使用了时间缓存机制进行优化，**
 **目前存在一个疑惑就是使用并发竞争去换取时间格式化的性能消耗究竟值不值得？**
+**答案是不值得，我们在 v0.1.1-alpha 及更高版本中取消了这个时间缓存机制。**
 
 ### 👥 贡献者
 

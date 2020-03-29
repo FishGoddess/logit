@@ -20,7 +20,6 @@ package logit
 
 import (
     "runtime"
-    "strconv"
     "sync"
     "time"
 )
@@ -40,7 +39,7 @@ type Logger struct {
 
     // handlers is the slice of log handlers.
     // You can add your handler for some situations.
-    // See LoggerHandler.
+    // See logit.Handler.
     handlers []Handler
 
     // needFileInfo is a flag to check if msg should contain file info.
@@ -55,11 +54,9 @@ type Logger struct {
     mu *sync.RWMutex
 }
 
-// NewLogger creates one Logger with given out and level and handlers.
-// The first parameter writer is the writer for logging.
-// The second parameter level is the level of this Logger.
-// The third parameter handlers is all logger handlers for handling each log.
-// It returns a new running Logger holder.
+// NewLogger creates one Logger with given parameters.
+// The first parameter level is the level of this Logger.
+// The second parameter handlers is all logger handlers for handling each log.
 func NewLogger(level Level, handlers ...Handler) *Logger {
 
     // 至少添加一个日志处理器，否则直接报错
@@ -80,7 +77,6 @@ func NewLogger(level Level, handlers ...Handler) *Logger {
         New: func() interface{} {
             return &Log{
                 logger: logger,
-                extra:  map[string]string{},
             }
         },
     }
@@ -89,37 +85,23 @@ func NewLogger(level Level, handlers ...Handler) *Logger {
 }
 
 // ChangeLevelTo will change the level of current Logger to newLevel.
-func (l *Logger) ChangeLevelTo(newLevel Level) {
+// It returns old level of current logger.
+func (l *Logger) ChangeLevelTo(newLevel Level) Level {
     l.mu.Lock()
     defer l.mu.Unlock()
+    oldLevel := l.level
     l.level = newLevel
+    return oldLevel
 }
 
-// Level returns the logger level of l.
+// Level returns the logger level of current Logger.
 func (l *Logger) Level() Level {
     l.mu.RLock()
     defer l.mu.RUnlock()
     return l.level
 }
 
-// EnableFileInfo means every log will contain file info like line number.
-// However, you should know that this is expensive in time.
-// So be sure you really need it or keep it disabled.
-func (l *Logger) EnableFileInfo() {
-    l.mu.Lock()
-    defer l.mu.Unlock()
-    l.needFileInfo = true
-}
-
-// DisableFileInfo means every log will not contain file info like line number.
-// If you want file info again, try l.EnableFileInfo().
-func (l *Logger) DisableFileInfo() {
-    l.mu.Lock()
-    defer l.mu.Unlock()
-    l.needFileInfo = false
-}
-
-// AddHandlers adds more handlers to l, and all handlers added before will be retained.
+// AddHandlers adds more handlers to current Logger, and all handlers added before will be retained.
 // If you want to remove all handlers, try l.SetHandlers().
 // See logit.Handler.
 func (l *Logger) AddHandlers(handlers ...Handler) {
@@ -148,7 +130,7 @@ func (l *Logger) SetHandlers(handlers ...Handler) bool {
     return true
 }
 
-// Handlers returns all handlers of l in a copy slice.
+// Handlers returns all handlers of current logger in a copy slice.
 func (l *Logger) Handlers() []Handler {
     l.mu.RLock()
     defer l.mu.RUnlock()
@@ -156,6 +138,23 @@ func (l *Logger) Handlers() []Handler {
     // 返回的是日志处理器的副本，防止被非法篡改
     handlers := make([]Handler, 0, len(l.handlers))
     return append(handlers, l.handlers...)
+}
+
+// EnableFileInfo means every log will contain file info like line number.
+// However, you should know that this is expensive in time.
+// So be sure you really need it or keep it disabled.
+func (l *Logger) EnableFileInfo() {
+    l.mu.Lock()
+    defer l.mu.Unlock()
+    l.needFileInfo = true
+}
+
+// DisableFileInfo means every log will not contain file info like line number.
+// If you want file info again, try l.EnableFileInfo().
+func (l *Logger) DisableFileInfo() {
+    l.mu.Lock()
+    defer l.mu.Unlock()
+    l.needFileInfo = false
 }
 
 // newLog returns a Log holder from object pool.
@@ -170,7 +169,8 @@ func (l *Logger) newLog(level Level, msg string) *Log {
 
 // releaseLog releases log to object pool so that this log can be reused next time.
 func (l *Logger) releaseLog(log *Log) {
-    log.extra = map[string]string{}
+    log.file = ""
+    log.line = 0
     l.logs.Put(log)
 }
 
@@ -184,16 +184,16 @@ func (l *Logger) log(callDepth int, level Level, msg string) {
     // 加上读锁
     l.mu.RLock()
 
-    // 日志记录器的级别高于日志的级别，不进行记录：
+    // 日志记录器的级别高于日志的级别，不进行记录
     if l.level > level {
         l.mu.RUnlock()
         return
     }
 
     // 提前释放读锁，后续操作非常消耗时间，可以不用加锁了，彻底释放并发的天性
-    // 但是 needFileInfo 的获取需要保证并发安全，就在释放锁之前拷贝一份副本，
-    // 即使释放锁之后有人修改了这个属性，也和这里无关了，因为在执行这个 log 方法的时间点上
-    // 这个属性的值就已经确定了，并且不允许被修改了，这类似于 copy on write 的解决思路。
+    // 但是 needFileInfo 的获取需要保证并发安全，就在释放锁之前拷贝一份副本
+    // 即使释放锁之后有人修改了这个属性，也和这里无关了，因为在执行这个 log 方法的时间点上，
+    // 这个属性的值就已经确定了，并且不允许被修改了，这类似于 copy on write 的解决思路
     // 这个解决并发竞争的方案是否没有问题，需要时间的验证才知道
     needFileInfo := l.needFileInfo
     l.mu.RUnlock()
@@ -228,12 +228,12 @@ func wrapLogWithFileInfo(callDepth int, log *Log) {
     // 这个 callDepth 是 runtime.Caller 方法的参数，表示上面第几层调用者信息
     _, file, line, ok := runtime.Caller(callDepth)
     if !ok {
-        log.extra["file"] = "unknown file"
-        log.extra["line"] = "-1"
+        log.file = "unknown file"
+        log.line = -1
     }
 
-    log.extra["file"] = file
-    log.extra["line"] = strconv.Itoa(line)
+    log.file = file
+    log.line = line
 }
 
 // Debug will output msg as a debug message.

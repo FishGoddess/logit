@@ -42,7 +42,7 @@ module your_project_name
 go 1.14
 
 require (
-    github.com/FishGoddess/logit v0.1.0
+    github.com/FishGoddess/logit v0.1.1-alpha
 )
 ```
 
@@ -95,10 +95,9 @@ func main() {
 * [basic](./_examples/basic.go)
 * [logger](./_examples/logger.go)
 * [level_and_disable](./_examples/level_and_disable.go)
-* [log_to_file](./_examples/log_to_file.go)
 * [handler](./_examples/handler.go)
 * [wrapper](./_examples/wrapper.go)
-* [encoder](./_examples/encoder.go)
+* [log_to_file](./_examples/log_to_file.go)
 
 _Check more examples in [_examples](./_examples)._
 
@@ -112,7 +111,7 @@ $ go test -v ./_examples/benchmarks_test.go -bench=. -benchtime=1s
 
 | test case | times ran (large is better) |  ns/op (small is better) | features | extension |
 | -----------|--------|-------------|-------------|-------------|
-| **logit** | **1242982** | &nbsp; **960 ns/op** | powerful | high |
+| **logit** | &nbsp; **667340** | **1844 ns/op** | powerful | high |
 | zap | &nbsp; 401043 | 2793 ns/op | normal | normal |
 | logrus | &nbsp; 158262 | 7751 ns/op | normal | normal |
 | golog | &nbsp; 751064 | 1614 ns/op | normal | normal |
@@ -133,6 +132,7 @@ $ go test -v ./_examples/benchmarks_test.go -bench=. -benchtime=1s
 **3. After checking the benchmarks of v0.0.8 version, we found that time format takes a lots of time**
 **because of time.Time.AppendFormat. In v0.0.11 and higher versions, we use time cache mechanism to**
 **reduce the times of time format. However, is it worth to replace time format operation with concurrent competition?**
+**The answer is no, so we cancel this mechanism in v0.1.1-alpha and higher versions.**
 
 ### 👥 Contributing
 

@@ -1,13 +1,20 @@
 ## ✒ 未来版本的新特性 (Features in future version)
 
-### v0.1.2
+### v0.1.3
 * 完善 DurationRollingFile 结构，加入文件个数限制
 * 完善 SizeRollingFile 结构，加入文件个数限制
 
-### v0.1.1
+### v0.1.2
 * 加入配置文件的支持
 
-### v0.1.0
+### v0.1.1-alpha
+* 再次对 Handler 进行重构，尽量优化 Logger 的设计
+* 去除 Encoder，减少多余的设计，轻量化 Logger
+* 取消时间缓存机制，减少并发竞争性
+* 优化 releaseLog 的 extra 内存分配
+* 加入 FileConfig，为后续支持配置文件做准备
+
+### v0.1.0-alpha
 * 重新设计 Logger，主要是轻量化处理和重构 handler 的设计
 * 增加 Encoder 接口，方便用户扩展 Logger，并内置 Json 编码器
 * Json 编码器允许时间不做格式化，使用 Unix 形式处理时间，方便解析处理

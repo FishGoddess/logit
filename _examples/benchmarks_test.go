@@ -26,7 +26,7 @@ func (nw *nopWriter) Write(p []byte) (n int, err error) {
 func BenchmarkLogitLogger(b *testing.B) {
 
     // 测试用的日志记录器
-    logger := logit.NewLogger(logit.DebugLevel, logit.NewDefaultHandler(&nopWriter{}, logit.NewDefaultEncoder(logit.DefaultTimeFormat)))
+    logger := logit.NewLogger(logit.DebugLevel, logit.NewDefaultHandler(&nopWriter{}, logit.DefaultTimeFormat))
 
     // 测试用的日志任务
     logTask := func() {

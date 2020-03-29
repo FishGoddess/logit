@@ -19,7 +19,12 @@
 package logit
 
 import (
+    "bytes"
+    "errors"
     "io"
+    "os"
+    "strconv"
+    "sync"
 )
 
 // Handler is an interface representation of log handler.
@@ -36,25 +41,148 @@ type Handler interface {
     Handle(log *Log) bool
 }
 
+func init() {
+    RegisterHandler("default", func() Handler {
+        return NewDefaultHandler(os.Stdout, DefaultTimeFormat)
+    })
+    RegisterHandler("json", func() Handler {
+        return NewJsonHandler(os.Stdout, "")
+    })
+}
+
+const (
+    // DefaultTimeFormat is the default format for formatting time.
+    DefaultTimeFormat = "2006-01-02 15:04:05"
+)
+
+var (
+    // handlers stores all registered handlers.
+    // mutexOfHandlers is for concurrency.
+    handlers        = map[string]func() Handler{}
+    mutexOfHandlers = &sync.RWMutex{}
+
+    // HandlerIsExistedError is an error happens on repeat handler name.
+    HandlerIsExistedError = errors.New("the name of handler you want to register already exists! May be you should give it an another name")
+)
+
+// RegisterHandler registers your handler to logit so that you can use them easily.
+// Return an error if the name is existed.
+func RegisterHandler(name string, newHandler func() Handler) error {
+    mutexOfHandlers.Lock()
+    defer mutexOfHandlers.Unlock()
+    if _, ok := handlers[name]; ok {
+        return HandlerIsExistedError
+    }
+    handlers[name] = newHandler
+    return nil
+}
+
+// HandlerOf returns handler whose name is given name.
+// Notice that we don't use an error mechanism or ok mechanism to check the name but
+// a default handler returning mechanism. This is a more convenient way to use handlers (we think).
+func HandlerOf(name string) Handler {
+    mutexOfHandlers.RLock()
+    defer mutexOfHandlers.RUnlock()
+    newHandler, ok := handlers[name]
+    if !ok {
+        return NewDefaultHandler(os.Stdout, DefaultTimeFormat)
+    }
+    return newHandler()
+}
+
+// EncodeToText encodes a log to a plain string like "[Info] [2020-03-06 16:10:44] msg" in bytes.
+func EncodeToText(log *Log, timeFormat string) []byte {
+
+    // 组装 log
+    buffer := bytes.NewBuffer(make([]byte, 0, 64))
+    buffer.WriteString("[")
+    buffer.WriteString(log.Level().String())
+    buffer.WriteString("] [")
+    buffer.WriteString(log.Now().Format(timeFormat))
+    buffer.WriteString("] ")
+
+    // 如果有文件信息，就把文件信息也加进去
+    if log.file != "" && log.Line() != 0 {
+        buffer.WriteString("[")
+        buffer.WriteString(log.File() + ":" + strconv.Itoa(log.Line()))
+        buffer.WriteString("] ")
+    }
+
+    buffer.WriteString(log.Msg())
+    buffer.WriteString("\n")
+    return buffer.Bytes()
+}
+
+// EncodeToJson encodes a log to a Json string like `{"level":"debug", "time":"2020-03-22 22:35:00", "msg":"log content..."}` in bytes.
+// If timeFormat == "", then it will not format time and keep time in unix form.
+func EncodeToJson(log *Log, timeFormat string) []byte {
+
+    // 组装 log
+    buffer := bytes.NewBuffer(make([]byte, 0, 64))
+    buffer.WriteString(`{"level":"`)
+    buffer.WriteString(log.Level().String())
+    buffer.WriteString(`", "time":`)
+
+    // 判断是否需要格式化时间
+    if timeFormat != "" {
+        buffer.WriteString(strconv.Quote(log.Now().Format(timeFormat)))
+    } else {
+        buffer.WriteString(strconv.FormatInt(log.Now().Unix(), 10))
+    }
+
+    // 如果有文件信息，就把文件信息也加进去
+    if log.file != "" && log.Line() != 0 {
+        buffer.WriteString(`, "file":"` + log.File())
+        buffer.WriteString(`", "line":` + strconv.Itoa(log.Line()))
+    }
+
+    buffer.WriteString(`, "msg":"`)
+    buffer.WriteString(log.Msg())
+    buffer.WriteString("\"}\n")
+    return buffer.Bytes()
+}
+
 // DefaultHandler is a default handler for use.
 // Generally speaking, encoding a log to bytes then written by writer is the most of
 // handlers do. So we provide a default handler, which only need a writer and an encoder.
 type DefaultHandler struct {
-    writer  io.Writer
-    encoder Encoder
+    writer     io.Writer
+    timeFormat string
 }
 
-// NewDefaultHandler returns a DefaultHandler holder with given writer and encoder.
-func NewDefaultHandler(writer io.Writer, encoder Encoder) Handler {
+// NewDefaultHandler returns a DefaultHandler holder with given writer.
+func NewDefaultHandler(writer io.Writer, timeFormat string) Handler {
     return &DefaultHandler{
-        writer:  writer,
-        encoder: encoder,
+        writer:     writer,
+        timeFormat: timeFormat,
     }
 }
 
-// Handle will encode log to bytes with internal encoder and written by internal writer.
+// Handle will encode log and write log by internal writer.
 // Return true so that handlers after it will be used.
 func (dh *DefaultHandler) Handle(log *Log) bool {
-    dh.writer.Write(dh.encoder.Encode(log))
+    dh.writer.Write(EncodeToText(log, dh.timeFormat))
+    return true
+}
+
+// JsonHandler is a json handler for use.
+type JsonHandler struct {
+    writer     io.Writer
+    timeFormat string
+}
+
+// NewJsonHandler returns a JsonHandler holder with given writer.
+// If timeFormat == "", then it will not format time and keep time in unix form.
+func NewJsonHandler(writer io.Writer, timeFormat string) Handler {
+    return &JsonHandler{
+        writer:     writer,
+        timeFormat: timeFormat,
+    }
+}
+
+// Handle will encode log and write log by internal writer.
+// Return true so that handlers after it will be used.
+func (jh *JsonHandler) Handle(log *Log) bool {
+    jh.writer.Write(EncodeToJson(log, jh.timeFormat))
     return true
 }
