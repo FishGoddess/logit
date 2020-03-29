@@ -55,11 +55,11 @@ func NewLoggerFrom(config Config) *Logger {
 // NewLoggerFromConfigFile returns a logger with config file.
 // A config file is a file like "xxx.cfg", and its content looks like:
 //
-//     "handlers":[
-//         {
-//             "name":"json"
+//         "handlers":{
+//             "json":{
+//
+//             }
 //         }
-//     ]
 //
 // Check examples to get more information. See logit.ParseConfigFile.
 func NewLoggerFromConfigFile(configFile string) *Logger {

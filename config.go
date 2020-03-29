@@ -21,12 +21,7 @@ package logit
 import (
     "bytes"
     "encoding/json"
-    "errors"
     "io/ioutil"
-)
-
-var (
-    HandlerDoesNotHaveNameError = errors.New("handler should provide a name which has been used to register to logit")
 )
 
 // Config is for configuring a Logger.
@@ -45,7 +40,7 @@ type Config struct {
 type fileConfig struct {
     Level string `json:"level"`
 
-    Handlers []map[string]string `json:"handlers"`
+    Handlers map[string]map[string]string `json:"handlers"`
 }
 
 func removeComments(fileInBytes []byte) []byte {
@@ -70,13 +65,8 @@ func parseConfig(fileConfig fileConfig) (Config, error) {
 
     // 解析日志处理器
     var handlers []Handler
-    for _, handler := range fileConfig.Handlers {
-        name, ok := handler["name"]
-        if !ok {
-            return Config{}, HandlerDoesNotHaveNameError
-        }
-        delete(handler, "name")
-        handlers = append(handlers, HandlerOf(name, handler))
+    for name, parmas := range fileConfig.Handlers {
+        handlers = append(handlers, HandlerOf(name, parmas))
     }
 
     return Config{

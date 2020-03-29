@@ -162,21 +162,20 @@ func EncodeToJson(log *Log, timeFormat string) []byte {
 // For config:
 //     If you want to use this handler in your logger by config file, try this:
 //
-//         "handlers":[
-//             {
-//                 "name":"default"
+//         "handlers":{
+//             "default":{
+//
 //             }
-//         ]
+//         }
 //
 //     This will use logit.DefaultTimeFormat to format time, and if you want to
 //     use your layout to format time, try this:
 //
-//         "handlers":[
-//             {
-//                 "name":"default",
+//         "handlers":{
+//             "default":{
 //                 "timeFormat": "2006-01-02"
 //             }
-//         ]
+//         }
 //
 type DefaultHandler struct {
     writer     io.Writer
@@ -203,21 +202,20 @@ func (dh *DefaultHandler) Handle(log *Log) bool {
 // For config:
 //     If you want to use this handler in your logger by config file, try this:
 //
-//         "handlers":[
-//             {
-//                 "name":"json"
+//         "handlers":{
+//             "json":{
+//
 //             }
-//         ]
+//         }
 //
 //     This config will not format time, and keep time in unix form. If you want to
 //     use your layout to format time, try this:
 //
-//         "handlers":[
-//             {
-//                 "name":"json",
+//         "handlers":{
+//             "json":{
 //                 "timeFormat": "2006-01-02"
 //             }
-//         ]
+//         }
 //
 type JsonHandler struct {
     writer     io.Writer

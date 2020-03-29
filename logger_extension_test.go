@@ -108,6 +108,6 @@ func TestLoggerLogFunction(t *testing.T) {
 
 // 测试从配置文件中创建一个 logger
 func TestNewLoggerFromConfigFile(t *testing.T) {
-    logger := NewLoggerFromConfigFile("Z:/logit.cfg")
+    logger := NewLoggerFromConfigFile("./_examples/logger_extension_test.cfg")
     logger.Info("Does it work?")
 }
