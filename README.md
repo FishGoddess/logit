@@ -101,18 +101,17 @@ _更多使用案例请查看 [_examples](./_examples) 目录。_
 ### 🔥 性能测试
 
 ```bash
-$ go test -v ./_examples/benchmarks_test.go -bench=. -benchtime=1s
+$ go test -v ./_examples/benchmarks_test.go -bench=. -benchtime=10s
 ```
 
 > 测试文件：[_examples/benchmarks_test.go](./_examples/benchmarks_test.go)
 
 | 测试 | 单位时间内运行次数 (越大越好) |  每个操作消耗时间 (越小越好) | 功能性 | 扩展性 |
 | -----------|--------|-------------|-------------|-------------|
-| **logit** | &nbsp; **667340** | **1844 ns/op** | 强大 | 高 |
-| zap | &nbsp; 401043 | 2793 ns/op | 正常 | 正常 |
-| logrus | &nbsp; 158262 | 7751 ns/op | 正常 | 正常 |
-| golog | &nbsp; 751064 | 1614 ns/op | 正常 | 正常 |
-| golang log | 1269531 | &nbsp; 938 ns/op | 一般 | 无 |
+| **logit** | **6190574** | **1909 ns/op** | 强大 | 高 |
+| golog | 3361483 | 3589 ns/op | 简单 | 一般 |
+| zap | 2971119 | 4066 ns/op | 复杂 | 正常 |
+| logrus | 1553419 | 7869 ns/op | 正常 | 正常 |
 
 > 测试环境：I7-6700HQ CPU @ 2.6 GHZ，16 GB RAM
 

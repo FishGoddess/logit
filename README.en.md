@@ -104,18 +104,17 @@ _Check more examples in [_examples](./_examples)._
 ### 🔥 Benchmarks
 
 ```bash
-$ go test -v ./_examples/benchmarks_test.go -bench=. -benchtime=1s
+$ go test -v ./_examples/benchmarks_test.go -bench=. -benchtime=10s
 ```
 
 > Benchmark file：[_examples/benchmarks_test.go](./_examples/benchmarks_test.go)
 
 | test case | times ran (large is better) |  ns/op (small is better) | features | extension |
 | -----------|--------|-------------|-------------|-------------|
-| **logit** | &nbsp; **667340** | **1844 ns/op** | powerful | high |
-| zap | &nbsp; 401043 | 2793 ns/op | normal | normal |
-| logrus | &nbsp; 158262 | 7751 ns/op | normal | normal |
-| golog | &nbsp; 751064 | 1614 ns/op | normal | normal |
-| golang log | 1269531 | &nbsp; 938 ns/op | not good | none |
+| **logit** | **6190574** | **1909 ns/op** | powerful | high |
+| golog | 3361483 | 3589 ns/op | easy | common |
+| zap | 2971119 | 4066 ns/op | complex | normal |
+| logrus | 1553419 | 7869 ns/op | normal | normal |
 
 > Environment：I7-6700HQ CPU @ 2.6 GHZ, 16 GB RAM
 

@@ -1,62 +1,63 @@
 // Author: fish
 // Email: fishinlove@163.com
-// Created at 2020/03/02 21:07:01
+// Created at 2020/03/02 20:51:29
 
 package main
 
 import (
-    "log"
     "testing"
+    //"time"
 
     "github.com/FishGoddess/logit"
+    //"github.com/FishGoddess/logit/wrapper"
     //"github.com/kataras/golog"
     //"github.com/sirupsen/logrus"
     //"go.uber.org/zap"
     //"go.uber.org/zap/zapcore"
 )
 
-// 仅为测试用，不输出任何信息的写出器
+// 时间格式化字符串
+const timeFormat = "2006-01-02 15:04:05"
+
 type nopWriter struct{}
 
-func (nw *nopWriter) Write(p []byte) (n int, err error) {
+func (w *nopWriter) Write(p []byte) (n int, err error) {
     return 0, nil
 }
+
+/*
+
+BenchmarkLogitLogger-8           6190574              1909 ns/op             384 B/op          8 allocs/op
+
+BenchmarkGologLogger-8           3361483              3589 ns/op             712 B/op         24 allocs/op
+
+BenchmarkZapLogger-8             2971119              4066 ns/op             448 B/op         16 allocs/op
+
+BenchmarkLogrusLogger-8          1553419              7869 ns/op            1633 B/op         52 allocs/op
+
+***************************************************************************************************************
+
+BenchmarkLogitFile-8             1000000             10604 ns/op             384 B/op          8 allocs/op
+
+BenchmarkGologFile-8              600966             20385 ns/op             712 B/op         24 allocs/op
+
+BenchmarkZapFile-8                828692             13586 ns/op             448 B/op         16 allocs/op
+
+BenchmarkLogrusFile-8             632258             16950 ns/op            1633 B/op         52 allocs/op
+*/
 
 // 测试 logit 日志记录器的速度
 func BenchmarkLogitLogger(b *testing.B) {
 
     // 测试用的日志记录器
-    logger := logit.NewLogger(logit.DebugLevel, logit.NewDefaultHandler(&nopWriter{}, logit.DefaultTimeFormat))
+    logger := logit.NewLogger(logit.DebugLevel, logit.NewDefaultHandler(&nopWriter{}, timeFormat))
 
     // 测试用的日志任务
     logTask := func() {
         logger.Debug("debug...")
         logger.Info("info...")
-        logger.Warn("warn...")
+        logger.Warn("warning...")
         logger.Error("error...")
-    }
-
-    // 开始性能测试
-    b.ReportAllocs()
-    b.StartTimer()
-
-    for i := 0; i < b.N; i++ {
-        logTask()
-    }
-}
-
-// 测试标准库 log.Logger 日志记录器的速度
-func BenchmarkLogLogger(b *testing.B) {
-
-    // 测试用的日志记录器
-    logger := log.New(&nopWriter{}, "", log.LstdFlags)
-
-    // 测试用的日志任务
-    logTask := func() {
-        logger.Println("debug...")
-        logger.Println("info...")
-        logger.Println("warn...")
-        logger.Println("error...")
     }
 
     // 开始性能测试
@@ -71,16 +72,48 @@ func BenchmarkLogLogger(b *testing.B) {
 // 测试 golog 日志记录器的速度
 //func BenchmarkGologLogger(b *testing.B) {
 //
-//    golog.SetOutput(&nopWriter{})
-//    golog.SetLevel("debug")
-//    golog.SetTimeFormat("")
+//    logger := golog.New()
+//    logger.SetOutput(&nopWriter{})
+//    logger.SetLevel("debug")
+//    logger.SetTimeFormat(timeFormat)
 //
 //    // 测试用的日志任务
 //    logTask := func() {
-//        golog.Debug("debug...")
-//        golog.Info("info...")
-//        golog.Warn("warn...")
-//        golog.Error("error...")
+//        logger.Debug("debug...")
+//        logger.Info("info...")
+//        logger.Warn("warning...")
+//        logger.Error("error...")
+//    }
+//
+//    // 开始性能测试
+//    b.ReportAllocs()
+//    b.StartTimer()
+//
+//    for i := 0; i < b.N; i++ {
+//        logTask()
+//    }
+//}
+
+// 测试 zap 日志记录器的速度
+//func BenchmarkZapLogger(b *testing.B) {
+//
+//    // 测试用的日志记录器
+//    config := zap.NewProductionEncoderConfig()
+//    config.EncodeTime = func(t time.Time, enc zapcore.PrimitiveArrayEncoder) {
+//        enc.AppendString(t.Format(timeFormat))
+//    }
+//    encoder := zapcore.NewConsoleEncoder(config)
+//    nopWriteSyncer := zapcore.AddSync(&nopWriter{})
+//    core := zapcore.NewCore(encoder, nopWriteSyncer, zapcore.DebugLevel)
+//    logger := zap.New(core)
+//    defer logger.Sync()
+//
+//    // 测试用的日志任务
+//    logTask := func() {
+//        logger.Debug("debug...")
+//        logger.Info("info...")
+//        logger.Warn("warning...")
+//        logger.Error("error...")
 //    }
 //
 //    // 开始性能测试
@@ -95,15 +128,19 @@ func BenchmarkLogLogger(b *testing.B) {
 // 测试 logrus 日志记录器的速度
 //func BenchmarkLogrusLogger(b *testing.B) {
 //
-//    logrus.SetOutput(&nopWriter{})
-//    logrus.SetLevel(logrus.DebugLevel)
+//    logger := logrus.New()
+//    logger.SetOutput(&nopWriter{})
+//    logger.SetLevel(logrus.DebugLevel)
+//    logger.SetFormatter(&logrus.TextFormatter{
+//        TimestampFormat: timeFormat,
+//    })
 //
 //    // 测试用的日志任务
 //    logTask := func() {
-//        logrus.Debug("debug...")
-//        logrus.Info("info...")
-//        logrus.Warn("warn...")
-//        logrus.Error("error...")
+//        logger.Debug("debug...")
+//        logger.Info("info...")
+//        logger.Warn("warning...")
+//        logger.Error("error...")
 //    }
 //
 //    b.ReportAllocs()
@@ -114,16 +151,68 @@ func BenchmarkLogLogger(b *testing.B) {
 //    }
 //}
 
-// 测试标准库 zap 日志记录器的速度
-//func BenchmarkZapLogger(b *testing.B) {
+// ******************************************************
+
+//// 测试 logit 文件日志记录器的速度
+//func BenchmarkLogitFile(b *testing.B) {
+//
+//    file, _ := wrapper.NewFile("D:/BenchmarkLogitFile.log")
+//    logger := logit.NewLogger(logit.DebugLevel, logit.NewDefaultHandler(file, timeFormat))
+//
+//    // 测试用的日志任务
+//    logTask := func() {
+//        logger.Debug("debug...")
+//        logger.Info("info...")
+//        logger.Warn("warning...")
+//        logger.Error("error...")
+//    }
+//
+//    b.ReportAllocs()
+//    b.StartTimer()
+//
+//    for i := 0; i < b.N; i++ {
+//        logTask()
+//    }
+//}
+//
+//// 测试 golog 文件日志记录器的速度
+//func BenchmarkGologFile(b *testing.B) {
+//
+//    logger := golog.New()
+//    file, _ := wrapper.NewFile("D:/BenchmarkGologFile.log")
+//    logger.SetOutput(file)
+//    logger.SetLevel("debug")
+//    logger.SetTimeFormat(timeFormat)
+//
+//    // 测试用的日志任务
+//    logTask := func() {
+//        logger.Debug("debug...")
+//        logger.Info("info...")
+//        logger.Warn("warning...")
+//        logger.Error("error...")
+//    }
+//
+//    // 开始性能测试
+//    b.ReportAllocs()
+//    b.StartTimer()
+//
+//    for i := 0; i < b.N; i++ {
+//        logTask()
+//    }
+//}
+//
+//// 测试 zap 文件日志记录器的速度
+//func BenchmarkZapFile(b *testing.B) {
 //
 //    // 测试用的日志记录器
 //    config := zap.NewProductionEncoderConfig()
-//    config.EncodeTime = zapcore.RFC3339TimeEncoder
-//    // 这里选用了 JSONEncoder，因为 JSONEncoder 比 ConsoleEncoder 的性能提升了接近 63%
-//    jsonEncoder := zapcore.NewJSONEncoder(config)
-//    nopWriteSyncer := zapcore.AddSync(&nopWriter{})
-//    core := zapcore.NewCore(jsonEncoder, nopWriteSyncer, zapcore.DebugLevel)
+//    config.EncodeTime = func(t time.Time, enc zapcore.PrimitiveArrayEncoder) {
+//        enc.AppendString(t.Format(timeFormat))
+//    }
+//    encoder := zapcore.NewConsoleEncoder(config)
+//    file, _ := wrapper.NewFile("D:/BenchmarkZapFile.log")
+//    writeSyncer := zapcore.AddSync(file)
+//    core := zapcore.NewCore(encoder, writeSyncer, zapcore.DebugLevel)
 //    logger := zap.New(core)
 //    defer logger.Sync()
 //
@@ -136,6 +225,33 @@ func BenchmarkLogLogger(b *testing.B) {
 //    }
 //
 //    // 开始性能测试
+//    b.ReportAllocs()
+//    b.StartTimer()
+//
+//    for i := 0; i < b.N; i++ {
+//        logTask()
+//    }
+//}
+//
+//// 测试 logrus 文件日志记录器的速度
+//func BenchmarkLogrusFile(b *testing.B) {
+//
+//    logger := logrus.New()
+//    file, _ := wrapper.NewFile("D:/BenchmarkLogrusFile.log")
+//    logger.SetOutput(file)
+//    logger.SetLevel(logrus.DebugLevel)
+//    logger.SetFormatter(&logrus.TextFormatter{
+//        TimestampFormat: timeFormat,
+//    })
+//
+//    // 测试用的日志任务
+//    logTask := func() {
+//        logger.Debug("debug...")
+//        logger.Info("info...")
+//        logger.Warn("warning...")
+//        logger.Error("error...")
+//    }
+//
 //    b.ReportAllocs()
 //    b.StartTimer()
 //
