@@ -88,26 +88,26 @@ func Error(msg string) {
 // The msg is the return value of msgGenerator.
 // This is a better way to output a long log made of many variables.
 func DebugFunc(msgGenerator func() string) {
-    globalLogger.DebugFunc(msgGenerator)
+    globalLogger.log(callDepthOfGlobalLogger, DebugLevel, msgGenerator())
 }
 
 // InfoFunc will output msg as an info message.
 // The msg is the return value of msgGenerator.
 // This is a better way to output a long log made of many variables.
 func InfoFunc(msgGenerator func() string) {
-    globalLogger.InfoFunc(msgGenerator)
+    globalLogger.log(callDepthOfGlobalLogger, InfoLevel, msgGenerator())
 }
 
 // WarnFunc will output msg as a warn message.
 // The msg is the return value of msgGenerator.
 // This is a better way to output a long log made of many variables.
 func WarnFunc(msgGenerator func() string) {
-    globalLogger.WarnFunc(msgGenerator)
+    globalLogger.log(callDepthOfGlobalLogger, WarnLevel, msgGenerator())
 }
 
 // ErrorFunc will output msg as an error message.
 // The msg is the return value of msgGenerator.
 // This is a better way to output a long log made of many variables.
 func ErrorFunc(msgGenerator func() string) {
-    globalLogger.ErrorFunc(msgGenerator)
+    globalLogger.log(callDepthOfGlobalLogger, ErrorLevel, msgGenerator())
 }

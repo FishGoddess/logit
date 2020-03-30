@@ -2,7 +2,7 @@
 
 [![License](./license.svg)](https://www.apache.org/licenses/LICENSE-2.0.html)
 
-**logit** 是一个简单易用并且是基于级别控制的日志库，可以应用于所有的 [GoLang](https://golang.org) 应用程序中。
+**logit** 是一个简单易用并且是基于级别控制和配置文件的日志库，可以应用于所有的 [GoLang](https://golang.org) 应用程序中。
 
 [Read me in English](./README.en.md).
 
@@ -10,6 +10,7 @@
 
 * 独特的日志输出模块设计，使用 wrapper 和 handler 装载特定的模块，实现扩展功能
 * 支持日志级别控制，一共有四个日志级别，分别是 debug，info，warn 和 error
+* 支持配置文件，可以让用户在项目编译成二进制之后还能灵活地控制日志的设置
 * 支持日志记录函数，使用回调的形式获取日志内容，对长日志内容的组织逻辑会更清晰
 * 支持开启或者关闭日志功能，线上环境可以关闭或调高日志级别
 * 支持记录日志到文件中，并且可以自定义日志文件名
@@ -21,8 +22,6 @@
 * 支持以 Json 形式输出日志信息，更方便后续对日志进行解析
 
 _历史版本的特性请查看 [HISTORY.md](./HISTORY.md)。未来版本的新特性和计划请查看 [FUTURE.md](./FUTURE.md)。_
-
-> 未来的 v0.1.0 以及更高的版本将会做一次设计上的重构，尽可能保持代码的简洁和功能的易用性，更多信息请查看 v0.1.x 分支。
 
 ### 🚀 安装方式
 
@@ -42,7 +41,7 @@ module your_project_name
 go 1.14
 
 require (
-    github.com/FishGoddess/logit v0.1.1-alpha
+    github.com/FishGoddess/logit v0.1.2
 )
 ```
 
@@ -92,6 +91,7 @@ func main() {
 * [basic](./_examples/basic.go)
 * [logger](./_examples/logger.go)
 * [level_and_disable](./_examples/level_and_disable.go)
+* [config_file](./_examples/config_file.go)
 * [handler](./_examples/handler.go)
 * [wrapper](./_examples/wrapper.go)
 * [log_to_file](./_examples/log_to_file.go)
@@ -101,18 +101,17 @@ _更多使用案例请查看 [_examples](./_examples) 目录。_
 ### 🔥 性能测试
 
 ```bash
-$ go test -v ./_examples/benchmarks_test.go -bench=. -benchtime=1s
+$ go test -v ./_examples/benchmarks_test.go -bench=. -benchtime=10s
 ```
 
 > 测试文件：[_examples/benchmarks_test.go](./_examples/benchmarks_test.go)
 
 | 测试 | 单位时间内运行次数 (越大越好) |  每个操作消耗时间 (越小越好) | 功能性 | 扩展性 |
 | -----------|--------|-------------|-------------|-------------|
-| **logit** | &nbsp; **667340** | **1844 ns/op** | 强大 | 高 |
-| zap | &nbsp; 401043 | 2793 ns/op | 正常 | 正常 |
-| logrus | &nbsp; 158262 | 7751 ns/op | 正常 | 正常 |
-| golog | &nbsp; 751064 | 1614 ns/op | 正常 | 正常 |
-| golang log | 1269531 | &nbsp; 938 ns/op | 一般 | 无 |
+| **logit** | **6429907** | **1855 ns/op** | 强大 | 高 |
+| golog | 3361483 | 3589 ns/op | 简单 | 一般 |
+| zap | 2971119 | 4066 ns/op | 复杂 | 正常 |
+| logrus | 1553419 | 7869 ns/op | 正常 | 正常 |
 
 > 测试环境：I7-6700HQ CPU @ 2.6 GHZ，16 GB RAM
 

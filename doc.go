@@ -60,7 +60,7 @@ Package logit provides an easy way to use foundation for your logging operations
     logger.Info("What time is it now?")
 
     // For convenience, we provide a register mechanism and you can use handlers like this:
-    logger = logit.NewLogger(logit.DebugLevel, logit.HandlerOf("default"))
+    logger = logit.NewLogger(logit.DebugLevel, logit.HandlerOf("default", map[string]string{}))
     logger.Info("What handler is it now?")
 
     // NewLoggerFrom creates a new Logger holder with given config.
@@ -158,7 +158,7 @@ Package logit provides an easy way to use foundation for your logging operations
     // you can use your handler by logit.HandlerOf.
     // See logit.HandlerOf.
     func init() {
-        logit.RegisterHandler("myHandler", func() logit.Handler {
+        logit.RegisterHandler("myHandler", func(params map[string]string) logit.Handler {
             return &myHandler{}
         })
     }
@@ -171,7 +171,7 @@ Package logit provides an easy way to use foundation for your logging operations
     // Add handlers to logger.
     // There are two handlers in logger because logger has a default handler inside after creating.
     // See logit.DefaultHandler.
-    logger.AddHandlers(&myHandler{}, logit.HandlerOf("json"))
+    logger.AddHandlers(&myHandler{}, logit.HandlerOf("json", map[string]string{}))
     fmt.Println("fmt =========================================")
     logger.Info("after adding handlers...")
 
@@ -179,12 +179,37 @@ Package logit provides an easy way to use foundation for your logging operations
     // There are two handlers in logger because the default handler inside was removed.
     // If you register your handler to logit by logit.RegisterHandler, then you can
     // use your handler everywhere like this:
-    logger.SetHandlers(logit.HandlerOf("myHandler"))
+    logger.SetHandlers(logit.HandlerOf("myHandler", map[string]string{}))
     fmt.Println("fmt =========================================")
     logger.Info("after setting handlers...")
+
+6. config file:
+
+    // Create a logger from config file.
+    //
+    // logger.cfg:
+    //     "level":"debug",
+    //     "handlers":{
+    //        "default":{
+    //            "timeFormat" : "2006/01/02 15:04"
+    //        },
+    //        "json":{
+    //            # "timeFormat" : "2006-01-02"
+    //        }
+    //     }
+    //
+    logger := logit.NewLoggerFromConfigFile("./logger.cfg")
+    logger.Info("I am working!")
+    logger.Info("My level is " + logger.Level().String())
+    fmt.Println("fmt ==============================================")
+
+    handlers := logger.Handlers()
+    for i, handler := range handlers {
+        logger.Info(fmt.Sprintf("No.%d hadler ==> %T", i + 1, handler))
+    }
 
 */
 package logit // import "github.com/FishGoddess/logit"
 
 // Version is the version string representation of logit.
-const Version = "v0.1.1-alpha"
+const Version = "v0.1.2"

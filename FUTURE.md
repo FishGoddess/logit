@@ -1,11 +1,18 @@
 ## ✒ 未来版本的新特性 (Features in future version)
 
-### v0.1.3
+### v0.1.4
 * 完善 DurationRollingFile 结构，加入文件个数限制
 * 完善 SizeRollingFile 结构，加入文件个数限制
 
+### v0.1.3
+* 继续完善配置文件，主要针对内置的日志处理器做适配
+* DefaultHandler 和 wrapper 进行配置文件的适配
+* JsonHandler 和 wrapper 进行配置文件的适配
+
 ### v0.1.2
-* 加入配置文件的支持
+* 加入配置文件的支持，以近似 Json 格式的配置文件来增加日志记录的灵活性
+* 修复 Logger 中 DebugFunc，InfoFunc，WarnFunc，ErrorFunc 等几个方法的文件信息错误问题
+* 修复 logit 中 DebugFunc，InfoFunc，WarnFunc，ErrorFunc 等几个方法的文件信息错误问题
 
 ### v0.1.1-alpha
 * 再次对 Handler 进行重构，尽量优化 Logger 的设计
