@@ -2,7 +2,7 @@
 
 [![License](./license.svg)](https://www.apache.org/licenses/LICENSE-2.0.html)
 
-**logit** is an easy-to-use and level-based logger for [GoLang](https://golang.org) applications.
+**logit** is an easy-to-use, also level-based and config file first logger for [GoLang](https://golang.org) applications.
 
 [阅读中文版的 Read me](./README.md).
 
@@ -10,6 +10,7 @@
 
 * Modularization design, easy to extend your logger with wrapper and handler
 * Level-based logging, and there are four levels to use
+* Config file supports, you can use a config file to change you logger flexibility even it has been a binary
 * Log Function supports, it is a better way to output a very long log
 * Enable or disable Logger, you can disable or switch to a higher level in your production environment
 * Log file supports, and you can customer the name of your log file
@@ -20,9 +21,7 @@
 * Time format supports, you can format time in your way
 * Log as Json string supports, by using provided JsonLoggerHandler
 
-_Check [HISTORY.md](./HISTORY.md) and [FUTURE.md](./FUTURE.md) to get more information._
-
-> We will redesign some part of logit for more concise and convenient, check branch v0.1.x to learn more information.
+_Check [HISTORY.md](./HISTORY.md) and [FUTURE.md](./FUTURE.md) to know about more information._
 
 ### 🚀 Installation
 
@@ -42,7 +41,7 @@ module your_project_name
 go 1.14
 
 require (
-    github.com/FishGoddess/logit v0.1.1-alpha
+    github.com/FishGoddess/logit v0.1.2
 )
 ```
 
@@ -95,6 +94,7 @@ func main() {
 * [basic](./_examples/basic.go)
 * [logger](./_examples/logger.go)
 * [level_and_disable](./_examples/level_and_disable.go)
+* [config_file](./_examples/config_file.go)
 * [handler](./_examples/handler.go)
 * [wrapper](./_examples/wrapper.go)
 * [log_to_file](./_examples/log_to_file.go)
@@ -111,7 +111,7 @@ $ go test -v ./_examples/benchmarks_test.go -bench=. -benchtime=10s
 
 | test case | times ran (large is better) |  ns/op (small is better) | features | extension |
 | -----------|--------|-------------|-------------|-------------|
-| **logit** | **6190574** | **1909 ns/op** | powerful | high |
+| **logit** | **6429907** | **1855 ns/op** | powerful | high |
 | golog | 3361483 | 3589 ns/op | easy | common |
 | zap | 2971119 | 4066 ns/op | complex | normal |
 | logrus | 1553419 | 7869 ns/op | normal | normal |

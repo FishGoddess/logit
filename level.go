@@ -46,6 +46,7 @@ var (
         OffLevel:   "off",
     }
 
+    // LevelIsNotExisted is an error representation of a level is not existed.
     LevelIsNotExisted = errors.New("level is not existed, be sure your level is one of them: debug, info, warn, error, off")
 )
 

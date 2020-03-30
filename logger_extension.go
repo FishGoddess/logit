@@ -57,11 +57,11 @@ func NewLoggerFrom(config Config) *Logger {
 //
 //         "handlers":{
 //             "json":{
-//
+//                 # I am a comment: params...
 //             }
 //         }
 //
-// Check examples to get more information. See logit.ParseConfigFile.
+// Check examples to know about more information. See logit.ParseConfigFile.
 func NewLoggerFromConfigFile(configFile string) *Logger {
     config, err := ParseConfigFile(configFile)
     if err != nil {
@@ -149,26 +149,26 @@ func NewDefaultSizeRollingLogger(directory string) *Logger {
 // The msg is the return value of msgGenerator.
 // This is a better way to output a long log made of many variables.
 func (l *Logger) DebugFunc(msgGenerator func() string) {
-    l.Debug(msgGenerator())
+    l.log(callDepth, DebugLevel, msgGenerator())
 }
 
 // InfoFunc will output msg as an info message.
 // The msg is the return value of msgGenerator.
 // This is a better way to output a long log made of many variables.
 func (l *Logger) InfoFunc(msgGenerator func() string) {
-    l.Info(msgGenerator())
+    l.log(callDepth, InfoLevel, msgGenerator())
 }
 
 // WarnFunc will output msg as a warn message.
 // The msg is the return value of msgGenerator.
 // This is a better way to output a long log made of many variables.
 func (l *Logger) WarnFunc(msgGenerator func() string) {
-    l.Warn(msgGenerator())
+    l.log(callDepth, WarnLevel, msgGenerator())
 }
 
 // ErrorFunc will output msg as an error message.
 // The msg is the return value of msgGenerator.
 // This is a better way to output a long log made of many variables.
 func (l *Logger) ErrorFunc(msgGenerator func() string) {
-    l.Error(msgGenerator())
+    l.log(callDepth, ErrorLevel, msgGenerator())
 }

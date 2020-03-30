@@ -1,5 +1,11 @@
 ## ✒ 历史版本的特性介绍 (Features in old version)
 
+### v0.1.2
+> 此版本发布于 2020-03-30
+* 加入配置文件的支持，以近似 Json 格式的配置文件来增加日志记录的灵活性
+* 修复 Logger 中 DebugFunc，InfoFunc，WarnFunc，ErrorFunc 等几个方法的文件信息错误问题
+* 修复 logit 中 DebugFunc，InfoFunc，WarnFunc，ErrorFunc 等几个方法的文件信息错误问题
+
 ### v0.1.1-alpha
 > 此版本发布于 2020-03-29
 * 再次对 Handler 进行重构，尽量优化 Logger 的设计

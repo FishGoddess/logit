@@ -27,7 +27,7 @@ func (w *nopWriter) Write(p []byte) (n int, err error) {
 
 /*
 
-BenchmarkLogitLogger-8           6190574              1909 ns/op             384 B/op          8 allocs/op
+BenchmarkLogitLogger-8           6429907              1855 ns/op             384 B/op          8 allocs/op
 
 BenchmarkGologLogger-8           3361483              3589 ns/op             712 B/op         24 allocs/op
 

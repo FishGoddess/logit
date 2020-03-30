@@ -33,6 +33,7 @@ func TestParseLevel(t *testing.T) {
     }
 }
 
+// 测试将 fileConfig 转换成 Config 的方法
 func TestFileConfigToConfig(t *testing.T) {
 
     config, err := parseConfig(fileConfig{
@@ -57,9 +58,10 @@ func TestFileConfigToConfig(t *testing.T) {
     logger.Warn("warn 测试 TestFileConfigToConfig...")
 }
 
+// 测试解析配置文件的方法
 func TestParseConfigFile(t *testing.T) {
 
-    config, err := ParseConfigFile("./_examples/logit-config-template.cfg")
+    config, err := ParseConfigFile("./_examples/config/logit-config-template.cfg")
     if err != nil {
         t.Fatal(err.Error())
     }

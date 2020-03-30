@@ -33,16 +33,23 @@ type Config struct {
     // If the level of log is smaller than this Level, this log will be ignored.
     Level Level
 
+    // Handlers is how to handle a log in logger.
+    // We provide some handlers and you can use them directly.
+    // See logit.Handler.
     Handlers []Handler
 }
 
 // fileConfig is the config mapping a file.
 type fileConfig struct {
+
+    // Level is the level in string form.
     Level string `json:"level"`
 
+    // Handlers is the mapping to config file.
     Handlers map[string]map[string]string `json:"handlers"`
 }
 
+// removeComments removes all comments of fileInBytes.
 func removeComments(fileInBytes []byte) []byte {
     // 注释只能是单独起一行，并且以 # 开头
     var buffer []byte
@@ -55,6 +62,8 @@ func removeComments(fileInBytes []byte) []byte {
     return buffer
 }
 
+// parseConfig parses fileConfig and convert it to Config.
+// Return an error if something wrong happened.
 func parseConfig(fileConfig fileConfig) (Config, error) {
 
     // 解析日志级别
@@ -75,6 +84,8 @@ func parseConfig(fileConfig fileConfig) (Config, error) {
     }, nil
 }
 
+// ParseConfigFile parses a config file whose path is configFile and returns
+// a Config of it. Return an error if something wrong happened.
 func ParseConfigFile(configFile string) (Config, error) {
 
     // 配置文件一般不会太大，直接全部读取进内存

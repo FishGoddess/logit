@@ -48,7 +48,7 @@ func main() {
     logger.Info("What time is it now?")
 
     // For convenience, we provide a register mechanism and you can use handlers like this:
-    logger = logit.NewLogger(logit.DebugLevel, logit.HandlerOf("default"))
+    logger = logit.NewLogger(logit.DebugLevel, logit.HandlerOf("default", map[string]string{}))
     logger.Info("What handler is it now?")
 
     // NewLoggerFrom creates a new Logger holder with given config.
