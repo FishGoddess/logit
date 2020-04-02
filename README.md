@@ -1,6 +1,8 @@
 # 📝 logit
 
-[![License](./license.svg)](https://www.apache.org/licenses/LICENSE-2.0.html)
+[![License](_icon/license.svg)](https://www.apache.org/licenses/LICENSE-2.0.html)
+[![Go Doc](_icon/godoc.svg)](https://pkg.go.dev/github.com/FishGoddess/logit?tab=doc)
+
 
 **logit** 是一个简单易用并且是基于级别控制和配置文件的日志库，可以应用于所有的 [GoLang](https://golang.org) 应用程序中。
 

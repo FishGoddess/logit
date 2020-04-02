@@ -5,6 +5,7 @@
 * 完善 SizeRollingFile 结构，加入文件个数限制
 
 ### v0.1.3
+* 更改内置日志处理器的换行符（\n）为系统的换行符
 * 继续完善配置文件，主要针对内置的日志处理器做适配
 * DefaultHandler 和 wrapper 进行配置文件的适配
 * JsonHandler 和 wrapper 进行配置文件的适配

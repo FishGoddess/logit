@@ -1,6 +1,6 @@
 # 📝 logit
 
-[![License](./license.svg)](https://www.apache.org/licenses/LICENSE-2.0.html)
+[![License](_icon/license.svg)](https://www.apache.org/licenses/LICENSE-2.0.html)
 
 **logit** is an easy-to-use, also level-based and config file first logger for [GoLang](https://golang.org) applications.
 
