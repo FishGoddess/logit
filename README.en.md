@@ -1,6 +1,7 @@
 # 📝 logit
 
-[![License](./license.svg)](https://www.apache.org/licenses/LICENSE-2.0.html)
+[![License](_icon/license.svg)](https://www.apache.org/licenses/LICENSE-2.0.html)
+[![Go Doc](_icon/godoc.svg)](https://pkg.go.dev/github.com/FishGoddess/logit?tab=doc)
 
 **logit** is an easy-to-use, also level-based and config file first logger for [GoLang](https://golang.org) applications.
 
@@ -41,7 +42,7 @@ module your_project_name
 go 1.14
 
 require (
-    github.com/FishGoddess/logit v0.1.2
+    github.com/FishGoddess/logit v0.1.3
 )
 ```
 

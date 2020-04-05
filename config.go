@@ -33,6 +33,11 @@ type Config struct {
     // If the level of log is smaller than this Level, this log will be ignored.
     Level Level
 
+    // NeedFileInfo will determine weather you need caller info or not.
+    // Notice that adding caller will use runtime method which costs lots of time,
+    // so set it to true only when you really need it.
+    NeedFileInfo bool
+
     // Handlers is how to handle a log in logger.
     // We provide some handlers and you can use them directly.
     // See logit.Handler.
@@ -44,6 +49,11 @@ type fileConfig struct {
 
     // Level is the level in string form.
     Level string `json:"level"`
+
+    // Caller will determine weather you need caller info or not.
+    // Notice that adding caller will use runtime method which costs lots of time,
+    // so set it to true only when you really need it.
+    Caller bool `json:"caller"`
 
     // Handlers is the mapping to config file.
     Handlers map[string]map[string]string `json:"handlers"`
@@ -79,8 +89,9 @@ func parseConfig(fileConfig fileConfig) (Config, error) {
     }
 
     return Config{
-        Level:    level,
-        Handlers: handlers,
+        Level:        level,
+        NeedFileInfo: fileConfig.Caller,
+        Handlers:     handlers,
     }, nil
 }
 
