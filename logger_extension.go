@@ -49,7 +49,14 @@ func nextFilename(directory string) func(now time.Time) string {
 // NewLoggerFrom returns a logger with given config.
 // See logit.Config.
 func NewLoggerFrom(config Config) *Logger {
-    return NewLogger(config.Level, config.Handlers...)
+
+    // 判断是否需要开启文件信息的记录
+    logger := NewLogger(config.Level, config.Handlers...)
+    if config.NeedFileInfo {
+        logger.EnableFileInfo()
+    }
+
+    return logger
 }
 
 // NewLoggerFromConfigFile returns a logger with config file.
