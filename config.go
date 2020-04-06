@@ -56,7 +56,7 @@ type fileConfig struct {
     Caller bool `json:"caller"`
 
     // Handlers is the mapping to config file.
-    Handlers map[string]map[string]string `json:"handlers"`
+    Handlers map[string]map[string]interface{} `json:"handlers"`
 }
 
 // removeComments removes all comments of fileInBytes.

@@ -20,18 +20,10 @@ package wrapper
 
 import (
     "errors"
-    "io"
     "os"
     "sync"
     "time"
 )
-
-// init registers DurationRollingFile to logit.
-func init() {
-    RegisterWriter("duration", func(params map[string]string) io.Writer {
-
-    })
-}
 
 // DurationRollingFile is a time sensitive file.
 //

@@ -25,6 +25,9 @@ import (
     "os"
     "strconv"
     "sync"
+    "time"
+
+    "github.com/FishGoddess/logit/wrapper"
 )
 
 // Handler is an interface representation of log handler.
@@ -41,20 +44,109 @@ type Handler interface {
     Handle(log *Log) bool
 }
 
+// WriterOf returns a writer implement with given params.
+// Different writer implement may have different params, so what params should
+// be used is dependent to specific writer implement.
+// An example of this method in config:
+//
+//     "writer": {
+//         "rolling": "duration",
+//         "duration": 1,
+//         "directory": "D:/"
+//     }
+//
+func WriterOf(params map[string]interface{}) io.Writer {
+
+    // 默认使用 os.Stdout
+    writer := os.Stdout
+    param, ok := params["writer"]
+    if !ok {
+        return writer
+    }
+
+    // 下面这段代码有些 “肮脏”，但是大张旗鼓地重构这个又有点主次不分的感觉，所以先保持这样，后续再考虑这个点
+    writerConfig := param.(map[string]interface{})
+    rolling, ok := writerConfig["rolling"]
+    if !ok {
+        return writer
+    }
+
+    switch rolling {
+
+    // 以时间间隔进行滚动的日志写出器
+    case "duration":
+
+        // 滚动的时间间隔，单位是秒
+        duration := 24 * 60 * 60 // 一天
+        if param, ok := writerConfig["duration"]; ok {
+            duration = int(param.(float64))
+        }
+
+        // 写出的目标文件夹
+        directory := "./"
+        if param, ok := writerConfig["directory"]; ok {
+            directory = param.(string)
+        }
+
+        return wrapper.NewDurationRollingFile(time.Duration(duration)*time.Second, wrapper.NextFilename(directory))
+
+    // 以文件大小进行滚动的日志写出器
+    case "size":
+
+        // 滚动的文件大小，单位是 MB
+        size := 64 // 64MB
+        if param, ok := writerConfig["size"]; ok {
+            size = int(param.(float64))
+        }
+
+        // 写出的目标文件夹
+        directory := "./"
+        if param, ok := writerConfig["directory"]; ok {
+            directory = param.(string)
+        }
+
+        return wrapper.NewSizeRollingFile(int64(size)*wrapper.MB, wrapper.NextFilename(directory))
+
+    // 不滚动的日志写出器
+    case "off":
+
+        // 写出的目标文件
+        if param, ok := writerConfig["file"]; ok {
+            file, err := wrapper.NewFile(param.(string))
+            if err != nil {
+                panic(err)
+            }
+            return file
+        }
+
+        file, err := wrapper.NewFile("./logit-" + strconv.FormatInt(time.Now().Unix(), 10) + wrapper.SuffixOfLogFile)
+        if err != nil {
+            panic(err)
+        }
+        return file
+    }
+
+    return writer
+}
+
 func init() {
-    RegisterHandler("default", func(params map[string]string) Handler {
+
+    // 注册默认日志处理器
+    RegisterHandler("default", func(params map[string]interface{}) Handler {
         timeFormat := DefaultTimeFormat
         if format, ok := params["timeFormat"]; ok && format != "" {
-            timeFormat = format
+            timeFormat = format.(string)
         }
-        return NewDefaultHandler(os.Stdout, timeFormat)
+        return NewDefaultHandler(WriterOf(params), timeFormat)
     })
-    RegisterHandler("json", func(params map[string]string) Handler {
+
+    // 注册 Json 格式日志处理器
+    RegisterHandler("json", func(params map[string]interface{}) Handler {
         timeFormat := ""
         if format, ok := params["timeFormat"]; ok {
-            timeFormat = format
+            timeFormat = format.(string)
         }
-        return NewJsonHandler(os.Stdout, timeFormat)
+        return NewJsonHandler(WriterOf(params), timeFormat)
     })
 }
 
@@ -66,7 +158,7 @@ const (
 var (
     // handlers stores all registered handlers.
     // mutexOfHandlers is for concurrency.
-    handlers        = map[string]func(params map[string]string) Handler{}
+    handlers = map[string]func(params map[string]interface{}) Handler{}
     mutexOfHandlers = &sync.RWMutex{}
 
     // HandlerIsExistedError is an error happens on repeating handler name.
@@ -75,10 +167,10 @@ var (
 
 // RegisterHandler registers your handler to logit so that you can use them easily.
 // Return an error if the name is existed, and you should change another name for your handler.
-// Notice that newHandler has a parameter called params, which will inject into newHandler
+// Notice that newHandler has a parameter called params, which will be injected into newHandler
 // by logit automatically. Different handler may have different params, so what params should
-// inject into newHandler is dependent to specific handler.
-func RegisterHandler(name string, newHandler func(params map[string]string) Handler) error {
+// be injected into newHandler is dependent to specific handler.
+func RegisterHandler(name string, newHandler func(params map[string]interface{}) Handler) error {
     mutexOfHandlers.Lock()
     defer mutexOfHandlers.Unlock()
     if _, ok := handlers[name]; ok {
@@ -90,10 +182,10 @@ func RegisterHandler(name string, newHandler func(params map[string]string) Hand
 
 // HandlerOf returns handler whose name is given name and params.
 // Different handler may have different params, so what params should
-// inject into newHandler is dependent to specific handler.
+// be injected into newHandler is dependent to specific handler.
 // Notice that we don't use an error mechanism or ok mechanism to check the name but
 // a default handler returning mechanism. This is a more convenient way to use handlers (we think).
-func HandlerOf(name string, params map[string]string) Handler {
+func HandlerOf(name string, params map[string]interface{}) Handler {
     mutexOfHandlers.RLock()
     defer mutexOfHandlers.RUnlock()
     newHandler, ok := handlers[name]
