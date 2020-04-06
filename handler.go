@@ -69,7 +69,7 @@ var (
     handlers        = map[string]func(params map[string]string) Handler{}
     mutexOfHandlers = &sync.RWMutex{}
 
-    // HandlerIsExistedError is an error happens on repeat handler name.
+    // HandlerIsExistedError is an error happens on repeating handler name.
     HandlerIsExistedError = errors.New("the name of handler you want to register already exists! May be you should give it an another name")
 )
 
