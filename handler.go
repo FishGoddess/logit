@@ -24,6 +24,7 @@ import (
     "io"
     "os"
     "strconv"
+    "strings"
     "sync"
     "time"
 
@@ -237,14 +238,20 @@ func EncodeToJson(log *Log, timeFormat string) []byte {
 
     // 如果有文件信息，就把文件信息也加进去
     if log.file != "" && log.Line() != 0 {
-        buffer.WriteString(`, "file":"` + log.File())
+        buffer.WriteString(`, "file":"` + escapeString(log.File()))
         buffer.WriteString(`", "line":` + strconv.Itoa(log.Line()))
     }
 
     buffer.WriteString(`, "msg":"`)
-    buffer.WriteString(log.Msg())
+    buffer.WriteString(escapeString(log.Msg()))
     buffer.WriteString("\"}\n")
     return buffer.Bytes()
+}
+
+// escapeString is for escaping string from special character, such as double quotes.
+// See issue: https://github.com/FishGoddess/logit/issues/1
+func escapeString(s string) string {
+    return strings.ReplaceAll(s, `"`, `\"`)
 }
 
 // DefaultHandler is a default handler for use.
