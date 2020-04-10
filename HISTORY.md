@@ -1,5 +1,9 @@
 ## ✒ 历史版本的特性介绍 (Features in old version)
 
+### v0.1.4
+> 此版本发布于 2020-04-10
+* 紧急修复 Json 处理器没有做字符转义的 bug，详情查询 [issue/1](https://github.com/FishGoddess/logit/issues/1)
+
 ### v0.1.3
 > 此版本发布于 2020-04-05
 * 增加配置文件中是否开启文件信息记录的选项
