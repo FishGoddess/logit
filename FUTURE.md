@@ -1,14 +1,17 @@
 ## ✒ 未来版本的新特性 (Features in future version)
 
-### v0.1.5
+### v0.1.6
 * 完善 DurationRollingFile 结构，加入文件个数限制
 * 完善 SizeRollingFile 结构，加入文件个数限制
 
-### v0.1.4
+### v0.1.5
 * 更改内置日志处理器的换行符（\n）为系统的换行符
 * 继续完善配置文件，主要针对内置的日志处理器做适配
 * DefaultHandler 和 wrapper 进行配置文件的适配
 * JsonHandler 和 wrapper 进行配置文件的适配
+
+### v0.1.4
+* 紧急修复 Json 处理器没有做字符转义的 bug，详情查询 [issue/1](https://github.com/FishGoddess/logit/issues/1)
 
 ### v0.1.3
 * 增加配置文件中是否开启文件信息记录的选项
