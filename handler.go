@@ -19,12 +19,10 @@
 package logit
 
 import (
-    "bytes"
     "errors"
     "io"
     "os"
     "strconv"
-    "strings"
     "sync"
     "time"
 
@@ -194,64 +192,6 @@ func HandlerOf(name string, params map[string]interface{}) Handler {
         return NewDefaultHandler(os.Stdout, DefaultTimeFormat)
     }
     return newHandler(params)
-}
-
-// EncodeToText encodes a log to a plain string like "[Info] [2020-03-06 16:10:44] msg" in bytes.
-func EncodeToText(log *Log, timeFormat string) []byte {
-
-    // 组装 log
-    buffer := bytes.NewBuffer(make([]byte, 0, 64))
-    buffer.WriteString("[")
-    buffer.WriteString(log.Level().String())
-    buffer.WriteString("] [")
-    buffer.WriteString(log.Now().Format(timeFormat))
-    buffer.WriteString("] ")
-
-    // 如果有文件信息，就把文件信息也加进去
-    if log.file != "" && log.Line() != 0 {
-        buffer.WriteString("[")
-        buffer.WriteString(log.File() + ":" + strconv.Itoa(log.Line()))
-        buffer.WriteString("] ")
-    }
-
-    buffer.WriteString(log.Msg())
-    buffer.WriteString("\n")
-    return buffer.Bytes()
-}
-
-// EncodeToJson encodes a log to a Json string like `{"level":"debug", "time":"2020-03-22 22:35:00", "msg":"log content..."}` in bytes.
-// If timeFormat == "", then it will not format time and keep time in unix form.
-func EncodeToJson(log *Log, timeFormat string) []byte {
-
-    // 组装 log
-    buffer := bytes.NewBuffer(make([]byte, 0, 64))
-    buffer.WriteString(`{"level":"`)
-    buffer.WriteString(log.Level().String())
-    buffer.WriteString(`", "time":`)
-
-    // 判断是否需要格式化时间
-    if timeFormat != "" {
-        buffer.WriteString(strconv.Quote(log.Now().Format(timeFormat)))
-    } else {
-        buffer.WriteString(strconv.FormatInt(log.Now().Unix(), 10))
-    }
-
-    // 如果有文件信息，就把文件信息也加进去
-    if log.file != "" && log.Line() != 0 {
-        buffer.WriteString(`, "file":"` + escapeString(log.File()))
-        buffer.WriteString(`", "line":` + strconv.Itoa(log.Line()))
-    }
-
-    buffer.WriteString(`, "msg":"`)
-    buffer.WriteString(escapeString(log.Msg()))
-    buffer.WriteString("\"}\n")
-    return buffer.Bytes()
-}
-
-// escapeString is for escaping string from special character, such as double quotes.
-// See issue: https://github.com/FishGoddess/logit/issues/1
-func escapeString(s string) string {
-    return strings.ReplaceAll(s, `"`, `\"`)
 }
 
 // DefaultHandler is a default handler for use.
