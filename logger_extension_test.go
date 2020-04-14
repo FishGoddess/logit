@@ -107,8 +107,8 @@ func TestLoggerLogFunction(t *testing.T) {
         return "error rand int: " + strconv.Itoa(rand.Intn(100))
     })
 
-    // test double quotes
-    logger.Info(`test "double quotes" !!!!`)
+    // test escaping
+    logger.Info(`test "double quotes"\t\b \u0003 \u0019 !!!!`)
 }
 
 // 测试从配置文件中创建一个 logger

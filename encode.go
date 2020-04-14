@@ -66,7 +66,7 @@ func EncodeToJson(log *Log, timeFormat string) []byte {
 
     // 如果有文件信息，就把文件信息也加进去
     if log.file != "" && log.Line() != 0 {
-        buffer.WriteString(`, "file":"` + escapeString(log.File()))
+        buffer.WriteString(`, "file":"` + log.File())
         buffer.WriteString(`", "line":` + strconv.Itoa(log.Line()))
     }
 
