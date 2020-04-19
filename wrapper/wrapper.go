@@ -19,11 +19,11 @@
 package wrapper
 
 import (
-    "math/rand"
-    "os"
-    "path"
-    "strconv"
-    "time"
+	"math/rand"
+	"os"
+	"path"
+	"strconv"
+	"time"
 )
 
 // These are units representation of file size.
@@ -32,14 +32,14 @@ import (
 // MB = 1024 * 1024 bytes.
 // GB = 1024 * 1024 * 1024 bytes.
 const (
-    KB int64 = 1 << (10 * (iota + 1))
-    MB
-    GB
+	KB int64 = 1 << (10 * (iota + 1))
+	MB
+	GB
 )
 
 const (
-    // SuffixOfLogFile is the suffix of log file.
-    SuffixOfLogFile = ".log"
+	// SuffixOfLogFile is the suffix of log file.
+	SuffixOfLogFile = ".log"
 )
 
 // nextFilename creates a time-relative filename with given now time.
@@ -47,26 +47,26 @@ const (
 // The filename will be like "20200304-145246-45.log".
 // Notice that directory stores all log files generated in this time.
 func NextFilename(directory string) func(now time.Time) string {
-    rand.Seed(time.Now().UnixNano())
-    return func(now time.Time) string {
-        name := now.Format("20060102-150405") + "-" + strconv.Itoa(rand.Intn(1000)) + SuffixOfLogFile
-        return path.Join(directory, name)
-    }
+	rand.Seed(time.Now().UnixNano())
+	return func(now time.Time) string {
+		name := now.Format("20060102-150405") + "-" + strconv.Itoa(rand.Intn(1000)) + SuffixOfLogFile
+		return path.Join(directory, name)
+	}
 }
 
 // NewFile creates a new file with given filePath.
 // Return a new File or an error if failed.
 // Notice that the permission of new file is 0644, which means rw-rw-r-- in unix-like os.
 func NewFile(filePath string) (*os.File, error) {
-    return os.OpenFile(filePath, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0664)
+	return os.OpenFile(filePath, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0664)
 }
 
 // generateFirstFile creates the first file with given nextFilename function.
 func generateFirstFile(nextFilename func(now time.Time) string) (*os.File, time.Time) {
-    now := time.Now()
-    file, err := NewFile(nextFilename(now))
-    if err != nil {
-        panic(err)
-    }
-    return file, now
+	now := time.Now()
+	file, err := NewFile(nextFilename(now))
+	if err != nil {
+		panic(err)
+	}
+	return file, now
 }

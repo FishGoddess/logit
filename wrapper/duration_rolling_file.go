@@ -19,10 +19,10 @@
 package wrapper
 
 import (
-    "errors"
-    "os"
-    "sync"
-    "time"
+	"errors"
+	"os"
+	"sync"
+	"time"
 )
 
 // DurationRollingFile is a time sensitive file.
@@ -36,26 +36,26 @@ import (
 // You can use it like using os.File!
 type DurationRollingFile struct {
 
-    // file points the writer which will be used this moment.
-    file *os.File
+	// file points the writer which will be used this moment.
+	file *os.File
 
-    // lastTime is the created time of current file above.
-    lastTime time.Time
+	// lastTime is the created time of current file above.
+	lastTime time.Time
 
-    // duration is the core field of this struct.
-    // Every times currentTime - lastTime >= duration, the file will
-    // roll to an entire new file for writing.
-    // Notice that its min value is one Second. See minDuration.
-    duration time.Duration
+	// duration is the core field of this struct.
+	// Every times currentTime - lastTime >= duration, the file will
+	// roll to an entire new file for writing.
+	// Notice that its min value is one Second. See minDuration.
+	duration time.Duration
 
-    // nextFilename is a function for generating a new file name.
-    // Every times rolling to next file will call it first.
-    // now is the time of calling this function, also the
-    // created time of next file.
-    nextFilename func(now time.Time) string
+	// nextFilename is a function for generating a new file name.
+	// Every times rolling to next file will call it first.
+	// now is the time of calling this function, also the
+	// created time of next file.
+	nextFilename func(now time.Time) string
 
-    // mu is a lock for safe concurrency.
-    mu sync.Mutex
+	// mu is a lock for safe concurrency.
+	mu sync.Mutex
 }
 
 // minDuration prevents io system from creating file too fast.
@@ -70,61 +70,61 @@ const minDuration = 1 * time.Second
 // Notice that duration's min value is one second. See minDuration.
 func NewDurationRollingFile(duration time.Duration, nextFilename func(now time.Time) string) *DurationRollingFile {
 
-    // 防止时间间隔太小导致滚动文件时 IO 的疯狂蠕动
-    if duration < minDuration {
-        panic(errors.New("Duration is smaller than " + minDuration.String() + "\n"))
-    }
+	// 防止时间间隔太小导致滚动文件时 IO 的疯狂蠕动
+	if duration < minDuration {
+		panic(errors.New("Duration is smaller than " + minDuration.String() + "\n"))
+	}
 
-    // 获取当前时间，并生成第一个文件
-    file, now := generateFirstFile(nextFilename)
-    return &DurationRollingFile{
-        file:         file,
-        lastTime:     now,
-        duration:     duration,
-        nextFilename: nextFilename,
-        mu:           sync.Mutex{},
-    }
+	// 获取当前时间，并生成第一个文件
+	file, now := generateFirstFile(nextFilename)
+	return &DurationRollingFile{
+		file:         file,
+		lastTime:     now,
+		duration:     duration,
+		nextFilename: nextFilename,
+		mu:           sync.Mutex{},
+	}
 }
 
 // rollingToNextFile will roll to next file for drf.
 func (drf *DurationRollingFile) rollingToNextFile(now time.Time) {
 
-    // 如果创建新文件发生错误，就继续使用当前的文件，等到下一次时间间隔再重试
-    newFile, err := NewFile(drf.nextFilename(now))
-    if err != nil {
-        return
-    }
+	// 如果创建新文件发生错误，就继续使用当前的文件，等到下一次时间间隔再重试
+	newFile, err := NewFile(drf.nextFilename(now))
+	if err != nil {
+		return
+	}
 
-    // 关闭当前使用的文件，初始化新文件
-    drf.file.Close()
-    drf.file = newFile
-    drf.lastTime = now
+	// 关闭当前使用的文件，初始化新文件
+	drf.file.Close()
+	drf.file = newFile
+	drf.lastTime = now
 }
 
 // ensureFileIsCorrect ensures drf is writing to a correct file this moment.
 func (drf *DurationRollingFile) ensureFileIsCorrect() {
-    now := time.Now()
-    if now.Sub(drf.lastTime) >= drf.duration {
-        drf.rollingToNextFile(now)
-    }
+	now := time.Now()
+	if now.Sub(drf.lastTime) >= drf.duration {
+		drf.rollingToNextFile(now)
+	}
 }
 
 // Write writes len(p) bytes from p to the underlying data stream.
 // It returns the number of bytes written from p (0 <= n <= len(p))
 // and any error encountered that caused the write to stop early.
 func (drf *DurationRollingFile) Write(p []byte) (n int, err error) {
-    drf.mu.Lock()
-    defer drf.mu.Unlock()
+	drf.mu.Lock()
+	defer drf.mu.Unlock()
 
-    // 确保当前文件对于当前时间点来说是正确的
-    drf.ensureFileIsCorrect()
-    return drf.file.Write(p)
+	// 确保当前文件对于当前时间点来说是正确的
+	drf.ensureFileIsCorrect()
+	return drf.file.Write(p)
 }
 
 // Close releases any resources using just moment.
 // It returns error when closing.
 func (drf *DurationRollingFile) Close() error {
-    drf.mu.Lock()
-    defer drf.mu.Unlock()
-    return drf.file.Close()
+	drf.mu.Lock()
+	defer drf.mu.Unlock()
+	return drf.file.Close()
 }

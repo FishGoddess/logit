@@ -19,20 +19,20 @@
 package wrapper
 
 import (
-    "testing"
-    "time"
+	"testing"
+	"time"
 )
 
 // 测试创建根据文件大小滚动的文件类型
 func TestNewSizeRollingFile(t *testing.T) {
 
-    file := NewSizeRollingFile(64*KB, func(now time.Time) string {
-        return "Z:/" + now.Format("20060102150405.000") + ".log"
-    })
-    defer file.Close()
+	file := NewSizeRollingFile(64*KB, func(now time.Time) string {
+		return "Z:/" + now.Format("20060102150405.000") + ".log"
+	})
+	defer file.Close()
 
-    b := make([]byte, 1024)
-    for i := 0; i < 1024; i++ {
-        file.Write(b)
-    }
+	b := make([]byte, 1024)
+	for i := 0; i < 1024; i++ {
+		file.Write(b)
+	}
 }

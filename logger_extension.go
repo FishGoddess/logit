@@ -19,24 +19,24 @@
 package logit
 
 import (
-    "io"
-    "os"
-    "time"
+	"io"
+	"os"
+	"time"
 
-    "github.com/FishGoddess/logit/wrapper"
+	"github.com/FishGoddess/logit/wrapper"
 )
 
 // NewLoggerFrom returns a logger with given config.
 // See logit.Config.
 func NewLoggerFrom(config Config) *Logger {
 
-    // 判断是否需要开启文件信息的记录
-    logger := NewLogger(config.Level, config.Handlers...)
-    if config.NeedFileInfo {
-        logger.EnableFileInfo()
-    }
+	// 判断是否需要开启文件信息的记录
+	logger := NewLogger(config.Level, config.Handlers...)
+	if config.NeedFileInfo {
+		logger.EnableFileInfo()
+	}
 
-    return logger
+	return logger
 }
 
 // NewLoggerFromConfigFile returns a logger with config file.
@@ -50,43 +50,43 @@ func NewLoggerFrom(config Config) *Logger {
 //
 // Check examples to know about more information. See logit.ParseConfigFile.
 func NewLoggerFromConfigFile(configFile string) *Logger {
-    config, err := ParseConfigFile(configFile)
-    if err != nil {
-        panic(err)
-    }
-    return NewLoggerFrom(config)
+	config, err := ParseConfigFile(configFile)
+	if err != nil {
+		panic(err)
+	}
+	return NewLoggerFrom(config)
 }
 
 // NewDevelopLogger returns a logger for developing.
 // A logger for developing should be easy-to-read and output to console.
 // Also, the level should be DebugLevel.
 func NewDevelopLogger() *Logger {
-    return NewLoggerFrom(Config{
-        Level:    DebugLevel,
-        Handlers: []Handler{NewDefaultHandler(os.Stdout, DefaultTimeFormat)},
-    })
+	return NewLoggerFrom(Config{
+		Level:    DebugLevel,
+		Handlers: []Handler{NewDefaultHandler(os.Stdout, DefaultTimeFormat)},
+	})
 }
 
 // NewProductionLogger returns a logger for production.
 // A logger for production should be easy-to-resolve and output to somewhere not only console.
 // Also, the level should be WarnLevel.
 func NewProductionLogger(writer io.Writer) *Logger {
-    return NewLoggerFrom(Config{
-        Level:    WarnLevel,
-        Handlers: []Handler{NewJsonHandler(writer, "")},
-    })
+	return NewLoggerFrom(Config{
+		Level:    WarnLevel,
+		Handlers: []Handler{NewJsonHandler(writer, "")},
+	})
 }
 
 // NewFileLogger returns a Logger holder which log to a file with given logFile.
 func NewFileLogger(logFile string) *Logger {
-    file, err := wrapper.NewFile(logFile)
-    if err != nil {
-        panic(err)
-    }
-    return NewLoggerFrom(Config{
-        Level:    InfoLevel,
-        Handlers: []Handler{NewDefaultHandler(file, DefaultTimeFormat)},
-    })
+	file, err := wrapper.NewFile(logFile)
+	if err != nil {
+		panic(err)
+	}
+	return NewLoggerFrom(Config{
+		Level:    InfoLevel,
+		Handlers: []Handler{NewDefaultHandler(file, DefaultTimeFormat)},
+	})
 }
 
 // NewDurationRollingLogger creates a duration rolling logger with given duration.
@@ -96,18 +96,18 @@ func NewFileLogger(logFile string) *Logger {
 // If you want to appoint another filename, check this and do it by this way.
 // See wrapper.NewDurationRollingFile (it is an implement of io.writer).
 func NewDurationRollingLogger(directory string, duration time.Duration) *Logger {
-    file := wrapper.NewDurationRollingFile(duration, wrapper.NextFilename(directory))
-    return NewLoggerFrom(Config{
-        Level:    InfoLevel,
-        Handlers: []Handler{NewDefaultHandler(file, DefaultTimeFormat)},
-    })
+	file := wrapper.NewDurationRollingFile(duration, wrapper.NextFilename(directory))
+	return NewLoggerFrom(Config{
+		Level:    InfoLevel,
+		Handlers: []Handler{NewDefaultHandler(file, DefaultTimeFormat)},
+	})
 }
 
 // NewDayRollingLogger creates a day rolling logger.
 // You should appoint a directory to store all log files generated in this time.
 // See logit.NewDurationRollingLogger.
 func NewDayRollingLogger(directory string) *Logger {
-    return NewDurationRollingLogger(directory, 24*time.Hour)
+	return NewDurationRollingLogger(directory, 24*time.Hour)
 }
 
 // NewSizeRollingLogger creates a file size rolling logger with given limitedSize.
@@ -118,44 +118,44 @@ func NewDayRollingLogger(directory string) *Logger {
 // If you want to appoint another filename, check this and do it by this way.
 // See wrapper.NewSizeRollingFile (it is an implement of io.writer).
 func NewSizeRollingLogger(directory string, limitedSize int64) *Logger {
-    file := wrapper.NewSizeRollingFile(limitedSize, wrapper.NextFilename(directory))
-    return NewLoggerFrom(Config{
-        Level:    InfoLevel,
-        Handlers: []Handler{NewDefaultHandler(file, DefaultTimeFormat)},
-    })
+	file := wrapper.NewSizeRollingFile(limitedSize, wrapper.NextFilename(directory))
+	return NewLoggerFrom(Config{
+		Level:    InfoLevel,
+		Handlers: []Handler{NewDefaultHandler(file, DefaultTimeFormat)},
+	})
 }
 
 // NewDayRollingLogger creates a file size rolling logger.
 // You should appoint a directory to store all log files generated in this time.
 // Default means limitedSize is 64 MB. See logit.NewSizeRollingLogger.
 func NewDefaultSizeRollingLogger(directory string) *Logger {
-    return NewSizeRollingLogger(directory, 64*wrapper.MB)
+	return NewSizeRollingLogger(directory, 64*wrapper.MB)
 }
 
 // DebugFunc will output msg as a debug message.
 // The msg is the return value of msgGenerator.
 // This is a better way to output a long log made of many variables.
 func (l *Logger) DebugFunc(msgGenerator func() string) {
-    l.log(callDepth, DebugLevel, msgGenerator())
+	l.log(callDepth, DebugLevel, msgGenerator())
 }
 
 // InfoFunc will output msg as an info message.
 // The msg is the return value of msgGenerator.
 // This is a better way to output a long log made of many variables.
 func (l *Logger) InfoFunc(msgGenerator func() string) {
-    l.log(callDepth, InfoLevel, msgGenerator())
+	l.log(callDepth, InfoLevel, msgGenerator())
 }
 
 // WarnFunc will output msg as a warn message.
 // The msg is the return value of msgGenerator.
 // This is a better way to output a long log made of many variables.
 func (l *Logger) WarnFunc(msgGenerator func() string) {
-    l.log(callDepth, WarnLevel, msgGenerator())
+	l.log(callDepth, WarnLevel, msgGenerator())
 }
 
 // ErrorFunc will output msg as an error message.
 // The msg is the return value of msgGenerator.
 // This is a better way to output a long log made of many variables.
 func (l *Logger) ErrorFunc(msgGenerator func() string) {
-    l.log(callDepth, ErrorLevel, msgGenerator())
+	l.log(callDepth, ErrorLevel, msgGenerator())
 }
