@@ -25,6 +25,8 @@
 
 _历史版本的特性请查看 [HISTORY.md](./HISTORY.md)。未来版本的新特性和计划请查看 [FUTURE.md](./FUTURE.md)。_
 
+> v0.1.x 版本只是一个特性过渡版本，目前已经停止更新，只进行维护和修复。下一个大更新版本 v0.2.x 将带来全新的特性和使用体验（其中一点就是做减法），并保持长期更新和维护！
+
 ### 🚀 安装方式
 
 唯一需要的依赖就是 [Golang 运行环境](https://golang.org).
@@ -43,7 +45,7 @@ module your_project_name
 go 1.14
 
 require (
-    github.com/FishGoddess/logit v0.1.4
+    github.com/FishGoddess/logit v0.1.5
 )
 ```
 

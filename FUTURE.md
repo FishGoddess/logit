@@ -1,14 +1,14 @@
 ## ✒ 未来版本的新特性 (Features in future version)
 
-### v0.1.6
-* 完善 DurationRollingFile 结构，加入文件个数限制
-* 完善 SizeRollingFile 结构，加入文件个数限制
+### v0.2.0
+* 继续完善配置文件，主要针对内置的日志处理器做适配
+* 合并目前的 DefaultHandler 和 JsonHandler
+* DefaultHandler 和 wrapper 进行配置文件的适配
+* 加入 FileHandler，专门负责文件相关的日志处理器
+* 增加分级日志处理器包装器，不同的级别可以使用不同的日志处理器
 
 ### v0.1.5
-* 更改内置日志处理器的换行符（\n）为系统的换行符
-* 继续完善配置文件，主要针对内置的日志处理器做适配
-* DefaultHandler 和 wrapper 进行配置文件的适配
-* JsonHandler 和 wrapper 进行配置文件的适配
+* 完善 Json 处理器没有做字符转义的修复方案，详情查询 [issue/1](https://github.com/FishGoddess/logit/issues/1)
 
 ### v0.1.4
 * 紧急修复 Json 处理器没有做字符转义的 bug，详情查询 [issue/1](https://github.com/FishGoddess/logit/issues/1)

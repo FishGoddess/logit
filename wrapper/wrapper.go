@@ -19,7 +19,10 @@
 package wrapper
 
 import (
+    "math/rand"
     "os"
+    "path"
+    "strconv"
     "time"
 )
 
@@ -33,6 +36,23 @@ const (
     MB
     GB
 )
+
+const (
+    // SuffixOfLogFile is the suffix of log file.
+    SuffixOfLogFile = ".log"
+)
+
+// nextFilename creates a time-relative filename with given now time.
+// Also, it uses random number to ensure this filename is available.
+// The filename will be like "20200304-145246-45.log".
+// Notice that directory stores all log files generated in this time.
+func NextFilename(directory string) func(now time.Time) string {
+    rand.Seed(time.Now().UnixNano())
+    return func(now time.Time) string {
+        name := now.Format("20060102-150405") + "-" + strconv.Itoa(rand.Intn(1000)) + SuffixOfLogFile
+        return path.Join(directory, name)
+    }
+}
 
 // NewFile creates a new file with given filePath.
 // Return a new File or an error if failed.

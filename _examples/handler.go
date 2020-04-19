@@ -19,49 +19,49 @@
 package main
 
 import (
-    "fmt"
-    "os"
+	"fmt"
+	"os"
 
-    "github.com/FishGoddess/logit"
+	"github.com/FishGoddess/logit"
 )
 
 type myHandler struct{}
 
 // Customize your own handler.
 func (mh *myHandler) Handle(log *logit.Log) bool {
-    os.Stdout.Write([]byte("myHandler: "))
-    os.Stdout.Write(logit.EncodeToJson(log, "")) // Try `os.Stdout.WriteString(log.Msg())` ?
-    return true
+	os.Stdout.Write([]byte("myHandler: "))
+	os.Stdout.Write(logit.EncodeToJson(log, "")) // Try `os.Stdout.WriteString(log.Msg())` ?
+	return true
 }
 
 // We recommend you to register your handler to logit, so that
 // you can use your handler by logit.HandlerOf.
 // See logit.HandlerOf.
 func init() {
-    logit.RegisterHandler("myHandler", func(params map[string]string) logit.Handler {
-        return &myHandler{}
-    })
+	logit.RegisterHandler("myHandler", func(params map[string]interface{}) logit.Handler {
+		return &myHandler{}
+	})
 }
 
 func main() {
 
-    // Create a logger holder.
-    // Default handler is logit.DefaultHandler.
-    logger := logit.NewDevelopLogger()
-    logger.Info("before adding handlers...")
+	// Create a logger holder.
+	// Default handler is logit.DefaultHandler.
+	logger := logit.NewDevelopLogger()
+	logger.Info("before adding handlers...")
 
-    // Add handlers to logger.
-    // There are two handlers in logger because logger has a default handler inside after creating.
-    // See logit.DefaultHandler.
-    logger.AddHandlers(&myHandler{}, logit.HandlerOf("json", map[string]string{}))
-    fmt.Println("fmt =========================================")
-    logger.Info("after adding handlers...")
+	// Add handlers to logger.
+	// There are two handlers in logger because logger has a default handler inside after creating.
+	// See logit.DefaultHandler.
+	logger.AddHandlers(&myHandler{}, logit.HandlerOf("json", map[string]interface{}{}))
+	fmt.Println("fmt =========================================")
+	logger.Info("after adding handlers...")
 
-    // Set handlers to logger.
-    // There are two handlers in logger because the default handler inside was removed.
-    // If you register your handler to logit by logit.RegisterHandler, then you can
-    // use your handler everywhere like this:
-    logger.SetHandlers(logit.HandlerOf("myHandler", map[string]string{}))
-    fmt.Println("fmt =========================================")
-    logger.Info("after setting handlers...")
+	// Set handlers to logger.
+	// There are two handlers in logger because the default handler inside was removed.
+	// If you register your handler to logit by logit.RegisterHandler, then you can
+	// use your handler everywhere like this:
+	logger.SetHandlers(logit.HandlerOf("myHandler", map[string]interface{}{}))
+	fmt.Println("fmt =========================================")
+	logger.Info("after setting handlers...")
 }

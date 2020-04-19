@@ -20,31 +20,11 @@ package logit
 
 import (
     "io"
-    "math/rand"
     "os"
-    "path"
-    "strconv"
     "time"
 
     "github.com/FishGoddess/logit/wrapper"
 )
-
-const (
-    // SuffixOfLogFile is the suffix of log file.
-    SuffixOfLogFile = ".log"
-)
-
-// nextFilename creates a time-relative filename with given now time.
-// Also, it uses random number to ensure this filename is available.
-// The filename will be like "20200304-145246-45.log".
-// Notice that directory stores all log files generated in this time.
-func nextFilename(directory string) func(now time.Time) string {
-    rand.Seed(time.Now().UnixNano())
-    return func(now time.Time) string {
-        name := now.Format("20060102-150405") + "-" + strconv.Itoa(rand.Intn(1000)) + SuffixOfLogFile
-        return path.Join(directory, name)
-    }
-}
 
 // NewLoggerFrom returns a logger with given config.
 // See logit.Config.
@@ -116,7 +96,7 @@ func NewFileLogger(logFile string) *Logger {
 // If you want to appoint another filename, check this and do it by this way.
 // See wrapper.NewDurationRollingFile (it is an implement of io.writer).
 func NewDurationRollingLogger(directory string, duration time.Duration) *Logger {
-    file := wrapper.NewDurationRollingFile(duration, nextFilename(directory))
+    file := wrapper.NewDurationRollingFile(duration, wrapper.NextFilename(directory))
     return NewLoggerFrom(Config{
         Level:    InfoLevel,
         Handlers: []Handler{NewDefaultHandler(file, DefaultTimeFormat)},
@@ -138,7 +118,7 @@ func NewDayRollingLogger(directory string) *Logger {
 // If you want to appoint another filename, check this and do it by this way.
 // See wrapper.NewSizeRollingFile (it is an implement of io.writer).
 func NewSizeRollingLogger(directory string, limitedSize int64) *Logger {
-    file := wrapper.NewSizeRollingFile(limitedSize, nextFilename(directory))
+    file := wrapper.NewSizeRollingFile(limitedSize, wrapper.NextFilename(directory))
     return NewLoggerFrom(Config{
         Level:    InfoLevel,
         Handlers: []Handler{NewDefaultHandler(file, DefaultTimeFormat)},

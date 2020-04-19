@@ -38,7 +38,7 @@ func TestFileConfigToConfig(t *testing.T) {
 
     config, err := parseConfig(fileConfig{
         Level: "info",
-        Handlers: map[string]map[string]string{
+        Handlers: map[string]map[string]interface{}{
             "json": {
                 "timeFormat": "2006年01月02日 15点04分05秒",
             },
