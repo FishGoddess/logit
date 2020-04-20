@@ -19,30 +19,30 @@
 package main
 
 import (
-    "time"
+	"time"
 
-    "github.com/FishGoddess/logit/wrapper"
+	"github.com/FishGoddess/logit/wrapper"
 )
 
 func main() {
 
-    // 1. DurationRollingFile is a time sensitive file.
-    durationRollingFile := wrapper.NewDurationRollingFile(24*time.Hour, func(now time.Time) string {
-        return "D:/" + now.Format("20060102-150405") + ".txt"
-    })
-    defer durationRollingFile.Close()
+	// 1. DurationRollingFile is a time sensitive file.
+	durationRollingFile := wrapper.NewDurationRollingFile(24*time.Hour, func(now time.Time) string {
+		return "D:/" + now.Format("20060102-150405") + ".txt"
+	})
+	defer durationRollingFile.Close()
 
-    // You can use it like using os.File!
-    durationRollingFile.Write([]byte("Hello!"))
+	// You can use it like using os.File!
+	durationRollingFile.Write([]byte("Hello!"))
 
-    // =================================================================================
+	// =================================================================================
 
-    // 2. SizeRollingFile is a file size sensitive file.
-    sizeRollingFile := wrapper.NewSizeRollingFile(64*wrapper.KB, func(now time.Time) string {
-        return "D:/" + now.Format("20060102150405.000") + ".txt"
-    })
-    defer sizeRollingFile.Close()
+	// 2. SizeRollingFile is a file size sensitive file.
+	sizeRollingFile := wrapper.NewSizeRollingFile(64*wrapper.KB, func(now time.Time) string {
+		return "D:/" + now.Format("20060102150405.000") + ".txt"
+	})
+	defer sizeRollingFile.Close()
 
-    // You can use it like using os.File!
-    sizeRollingFile.Write([]byte("Hello!"))
+	// You can use it like using os.File!
+	sizeRollingFile.Write([]byte("Hello!"))
 }

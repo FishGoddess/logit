@@ -23,51 +23,51 @@ import "time"
 // Log is representation of a logging message, including all information about this message.
 type Log struct {
 
-    // logger is the publisher of this log.
-    logger *Logger
+	// logger is the publisher of this log.
+	logger *Logger
 
-    // level is the level of this log.
-    level Level
+	// level is the level of this log.
+	level Level
 
-    // now is the publishing time of this log.
-    now time.Time
+	// now is the publishing time of this log.
+	now time.Time
 
-    // file is the file of this log.
-    file string
+	// file is the file of this log.
+	file string
 
-    // line is the line number in file.
-    line int
+	// line is the line number in file.
+	line int
 
-    // msg is the message of this log.
-    msg string
+	// msg is the message of this log.
+	msg string
 }
 
 // Logger returns the publisher of this log.
 func (l *Log) Logger() *Logger {
-    return l.logger
+	return l.logger
 }
 
 // Level returns the level of this log.
 func (l *Log) Level() Level {
-    return l.level
+	return l.level
 }
 
 // Now returns the publishing time of this log.
 func (l *Log) Now() time.Time {
-    return l.now
+	return l.now
 }
 
 // Msg returns the message of this log.
 func (l *Log) Msg() string {
-    return l.msg
+	return l.msg
 }
 
 // File returns the file of this log.
 func (l *Log) File() string {
-    return l.file
+	return l.file
 }
 
 // Line returns the line number in file of this log.
 func (l *Log) Line() int {
-    return l.line
+	return l.line
 }

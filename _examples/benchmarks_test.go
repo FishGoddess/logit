@@ -11,7 +11,7 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-// 
+//
 // Author: fish
 // Email: fishinlove@163.com
 // Created at 2020/03/02 20:51:29
@@ -19,15 +19,15 @@
 package main
 
 import (
-    "testing"
-    //"time"
+	"testing"
+	//"time"
 
-    "github.com/FishGoddess/logit"
-    //"github.com/FishGoddess/logit/wrapper"
-    //"github.com/kataras/golog"
-    //"github.com/sirupsen/logrus"
-    //"go.uber.org/zap"
-    //"go.uber.org/zap/zapcore"
+	"github.com/FishGoddess/logit"
+	//"github.com/FishGoddess/logit/wrapper"
+	//"github.com/kataras/golog"
+	//"github.com/sirupsen/logrus"
+	//"go.uber.org/zap"
+	//"go.uber.org/zap/zapcore"
 )
 
 // 时间格式化字符串
@@ -36,7 +36,7 @@ const timeFormat = "2006-01-02 15:04:05"
 type nopWriter struct{}
 
 func (w *nopWriter) Write(p []byte) (n int, err error) {
-    return 0, nil
+	return 0, nil
 }
 
 /*
@@ -63,24 +63,24 @@ BenchmarkLogrusFile-8             632258             16950 ns/op            1633
 // 测试 logit 日志记录器的速度
 func BenchmarkLogitLogger(b *testing.B) {
 
-    // 测试用的日志记录器
-    logger := logit.NewLogger(logit.DebugLevel, logit.NewDefaultHandler(&nopWriter{}, timeFormat))
+	// 测试用的日志记录器
+	logger := logit.NewLogger(logit.DebugLevel, logit.NewDefaultHandler(&nopWriter{}, timeFormat))
 
-    // 测试用的日志任务
-    logTask := func() {
-        logger.Debug("debug...")
-        logger.Info("info...")
-        logger.Warn("warning...")
-        logger.Error("error...")
-    }
+	// 测试用的日志任务
+	logTask := func() {
+		logger.Debug("debug...")
+		logger.Info("info...")
+		logger.Warn("warning...")
+		logger.Error("error...")
+	}
 
-    // 开始性能测试
-    b.ReportAllocs()
-    b.StartTimer()
+	// 开始性能测试
+	b.ReportAllocs()
+	b.StartTimer()
 
-    for i := 0; i < b.N; i++ {
-        logTask()
-    }
+	for i := 0; i < b.N; i++ {
+		logTask()
+	}
 }
 
 // 测试 golog 日志记录器的速度

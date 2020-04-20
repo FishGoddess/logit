@@ -19,50 +19,50 @@
 package logit
 
 import (
-    "errors"
-    "math"
+	"errors"
+	"math"
 )
 
 // Level is the type representation of the level.
 type Level uint8
 
 const (
-    DebugLevel Level = iota
-    InfoLevel
-    WarnLevel
-    ErrorLevel
+	DebugLevel Level = iota
+	InfoLevel
+	WarnLevel
+	ErrorLevel
 
-    // OffLevel is for disabling a logger
-    OffLevel = math.MaxUint8
+	// OffLevel is for disabling a logger
+	OffLevel = math.MaxUint8
 )
 
 var (
-    // levels provides the name of all supported level.
-    levels = map[Level]string{
-        DebugLevel: "debug",
-        InfoLevel:  "info",
-        WarnLevel:  "warn",
-        ErrorLevel: "error",
-        OffLevel:   "off",
-    }
+	// levels provides the name of all supported level.
+	levels = map[Level]string{
+		DebugLevel: "debug",
+		InfoLevel:  "info",
+		WarnLevel:  "warn",
+		ErrorLevel: "error",
+		OffLevel:   "off",
+	}
 
-    // LevelIsNotExisted is an error representation of a level is not existed.
-    LevelIsNotExisted = errors.New("level is not existed, be sure your level is one of them: debug, info, warn, error, off")
+	// LevelIsNotExisted is an error representation of a level is not existed.
+	LevelIsNotExisted = errors.New("level is not existed, be sure your level is one of them: debug, info, warn, error, off")
 )
 
 // ParseLevel parses level and returns the Level of it.
 // Return LevelIsNotExisted if level is not existed.
 func ParseLevel(level string) (Level, error) {
-    for k, v := range levels {
-        if v == level {
-            return k, nil
-        }
-    }
-    return 0, LevelIsNotExisted
+	for k, v := range levels {
+		if v == level {
+			return k, nil
+		}
+	}
+	return 0, LevelIsNotExisted
 }
 
 // The String method is used to print values passed as an operand
 // to any format that accepts a string or to an printer without format such as Print.
 func (ll Level) String() string {
-    return levels[ll]
+	return levels[ll]
 }

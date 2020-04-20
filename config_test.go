@@ -22,56 +22,56 @@ import "testing"
 
 // 测试解析日志级别的方法
 func TestParseLevel(t *testing.T) {
-    level, err := ParseLevel("debug")
-    if err != nil || level != DebugLevel {
-        t.Fatal("ParseLevel 出现错误！")
-    }
+	level, err := ParseLevel("debug")
+	if err != nil || level != DebugLevel {
+		t.Fatal("ParseLevel 出现错误！")
+	}
 
-    level, err = ParseLevel("debug?")
-    if err == nil {
-        t.Fatal("ParseLevel 出现错误！")
-    }
+	level, err = ParseLevel("debug?")
+	if err == nil {
+		t.Fatal("ParseLevel 出现错误！")
+	}
 }
 
 // 测试将 fileConfig 转换成 Config 的方法
 func TestFileConfigToConfig(t *testing.T) {
 
-    config, err := parseConfig(fileConfig{
-        Level: "info",
-        Handlers: map[string]map[string]interface{}{
-            "json": {
-                "timeFormat": "2006年01月02日 15点04分05秒",
-            },
-        },
-    })
-    if err != nil {
-        t.Fatal(err.Error())
-    }
+	config, err := parseConfig(fileConfig{
+		Level: "info",
+		Handlers: map[string]map[string]interface{}{
+			"json": {
+				"timeFormat": "2006年01月02日 15点04分05秒",
+			},
+		},
+	})
+	if err != nil {
+		t.Fatal(err.Error())
+	}
 
-    t.Logf("%v\n", config.Level)
-    for _, handler := range config.Handlers {
-        t.Logf("%T\n", handler)
-    }
+	t.Logf("%v\n", config.Level)
+	for _, handler := range config.Handlers {
+		t.Logf("%T\n", handler)
+	}
 
-    logger := NewLoggerFrom(config)
-    logger.Info("info 测试 TestFileConfigToConfig...")
-    logger.Warn("warn 测试 TestFileConfigToConfig...")
+	logger := NewLoggerFrom(config)
+	logger.Info("info 测试 TestFileConfigToConfig...")
+	logger.Warn("warn 测试 TestFileConfigToConfig...")
 }
 
 // 测试解析配置文件的方法
 func TestParseConfigFile(t *testing.T) {
 
-    config, err := ParseConfigFile("./_examples/config/logit-config-template.cfg")
-    if err != nil {
-        t.Fatal(err.Error())
-    }
+	config, err := ParseConfigFile("./_examples/config/logit-config-template.cfg")
+	if err != nil {
+		t.Fatal(err.Error())
+	}
 
-    t.Logf("%v\n", config.Level)
-    for _, handler := range config.Handlers {
-        t.Logf("%T\n", handler)
-    }
+	t.Logf("%v\n", config.Level)
+	for _, handler := range config.Handlers {
+		t.Logf("%T\n", handler)
+	}
 
-    logger := NewLoggerFrom(config)
-    logger.Info("info 测试 TestFileConfigToConfig...")
-    logger.Warn("warn 测试 TestFileConfigToConfig...")
+	logger := NewLoggerFrom(config)
+	logger.Info("info 测试 TestFileConfigToConfig...")
+	logger.Warn("warn 测试 TestFileConfigToConfig...")
 }
