@@ -20,9 +20,43 @@ package logit
 
 import (
 	"bytes"
+	"errors"
 	"strconv"
 	"strings"
 )
+
+var (
+	// encoders stores all encoders provided.
+	// Call EncoderOf method to use one of encoders below.
+	// Actually, this field is for me, not for you, ha:)
+	encoders = map[string]Encoder{
+		"text": EncodeToText,
+		"json": EncodeToJson,
+	}
+
+	// EncoderIsNotExistedError is the error which will occur on pointing a nonexistent encoder.
+	EncoderIsNotExistedError = errors.New("the encoder you pointed is not existed! Try text or json")
+)
+
+// Encoder is for encoding a log to bytes with timeFormat.
+// No matter what you do, remember, return it in bytes form.
+type Encoder func(log *Log, timeFormat string) []byte
+
+// Encode encodes a log to bytes with timeFormat.
+// This is Encoder's substitute, and only for more code-readable.
+func (e Encoder) Encode(log *Log, timeFormat string) []byte {
+	return e(log, timeFormat)
+}
+
+// EncoderOf returns the encoder called name.
+// Notice that it returns nil when the encoder called name doesn't exist.
+func EncoderOf(name string) Encoder {
+	encoder, ok := encoders[name]
+	if !ok {
+		panic(EncoderIsNotExistedError)
+	}
+	return encoder
+}
 
 // EncodeToText encodes a log to a plain string like "[Info] [2020-03-06 16:10:44] msg" in bytes.
 func EncodeToText(log *Log, timeFormat string) []byte {

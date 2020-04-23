@@ -20,6 +20,7 @@ package logit
 
 import (
 	"errors"
+	"fmt"
 	"io"
 	"os"
 	"strconv"
@@ -129,16 +130,6 @@ func WriterOf(params map[string]interface{}) io.Writer {
 }
 
 func init() {
-
-	// 注册默认日志处理器
-	RegisterHandler("default", func(params map[string]interface{}) Handler {
-		timeFormat := DefaultTimeFormat
-		if format, ok := params["timeFormat"]; ok && format != "" {
-			timeFormat = format.(string)
-		}
-		return NewDefaultHandler(WriterOf(params), timeFormat)
-	})
-
 	// 注册 Json 格式日志处理器
 	RegisterHandler("json", func(params map[string]interface{}) Handler {
 		timeFormat := ""
@@ -148,11 +139,6 @@ func init() {
 		return NewJsonHandler(WriterOf(params), timeFormat)
 	})
 }
-
-const (
-	// DefaultTimeFormat is the default format for formatting time.
-	DefaultTimeFormat = "2006-01-02 15:04:05"
-)
 
 var (
 	// handlers stores all registered handlers.
@@ -189,51 +175,10 @@ func HandlerOf(name string, params map[string]interface{}) Handler {
 	defer mutexOfHandlers.RUnlock()
 	newHandler, ok := handlers[name]
 	if !ok {
-		return NewDefaultHandler(os.Stdout, DefaultTimeFormat)
+		fmt.Fprintln(os.Stderr, "The handler you pointed is not existed! Use NewDefaultHandler(os.Stdout, EncoderOf(\"text\"), DefaultTimeFormat) instead!")
+		return NewDefaultHandler(os.Stdout, EncoderOf("text"), DefaultTimeFormat)
 	}
 	return newHandler(params)
-}
-
-// DefaultHandler is a default handler for use.
-// Generally speaking, encoding a log to bytes then written by writer is the most of
-// handlers do. So we provide a default handler, which only need a writer and an encoder.
-//
-// For config:
-//     If you want to use this handler in your logger by config file, try this:
-//
-//         "handlers":{
-//             "default":{
-//
-//             }
-//         }
-//
-//     This will use logit.DefaultTimeFormat to format time, and if you want to
-//     use your layout to format time, try this:
-//
-//         "handlers":{
-//             "default":{
-//                 "timeFormat": "2006-01-02"
-//             }
-//         }
-//
-type DefaultHandler struct {
-	writer     io.Writer
-	timeFormat string
-}
-
-// NewDefaultHandler returns a DefaultHandler holder with given writer.
-func NewDefaultHandler(writer io.Writer, timeFormat string) Handler {
-	return &DefaultHandler{
-		writer:     writer,
-		timeFormat: timeFormat,
-	}
-}
-
-// Handle will encode log and write log by internal writer.
-// Return true so that handlers after it will be used.
-func (dh *DefaultHandler) Handle(log *Log) bool {
-	dh.writer.Write(EncodeToText(log, dh.timeFormat))
-	return true
 }
 
 // JsonHandler is a json handler for use.
@@ -273,6 +218,6 @@ func NewJsonHandler(writer io.Writer, timeFormat string) Handler {
 // Handle will encode log and write log by internal writer.
 // Return true so that handlers after it will be used.
 func (jh *JsonHandler) Handle(log *Log) bool {
-	jh.writer.Write(EncodeToJson(log, jh.timeFormat))
+	jh.writer.Write(EncoderOf("json").Encode(log, jh.timeFormat))
 	return true
 }

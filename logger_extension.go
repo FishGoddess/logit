@@ -63,7 +63,7 @@ func NewLoggerFromConfigFile(configFile string) *Logger {
 func NewDevelopLogger() *Logger {
 	return NewLoggerFrom(Config{
 		Level:    DebugLevel,
-		Handlers: []Handler{NewDefaultHandler(os.Stdout, DefaultTimeFormat)},
+		Handlers: []Handler{NewDefaultHandlerWithoutEncoder(os.Stdout, DefaultTimeFormat)},
 	})
 }
 
@@ -85,7 +85,7 @@ func NewFileLogger(logFile string) *Logger {
 	}
 	return NewLoggerFrom(Config{
 		Level:    InfoLevel,
-		Handlers: []Handler{NewDefaultHandler(file, DefaultTimeFormat)},
+		Handlers: []Handler{NewDefaultHandlerWithoutEncoder(file, DefaultTimeFormat)},
 	})
 }
 
@@ -99,7 +99,7 @@ func NewDurationRollingLogger(directory string, duration time.Duration) *Logger 
 	file := writer.NewDurationRollingFile(duration, writer.NextFilename(directory))
 	return NewLoggerFrom(Config{
 		Level:    InfoLevel,
-		Handlers: []Handler{NewDefaultHandler(file, DefaultTimeFormat)},
+		Handlers: []Handler{NewDefaultHandlerWithoutEncoder(file, DefaultTimeFormat)},
 	})
 }
 
@@ -121,7 +121,7 @@ func NewSizeRollingLogger(directory string, limitedSize int64) *Logger {
 	file := writer.NewSizeRollingFile(limitedSize, writer.NextFilename(directory))
 	return NewLoggerFrom(Config{
 		Level:    InfoLevel,
-		Handlers: []Handler{NewDefaultHandler(file, DefaultTimeFormat)},
+		Handlers: []Handler{NewDefaultHandlerWithoutEncoder(file, DefaultTimeFormat)},
 	})
 }
 

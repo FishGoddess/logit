@@ -29,31 +29,31 @@ import (
 
 // 测试日志记录器的 Debug 方法
 func TestLoggerDebug(t *testing.T) {
-	logger := NewLogger(DebugLevel, NewDefaultHandler(os.Stdout, DefaultTimeFormat))
+	logger := NewLogger(DebugLevel, NewDefaultHandlerWithoutEncoder(os.Stdout, DefaultTimeFormat))
 	logger.Debug("这是 debug 信息。。。")
 }
 
 // 测试日志记录器的 Debug 方法
 func TestLoggerInfo(t *testing.T) {
-	logger := NewLogger(DebugLevel, NewDefaultHandler(os.Stdout, DefaultTimeFormat))
+	logger := NewLogger(DebugLevel, NewDefaultHandlerWithoutEncoder(os.Stdout, DefaultTimeFormat))
 	logger.Info("这是 info 信息。。。")
 }
 
 // 测试日志记录器的 Debug 方法
 func TestLoggerWarn(t *testing.T) {
-	logger := NewLogger(DebugLevel, NewDefaultHandler(os.Stdout, DefaultTimeFormat))
+	logger := NewLogger(DebugLevel, NewDefaultHandlerWithoutEncoder(os.Stdout, DefaultTimeFormat))
 	logger.Warn("这是 warn 信息。。。")
 }
 
 // 测试日志记录器的 Debug 方法
 func TestLoggerError(t *testing.T) {
-	logger := NewLogger(DebugLevel, NewDefaultHandler(os.Stdout, DefaultTimeFormat))
+	logger := NewLogger(DebugLevel, NewDefaultHandlerWithoutEncoder(os.Stdout, DefaultTimeFormat))
 	logger.Error("这是 error 信息。。。")
 }
 
 // 测试调整日志记录器为运行状态的方法
 func TestLoggerEnable(t *testing.T) {
-	logger := NewLogger(DebugLevel, NewDefaultHandler(os.Stdout, DefaultTimeFormat))
+	logger := NewLogger(DebugLevel, NewDefaultHandlerWithoutEncoder(os.Stdout, DefaultTimeFormat))
 	logger.Debug("1. 这是 debug 信息。。。")
 	level := logger.ChangeLevelTo(OffLevel)
 	logger.Debug("2. 这是 debug 信息。。。")
@@ -63,7 +63,7 @@ func TestLoggerEnable(t *testing.T) {
 
 // 测试日志记录器的级别控制是否可用
 func TestLevel(t *testing.T) {
-	logger := NewLogger(DebugLevel, NewDefaultHandler(os.Stdout, DefaultTimeFormat))
+	logger := NewLogger(DebugLevel, NewDefaultHandlerWithoutEncoder(os.Stdout, DefaultTimeFormat))
 	logger.Debug(logger.Level().String())
 	logger.Info("这条 info 级别的内容可以显示吗？")
 	logger.Warn("这条 warn 级别的内容可以显示吗？")
@@ -72,7 +72,7 @@ func TestLevel(t *testing.T) {
 
 // 测试更改日志级别是否可用
 func TestLoggerChangeLevelTo(t *testing.T) {
-	logger := NewLogger(WarnLevel, NewDefaultHandler(os.Stdout, DefaultTimeFormat))
+	logger := NewLogger(WarnLevel, NewDefaultHandlerWithoutEncoder(os.Stdout, DefaultTimeFormat))
 	logger.Info("Logger's level is warn, so info message will not be logged!")
 
 	logger.ChangeLevelTo(InfoLevel)
@@ -84,7 +84,7 @@ func TestLoggerChangeLevelTo(t *testing.T) {
 
 // 测试文件信息显示的开关是否可用
 func TestLoggerEnableAndDisableFileInfo(t *testing.T) {
-	logger := NewLogger(DebugLevel, NewDefaultHandler(os.Stdout, DefaultTimeFormat))
+	logger := NewLogger(DebugLevel, NewDefaultHandlerWithoutEncoder(os.Stdout, DefaultTimeFormat))
 	logger.Warn("没有文件信息！")
 	logger.EnableFileInfo()
 	logger.Warn("有文件信息？是否正确？")
@@ -97,13 +97,13 @@ type myHandler struct{}
 // Customize your own handler.
 func (mh *myHandler) Handle(log *Log) bool {
 	os.Stdout.Write([]byte("myHandler: "))
-	os.Stdout.Write(EncodeToText(log, DefaultTimeFormat))
+	os.Stdout.Write(EncoderOf("text").Encode(log, DefaultTimeFormat))
 	return true
 }
 
 // 测试增加处理器是否可用
 func TestLoggerAddHandlersAndSetHandlers(t *testing.T) {
-	logger := NewLogger(DebugLevel, NewDefaultHandler(os.Stdout, DefaultTimeFormat))
+	logger := NewLogger(DebugLevel, NewDefaultHandlerWithoutEncoder(os.Stdout, DefaultTimeFormat))
 	logger.Info("当前的日志处理器：" + fmt.Sprintf("%v", logger.handlers))
 
 	if len(logger.handlers) != 1 {
@@ -158,7 +158,7 @@ func TestLoggerHandlers(t *testing.T) {
 // 测试并发情况下使用 Logger
 func TestLoggerInConcurrency(t *testing.T) {
 
-	logger := NewLogger(DebugLevel, NewDefaultHandler(os.Stdout, DefaultTimeFormat))
+	logger := NewLogger(DebugLevel, NewDefaultHandlerWithoutEncoder(os.Stdout, DefaultTimeFormat))
 
 	group := sync.WaitGroup{}
 	for i := 0; i < 100; i++ {
