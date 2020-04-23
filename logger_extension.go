@@ -23,7 +23,7 @@ import (
 	"os"
 	"time"
 
-	"github.com/FishGoddess/logit/wrapper"
+	"github.com/FishGoddess/logit/writer"
 )
 
 // NewLoggerFrom returns a logger with given config.
@@ -79,7 +79,7 @@ func NewProductionLogger(writer io.Writer) *Logger {
 
 // NewFileLogger returns a Logger holder which log to a file with given logFile.
 func NewFileLogger(logFile string) *Logger {
-	file, err := wrapper.NewFile(logFile)
+	file, err := writer.NewFile(logFile)
 	if err != nil {
 		panic(err)
 	}
@@ -91,12 +91,12 @@ func NewFileLogger(logFile string) *Logger {
 
 // NewDurationRollingLogger creates a duration rolling logger with given duration.
 // You should appoint a directory to store all log files generated in this time.
-// Notice that duration must not less than minDuration (generally one second), see wrapper.minDuration.
+// Notice that duration must not less than minDuration (generally one second), see writer.minDuration.
 // Also, default filename of log file is like "20200304-145246-45.log", see nextFilename.
 // If you want to appoint another filename, check this and do it by this way.
-// See wrapper.NewDurationRollingFile (it is an implement of io.writer).
+// See writer.NewDurationRollingFile (it is an implement of io.writer).
 func NewDurationRollingLogger(directory string, duration time.Duration) *Logger {
-	file := wrapper.NewDurationRollingFile(duration, wrapper.NextFilename(directory))
+	file := writer.NewDurationRollingFile(duration, writer.NextFilename(directory))
 	return NewLoggerFrom(Config{
 		Level:    InfoLevel,
 		Handlers: []Handler{NewDefaultHandler(file, DefaultTimeFormat)},
@@ -112,13 +112,13 @@ func NewDayRollingLogger(directory string) *Logger {
 
 // NewSizeRollingLogger creates a file size rolling logger with given limitedSize.
 // You should appoint a directory to store all log files generated in this time.
-// Notice that limitedSize must not less than minLimitedSize (generally 64 KB), see wrapper.minLimitedSize.
-// Check wrapper.KB, wrapper.MB, wrapper.GB to know what unit you gonna to use.
+// Notice that limitedSize must not less than minLimitedSize (generally 64 KB), see writer.minLimitedSize.
+// Check writer.KB, writer.MB, writer.GB to know what unit you gonna to use.
 // Also, default filename of log file is like "20200304-145246-45.log", see nextFilename.
 // If you want to appoint another filename, check this and do it by this way.
-// See wrapper.NewSizeRollingFile (it is an implement of io.writer).
+// See writer.NewSizeRollingFile (it is an implement of io.writer).
 func NewSizeRollingLogger(directory string, limitedSize int64) *Logger {
-	file := wrapper.NewSizeRollingFile(limitedSize, wrapper.NextFilename(directory))
+	file := writer.NewSizeRollingFile(limitedSize, writer.NextFilename(directory))
 	return NewLoggerFrom(Config{
 		Level:    InfoLevel,
 		Handlers: []Handler{NewDefaultHandler(file, DefaultTimeFormat)},
@@ -129,7 +129,7 @@ func NewSizeRollingLogger(directory string, limitedSize int64) *Logger {
 // You should appoint a directory to store all log files generated in this time.
 // Default means limitedSize is 64 MB. See logit.NewSizeRollingLogger.
 func NewDefaultSizeRollingLogger(directory string) *Logger {
-	return NewSizeRollingLogger(directory, 64*wrapper.MB)
+	return NewSizeRollingLogger(directory, 64*writer.MB)
 }
 
 // DebugFunc will output msg as a debug message.

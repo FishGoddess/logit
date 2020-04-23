@@ -16,7 +16,7 @@
 // Email: fishinlove@163.com
 // Created at 2020/03/03 16:01:38
 
-package wrapper
+package writer
 
 import (
 	"os"

@@ -1,11 +1,12 @@
 ## ✒ 未来版本的新特性 (Features in future version)
 
 ### v0.2.0
-* 继续完善配置文件，主要针对内置的日志处理器做适配
-* 合并目前的 DefaultHandler 和 JsonHandler
-* DefaultHandler 和 wrapper 进行配置文件的适配
-* 加入 FileHandler，专门负责文件相关的日志处理器
-* 增加分级日志处理器包装器，不同的级别可以使用不同的日志处理器
+* 将 wrapper 修改为 writer
+* 将 default handler 抽取到一个 default_handler.go
+* 去除 json handler，将这个作为 handler 的一个参数，考虑提取出一个 encoder，然后也使用注册中心模式
+* 加入 file handler，专门负责文件相关的日志处理器，包含时间滚动和大小滚动和不滚动的功能
+* 增加 level_handler.go，里面是不同日志级别的日志处理器包装器，可以传一堆的 handler 进去
+* 增加 timeout_handler.go，里面是带超时功能的日志处理器包装器
 
 ### v0.1.5
 * 完善 Json 处理器没有做字符转义的修复方案，详情查询 [issue/1](https://github.com/FishGoddess/logit/issues/1)

@@ -26,7 +26,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/FishGoddess/logit/wrapper"
+	"github.com/FishGoddess/logit/writer"
 )
 
 // Handler is an interface representation of log handler.
@@ -57,17 +57,17 @@ type Handler interface {
 func WriterOf(params map[string]interface{}) io.Writer {
 
 	// 默认使用 os.Stdout
-	writer := os.Stdout
+	w := os.Stdout
 	param, ok := params["writer"]
 	if !ok {
-		return writer
+		return w
 	}
 
 	// 下面这段代码有些 “肮脏”，但是大张旗鼓地重构这个又有点主次不分的感觉，所以先保持这样，后续再考虑这个点
 	writerConfig := param.(map[string]interface{})
 	rolling, ok := writerConfig["rolling"]
 	if !ok {
-		return writer
+		return w
 	}
 
 	switch rolling {
@@ -87,7 +87,7 @@ func WriterOf(params map[string]interface{}) io.Writer {
 			directory = param.(string)
 		}
 
-		return wrapper.NewDurationRollingFile(time.Duration(duration)*time.Second, wrapper.NextFilename(directory))
+		return writer.NewDurationRollingFile(time.Duration(duration)*time.Second, writer.NextFilename(directory))
 
 	// 以文件大小进行滚动的日志写出器
 	case "size":
@@ -104,28 +104,28 @@ func WriterOf(params map[string]interface{}) io.Writer {
 			directory = param.(string)
 		}
 
-		return wrapper.NewSizeRollingFile(int64(size)*wrapper.MB, wrapper.NextFilename(directory))
+		return writer.NewSizeRollingFile(int64(size)*writer.MB, writer.NextFilename(directory))
 
 	// 不滚动的日志写出器
 	case "off":
 
 		// 写出的目标文件
 		if param, ok := writerConfig["file"]; ok {
-			file, err := wrapper.NewFile(param.(string))
+			file, err := writer.NewFile(param.(string))
 			if err != nil {
 				panic(err)
 			}
 			return file
 		}
 
-		file, err := wrapper.NewFile("./logit-" + strconv.FormatInt(time.Now().Unix(), 10) + wrapper.SuffixOfLogFile)
+		file, err := writer.NewFile("./logit-" + strconv.FormatInt(time.Now().Unix(), 10) + writer.SuffixOfLogFile)
 		if err != nil {
 			panic(err)
 		}
 		return file
 	}
 
-	return writer
+	return w
 }
 
 func init() {

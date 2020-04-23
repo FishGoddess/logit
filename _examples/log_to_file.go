@@ -22,7 +22,7 @@ import (
 	"time"
 
 	"github.com/FishGoddess/logit"
-	"github.com/FishGoddess/logit/wrapper"
+	"github.com/FishGoddess/logit/writer"
 )
 
 func main() {
@@ -34,10 +34,10 @@ func main() {
 
 	// NewDurationRollingLogger creates a duration rolling logger with given duration.
 	// You should appoint a directory to store all log files generated in this time.
-	// Notice that duration must not less than minDuration (generally time.Second), see wrapper.minDuration.
-	// Also, default filename of log file is like "20200304-145246-45.log", see wrapper.NewFilename.
+	// Notice that duration must not less than minDuration (generally time.Second), see writer.minDuration.
+	// Also, default filename of log file is like "20200304-145246-45.log", see writer.NewFilename.
 	// If you want to appoint another filename, check this and do it by this way.
-	// See wrapper.NewDurationRollingFile (it is an implement of io.writer).
+	// See writer.NewDurationRollingFile (it is an implement of io.writer).
 	logger = logit.NewDurationRollingLogger("D:/", 24*time.Hour)
 	logger.Info("Rolling!!!")
 
@@ -49,12 +49,12 @@ func main() {
 
 	// NewSizeRollingLogger creates a file size rolling logger with given limitedSize.
 	// You should appoint a directory to store all log files generated in this time.
-	// Notice that limitedSize must not less than minLimitedSize (generally 64 KB), see wrapper.minLimitedSize.
-	// Check wrapper.KB, wrapper.MB, wrapper.GB to know what unit you gonna to use.
+	// Notice that limitedSize must not less than minLimitedSize (generally 64 KB), see writer.minLimitedSize.
+	// Check writer.KB, writer.MB, writer.GB to know what unit you gonna to use.
 	// Also, default filename of log file is like "20200304-145246-45.log", see nextFilename.
 	// If you want to appoint another filename, check this and do it by this way.
-	// See wrapper.NewSizeRollingFile (it is an implement of io.writer).
-	logger = logit.NewSizeRollingLogger("D:/", 64*wrapper.KB)
+	// See writer.NewSizeRollingFile (it is an implement of io.writer).
+	logger = logit.NewSizeRollingLogger("D:/", 64*writer.KB)
 	logger.Info("file size???")
 
 	// NewDayRollingLogger creates a file size rolling logger.

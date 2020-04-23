@@ -17,7 +17,7 @@
 // Created at 2020/03/03 14:59:08
 
 /*
-Package wrapper provides some writers to extend your Logger.
+Package writer provides some writers to extend your Logger.
 
 1. DurationRollingFile:
 
@@ -42,4 +42,4 @@ Package wrapper provides some writers to extend your Logger.
     file.Write([]byte("Hello!"))
 
 */
-package wrapper // import "github.com/FishGoddess/logit/wrapper"
+package writer // import "github.com/FishGoddess/logit/writer"
