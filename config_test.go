@@ -36,10 +36,10 @@ func TestParseLevel(t *testing.T) {
 // 测试将 fileConfig 转换成 Config 的方法
 func TestFileConfigToConfig(t *testing.T) {
 
-	config, err := parseConfig(fileConfig{
+	config, err := parseFileConfig(fileConfig{
 		Level: "info",
 		Handlers: map[string]map[string]interface{}{
-			"json": {
+			"console": {
 				"timeFormat": "2006年01月02日 15点04分05秒",
 			},
 		},
@@ -61,7 +61,7 @@ func TestFileConfigToConfig(t *testing.T) {
 // 测试解析配置文件的方法
 func TestParseConfigFile(t *testing.T) {
 
-	config, err := ParseConfigFile("./_examples/config/logit-config-template.cfg")
+	config, err := ParseConfigFile("./_examples/logger.cfg")
 	if err != nil {
 		t.Fatal(err.Error())
 	}

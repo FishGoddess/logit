@@ -23,7 +23,7 @@ import (
 	//"time"
 
 	"github.com/FishGoddess/logit"
-	//"github.com/FishGoddess/logit/wrapper"
+	//"github.com/FishGoddess/logit/writer"
 	//"github.com/kataras/golog"
 	//"github.com/sirupsen/logrus"
 	//"go.uber.org/zap"
@@ -64,7 +64,7 @@ BenchmarkLogrusFile-8             632258             16950 ns/op            1633
 func BenchmarkLogitLogger(b *testing.B) {
 
 	// 测试用的日志记录器
-	logger := logit.NewLogger(logit.DebugLevel, logit.NewDefaultHandler(&nopWriter{}, timeFormat))
+	logger := logit.NewLogger(logit.DebugLevel, logit.NewStandardHandler(&nopWriter{}, logit.EncoderOf("text"), timeFormat))
 
 	// 测试用的日志任务
 	logTask := func() {
@@ -170,8 +170,8 @@ func BenchmarkLogitLogger(b *testing.B) {
 //// 测试 logit 文件日志记录器的速度
 //func BenchmarkLogitFile(b *testing.B) {
 //
-//    file, _ := wrapper.NewFile("D:/BenchmarkLogitFile.log")
-//    logger := logit.NewLogger(logit.DebugLevel, logit.NewDefaultHandler(file, timeFormat))
+//    file, _ := writer.NewFile("D:/BenchmarkLogitFile.log")
+//    logger := logit.NewLogger(logit.DebugLevel, logit.NewStandardHandler(file, logit.EncoderOf("text"), timeFormat))
 //
 //    // 测试用的日志任务
 //    logTask := func() {
@@ -193,7 +193,7 @@ func BenchmarkLogitLogger(b *testing.B) {
 //func BenchmarkGologFile(b *testing.B) {
 //
 //    logger := golog.New()
-//    file, _ := wrapper.NewFile("D:/BenchmarkGologFile.log")
+//    file, _ := writer.NewFile("D:/BenchmarkGologFile.log")
 //    logger.SetOutput(file)
 //    logger.SetLevel("debug")
 //    logger.SetTimeFormat(timeFormat)
@@ -224,7 +224,7 @@ func BenchmarkLogitLogger(b *testing.B) {
 //        enc.AppendString(t.Format(timeFormat))
 //    }
 //    encoder := zapcore.NewConsoleEncoder(config)
-//    file, _ := wrapper.NewFile("D:/BenchmarkZapFile.log")
+//    file, _ := writer.NewFile("D:/BenchmarkZapFile.log")
 //    writeSyncer := zapcore.AddSync(file)
 //    core := zapcore.NewCore(encoder, writeSyncer, zapcore.DebugLevel)
 //    logger := zap.New(core)
@@ -251,7 +251,7 @@ func BenchmarkLogitLogger(b *testing.B) {
 //func BenchmarkLogrusFile(b *testing.B) {
 //
 //    logger := logrus.New()
-//    file, _ := wrapper.NewFile("D:/BenchmarkLogrusFile.log")
+//    file, _ := writer.NewFile("D:/BenchmarkLogrusFile.log")
 //    logger.SetOutput(file)
 //    logger.SetLevel(logrus.DebugLevel)
 //    logger.SetFormatter(&logrus.TextFormatter{

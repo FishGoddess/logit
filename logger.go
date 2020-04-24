@@ -42,9 +42,9 @@ type Logger struct {
 	// See logit.Handler.
 	handlers []Handler
 
-	// needFileInfo is a flag to check if msg should contain file info.
+	// needCaller is a flag to check if msg should contain file info.
 	// This step is useful but too expensive, so default is false.
-	needFileInfo bool
+	needCaller bool
 
 	// logs is an object pool cache some Log holder.
 	// Use a pool is for reducing memory allocation.
@@ -66,10 +66,10 @@ func NewLogger(level Level, handlers ...Handler) *Logger {
 
 	// 创建 logger 对象
 	logger := &Logger{
-		level:        level,
-		handlers:     handlers,
-		needFileInfo: false,
-		mu:           &sync.RWMutex{},
+		level:      level,
+		handlers:   handlers,
+		needCaller: false,
+		mu:         &sync.RWMutex{},
 	}
 
 	// 初始化 logs 对象池
@@ -146,7 +146,7 @@ func (l *Logger) Handlers() []Handler {
 func (l *Logger) EnableFileInfo() {
 	l.mu.Lock()
 	defer l.mu.Unlock()
-	l.needFileInfo = true
+	l.needCaller = true
 }
 
 // DisableFileInfo means every log will not contain file info like line number.
@@ -154,7 +154,7 @@ func (l *Logger) EnableFileInfo() {
 func (l *Logger) DisableFileInfo() {
 	l.mu.Lock()
 	defer l.mu.Unlock()
-	l.needFileInfo = false
+	l.needCaller = false
 }
 
 // newLog returns a Log holder from object pool.
@@ -195,7 +195,7 @@ func (l *Logger) log(callDepth int, level Level, msg string) {
 	// 即使释放锁之后有人修改了这个属性，也和这里无关了，因为在执行这个 log 方法的时间点上，
 	// 这个属性的值就已经确定了，并且不允许被修改了，这类似于 copy on write 的解决思路
 	// 这个解决并发竞争的方案是否没有问题，需要时间的验证才知道
-	needFileInfo := l.needFileInfo
+	needFileInfo := l.needCaller
 	l.mu.RUnlock()
 
 	// 处理日志
@@ -204,7 +204,7 @@ func (l *Logger) log(callDepth int, level Level, msg string) {
 
 	// 如果需要文件信息，对当前的 msg 进行包装
 	if needFileInfo {
-		wrapLogWithFileInfo(callDepth, log)
+		wrapLogWithCaller(callDepth, log)
 	}
 	l.handleLog(log)
 }
@@ -220,10 +220,10 @@ func (l *Logger) handleLog(log *Log) {
 	}
 }
 
-// wrapLogWithFileInfo wraps log with file info.
+// wrapLogWithCaller wraps log with file info.
 // This function is too expensive because of runtime.Caller.
 // Notice that callDepth is the depth of calling stack. See callDepth.
-func wrapLogWithFileInfo(callDepth int, log *Log) {
+func wrapLogWithCaller(callDepth int, log *Log) {
 
 	// 这个 callDepth 是 runtime.Caller 方法的参数，表示上面第几层调用者信息
 	_, file, line, ok := runtime.Caller(callDepth)

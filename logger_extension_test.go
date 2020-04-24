@@ -25,7 +25,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/FishGoddess/logit/wrapper"
+	"github.com/FishGoddess/logit/writer"
 )
 
 // 测试创建文件日志记录器
@@ -69,7 +69,7 @@ func TestNewDayRollingLogger(t *testing.T) {
 // 测试按照文件大小自动划分日志文件的日志记录器
 func TestNewSizeRollingLogger(t *testing.T) {
 
-	logger := NewSizeRollingLogger("Z:/", 64*wrapper.KB)
+	logger := NewSizeRollingLogger("Z:/", 64*writer.KB)
 	for i := 0; i < 1000; i++ {
 		logger.Debug("debug...")
 		logger.Info("info...")

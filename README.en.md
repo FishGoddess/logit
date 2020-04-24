@@ -99,7 +99,7 @@ func main() {
 * [level_and_disable](./_examples/level_and_disable.go)
 * [config_file](./_examples/config_file.go)
 * [handler](./_examples/handler.go)
-* [wrapper](./_examples/wrapper.go)
+* [writer](./_examples/writer.go)
 * [log_to_file](./_examples/log_to_file.go)
 
 _Check more examples in [_examples](./_examples)._

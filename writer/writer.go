@@ -16,7 +16,7 @@
 // Email: fishinlove@163.com
 // Created at 2020/03/03 15:10:45
 
-package wrapper
+package writer
 
 import (
 	"math/rand"

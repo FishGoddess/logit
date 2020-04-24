@@ -21,13 +21,13 @@ package main
 import (
 	"time"
 
-	"github.com/FishGoddess/logit/wrapper"
+	"github.com/FishGoddess/logit/writer"
 )
 
 func main() {
 
 	// 1. DurationRollingFile is a time sensitive file.
-	durationRollingFile := wrapper.NewDurationRollingFile(24*time.Hour, func(now time.Time) string {
+	durationRollingFile := writer.NewDurationRollingFile(24*time.Hour, func(now time.Time) string {
 		return "D:/" + now.Format("20060102-150405") + ".txt"
 	})
 	defer durationRollingFile.Close()
@@ -38,7 +38,7 @@ func main() {
 	// =================================================================================
 
 	// 2. SizeRollingFile is a file size sensitive file.
-	sizeRollingFile := wrapper.NewSizeRollingFile(64*wrapper.KB, func(now time.Time) string {
+	sizeRollingFile := writer.NewSizeRollingFile(64*writer.KB, func(now time.Time) string {
 		return "D:/" + now.Format("20060102150405.000") + ".txt"
 	})
 	defer sizeRollingFile.Close()

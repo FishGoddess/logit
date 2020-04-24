@@ -1,5 +1,13 @@
 ## ✒ 历史版本的特性介绍 (Features in old version)
 
+### v0.2.0-alpha
+> 此版本发布于 2020-04-24
+* 将 wrapper 修改为 writer
+* 剔除了 default handler 和 json handler，整合进 standard handler 中
+* 提取出一个 encoder，方便内置处理器引用
+* 加入 console handler，专门负责输出到控制台的日志处理器
+* 加入 file handler，专门负责文件相关的日志处理器，包含时间滚动和大小滚动和不滚动的功能
+
 ### v0.1.5
 > 此版本发布于 2020-04-19
 * 完善 Json 处理器没有做字符转义的修复方案，详情查询 [issue/1](https://github.com/FishGoddess/logit/issues/1)
