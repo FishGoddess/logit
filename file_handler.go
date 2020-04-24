@@ -153,7 +153,7 @@ func WriterOf(params map[string]interface{}) io.Writer {
 //                 }
 //             }
 //         }
-// 
+//
 func init() {
 	// 注册日志处理器
 	RegisterHandler("file", func(params map[string]interface{}) Handler {

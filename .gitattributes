@@ -3,6 +3,7 @@
 
 # convert to lf on checkout.
 *.go text eol=lf
+*.mod text eol=lf
 *.md text eol=lf
 *.svg text eol=lf
 

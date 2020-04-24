@@ -49,7 +49,7 @@ func init() {
 // ConsoleHandler is a console handler for use.
 // Actually, output a log to console is the most of things loggers do when developing.
 // So we provide a console handler, which only need an encoder.
-// 
+//
 // For config:
 //     If you want to use this handler in your logger by config file, try this:
 //
