@@ -14,27 +14,26 @@
 //
 // Author: fish
 // Email: fishinlove@163.com
-// Created at 2020/04/23 23:03:56
+// Created at 2020/04/24 10:51:51
 
 package logit
 
 import (
-	"io"
-)
-
-const (
-	// DefaultTimeFormat is the default format for formatting time.
-	DefaultTimeFormat = "2006-01-02 15:04:05"
+	"os"
 )
 
 func init() {
 	// 注册日志处理器
-	RegisterHandler("default", func(params map[string]interface{}) Handler {
+	RegisterHandler("console", func(params map[string]interface{}) Handler {
 
 		// 如果时间格式参数没有传递，就使用默认的时间格式
 		timeFormat := DefaultTimeFormat
 		if format, ok := params["timeFormat"]; ok && format.(string) != "" {
 			timeFormat = format.(string)
+			// 如果参数是 unix，则直接使用空字符串
+			if timeFormat == "unix" {
+				timeFormat = ""
+			}
 		}
 
 		// 如果编码器参数没有传递，就使用 text 编码器
@@ -43,59 +42,65 @@ func init() {
 			encoder = EncoderOf(encoderName.(string))
 		}
 
-		return NewDefaultHandler(WriterOf(params), encoder, timeFormat)
+		return NewConsoleHandler(encoder, timeFormat)
 	})
 }
 
-// DefaultHandler is a default handler for use.
-// Generally speaking, encoding a log to bytes then written by writer is the most of
-// handlers do. So we provide a default handler, which only need a writer and an encoder.
-//
+// ConsoleHandler is a console handler for use.
+// Actually, output a log to console is the most of things loggers do when developing.
+// So we provide a console handler, which only need an encoder.
+// 
 // For config:
 //     If you want to use this handler in your logger by config file, try this:
 //
 //         "handlers":{
-//             "default":{
+//             "console":{
 //
 //             }
 //         }
 //
-//     This will use logit.DefaultTimeFormat to format time, and if you want to
+//     It will use logit.DefaultTimeFormat to format time in default, so if you want to
 //     use your layout to format time, try this:
 //
 //         "handlers":{
-//             "default":{
+//             "console":{
 //                 "timeFormat": "2006-01-02"
 //             }
 //         }
 //
-type DefaultHandler struct {
-	writer     io.Writer
+//     Want a json string? Try this:
+//
+//         "handlers":{
+//             "console":{
+//                 "timeFormat": "2006-01-02",
+//                 "encoder": "json"
+//             }
+//         }
+//
+type ConsoleHandler struct {
 	encoder    Encoder
 	timeFormat string
 }
 
-// NewDefaultHandlerWithoutEncoder returns a DefaultHandler holder with given writer.
-func NewDefaultHandlerWithoutEncoder(writer io.Writer, timeFormat string) Handler {
-	return &DefaultHandler{
-		writer:     writer,
-		encoder:    EncoderOf("text"),
-		timeFormat: timeFormat,
-	}
-}
-
-// NewDefaultHandler returns a DefaultHandler holder with given writer and encoder.
-func NewDefaultHandler(writer io.Writer, encoder Encoder, timeFormat string) Handler {
-	return &DefaultHandler{
-		writer:     writer,
+// NewConsoleHandler returns a ConsoleHandler holder with given encoder.
+func NewConsoleHandler(encoder Encoder, timeFormat string) Handler {
+	return &ConsoleHandler{
 		encoder:    encoder,
 		timeFormat: timeFormat,
 	}
 }
 
-// Handle will encode log and write log by internal writer.
+// Handle will encode log and write log by stdout or stderr.
 // Return true so that handlers after it will be used.
-func (dh *DefaultHandler) Handle(log *Log) bool {
-	dh.writer.Write(dh.encoder.Encode(log, dh.timeFormat))
+// Notice that an error log will be written to stderr.
+func (ch *ConsoleHandler) Handle(log *Log) bool {
+	// 错误日志通过 stderr 进行输出
+	if log.Level() == ErrorLevel {
+		os.Stderr.Write(ch.encoder.Encode(log, ch.timeFormat))
+		return true
+	}
+
+	// 非错误日志通过 stdout 进行输出
+	os.Stdout.Write(ch.encoder.Encode(log, ch.timeFormat))
 	return true
 }

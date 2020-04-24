@@ -49,19 +49,19 @@ func main() {
 	// Default handler is logit.DefaultHandler.
 	logger := logit.NewDevelopLogger()
 	logger.Info("before adding handlers...")
+	fmt.Println("fmt =========================================")
 
 	// Add handlers to logger.
-	// There are two handlers in logger because logger has a default handler inside after creating.
-	// See logit.DefaultHandler.
-	logger.AddHandlers(&myHandler{}, logit.HandlerOf("json", map[string]interface{}{}))
-	fmt.Println("fmt =========================================")
+	// There are three handlers in logger because logger has one handler inside after creating.
+	// See logit.ConsoleHandler.
+	logger.AddHandlers(&myHandler{}, logit.HandlerOf("console", map[string]interface{}{}))
 	logger.Info("after adding handlers...")
+	fmt.Println("fmt =========================================")
 
 	// Set handlers to logger.
-	// There are two handlers in logger because the default handler inside was removed.
+	// There are one handler in logger because all handlers inside was removed.
 	// If you register your handler to logit by logit.RegisterHandler, then you can
 	// use your handler everywhere like this:
 	logger.SetHandlers(logit.HandlerOf("myHandler", map[string]interface{}{}))
-	fmt.Println("fmt =========================================")
 	logger.Info("after setting handlers...")
 }

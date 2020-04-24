@@ -19,7 +19,6 @@
 package logit
 
 import (
-	"fmt"
 	"math/rand"
 	"os"
 	"strconv"
@@ -116,22 +115,4 @@ func TestLoggerLogFunction(t *testing.T) {
 func TestNewLoggerFromConfigFile(t *testing.T) {
 	logger := NewLoggerFromConfigFile("./_examples/logger.cfg")
 	logger.Info("Does it work?")
-}
-
-// 测试获取编码器
-func TestEncoderOf(t *testing.T) {
-
-	encoder := EncoderOf("nil")
-	if encoder != nil {
-		t.Fatal("应该为 nil")
-	}
-
-	log := &Log{
-		level: DebugLevel,
-		now:   time.Now(),
-		msg:   "haha",
-	}
-
-	fmt.Println(string(EncoderOf("text").Encode(log, DefaultTimeFormat)))
-	fmt.Println(string(EncoderOf("json").Encode(log, "")))
 }

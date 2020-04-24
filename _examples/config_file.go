@@ -29,13 +29,18 @@ func main() {
 	// Create a logger from config file.
 	//
 	// logger.cfg:
-	//     "level":"debug",
-	//     "handlers":{
-	//        "default":{
-	//            "timeFormat" : "2006/01/02 15:04"
+	//     "level": "debug",
+	//
+	//     "handlers": {
+	//        "console": {
+	//            "timeFormat":"unix",
+	//            "encoder":"json"
 	//        },
-	//        "json":{
-	//            # "timeFormat" : "2006-01-02"
+	//        "file":{
+	//            "writer":{
+	//                "rolling":"off",
+	//                "file":"D:/logit.log"
+	//            }
 	//        }
 	//     }
 	//

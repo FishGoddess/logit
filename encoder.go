@@ -49,7 +49,7 @@ func (e Encoder) Encode(log *Log, timeFormat string) []byte {
 }
 
 // EncoderOf returns the encoder called name.
-// Notice that it returns nil when the encoder called name doesn't exist.
+// Notice that it will panic if the encoder called name doesn't exist.
 func EncoderOf(name string) Encoder {
 	encoder, ok := encoders[name]
 	if !ok {
@@ -66,7 +66,14 @@ func EncodeToText(log *Log, timeFormat string) []byte {
 	buffer.WriteString("[")
 	buffer.WriteString(log.Level().String())
 	buffer.WriteString("] [")
-	buffer.WriteString(log.Now().Format(timeFormat))
+
+	// 判断是否需要格式化时间
+	if timeFormat != "" {
+		buffer.WriteString(log.Now().Format(timeFormat))
+	} else {
+		buffer.WriteString(strconv.FormatInt(log.Now().Unix(), 10))
+	}
+
 	buffer.WriteString("] ")
 
 	// 如果有文件信息，就把文件信息也加进去

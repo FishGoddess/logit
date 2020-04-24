@@ -33,10 +33,10 @@ type Config struct {
 	// If the level of log is smaller than this Level, this log will be ignored.
 	Level Level
 
-	// NeedFileInfo will determine weather you need caller info or not.
+	// NeedCaller will determine weather you need caller info or not.
 	// Notice that adding caller will use runtime method which costs lots of time,
 	// so set it to true only when you really need it.
-	NeedFileInfo bool
+	NeedCaller bool
 
 	// Handlers is how to handle a log in logger.
 	// We provide some handlers and you can use them directly.
@@ -72,9 +72,9 @@ func removeComments(fileInBytes []byte) []byte {
 	return buffer
 }
 
-// parseConfig parses fileConfig and convert it to Config.
+// parseFileConfig parses fileConfig and convert it to Config.
 // Return an error if something wrong happened.
-func parseConfig(fileConfig fileConfig) (Config, error) {
+func parseFileConfig(fileConfig fileConfig) (Config, error) {
 
 	// 解析日志级别
 	level, err := ParseLevel(fileConfig.Level)
@@ -89,9 +89,9 @@ func parseConfig(fileConfig fileConfig) (Config, error) {
 	}
 
 	return Config{
-		Level:        level,
-		NeedFileInfo: fileConfig.Caller,
-		Handlers:     handlers,
+		Level:      level,
+		NeedCaller: fileConfig.Caller,
+		Handlers:   handlers,
 	}, nil
 }
 
@@ -117,5 +117,5 @@ func ParseConfigFile(configFile string) (Config, error) {
 		return Config{}, err
 	}
 
-	return parseConfig(fileConfig)
+	return parseFileConfig(fileConfig)
 }

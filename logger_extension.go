@@ -32,7 +32,7 @@ func NewLoggerFrom(config Config) *Logger {
 
 	// 判断是否需要开启文件信息的记录
 	logger := NewLogger(config.Level, config.Handlers...)
-	if config.NeedFileInfo {
+	if config.NeedCaller {
 		logger.EnableFileInfo()
 	}
 
@@ -63,7 +63,7 @@ func NewLoggerFromConfigFile(configFile string) *Logger {
 func NewDevelopLogger() *Logger {
 	return NewLoggerFrom(Config{
 		Level:    DebugLevel,
-		Handlers: []Handler{NewDefaultHandlerWithoutEncoder(os.Stdout, DefaultTimeFormat)},
+		Handlers: []Handler{NewStandardHandler(os.Stdout, EncoderOf("text"), DefaultTimeFormat)},
 	})
 }
 
@@ -73,7 +73,7 @@ func NewDevelopLogger() *Logger {
 func NewProductionLogger(writer io.Writer) *Logger {
 	return NewLoggerFrom(Config{
 		Level:    WarnLevel,
-		Handlers: []Handler{NewJsonHandler(writer, "")},
+		Handlers: []Handler{NewStandardHandler(writer, EncoderOf("json"), "")},
 	})
 }
 
@@ -85,7 +85,7 @@ func NewFileLogger(logFile string) *Logger {
 	}
 	return NewLoggerFrom(Config{
 		Level:    InfoLevel,
-		Handlers: []Handler{NewDefaultHandlerWithoutEncoder(file, DefaultTimeFormat)},
+		Handlers: []Handler{NewStandardHandler(file, EncoderOf("text"), DefaultTimeFormat)},
 	})
 }
 
@@ -99,7 +99,7 @@ func NewDurationRollingLogger(directory string, duration time.Duration) *Logger 
 	file := writer.NewDurationRollingFile(duration, writer.NextFilename(directory))
 	return NewLoggerFrom(Config{
 		Level:    InfoLevel,
-		Handlers: []Handler{NewDefaultHandlerWithoutEncoder(file, DefaultTimeFormat)},
+		Handlers: []Handler{NewStandardHandler(file, EncoderOf("text"), DefaultTimeFormat)},
 	})
 }
 
@@ -121,7 +121,7 @@ func NewSizeRollingLogger(directory string, limitedSize int64) *Logger {
 	file := writer.NewSizeRollingFile(limitedSize, writer.NextFilename(directory))
 	return NewLoggerFrom(Config{
 		Level:    InfoLevel,
-		Handlers: []Handler{NewDefaultHandlerWithoutEncoder(file, DefaultTimeFormat)},
+		Handlers: []Handler{NewStandardHandler(file, EncoderOf("text"), DefaultTimeFormat)},
 	})
 }
 
