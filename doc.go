@@ -69,7 +69,7 @@ Package logit provides an easy way to use foundation for your logging operations
 	// See logit.Encoder to check more information.
 	logger = logit.NewLoggerFrom(logit.Config{
 		Level:    logit.DebugLevel,
-		Handlers: []logit.Handler{logit.NewConsoleHandler(logit.EncoderOf("json"), "")},
+		Handlers: []logit.Handler{logit.NewStandardHandler(os.Stdout, logit.EncoderOf("json"), "")},
 	})
 	logger.Info("I am a json log!")
 
@@ -171,7 +171,7 @@ Package logit provides an easy way to use foundation for your logging operations
 
 	// Add handlers to logger.
 	// There are three handlers in logger because logger has one handler inside after creating.
-	// See logit.ConsoleHandler.
+	// See logit.StandardHandler.
 	logger.AddHandlers(&myHandler{}, logit.HandlerOf("console", map[string]interface{}{}))
 	logger.Info("after adding handlers...")
 	fmt.Println("fmt =========================================")

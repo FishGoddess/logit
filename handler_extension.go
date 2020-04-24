@@ -14,18 +14,46 @@
 //
 // Author: fish
 // Email: fishinlove@163.com
-// Created at 2020/04/24 11:20:24
+// Created at 2020/04/24 23:37:56
 
 package logit
 
 import (
+	"github.com/FishGoddess/logit/writer"
 	"io"
 	"os"
 	"strconv"
 	"time"
-
-	"github.com/FishGoddess/logit/writer"
 )
+
+func init() {
+	registerConsoleHandler()
+	registerFileHandler()
+	registerDurationRollingHandler()
+	registerSizeRollingHandler()
+}
+
+// encoderAndTimeFormatOf returns an encoder and time format of this params.
+func encoderAndTimeFormatOf(params map[string]interface{}) (Encoder, string) {
+
+	// 如果编码器参数没有传递，就使用 text 编码器
+	encoder := EncoderOf("text")
+	if encoderName, ok := params["encoder"]; ok && encoderName.(string) != "" {
+		encoder = EncoderOf(encoderName.(string))
+	}
+
+	// 如果时间格式参数没有传递，就使用默认的时间格式
+	timeFormat := DefaultTimeFormat
+	if format, ok := params["timeFormat"]; ok && format.(string) != "" {
+		timeFormat = format.(string)
+		// 如果参数是 unix，则直接使用空字符串
+		if timeFormat == "unix" {
+			timeFormat = ""
+		}
+	}
+
+	return encoder, timeFormat
+}
 
 // WriterOf returns a writer implement with given params.
 // Different writer implement may have different params, so what params should
@@ -112,7 +140,45 @@ func WriterOf(params map[string]interface{}) io.Writer {
 	return w
 }
 
-// Register file handler.
+// registerConsoleHandler registers console handler.
+// Actually, output a log to console is the most of things loggers do when developing.
+// So we provide a console handler, which only need an encoder.
+//
+// For config:
+//     If you want to use this handler in your logger by config file, try this:
+//
+//         "handlers":{
+//             "console":{
+//
+//             }
+//         }
+//
+//     It will use logit.DefaultTimeFormat to format time in default, so if you want to
+//     use your layout to format time, try this:
+//
+//         "handlers":{
+//             "console":{
+//                 "timeFormat": "2006-01-02"
+//             }
+//         }
+//
+//     Want a json string? Try this:
+//
+//         "handlers":{
+//             "console":{
+//                 "timeFormat": "2006-01-02",
+//                 "encoder": "json"
+//             }
+//         }
+//
+func registerConsoleHandler() {
+	RegisterHandler("console", func(params map[string]interface{}) Handler {
+		encoder, timeFormat := encoderAndTimeFormatOf(params)
+		return NewStandardHandler(os.Stdout, encoder, timeFormat)
+	})
+}
+
+// registerFileHandler registers file handler.
 // Generally speaking, encoding a log to bytes then written to file is a common thing.
 // So we provide a file handler, which is only for config file.
 // If you want to use it in your code, try logit.HandlerOf("file", map[string]interface{...})
@@ -154,26 +220,24 @@ func WriterOf(params map[string]interface{}) io.Writer {
 //             }
 //         }
 //
-func init() {
-	// 注册日志处理器
+func registerFileHandler() {
 	RegisterHandler("file", func(params map[string]interface{}) Handler {
+		encoder, timeFormat := encoderAndTimeFormatOf(params)
+		return NewStandardHandler(WriterOf(params), encoder, timeFormat)
+	})
+}
 
-		// 如果时间格式参数没有传递，就使用默认的时间格式
-		timeFormat := DefaultTimeFormat
-		if format, ok := params["timeFormat"]; ok && format.(string) != "" {
-			timeFormat = format.(string)
-			// 如果参数是 unix，则直接使用空字符串
-			if timeFormat == "unix" {
-				timeFormat = ""
-			}
-		}
+// TODO 将 duration 和 size 滚动的日志处理器从 file handler 中分离出来
+func registerDurationRollingHandler() {
+	RegisterHandler("file", func(params map[string]interface{}) Handler {
+		encoder, timeFormat := encoderAndTimeFormatOf(params)
+		return NewStandardHandler(WriterOf(params), encoder, timeFormat)
+	})
+}
 
-		// 如果编码器参数没有传递，就使用 text 编码器
-		encoder := EncoderOf("text")
-		if encoderName, ok := params["encoder"]; ok && encoderName.(string) != "" {
-			encoder = EncoderOf(encoderName.(string))
-		}
-
+func registerSizeRollingHandler() {
+	RegisterHandler("file", func(params map[string]interface{}) Handler {
+		encoder, timeFormat := encoderAndTimeFormatOf(params)
 		return NewStandardHandler(WriterOf(params), encoder, timeFormat)
 	})
 }

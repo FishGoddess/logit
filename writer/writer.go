@@ -26,23 +26,21 @@ import (
 	"time"
 )
 
-// These are units representation of file size.
-//
-// KB = 1024 bytes.
-// MB = 1024 * 1024 bytes.
-// GB = 1024 * 1024 * 1024 bytes.
 const (
+	// These are units representation of file size.
+	//
+	// KB = 1024 bytes.
+	// MB = 1024 * 1024 bytes.
+	// GB = 1024 * 1024 * 1024 bytes.
 	KB int64 = 1 << (10 * (iota + 1))
 	MB
 	GB
-)
 
-const (
 	// SuffixOfLogFile is the suffix of log file.
 	SuffixOfLogFile = ".log"
 )
 
-// nextFilename creates a time-relative filename with given now time.
+// NextFilename creates a time-relative filename with given now time.
 // Also, it uses random number to ensure this filename is available.
 // The filename will be like "20200304-145246-45.log".
 // Notice that directory stores all log files generated in this time.

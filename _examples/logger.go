@@ -57,7 +57,7 @@ func main() {
 	// See logit.Encoder to check more information.
 	logger = logit.NewLoggerFrom(logit.Config{
 		Level:    logit.DebugLevel,
-		Handlers: []logit.Handler{logit.NewConsoleHandler(logit.EncoderOf("json"), "")},
+		Handlers: []logit.Handler{logit.NewStandardHandler(os.Stdout, logit.EncoderOf("json"), "")},
 	})
 	logger.Info("I am a json log!")
 

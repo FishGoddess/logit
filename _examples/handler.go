@@ -53,7 +53,7 @@ func main() {
 
 	// Add handlers to logger.
 	// There are three handlers in logger because logger has one handler inside after creating.
-	// See logit.ConsoleHandler.
+	// See logit.StandardHandler.
 	logger.AddHandlers(&myHandler{}, logit.HandlerOf("console", map[string]interface{}{}))
 	logger.Info("after adding handlers...")
 	fmt.Println("fmt =========================================")
