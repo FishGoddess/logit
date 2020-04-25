@@ -1,9 +1,16 @@
 ## ✒ 未来版本的新特性 (Features in future version)
 
 ### v0.2.x
-* 考虑将 console handler 简化，跟 file handler 一样只使用 RegisterHandler 构造
 * 增加 level_handler.go，里面是不同日志级别的日志处理器包装器，可以传一堆的 handler 进去
 * 增加 timeout_handler.go，里面是带超时功能的日志处理器包装器
+
+### v0.2.1-alpha
+* 将 console handler 简化，目前使用 RegisterHandler 构造
+* 从 file handler 中抽取出 duration rolling 和 size rolling 两个日志处理器
+* 屏蔽了 HandlerOf 和 EncoderOf，只暴露特定的 API
+* 新增 TextEncoder 和 JsonEncoder 两个方法，可以获取到具体的日志编码器
+* 新增 NewConsoleHandler 和 NewFileHandler，分别对应控制台和文件日志处理器
+* 新增 NewDurationRollingHandler 和 NewSizeRollingHandler，分别对应时间间隔滚动和文件大小滚动的日志处理器
 
 ### v0.2.0-alpha
 * 将 wrapper 修改为 writer

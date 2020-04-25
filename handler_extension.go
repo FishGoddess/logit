@@ -20,7 +20,6 @@ package logit
 
 import (
 	"github.com/FishGoddess/logit/writer"
-	"io"
 	"os"
 	"strconv"
 	"strings"
@@ -33,47 +32,6 @@ func init() {
 	registerDurationRollingHandler()
 	registerSizeRollingHandler()
 }
-
-// encoderAndTimeFormatOf returns an encoder and time format of this params.
-func encoderAndTimeFormatOf(params map[string]interface{}) (Encoder, string) {
-
-	// 如果编码器参数没有传递，就使用 text 编码器
-	encoder := EncoderOf("text")
-	if encoderName, ok := params["encoder"]; ok && strings.TrimSpace(encoderName.(string)) != "" {
-		encoder = EncoderOf(encoderName.(string))
-	}
-
-	// 如果时间格式参数没有传递，就使用默认的时间格式
-	timeFormat := DefaultTimeFormat
-	if format, ok := params["timeFormat"]; ok && strings.TrimSpace(format.(string)) != "" {
-		timeFormat = format.(string)
-		// 如果参数是 unix，则直接使用空字符串
-		if timeFormat == "unix" {
-			timeFormat = ""
-		}
-	}
-
-	return encoder, timeFormat
-}
-
-func limitAndDirectoryOf(params map[string]interface{}, defaultDuration int) io.Writer {
-
-	// 滚动的时间间隔，单位是秒
-	duration := 24 * 60 * 60 // 默认是一天
-	if param, ok := params["limit"]; ok {
-		duration = int(param.(float64))
-	}
-
-	// 保存日志的目标文件夹
-	directory := "./" // 默认是当前目录
-	if param, ok := params["directory"]; ok {
-		directory = param.(string)
-	}
-
-	return writer.NewDurationRollingFile(time.Duration(duration)*time.Second, writer.NextFilename(directory))
-}
-
-// =============================== console handler ===============================
 
 // registerConsoleHandler registers console handler.
 // Actually, output a log to console is the most of things loggers do when developing.
@@ -108,22 +66,9 @@ func limitAndDirectoryOf(params map[string]interface{}, defaultDuration int) io.
 //
 func registerConsoleHandler() {
 	RegisterHandler("console", func(params map[string]interface{}) Handler {
-		encoder, timeFormat := encoderAndTimeFormatOf(params)
+		encoder, timeFormat := encoderAndTimeFormatOf(params, TextEncoder(), DefaultTimeFormat)
 		return NewConsoleHandler(encoder, timeFormat)
 	})
-}
-
-// =============================== file handler ===============================
-
-func pathOf(params map[string]interface{}) string {
-
-	// 写出的目标文件
-	path := "./logit-" + strconv.FormatInt(time.Now().Unix(), 10) + writer.SuffixOfLogFile
-	if param, ok := params["path"]; ok && strings.TrimSpace(param.(string)) != "" {
-		path = param.(string)
-	}
-
-	return path
 }
 
 // registerFileHandler registers file handler.
@@ -161,64 +106,81 @@ func pathOf(params map[string]interface{}) string {
 //
 func registerFileHandler() {
 	RegisterHandler("file", func(params map[string]interface{}) Handler {
-		encoder, timeFormat := encoderAndTimeFormatOf(params)
-		return NewFileHandler(pathOf(params), encoder, timeFormat)
+		path := pathOf(params, "./logit-"+strconv.FormatInt(time.Now().Unix(), 10)+writer.SuffixOfLogFile)
+		encoder, timeFormat := encoderAndTimeFormatOf(params, TextEncoder(), DefaultTimeFormat)
+		return NewFileHandler(path, encoder, timeFormat)
 	})
-}
-
-// =============================== duration rolling handler ===============================
-
-func durationRollingWriterOf(params map[string]interface{}) io.Writer {
-
-	// 滚动的时间间隔，单位是秒
-	duration := 24 * 60 * 60 // 默认是一天
-	if param, ok := params["limit"]; ok {
-		duration = int(param.(float64))
-	}
-
-	// 保存日志的目标文件夹
-	directory := "./" // 默认是当前目录
-	if param, ok := params["directory"]; ok {
-		directory = param.(string)
-	}
-
-	return writer.NewDurationRollingFile(time.Duration(duration)*time.Second, writer.NextFilename(directory))
 }
 
 func registerDurationRollingHandler() {
 	RegisterHandler("duration", func(params map[string]interface{}) Handler {
-		encoder, timeFormat := encoderAndTimeFormatOf(params)
-		return NewStandardHandler(durationRollingWriterOf(params), encoder, timeFormat)
+		limit, directory := limitAndDirectoryOf(params, 24*60*60, "./") // 滚动的时间间隔，单位是秒，默认是一天
+		encoder, timeFormat := encoderAndTimeFormatOf(params, TextEncoder(), DefaultTimeFormat)
+		return NewDurationRollingHandler(limit, directory, encoder, timeFormat)
 	})
-}
-
-// =============================== size rolling handler ===============================
-
-func sizeRollingWriterOf(params map[string]interface{}) io.Writer {
-
-	// 滚动的文件大小，单位是 MB
-	size := 64 // 默认是 64MB
-	if param, ok := params["limit"]; ok {
-		size = int(param.(float64))
-	}
-
-	// 写出的目标文件夹
-	directory := "./" // 默认是当前目录
-	if param, ok := params["directory"]; ok {
-		directory = param.(string)
-	}
-
-	return writer.NewSizeRollingFile(int64(size)*writer.MB, writer.NextFilename(directory))
 }
 
 func registerSizeRollingHandler() {
 	RegisterHandler("size", func(params map[string]interface{}) Handler {
-		encoder, timeFormat := encoderAndTimeFormatOf(params)
-		return NewStandardHandler(sizeRollingWriterOf(params), encoder, timeFormat)
+		limit, directory := limitAndDirectoryOf(params, 64, "./") // 滚动的文件大小，单位是 MB，默认是 64MB
+		encoder, timeFormat := encoderAndTimeFormatOf(params, TextEncoder(), DefaultTimeFormat)
+		return NewSizeRollingHandler(limit, directory, encoder, timeFormat)
 	})
 }
 
 // =============================== for convenience ===============================
+
+// encoderAndTimeFormatOf returns an encoder and time format of this params.
+func encoderAndTimeFormatOf(params map[string]interface{}, defaultEncoder Encoder, defaultTimeFormat string) (Encoder, string) {
+
+	// 日志编码器参数
+	encoder := defaultEncoder
+	if encoderName, ok := params["encoder"]; ok && strings.TrimSpace(encoderName.(string)) != "" {
+		encoder = encoderOf(encoderName.(string))
+	}
+
+	// 时间格式化参数
+	timeFormat := defaultTimeFormat
+	if format, ok := params["timeFormat"]; ok && strings.TrimSpace(format.(string)) != "" {
+		timeFormat = format.(string)
+		// 如果参数是 unix，则直接使用空字符串
+		if timeFormat == "unix" {
+			timeFormat = ""
+		}
+	}
+
+	return encoder, timeFormat
+}
+
+func pathOf(params map[string]interface{}, defaultPath string) string {
+
+	// 日志输出的目标文件
+	path := defaultPath
+	if param, ok := params["path"]; ok && strings.TrimSpace(param.(string)) != "" {
+		path = param.(string)
+	}
+
+	return path
+}
+
+func limitAndDirectoryOf(params map[string]interface{}, defaultDuration int, defaultDirectory string) (int, string) {
+
+	// 限制属性的参数
+	limit := defaultDuration
+	if param, ok := params["limit"]; ok {
+		limit = int(param.(float64))
+	}
+
+	// 保存日志的目标文件夹
+	directory := defaultDirectory // 默认是当前目录
+	if param, ok := params["directory"]; ok {
+		directory = param.(string)
+	}
+
+	return limit, directory
+}
+
+// =============================== for public users ===============================
 
 func NewConsoleHandler(encoder Encoder, timeFormat string) Handler {
 	return NewStandardHandler(os.Stdout, encoder, timeFormat)

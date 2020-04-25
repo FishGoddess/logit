@@ -20,7 +20,9 @@ package logit
 
 import (
 	"errors"
+	"fmt"
 	"io"
+	"os"
 	"sync"
 )
 
@@ -37,9 +39,6 @@ var (
 
 	// HandlerIsExistedError is an error happens on repeating handler name.
 	HandlerIsExistedError = errors.New("the name of handler you want to register already exists! May be you should give it an another name")
-
-	// HandlerIsNotExistedError is an error happens on failing to find the handler.
-	HandlerIsNotExistedError = errors.New("the handler you pointed is not existed! Please check the names of all handlers")
 )
 
 // Handler is an interface representation of log handler.
@@ -74,14 +73,15 @@ func RegisterHandler(name string, newHandler func(params map[string]interface{})
 // HandlerOf returns handler whose name is given name and params.
 // Different handler may have different params, so what params should
 // be injected into newHandler is dependent to specific handler.
-// Notice that we use panic mechanism to check the name.
+// Notice that we use tips+exit mechanism to check the name.
 // This is a more convenient way to use handlers (we think).
 func HandlerOf(name string, params map[string]interface{}) Handler {
 	mutexOfHandlers.RLock()
 	defer mutexOfHandlers.RUnlock()
 	newHandler, ok := handlers[name]
 	if !ok {
-		panic(HandlerIsNotExistedError)
+		fmt.Fprintf(os.Stderr, "Error: the handler \"%s\" you pointed is not existed!\n", name)
+		os.Exit(-1)
 	}
 	return newHandler(params)
 }

@@ -26,18 +26,11 @@ import (
 // 测试获取编码器
 func TestEncoderOf(t *testing.T) {
 
-	defer func() {
-		err := recover()
-		if err == nil {
-			t.Fatal("获取编码器测试出现问题！")
-		}
-	}()
-
-	// 这个不存在的编码器会引起 panic，然后被上面的 recover 捕获
-	encoder := EncoderOf("nil")
-	if encoder != nil {
-		t.Fatal("EncoderOf 中 encoder 应该为 nil")
-	}
+	// 这个不存在的编码器退出程序
+	//encoder := encoderOf("fake-encoder")
+	//if encoder != nil {
+	//	t.Fatal("encoderOf 中 encoder 应该为 nil")
+	//}
 
 	log := &Log{
 		level: DebugLevel,
@@ -46,10 +39,10 @@ func TestEncoderOf(t *testing.T) {
 	}
 
 	// 判断获取的编码器是否正确
-	if string(EncoderOf("text").Encode(log, DefaultTimeFormat)) != string(EncodeToText(log, DefaultTimeFormat)) {
-		t.Fatal("EncoderOf(\"text\") 出现问题！")
+	if string(encoderOf("text").Encode(log, DefaultTimeFormat)) != string(TextEncoder().Encode(log, DefaultTimeFormat)) {
+		t.Fatal("encoderOf(\"text\") 出现问题！")
 	}
-	if string(EncoderOf("text").Encode(log, "")) != string(EncodeToJson(log, "")) {
-		t.Fatal("EncoderOf(\"json\") 出现问题！")
+	if string(encoderOf("json").Encode(log, "")) != string(JsonEncoder().Encode(log, "")) {
+		t.Fatal("encoderOf(\"json\") 出现问题！")
 	}
 }

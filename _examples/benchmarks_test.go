@@ -64,7 +64,7 @@ BenchmarkLogrusFile-8             632258             16950 ns/op            1633
 func BenchmarkLogitLogger(b *testing.B) {
 
 	// 测试用的日志记录器
-	logger := logit.NewLogger(logit.DebugLevel, logit.NewStandardHandler(&nopWriter{}, logit.EncoderOf("text"), timeFormat))
+	logger := logit.NewLogger(logit.DebugLevel, logit.NewStandardHandler(&nopWriter{}, logit.TextEncoder(), timeFormat))
 
 	// 测试用的日志任务
 	logTask := func() {
@@ -171,7 +171,7 @@ func BenchmarkLogitLogger(b *testing.B) {
 //func BenchmarkLogitFile(b *testing.B) {
 //
 //    file, _ := writer.NewFile("D:/BenchmarkLogitFile.log")
-//    logger := logit.NewLogger(logit.DebugLevel, logit.NewStandardHandler(file, logit.EncoderOf("text"), timeFormat))
+//    logger := logit.NewLogger(logit.DebugLevel, logit.NewStandardHandler(file, logit.TextEncoder(), timeFormat))
 //
 //    // 测试用的日志任务
 //    logTask := func() {

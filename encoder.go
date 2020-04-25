@@ -20,22 +20,20 @@ package logit
 
 import (
 	"bytes"
-	"errors"
+	"fmt"
+	"os"
 	"strconv"
 	"strings"
 )
 
 var (
 	// encoders stores all encoders provided.
-	// Call EncoderOf method to use one of encoders below.
+	// Call encoderOf method to use one of encoders below.
 	// Actually, this field is for me, not for you, ha:)
 	encoders = map[string]Encoder{
-		"text": EncodeToText,
-		"json": EncodeToJson,
+		"text": TextEncoder(),
+		"json": JsonEncoder(),
 	}
-
-	// EncoderIsNotExistedError is the error which will occur on pointing a nonexistent encoder.
-	EncoderIsNotExistedError = errors.New("the encoder you pointed is not existed! Try text or json")
 )
 
 // Encoder is for encoding a log to bytes with timeFormat.
@@ -48,73 +46,84 @@ func (e Encoder) Encode(log *Log, timeFormat string) []byte {
 	return e(log, timeFormat)
 }
 
-// EncoderOf returns the encoder called name.
+// encoderOf returns the encoder called name.
 // Notice that it will panic if the encoder called name doesn't exist.
-func EncoderOf(name string) Encoder {
+func encoderOf(name string) Encoder {
 	encoder, ok := encoders[name]
 	if !ok {
-		panic(EncoderIsNotExistedError)
+		fmt.Fprintf(os.Stderr, "Error: The encoder \"%s\" you pointed is not existed! Try \"text\" or \"json\".\n", name)
+		os.Exit(-2)
 	}
 	return encoder
 }
 
-// EncodeToText encodes a log to a plain string like "[Info] [2020-03-06 16:10:44] msg" in bytes.
-func EncodeToText(log *Log, timeFormat string) []byte {
+// =================================== text encoder ===================================
 
-	// 组装 log
-	buffer := bytes.NewBuffer(make([]byte, 0, 64))
-	buffer.WriteString("[")
-	buffer.WriteString(log.Level().String())
-	buffer.WriteString("] [")
+// TextEncoder encodes a log to a plain string like "[Info] [2020-03-06 16:10:44] msg" in bytes.
+// If timeFormat == "", then it will not format time and keep time in unix form.
+func TextEncoder() Encoder {
+	return func(log *Log, timeFormat string) []byte {
 
-	// 判断是否需要格式化时间
-	if timeFormat != "" {
-		buffer.WriteString(log.Now().Format(timeFormat))
-	} else {
-		buffer.WriteString(strconv.FormatInt(log.Now().Unix(), 10))
-	}
-
-	buffer.WriteString("] ")
-
-	// 如果有文件信息，就把文件信息也加进去
-	if log.file != "" && log.Line() != 0 {
+		// 组装 log
+		// TODO 考虑使用 strings.Builder 替换
+		buffer := bytes.NewBuffer(make([]byte, 0, 64))
 		buffer.WriteString("[")
-		buffer.WriteString(log.File() + ":" + strconv.Itoa(log.Line()))
-		buffer.WriteString("] ")
-	}
+		buffer.WriteString(log.Level().String())
+		buffer.WriteString("] [")
 
-	buffer.WriteString(log.Msg())
-	buffer.WriteString("\n")
-	return buffer.Bytes()
+		// 判断是否需要格式化时间
+		if timeFormat != "" {
+			buffer.WriteString(log.Now().Format(timeFormat))
+		} else {
+			buffer.WriteString(strconv.FormatInt(log.Now().Unix(), 10))
+		}
+
+		buffer.WriteString("] ")
+
+		// 如果有文件信息，就把文件信息也加进去
+		if log.file != "" && log.Line() != 0 {
+			buffer.WriteString("[")
+			buffer.WriteString(log.File() + ":" + strconv.Itoa(log.Line()))
+			buffer.WriteString("] ")
+		}
+
+		buffer.WriteString(log.Msg())
+		buffer.WriteString("\n")
+		return buffer.Bytes()
+	}
 }
 
-// EncodeToJson encodes a log to a Json string like `{"level":"debug", "time":"2020-03-22 22:35:00", "msg":"log content..."}` in bytes.
+// =================================== json encoder ===================================
+
+// JsonEncoder encodes a log to a Json string like `{"level":"debug", "time":"2020-03-22 22:35:00", "msg":"log content..."}` in bytes.
 // If timeFormat == "", then it will not format time and keep time in unix form.
-func EncodeToJson(log *Log, timeFormat string) []byte {
+func JsonEncoder() Encoder {
+	return func(log *Log, timeFormat string) []byte {
 
-	// 组装 log
-	buffer := bytes.NewBuffer(make([]byte, 0, 64))
-	buffer.WriteString(`{"level":"`)
-	buffer.WriteString(log.Level().String())
-	buffer.WriteString(`", "time":`)
+		// 组装 log
+		buffer := bytes.NewBuffer(make([]byte, 0, 64))
+		buffer.WriteString(`{"level":"`)
+		buffer.WriteString(log.Level().String())
+		buffer.WriteString(`", "time":`)
 
-	// 判断是否需要格式化时间
-	if timeFormat != "" {
-		buffer.WriteString(strconv.Quote(log.Now().Format(timeFormat)))
-	} else {
-		buffer.WriteString(strconv.FormatInt(log.Now().Unix(), 10))
+		// 判断是否需要格式化时间
+		if timeFormat != "" {
+			buffer.WriteString(strconv.Quote(log.Now().Format(timeFormat)))
+		} else {
+			buffer.WriteString(strconv.FormatInt(log.Now().Unix(), 10))
+		}
+
+		// 如果有文件信息，就把文件信息也加进去
+		if log.file != "" && log.Line() != 0 {
+			buffer.WriteString(`, "file":"` + log.File())
+			buffer.WriteString(`", "line":` + strconv.Itoa(log.Line()))
+		}
+
+		buffer.WriteString(`, "msg":"`)
+		buffer.WriteString(escapeString(log.Msg()))
+		buffer.WriteString("\"}\n")
+		return buffer.Bytes()
 	}
-
-	// 如果有文件信息，就把文件信息也加进去
-	if log.file != "" && log.Line() != 0 {
-		buffer.WriteString(`, "file":"` + log.File())
-		buffer.WriteString(`", "line":` + strconv.Itoa(log.Line()))
-	}
-
-	buffer.WriteString(`, "msg":"`)
-	buffer.WriteString(escapeString(log.Msg()))
-	buffer.WriteString("\"}\n")
-	return buffer.Bytes()
 }
 
 // escapeString is for escaping string from special character, such as double quotes.

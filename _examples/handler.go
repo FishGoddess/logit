@@ -30,7 +30,7 @@ type myHandler struct{}
 // Customize your own handler.
 func (mh *myHandler) Handle(log *logit.Log) bool {
 	os.Stdout.Write([]byte("myHandler: "))
-	os.Stdout.Write(logit.EncoderOf("json").Encode(log, "")) // Try `os.Stdout.WriteString(log.Msg())` ?
+	os.Stdout.Write(logit.JsonEncoder().Encode(log, "")) // Try `os.Stdout.WriteString(log.Msg())` ?
 	return true
 }
 
