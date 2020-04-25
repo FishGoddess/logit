@@ -114,17 +114,19 @@ func registerFileHandler() {
 
 func registerDurationRollingHandler() {
 	RegisterHandler("duration", func(params map[string]interface{}) Handler {
-		limit, directory := limitAndDirectoryOf(params, 24*60*60, "./") // 滚动的时间间隔，单位是秒，默认是一天
+		// 滚动的时间间隔，单位是秒，默认是 1 天
+		limit, directory := limitAndDirectoryOf(params, 24*60*60, "./")
 		encoder, timeFormat := encoderAndTimeFormatOf(params, TextEncoder(), DefaultTimeFormat)
-		return NewDurationRollingHandler(limit, directory, encoder, timeFormat)
+		return NewDurationRollingHandler(time.Duration(limit)*time.Second, directory, encoder, timeFormat)
 	})
 }
 
 func registerSizeRollingHandler() {
 	RegisterHandler("size", func(params map[string]interface{}) Handler {
-		limit, directory := limitAndDirectoryOf(params, 64, "./") // 滚动的文件大小，单位是 MB，默认是 64MB
+		// 滚动的文件大小，单位是 MB，默认是 64MB
+		limit, directory := limitAndDirectoryOf(params, 64, "./")
 		encoder, timeFormat := encoderAndTimeFormatOf(params, TextEncoder(), DefaultTimeFormat)
-		return NewSizeRollingHandler(limit, directory, encoder, timeFormat)
+		return NewSizeRollingHandler(int64(limit)*writer.MB, directory, encoder, timeFormat)
 	})
 }
 
@@ -194,12 +196,12 @@ func NewFileHandler(path string, encoder Encoder, timeFormat string) Handler {
 	return NewStandardHandler(file, encoder, timeFormat)
 }
 
-func NewDurationRollingHandler(limit int, directory string, encoder Encoder, timeFormat string) Handler {
-	file := writer.NewDurationRollingFile(time.Duration(limit)*time.Second, writer.NextFilename(directory))
+func NewDurationRollingHandler(limit time.Duration, directory string, encoder Encoder, timeFormat string) Handler {
+	file := writer.NewDurationRollingFile(limit, writer.NextFilename(directory))
 	return NewStandardHandler(file, encoder, timeFormat)
 }
 
-func NewSizeRollingHandler(limit int, directory string, encoder Encoder, timeFormat string) Handler {
-	file := writer.NewSizeRollingFile(int64(limit)*writer.MB, writer.NextFilename(directory))
+func NewSizeRollingHandler(limit int64, directory string, encoder Encoder, timeFormat string) Handler {
+	file := writer.NewSizeRollingFile(limit, writer.NextFilename(directory))
 	return NewStandardHandler(file, encoder, timeFormat)
 }

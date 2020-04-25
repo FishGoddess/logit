@@ -30,7 +30,7 @@ type myHandler struct{}
 // Customize your own handler.
 func (mh *myHandler) Handle(log *logit.Log) bool {
 	os.Stdout.Write([]byte("myHandler: "))
-	os.Stdout.Write(logit.JsonEncoder().Encode(log, "")) // Try `os.Stdout.WriteString(log.Msg())` ?
+	os.Stdout.Write(logit.TextEncoder().Encode(log, "")) // Try `os.Stdout.WriteString(log.Msg())` ?
 	return true
 }
 
@@ -45,16 +45,15 @@ func init() {
 
 func main() {
 
-	// Create a logger holder.
-	// Default handler is logit.DefaultHandler.
-	logger := logit.NewDevelopLogger()
+	// Create a logger holder with a console handler.
+	logger := logit.NewLogger(logit.DebugLevel, logit.NewConsoleHandler(logit.TextEncoder(), logit.DefaultTimeFormat))
 	logger.Info("before adding handlers...")
 	fmt.Println("fmt =========================================")
 
 	// Add handlers to logger.
 	// There are three handlers in logger because logger has one handler inside after creating.
 	// See logit.StandardHandler.
-	logger.AddHandlers(&myHandler{}, logit.HandlerOf("console", map[string]interface{}{}))
+	logger.AddHandlers(&myHandler{}, logit.NewConsoleHandler(logit.JsonEncoder(), ""))
 	logger.Info("after adding handlers...")
 	fmt.Println("fmt =========================================")
 
@@ -62,6 +61,6 @@ func main() {
 	// There are one handler in logger because all handlers inside was removed.
 	// If you register your handler to logit by logit.RegisterHandler, then you can
 	// use your handler everywhere like this:
-	logger.SetHandlers(logit.HandlerOf("myHandler", map[string]interface{}{}))
+	logger.SetHandlers(&myHandler{})
 	logger.Info("after setting handlers...")
 }

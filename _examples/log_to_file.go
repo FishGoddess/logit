@@ -29,7 +29,7 @@ func main() {
 
 	// NewFileLogger creates a new logger which logs to file.
 	// It just need a file path like "D:/test.log" and a logger level.
-	logger := logit.NewFileLogger("D:/test.log")
+	logger := logit.NewLogger(logit.DebugLevel, logit.NewFileHandler("D:/test.log", logit.TextEncoder(), logit.DefaultTimeFormat))
 	logger.Info("I am info message！")
 
 	// NewDurationRollingLogger creates a duration rolling logger with given duration.
@@ -38,14 +38,8 @@ func main() {
 	// Also, default filename of log file is like "20200304-145246-45.log", see writer.NewFilename.
 	// If you want to appoint another filename, check this and do it by this way.
 	// See writer.NewDurationRollingFile (it is an implement of io.writer).
-	logger = logit.NewDurationRollingLogger("D:/", 24*time.Hour)
+	logger = logit.NewLogger(logit.DebugLevel, logit.NewDurationRollingHandler(24*time.Hour, "D:/", logit.TextEncoder(), logit.DefaultTimeFormat))
 	logger.Info("Rolling!!!")
-
-	// NewDayRollingLogger creates a day rolling logger.
-	// You should appoint a directory to store all log files generated in this time.
-	// See logit.NewDurationRollingLogger.
-	logger = logit.NewDayRollingLogger("D:/")
-	logger.Info("Today is Friday!!!")
 
 	// NewSizeRollingLogger creates a file size rolling logger with given limitedSize.
 	// You should appoint a directory to store all log files generated in this time.
@@ -54,12 +48,6 @@ func main() {
 	// Also, default filename of log file is like "20200304-145246-45.log", see nextFilename.
 	// If you want to appoint another filename, check this and do it by this way.
 	// See writer.NewSizeRollingFile (it is an implement of io.writer).
-	logger = logit.NewSizeRollingLogger("D:/", 64*writer.KB)
+	logger = logit.NewLogger(logit.DebugLevel, logit.NewSizeRollingHandler(64*writer.KB, "D:/", logit.TextEncoder(), logit.DefaultTimeFormat))
 	logger.Info("file size???")
-
-	// NewDayRollingLogger creates a file size rolling logger.
-	// You should appoint a directory to store all log files generated in this time.
-	// Default means limitedSize is 64 MB. See NewSizeRollingLogger.
-	logger = logit.NewDefaultSizeRollingLogger("D:/")
-	logger.Info("64 MB rolling!!!")
 }

@@ -19,8 +19,8 @@
 package logit
 
 // globalLogger is a Logger holder for global usage.
-// Default level is info level.
-var globalLogger = NewDevelopLogger()
+// Default level is debug level.
+var globalLogger = NewLogger(DebugLevel, NewConsoleHandler(TextEncoder(), DefaultTimeFormat))
 
 // Me returns globalLogger for more usages.
 func Me() *Logger {

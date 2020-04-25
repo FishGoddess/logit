@@ -20,6 +20,7 @@ package logit
 
 import (
 	"fmt"
+	"math/rand"
 	"os"
 	"strconv"
 	"strings"
@@ -132,7 +133,7 @@ func TestLoggerAddHandlersAndSetHandlers(t *testing.T) {
 
 // 测试获取日志处理器的方法
 func TestLoggerHandlers(t *testing.T) {
-	logger := NewDevelopLogger()
+	logger := NewLogger(DebugLevel, NewConsoleHandler(JsonEncoder(), ""))
 	handlers := logger.Handlers()
 
 	// 需要判断地址是否一样，一样说明有问题
@@ -158,7 +159,7 @@ func TestLoggerHandlers(t *testing.T) {
 // 测试并发情况下使用 Logger
 func TestLoggerInConcurrency(t *testing.T) {
 
-	logger := NewLogger(DebugLevel, NewStandardHandler(os.Stdout, TextEncoder(), DefaultTimeFormat))
+	logger := NewLogger(DebugLevel, NewConsoleHandler(JsonEncoder(), ""))
 
 	group := sync.WaitGroup{}
 	for i := 0; i < 100; i++ {
@@ -173,4 +174,30 @@ func TestLoggerInConcurrency(t *testing.T) {
 	}
 
 	group.Wait()
+}
+
+// 测试从配置文件中创建一个 logger
+func TestNewLoggerFrom(t *testing.T) {
+	logger := NewLoggerFrom("./_examples/logger.conf")
+	logger.Info("Does it work?")
+}
+
+// 测试输出日志是从函数中生成的几个方法
+func TestLoggerLogFunction(t *testing.T) {
+	logger := NewLogger(DebugLevel, NewConsoleHandler(JsonEncoder(), ""))
+	logger.DebugFunc(func() string {
+		return "debug rand int: " + strconv.Itoa(rand.Intn(100))
+	})
+	logger.InfoFunc(func() string {
+		return "info rand int: " + strconv.Itoa(rand.Intn(100))
+	})
+	logger.WarnFunc(func() string {
+		return "warn rand int: " + strconv.Itoa(rand.Intn(100))
+	})
+	logger.ErrorFunc(func() string {
+		return "error rand int: " + strconv.Itoa(rand.Intn(100))
+	})
+
+	// test escaping
+	logger.Info(`test "double quotes"\t\b \u0003 \u0019 !!!!`)
 }

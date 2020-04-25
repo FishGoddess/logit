@@ -70,17 +70,19 @@ func RegisterHandler(name string, newHandler func(params map[string]interface{})
 	return nil
 }
 
-// HandlerOf returns handler whose name is given name and params.
+// handlerOf returns handler whose name is given name and params.
 // Different handler may have different params, so what params should
 // be injected into newHandler is dependent to specific handler.
 // Notice that we use tips+exit mechanism to check the name.
 // This is a more convenient way to use handlers (we think).
-func HandlerOf(name string, params map[string]interface{}) Handler {
+// so if the handler doesn't exist, a tip will be printed and
+// the program will exit with status code -1.
+func handlerOf(name string, params map[string]interface{}) Handler {
 	mutexOfHandlers.RLock()
 	defer mutexOfHandlers.RUnlock()
 	newHandler, ok := handlers[name]
 	if !ok {
-		fmt.Fprintf(os.Stderr, "Error: the handler \"%s\" you pointed is not existed!\n", name)
+		fmt.Fprintf(os.Stderr, "Error: The handler \"%s\" doesn't exist! Please change it to another handler.\n", name)
 		os.Exit(-1)
 	}
 	return newHandler(params)

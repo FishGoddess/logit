@@ -47,11 +47,12 @@ func (e Encoder) Encode(log *Log, timeFormat string) []byte {
 }
 
 // encoderOf returns the encoder called name.
-// Notice that it will panic if the encoder called name doesn't exist.
+// If the encoder doesn't exist, a tip will be printed and
+// the program will exit with status code -2.
 func encoderOf(name string) Encoder {
 	encoder, ok := encoders[name]
 	if !ok {
-		fmt.Fprintf(os.Stderr, "Error: The encoder \"%s\" you pointed is not existed! Try \"text\" or \"json\".\n", name)
+		fmt.Fprintf(os.Stderr, "Error: The encoder \"%s\" you pointed doesn't exist! Try \"text\" or \"json\".\n", name)
 		os.Exit(-2)
 	}
 	return encoder

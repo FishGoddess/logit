@@ -19,8 +19,9 @@
 package logit
 
 import (
-	"errors"
+	"fmt"
 	"math"
+	"os"
 )
 
 // Level is the type representation of the level.
@@ -45,20 +46,20 @@ var (
 		ErrorLevel: "error",
 		OffLevel:   "off",
 	}
-
-	// LevelIsNotExisted is an error representation of a level is not existed.
-	LevelIsNotExisted = errors.New("level is not existed, be sure your level is one of them: debug, info, warn, error, off")
 )
 
-// ParseLevel parses level and returns the Level of it.
-// Return LevelIsNotExisted if level is not existed.
-func ParseLevel(level string) (Level, error) {
+// parseLevel parses level and returns the Level of it.
+// If the level doesn't exist, a tip will be printed and
+// the program will exit with status code -3.
+func parseLevel(level string) Level {
 	for k, v := range levels {
 		if v == level {
-			return k, nil
+			return k
 		}
 	}
-	return 0, LevelIsNotExisted
+	fmt.Fprintf(os.Stderr, "Error: Level \"%s\" doesn't exist! Be sure your level is one of them: debug, info, warn, error, off\n", level)
+	os.Exit(-3)
+	return 0
 }
 
 // The String method is used to print values passed as an operand

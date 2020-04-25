@@ -11,6 +11,8 @@
 * 新增 TextEncoder 和 JsonEncoder 两个方法，可以获取到具体的日志编码器
 * 新增 NewConsoleHandler 和 NewFileHandler，分别对应控制台和文件日志处理器
 * 新增 NewDurationRollingHandler 和 NewSizeRollingHandler，分别对应时间间隔滚动和文件大小滚动的日志处理器
+* 删除了大量创建 Logger 的方法，这些方法会让人看起来很复杂很繁琐
+* 去除原有 Config 加 fileConfig 的配置设计，现在直接使用一个映射配置，然后组装成需要的参数
 
 ### v0.2.0-alpha
 * 将 wrapper 修改为 writer

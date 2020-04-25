@@ -32,7 +32,7 @@ func main() {
 	// NewDevelopLogger creates a new Logger holder for developing, generally log to terminal or console.
 	// You can switch to logit.NewProductionLogger for production environment.
 	//logger := logit.NewProductionLogger(os.Stdout)
-	logger := logit.NewDevelopLogger()
+	logger := logit.NewLogger(logit.DebugLevel, logit.NewConsoleHandler(logit.TextEncoder(), logit.DefaultTimeFormat))
 
 	// Then you will be easy to log!
 	logger.Debug("this is a debug message!")
@@ -48,18 +48,8 @@ func main() {
 	logger.Info("What time is it now?")
 
 	// For convenience, we provide a register mechanism and you can use handlers like this:
-	logger = logit.NewLogger(logit.DebugLevel, logit.HandlerOf("console", map[string]interface{}{}))
+	logger = logit.NewLogger(logit.DebugLevel, logit.NewConsoleHandler(logit.TextEncoder(), logit.DefaultTimeFormat))
 	logger.Info("What handler is it now?")
-
-	// NewLoggerFrom creates a new Logger holder with given config.
-	// The config has all the things to create a logger, such as level.
-	// We provide some encoders: default encoder and json encoder.
-	// See logit.Encoder to check more information.
-	logger = logit.NewLoggerFrom(logit.Config{
-		Level:    logit.DebugLevel,
-		Handlers: []logit.Handler{logit.NewStandardHandler(os.Stdout, logit.JsonEncoder(), "")},
-	})
-	logger.Info("I am a json log!")
 
 	// If you want to output log with file info, try this:
 	logger.EnableFileInfo()

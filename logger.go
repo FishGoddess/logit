@@ -255,3 +255,59 @@ func (l *Logger) Warn(msg string) {
 func (l *Logger) Error(msg string) {
 	l.log(callDepth, ErrorLevel, msg)
 }
+
+// ================================== extension ==================================
+
+// NewLoggerFrom returns a logger parsed from config file.
+// A config file is a file like "xxx.cfg", and its content looks like:
+//
+//         "handlers":{
+//             "console":{
+//                 # I am a comment: params...
+//             }
+//         }
+//
+// Check examples to know about more information.
+func NewLoggerFrom(configFile string) *Logger {
+
+	// 解析配置文件
+	conf, err := parseConfigFile(configFile)
+	if err != nil {
+		panic(err)
+	}
+
+	// 根据 conf 创建 logger，并返回
+	logger := NewLogger(parseLevel(conf.Level), parseHandlersFromConfig(conf)...)
+	if conf.Caller {
+		logger.EnableFileInfo()
+	}
+	return logger
+}
+
+// DebugFunc will output msg as a debug message.
+// The msg is the return value of msgGenerator.
+// This is a better way to output a long log made of many variables.
+func (l *Logger) DebugFunc(msgGenerator func() string) {
+	l.log(callDepth, DebugLevel, msgGenerator())
+}
+
+// InfoFunc will output msg as an info message.
+// The msg is the return value of msgGenerator.
+// This is a better way to output a long log made of many variables.
+func (l *Logger) InfoFunc(msgGenerator func() string) {
+	l.log(callDepth, InfoLevel, msgGenerator())
+}
+
+// WarnFunc will output msg as a warn message.
+// The msg is the return value of msgGenerator.
+// This is a better way to output a long log made of many variables.
+func (l *Logger) WarnFunc(msgGenerator func() string) {
+	l.log(callDepth, WarnLevel, msgGenerator())
+}
+
+// ErrorFunc will output msg as an error message.
+// The msg is the return value of msgGenerator.
+// This is a better way to output a long log made of many variables.
+func (l *Logger) ErrorFunc(msgGenerator func() string) {
+	l.log(callDepth, ErrorLevel, msgGenerator())
+}
