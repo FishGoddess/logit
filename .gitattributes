@@ -6,6 +6,7 @@
 *.mod text eol=lf
 *.md text eol=lf
 *.svg text eol=lf
+*.cfg text eol=lf
 
 # Denote all files that are truly binary and should not be modified.
 *.png binary
