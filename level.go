@@ -24,7 +24,7 @@ import (
 	"os"
 )
 
-// Level is the type representation of the level.
+// Level is the type representation of the logger level.
 type Level uint8
 
 const (
@@ -38,7 +38,7 @@ const (
 )
 
 var (
-	// levels provides the name of all supported level.
+	// levels store the names of all level provided.
 	levels = map[Level]string{
 		DebugLevel: "debug",
 		InfoLevel:  "info",
@@ -59,11 +59,11 @@ func parseLevel(level string) Level {
 	}
 	fmt.Fprintf(os.Stderr, "Error: Level \"%s\" doesn't exist! Be sure your level is one of them: debug, info, warn, error, off\n", level)
 	os.Exit(-3)
-	return 0
+	return OffLevel
 }
 
-// The String method is used to print values passed as an operand
-// to any format that accepts a string or to an printer without format such as Print.
+// String returns the name of Level ll.
+// This method will be called when using printing operations like fmt.Println.
 func (ll Level) String() string {
 	return levels[ll]
 }

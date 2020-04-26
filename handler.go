@@ -122,7 +122,7 @@ type StandardHandler struct {
 
 // NewStandardHandler returns a StandardHandler holder with given writer and encoder.
 // Encoder is how to encode a log to bytes, and we provide TextEncoder and JsonEncoder.
-// See logit.Encoder, TextEncoder and JsonEncoder.
+// See logit.Encoder, logit.TextEncoder and logit.JsonEncoder.
 func NewStandardHandler(writer io.Writer, encoder Encoder, timeFormat string) Handler {
 	return &StandardHandler{
 		writer:     writer,

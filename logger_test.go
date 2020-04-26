@@ -95,7 +95,7 @@ func TestLoggerEnableAndDisableFileInfo(t *testing.T) {
 
 type myHandler struct{}
 
-// Customize your own handler.
+// 定制自己的日志处理器
 func (mh *myHandler) Handle(log *Log) bool {
 	os.Stdout.Write([]byte("myHandler: "))
 	os.Stdout.Write(TextEncoder().Encode(log, DefaultTimeFormat))

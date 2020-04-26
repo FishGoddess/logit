@@ -32,7 +32,7 @@ type Log struct {
 	// now is the publishing time of this log.
 	now time.Time
 
-	// file is the file of this log.
+	// file is the file path of this log.
 	file string
 
 	// line is the line number in file.
@@ -57,12 +57,7 @@ func (l *Log) Now() time.Time {
 	return l.now
 }
 
-// Msg returns the message of this log.
-func (l *Log) Msg() string {
-	return l.msg
-}
-
-// File returns the file of this log.
+// File returns the file path of this log.
 func (l *Log) File() string {
 	return l.file
 }
@@ -70,4 +65,9 @@ func (l *Log) File() string {
 // Line returns the line number in file of this log.
 func (l *Log) Line() int {
 	return l.line
+}
+
+// Msg returns the message of this log.
+func (l *Log) Msg() string {
+	return l.msg
 }

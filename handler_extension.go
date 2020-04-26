@@ -213,7 +213,8 @@ func registerSizeRollingHandler() {
 
 // =============================== for convenience ===============================
 
-// encoderAndTimeFormatOf returns an encoder and time format of this params.
+// encoderAndTimeFormatOf returns encoder and time format in this params.
+// defaultEncoder and defaultTimeFormat will be used if you don't set to params.
 func encoderAndTimeFormatOf(params map[string]interface{}, defaultEncoder Encoder, defaultTimeFormat string) (Encoder, string) {
 
 	// 日志编码器参数
@@ -235,6 +236,8 @@ func encoderAndTimeFormatOf(params map[string]interface{}, defaultEncoder Encode
 	return encoder, timeFormat
 }
 
+// pathOf returns path in this params.
+// defaultPath will be used if you don't set to params.
 func pathOf(params map[string]interface{}, defaultPath string) string {
 
 	// 日志输出的目标文件
@@ -246,10 +249,12 @@ func pathOf(params map[string]interface{}, defaultPath string) string {
 	return path
 }
 
-func limitAndDirectoryOf(params map[string]interface{}, defaultDuration int, defaultDirectory string) (int, string) {
+// limitAndDirectoryOf returns limit and directory in this params.
+// defaultLimit and defaultDirectory will be used if you don't set to params.
+func limitAndDirectoryOf(params map[string]interface{}, defaultLimit int, defaultDirectory string) (int, string) {
 
 	// 限制属性的参数
-	limit := defaultDuration
+	limit := defaultLimit
 	if param, ok := params["limit"]; ok {
 		limit = int(param.(float64))
 	}
@@ -265,10 +270,17 @@ func limitAndDirectoryOf(params map[string]interface{}, defaultDuration int, def
 
 // =============================== for public users ===============================
 
+// NewConsoleHandler returns a handler for console.
+// This handler will write logs to console by os.Stdout.
+// See logit.Encoder, logit.TextEncoder, logit.JsonEncoder.
 func NewConsoleHandler(encoder Encoder, timeFormat string) Handler {
 	return NewStandardHandler(os.Stdout, encoder, timeFormat)
 }
 
+// NewFileHandler returns a handler which writes logs to a file.
+// You can point a path (the path of log file) to be used to write logs.
+// If the file of this path doesn't exist, a new file will be created.
+// See logit.Encoder, logit.TextEncoder, logit.JsonEncoder.
 func NewFileHandler(path string, encoder Encoder, timeFormat string) Handler {
 	file, err := writer.NewFile(path)
 	if err != nil {
@@ -277,11 +289,23 @@ func NewFileHandler(path string, encoder Encoder, timeFormat string) Handler {
 	return NewStandardHandler(file, encoder, timeFormat)
 }
 
+// NewDurationRollingHandler returns a handler which uses
+// a duration rolling file to write logs. The limit is duration, and
+// each duration has its own log file. Also you can point a directory
+// to be used to store all created log files.
+// See logit.Encoder, logit.TextEncoder, logit.JsonEncoder.
+// See writer.NewDurationRollingFile.
 func NewDurationRollingHandler(limit time.Duration, directory string, encoder Encoder, timeFormat string) Handler {
 	file := writer.NewDurationRollingFile(limit, writer.NextFilename(directory))
 	return NewStandardHandler(file, encoder, timeFormat)
 }
 
+// NewSizeRollingHandler returns a handler which uses
+// a size rolling file to write logs. The limit is the max size of log file,
+// and the log file will switch to a new one after reaching max size.
+// Also you can point a directory to be used to store all created log files.
+// See logit.Encoder, logit.TextEncoder, logit.JsonEncoder.
+// See writer.NewSizeRollingFile.
 func NewSizeRollingHandler(limit int64, directory string, encoder Encoder, timeFormat string) Handler {
 	file := writer.NewSizeRollingFile(limit, writer.NextFilename(directory))
 	return NewStandardHandler(file, encoder, timeFormat)
