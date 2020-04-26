@@ -44,7 +44,7 @@ Package logit provides an easy way to use foundation for your logging operations
 	// NewDevelopLogger creates a new Logger holder for developing, generally log to terminal or console.
 	// You can switch to logit.NewProductionLogger for production environment.
 	//logger := logit.NewProductionLogger(os.Stdout)
-	logger := logit.NewDevelopLogger()
+	logger := logit.NewLogger(logit.DebugLevel, logit.NewConsoleHandler(logit.TextEncoder(), logit.DefaultTimeFormat))
 
 	// Then you will be easy to log!
 	logger.Debug("this is a debug message!")
@@ -56,22 +56,12 @@ Package logit provides an easy way to use foundation for your logging operations
 	// As you know, file also can be written, just replace os.Stdout with your file!
 	// A logger is made of level and handlers, so we provide some handlers for use, see logit.Handler.
 	// This method is the most original way to create a logger for use.
-	logger = logit.NewLogger(logit.DebugLevel, logit.NewStandardHandler(os.Stdout, logit.encoderOf("text"), "2006/01/02 15:04:05"))
+	logger = logit.NewLogger(logit.DebugLevel, logit.NewStandardHandler(os.Stdout, logit.TextEncoder(), "2006/01/02 15:04:05"))
 	logger.Info("What time is it now?")
 
 	// For convenience, we provide a register mechanism and you can use handlers like this:
-	logger = logit.NewLogger(logit.DebugLevel, logit.HandlerOf("console", map[string]interface{}{}))
+	logger = logit.NewLogger(logit.DebugLevel, logit.NewConsoleHandler(logit.TextEncoder(), logit.DefaultTimeFormat))
 	logger.Info("What handler is it now?")
-
-	// NewLoggerFrom creates a new Logger holder with given config.
-	// The config has all the things to create a logger, such as level.
-	// We provide some encoders: default encoder and json encoder.
-	// See logit.Encoder to check more information.
-	logger = logit.NewLoggerFrom(logit.Config{
-		Level:    logit.DebugLevel,
-		Handlers: []logit.Handler{logit.NewStandardHandler(os.Stdout, logit.encoderOf("json"), "")},
-	})
-	logger.Info("I am a json log!")
 
 	// If you want to output log with file info, try this:
 	logger.EnableFileInfo()
@@ -109,7 +99,7 @@ Package logit provides an easy way to use foundation for your logging operations
 
 	// NewFileLogger creates a new logger which logs to file.
 	// It just need a file path like "D:/test.log" and a logger level.
-	logger := logit.NewFileLogger("D:/test.log")
+	logger := logit.NewLogger(logit.DebugLevel, logit.NewFileHandler("D:/test.log", logit.TextEncoder(), logit.DefaultTimeFormat))
 	logger.Info("I am info message！")
 
 	// NewDurationRollingLogger creates a duration rolling logger with given duration.
@@ -118,14 +108,8 @@ Package logit provides an easy way to use foundation for your logging operations
 	// Also, default filename of log file is like "20200304-145246-45.log", see writer.NewFilename.
 	// If you want to appoint another filename, check this and do it by this way.
 	// See writer.NewDurationRollingFile (it is an implement of io.writer).
-	logger = logit.NewDurationRollingLogger("D:/", 24*time.Hour)
+	logger = logit.NewLogger(logit.DebugLevel, logit.NewDurationRollingHandler(24*time.Hour, "D:/", logit.TextEncoder(), logit.DefaultTimeFormat))
 	logger.Info("Rolling!!!")
-
-	// NewDayRollingLogger creates a day rolling logger.
-	// You should appoint a directory to store all log files generated in this time.
-	// See logit.NewDurationRollingLogger.
-	logger = logit.NewDayRollingLogger("D:/")
-	logger.Info("Today is Friday!!!")
 
 	// NewSizeRollingLogger creates a file size rolling logger with given limitedSize.
 	// You should appoint a directory to store all log files generated in this time.
@@ -134,14 +118,8 @@ Package logit provides an easy way to use foundation for your logging operations
 	// Also, default filename of log file is like "20200304-145246-45.log", see nextFilename.
 	// If you want to appoint another filename, check this and do it by this way.
 	// See writer.NewSizeRollingFile (it is an implement of io.writer).
-	logger = logit.NewSizeRollingLogger("D:/", 64*writer.KB)
+	logger = logit.NewLogger(logit.DebugLevel, logit.NewSizeRollingHandler(64*writer.KB, "D:/", logit.TextEncoder(), logit.DefaultTimeFormat))
 	logger.Info("file size???")
-
-	// NewDayRollingLogger creates a file size rolling logger.
-	// You should appoint a directory to store all log files generated in this time.
-	// Default means limitedSize is 64 MB. See NewSizeRollingLogger.
-	logger = logit.NewDefaultSizeRollingLogger("D:/")
-	logger.Info("64 MB rolling!!!")
 
 5. handler:
 
@@ -149,61 +127,60 @@ Package logit provides an easy way to use foundation for your logging operations
 
     // Customize your own handler.
     func (mh *myHandler) Handle(log *logit.Log) bool {
-    	os.Stdout.Write([]byte("myHandler: "))
-    	os.Stdout.Write(logit.encoderOf("json").Encode(log, "")) // Try `os.Stdout.WriteString(log.Msg())` ?
-    	return true
+        os.Stdout.Write([]byte("myHandler: "))
+        os.Stdout.Write(logit.TextEncoder().Encode(log, "")) // Try `os.Stdout.WriteString(log.Msg())` ?
+        return true
     }
 
-    // We recommend you to register your handler to logit, so that
-    // you can use your handler by logit.HandlerOf.
-    // See logit.HandlerOf.
     func init() {
-    	logit.RegisterHandler("myHandler", func(params map[string]interface{}) logit.Handler {
-    		return &myHandler{}
-    	})
+        // We recommend you to register your handler to logit, so that
+        // you can use your handler in config file.
+        // See logit.RegisterHandler.
+        logit.RegisterHandler("myHandler", func(params map[string]interface{}) logit.Handler {
+            return &myHandler{}
+        })
     }
 
-	// Create a logger holder.
-	// Default handler is logit.DefaultHandler.
-	logger := logit.NewDevelopLogger()
+	// Create a logger holder with a console handler.
+	logger := logit.NewLogger(logit.DebugLevel, logit.NewConsoleHandler(logit.TextEncoder(), logit.DefaultTimeFormat))
 	logger.Info("before adding handlers...")
 	fmt.Println("fmt =========================================")
 
 	// Add handlers to logger.
-	// There are three handlers in logger because logger has one handler inside after creating.
-	// See logit.StandardHandler.
-	logger.AddHandlers(&myHandler{}, logit.HandlerOf("console", map[string]interface{}{}))
-	logger.Info("after adding handlers...")
+	// There are three handlers in logger because logger has one handler inside before adding.
+	// See logit.NewConsoleHandler.
+	logger.AddHandlers(&myHandler{}, logit.NewConsoleHandler(logit.JsonEncoder(), ""))
+	logger.Info("after adding two handlers...")
 	fmt.Println("fmt =========================================")
 
 	// Set handlers to logger.
 	// There are one handler in logger because all handlers inside was removed.
 	// If you register your handler to logit by logit.RegisterHandler, then you can
 	// use your handler everywhere like this:
-	logger.SetHandlers(logit.HandlerOf("myHandler", map[string]interface{}{}))
-	logger.Info("after setting handlers...")
+	logger.SetHandlers(&myHandler{})
+	logger.Info("after setting one handlers...")
 
 6. config file:
 
 	// Create a logger from config file.
 	//
 	// logger.conf:
-    //     "level": "debug",
+	//
+	//     "level": "debug",
+	//
+	//     "caller": false,
 	//
 	//     "handlers": {
-	//        "console": {
-	//            "timeFormat":"unix",
-	//            "encoder":"json"
-	//        },
-	//        "file":{
-	//            "writer":{
-	//                "rolling":"off",
-	//                "file":"D:/logit.log"
-	//            }
-	//        }
+	//         "console": {
+	//             "timeFormat":"unix",
+	//             "encoder":"json"
+	//         },
+	//         "file":{
+	//             "path":"D:/logit.log"
+	//         }
 	//     }
 	//
-	logger := logit.NewLoggerFromConfigFile("./logger.conf")
+	logger := logit.NewLoggerFrom("./logger.conf")
 	logger.Info("I am working!")
 	logger.Info("My level is " + logger.Level().String())
 	fmt.Println("fmt ==============================================")

@@ -34,10 +34,10 @@ func (mh *myHandler) Handle(log *logit.Log) bool {
 	return true
 }
 
-// We recommend you to register your handler to logit, so that
-// you can use your handler by logit.HandlerOf.
-// See logit.HandlerOf.
 func init() {
+	// We recommend you to register your handler to logit, so that
+	// you can use your handler in config file.
+	// See logit.RegisterHandler.
 	logit.RegisterHandler("myHandler", func(params map[string]interface{}) logit.Handler {
 		return &myHandler{}
 	})
@@ -51,10 +51,10 @@ func main() {
 	fmt.Println("fmt =========================================")
 
 	// Add handlers to logger.
-	// There are three handlers in logger because logger has one handler inside after creating.
-	// See logit.StandardHandler.
+	// There are three handlers in logger because logger has one handler inside before adding.
+	// See logit.NewConsoleHandler.
 	logger.AddHandlers(&myHandler{}, logit.NewConsoleHandler(logit.JsonEncoder(), ""))
-	logger.Info("after adding handlers...")
+	logger.Info("after adding two handlers...")
 	fmt.Println("fmt =========================================")
 
 	// Set handlers to logger.
@@ -62,5 +62,5 @@ func main() {
 	// If you register your handler to logit by logit.RegisterHandler, then you can
 	// use your handler everywhere like this:
 	logger.SetHandlers(&myHandler{})
-	logger.Info("after setting handlers...")
+	logger.Info("after setting one handlers...")
 }

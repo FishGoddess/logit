@@ -29,16 +29,19 @@ func main() {
 	// Create a logger from config file.
 	//
 	// logger.conf:
+	//
 	//     "level": "debug",
 	//
+	//     "caller": false,
+	//
 	//     "handlers": {
-	//        "console": {
-	//            "timeFormat":"unix",
-	//            "encoder":"json"
-	//        },
-	//        "file":{
-	//            "path":"D:/logit.log"
-	//        }
+	//         "console": {
+	//             "timeFormat":"unix",
+	//             "encoder":"json"
+	//         },
+	//         "file":{
+	//             "path":"D:/logit.log"
+	//         }
 	//     }
 	//
 	logger := logit.NewLoggerFrom("./logger.conf")
