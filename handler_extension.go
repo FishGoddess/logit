@@ -165,7 +165,7 @@ func registerDurationRollingHandler() {
 
 // registerSizeRollingHandler registers size rolling handler.
 // Sometimes we want each log file has a max size, which means the log file should
-// switch to a new one after reaching max size. That why we provide a size rolling handler!
+// switch to a new one after reaching to max size. That why we provide a size rolling handler!
 // If you want to use it in code, see logit.NewSizeRollingHandler.
 //
 // For config:
@@ -178,7 +178,7 @@ func registerDurationRollingHandler() {
 //         }
 //
 // You can point limit and directory here. The limit is the max size, the unit is MB.
-// In demo, "limit": 16 means the max size of each log file is 16MB, and 64MB will be set
+// In demo, "limit": 16 means the max size of each log file is 16 MB, and 64 MB will be set
 // in default. The directory is where the logs store, and "./" will be set in default.
 // It will use logit.DefaultTimeFormat to format time in default, so if you want to
 // use your layout to format time, try this:
@@ -204,7 +204,7 @@ func registerDurationRollingHandler() {
 //
 func registerSizeRollingHandler() {
 	RegisterHandler("size", func(params map[string]interface{}) Handler {
-		// 滚动的文件大小，单位是 MB，默认是 64MB
+		// 滚动的文件大小，单位是 MB，默认是 64 MB
 		limit, directory := limitAndDirectoryOf(params, 64, "./")
 		encoder, timeFormat := encoderAndTimeFormatOf(params, TextEncoder(), DefaultTimeFormat)
 		return NewSizeRollingHandler(int64(limit)*writer.MB, directory, encoder, timeFormat)
@@ -302,7 +302,7 @@ func NewDurationRollingHandler(limit time.Duration, directory string, encoder En
 
 // NewSizeRollingHandler returns a handler which uses
 // a size rolling file to write logs. The limit is the max size of log file,
-// and the log file will switch to a new one after reaching max size.
+// and the log file will switch to a new one after reaching to max size.
 // Also you can point a directory to be used to store all created log files.
 // See logit.Encoder, logit.TextEncoder, logit.JsonEncoder.
 // See writer.NewSizeRollingFile.

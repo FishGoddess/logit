@@ -41,7 +41,7 @@ type SizeRollingFile struct {
 	file *os.File
 
 	// limitedSize is the limited size of this file.
-	// File will roll to next file if its size reaches limitedSize.
+	// File will roll to next file if its size has reached to limitedSize.
 	// This field should be always larger than minLimitedSize for some safe considerations.
 	// Notice that it doesn't mean every files must be this size due to our performance optimization
 	// scheme. Generally it equals to file size, however, it will not equal to file size
@@ -49,20 +49,20 @@ type SizeRollingFile struct {
 	limitedSize int64
 
 	// currentSize equals to the size of current file.
-	// If current file have changed, currentSize will reset to 0.
+	// The currentSize will reset to 0 when rolling to next file.
 	// The reason why we set this field is file.Stat() is too expensive!
 	// Every writing operations will fetch file size, that means each operation
 	// will call file.Stat() for size. It's not a good way to fetch file size.
 	// So we keep one field inside, and record current size of current file with it.
 	// Each time fetching file size, the only thing wo do is checking this field.
 	// This way is cheaper, even cheapest. Of course, we should maintain this field
-	// inside for precision. Also, it doesn't mean we won't call file.Stat() anymore.
+	// inside for precision, so it doesn't mean we won't call file.Stat() anymore.
 	// If currentSize >= limitedSize, we will still call file.Stat() for precision.
 	// Certainly, we will set currentSize to the real size of file. Hey, you know we
 	// won't waste the time we spent on file.Stat() ^_^.
 	currentSize int64
 
-	// nextFilename is a function for generating a new file name.
+	// nextFilename is a function for generating next file name.
 	// Every times rolling to next file will call it first.
 	// now is the time of calling this function, also the
 	// created time of next file.
@@ -78,10 +78,10 @@ const minLimitedSize = 64 * KB
 
 // NewSizeRollingFile creates a new size rolling file.
 // limitedSize is how big did it roll to next file.
-// nextFilename is a function for generating a new file name.
+// nextFilename is a function for generating next file name.
 // Every times rolling to next file will call nextFilename first.
-// now is the time of calling this function, also the created time of next file.
-// Notice that limitedSize's min value is 64 KB (64 * 1024 bytes). See minLimitedSize.
+// now is the created time of next file. Notice that limitedSize's min value
+// is 64 KB (64 * 1024 bytes). See minLimitedSize.
 func NewSizeRollingFile(limitedSize int64, nextFilename func(now time.Time) string) *SizeRollingFile {
 
 	// 防止文件限制尺寸太小导致滚动文件时 IO 的疯狂蠕动
