@@ -24,22 +24,31 @@ import (
 	"io/ioutil"
 )
 
-// fileConfig is the config mapping a file.
+// config is the config mapping the config file.
 type config struct {
 
-	// Level is the level in string form.
+	// Level is the logger level in string form.
 	Level string `json:"level"`
 
-	// Caller will determine weather you need caller info or not.
-	// Notice that adding caller will use runtime method which costs lots of time,
+	// Caller will determine weather you need caller info in log or not.
+	// Notice that adding caller will call a runtime method which costs lots of time,
 	// so set it to true only when you really need it.
 	Caller bool `json:"caller"`
 
-	// Handlers is the mapping to config file.
+	// Handlers is the handlers you want to use mapping to config file.
 	Handlers map[string]map[string]interface{} `json:"handlers"`
 }
 
 // jsonifyContent normalize content to a standard json string in bytes.
+// We make a new config format which is transformed from Json.
+// As we know, a standard Json string is strict in format. However,
+// the worst thing when using a Json as config file is we can't add any
+// comments so we have no idea that why we use this configuration in our config.
+// So we must transform it. The first thing we do is let it supports comments.
+// Also, the "{}" in Json string is redundant in a config file. After doing these,
+// a reading-friendly config file is born, and it is not a standard Json string any more.
+// This method jsonifyContent will fix this so that we can use Json parser to
+// parse our config file.
 func jsonifyContent(content []byte) []byte {
 
 	// 我们的配置文件是支持注释的，而 Json 规范中并没有对注释的支持，所以我们需要对注释进行擦除
@@ -58,7 +67,7 @@ func jsonifyContent(content []byte) []byte {
 }
 
 // parseConfigFile parses a config file whose path is configFile and returns
-// a config of it. Return an error if something wrong happened.
+// a mapping config of it. Return an error if something wrong happened.
 func parseConfigFile(configFile string) (config, error) {
 
 	// 配置文件一般不会太大，直接全部读取进内存

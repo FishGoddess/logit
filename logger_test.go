@@ -179,7 +179,7 @@ func TestLoggerInConcurrency(t *testing.T) {
 // 测试从配置文件中创建一个 logger
 func TestNewLoggerFrom(t *testing.T) {
 	logger := NewLoggerFrom("./_examples/logger.conf")
-	logger.Info("Does it work?")
+	logger.Info("Does it work? 这是测试日志信息，实际的日志信息可能比这个长，也可能比这个短！")
 }
 
 // 测试输出日志是从函数中生成的几个方法

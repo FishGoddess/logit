@@ -32,7 +32,7 @@ const (
 )
 
 var (
-	// handlers stores all registered handlers.
+	// handlers store all handlers registered.
 	// mutexOfHandlers is for concurrency.
 	handlers        = map[string]func(params map[string]interface{}) Handler{}
 	mutexOfHandlers = &sync.RWMutex{}
@@ -59,7 +59,27 @@ type Handler interface {
 // Return an error if the name is existed, and you should change another name for your handler.
 // Notice that newHandler has a parameter called params, which will be injected into newHandler
 // by logit automatically. Different handler may have different params, so what params should
-// be injected into newHandler is dependent to specific handler.
+// be injected into newHandler is dependent to specific handler. Actually, this params is a
+// mapping of config file. All params you write in config file will be injected here.
+// For example, your config file is like this:
+//
+//     "handlers": {
+//         "my-handler": {
+//             "db": "127.0.0.1:3306",
+//             "user": "me",
+//             "password": "you guess?",
+//             "maxConnections": 1024
+//         }
+//     }
+//
+// Then a map[string]interface{} {
+//            "db": "127.0.0.1:3306",
+//            "user": "me",
+//            "password": "you guess?",
+//            "maxConnections": 1024
+//        } will be injected to params.
+//
+// So you can use these params written in config file.
 func RegisterHandler(name string, newHandler func(params map[string]interface{}) Handler) error {
 	mutexOfHandlers.Lock()
 	defer mutexOfHandlers.Unlock()
@@ -101,6 +121,8 @@ type StandardHandler struct {
 }
 
 // NewStandardHandler returns a StandardHandler holder with given writer and encoder.
+// Encoder is how to encode a log to bytes, and we provide TextEncoder and JsonEncoder.
+// See logit.Encoder, TextEncoder and JsonEncoder.
 func NewStandardHandler(writer io.Writer, encoder Encoder, timeFormat string) Handler {
 	return &StandardHandler{
 		writer:     writer,

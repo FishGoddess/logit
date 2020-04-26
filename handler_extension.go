@@ -36,31 +36,32 @@ func init() {
 // registerConsoleHandler registers console handler.
 // Actually, output a log to console is the most of things loggers do when developing.
 // So we provide a console handler, which only need an encoder.
+// If you want to use it in code, see logit.NewConsoleHandler.
 //
 // For config:
 //     If you want to use this handler in your logger by config file, try this:
 //
-//         "handlers":{
-//             "console":{
+//         "handlers": {
+//             "console": {
 //
 //             }
 //         }
 //
-//     It will use logit.DefaultTimeFormat to format time in default, so if you want to
-//     use your layout to format time, try this:
+// It will use logit.DefaultTimeFormat to format time in default, so if you want to
+// use your layout to format time, try this:
 //
-//         "handlers":{
-//             "console":{
+//         "handlers": {
+//             "console": {
 //                 "timeFormat": "2006-01-02"
 //             }
 //         }
 //
-//     Want a json string? Try this:
+// Want a Json string? Try this:
 //
-//         "handlers":{
-//             "console":{
-//                 "timeFormat": "2006-01-02",
-//                 "encoder": "json"
+//         "handlers": {
+//             "console": {
+//                 "encoder": "json",
+//                 "timeFormat": "2006-01-02"
 //             }
 //         }
 //
@@ -73,33 +74,34 @@ func registerConsoleHandler() {
 
 // registerFileHandler registers file handler.
 // Generally speaking, encoding a log to bytes then written to file is a common thing.
-// So we provide a file handler, which is only for config file.
-// If you want to use it in your code, try logit.HandlerOf("file", map[string]interface{...})
+// So we provide a file handler, which writes logs to file.
+// If you want to use it in code, see logit.NewFileHandler.
 //
 // For config:
 //
-//         "handlers":{
-//             "file":{
-//                 "path":"D:/logit.log"
+//         "handlers": {
+//             "file": {
+//                 "path": "D:/logit.log"
 //             }
 //         }
 //
-//     It will use logit.DefaultTimeFormat to format time in default, so if you want to
-//     use your layout to format time, try this:
+// The path is where the logs should be written. It is a file, and will be created
+// by logit automatically. It will use logit.DefaultTimeFormat to format time in default,
+// so if you want to use your layout to format time, try this:
 //
-//         "handlers":{
-//             "file":{
-//                 "path":"D:/logit.log",
+//         "handlers": {
+//             "file": {
+//                 "path": "D:/logit.log",
 //                 "timeFormat": "2006-01-02"
 //             }
 //         }
 //
-//     Want a json string? Try this:
+// Want a Json string? Try this:
 //
-//         "handlers":{
-//             "file":{
+//         "handlers": {
+//             "file": {
 //                 "encoder": "json",
-//                 "path":"D:/logit.log",
+//                 "path": "D:/logit.log",
 //                 "timeFormat": "2006-01-02"
 //             }
 //         }
@@ -112,6 +114,46 @@ func registerFileHandler() {
 	})
 }
 
+// registerDurationRollingHandler registers duration rolling handler.
+// Sometimes we want each day has its own log file, or each fixed duration
+// has its own log file. That means the log file should switch to a new one
+// after duration. That why we provide a duration rolling handler!
+// If you want to use it in code, see logit.NewDurationRollingHandler.
+//
+// For config:
+//
+//         "handlers": {
+//             "duration": {
+//                 "limit": 60,
+//                 "directory": "D:/logs"
+//             }
+//         }
+//
+// You can point limit and directory here. The limit is the duration, the unit is second.
+// In demo, "limit": 60 means each 60 seconds has its log file, and one day will be set
+// in default. The directory is where the logs store, and "./" will be set in default.
+// It will use logit.DefaultTimeFormat to format time in default, so if you want to
+// use your layout to format time, try this:
+//
+//         "handlers": {
+//             "duration": {
+//                 "limit": 60,
+//                 "directory": "D:/logs",
+//                 "timeFormat": "2006-01-02"
+//             }
+//         }
+//
+// Want a Json string? Try this:
+//
+//         "handlers":{
+//             "duration":{
+//                 "limit": 60,
+//                 "encoder": "json",
+//                 "directory": "D:/logs",
+//                 "timeFormat": "2006-01-02"
+//             }
+//         }
+//
 func registerDurationRollingHandler() {
 	RegisterHandler("duration", func(params map[string]interface{}) Handler {
 		// 滚动的时间间隔，单位是秒，默认是 1 天
@@ -121,6 +163,45 @@ func registerDurationRollingHandler() {
 	})
 }
 
+// registerSizeRollingHandler registers size rolling handler.
+// Sometimes we want each log file has a max size, which means the log file should
+// switch to a new one after reaching max size. That why we provide a size rolling handler!
+// If you want to use it in code, see logit.NewSizeRollingHandler.
+//
+// For config:
+//
+//         "handlers": {
+//             "size": {
+//                 "limit": 16,
+//                 "directory": "D:/logs"
+//             }
+//         }
+//
+// You can point limit and directory here. The limit is the max size, the unit is MB.
+// In demo, "limit": 16 means the max size of each log file is 16MB, and 64MB will be set
+// in default. The directory is where the logs store, and "./" will be set in default.
+// It will use logit.DefaultTimeFormat to format time in default, so if you want to
+// use your layout to format time, try this:
+//
+//         "handlers": {
+//             "duration": {
+//                 "limit": 16,
+//                 "directory": "D:/logs",
+//                 "timeFormat": "2006-01-02"
+//             }
+//         }
+//
+// Want a Json string? Try this:
+//
+//         "handlers":{
+//             "duration":{
+//                 "limit": 16,
+//                 "encoder": "json",
+//                 "directory": "D:/logs",
+//                 "timeFormat": "2006-01-02"
+//             }
+//         }
+//
 func registerSizeRollingHandler() {
 	RegisterHandler("size", func(params map[string]interface{}) Handler {
 		// 滚动的文件大小，单位是 MB，默认是 64MB

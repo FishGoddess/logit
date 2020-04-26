@@ -27,7 +27,7 @@ import (
 )
 
 var (
-	// encoders stores all encoders provided.
+	// encoders store all encoders provided.
 	// Call encoderOf method to use one of encoders below.
 	// Actually, this field is for me, not for you, ha:)
 	encoders = map[string]Encoder{
@@ -66,7 +66,6 @@ func TextEncoder() Encoder {
 	return func(log *Log, timeFormat string) []byte {
 
 		// 组装 log
-		// TODO 考虑使用 strings.Builder 替换
 		buffer := bytes.NewBuffer(make([]byte, 0, 64))
 		buffer.WriteString("[")
 		buffer.WriteString(log.Level().String())
@@ -127,7 +126,7 @@ func JsonEncoder() Encoder {
 	}
 }
 
-// escapeString is for escaping string from special character, such as double quotes.
+// escapeString is for escaping string from special characters, such as double quotes.
 // See issue: https://github.com/FishGoddess/logit/issues/1
 func escapeString(s string) string {
 
@@ -141,7 +140,7 @@ func escapeString(s string) string {
 			builder.WriteRune('\\')
 			builder.WriteRune(r)
 		default:
-			// ascii 小于 16 需要在前面补 \u000，介于 16 和 32 之间的需要补 \u00
+			// ascii 小于 16 的需要在前面补 \u000，介于 [16, 32) 之间的需要补 \u00
 			if r < 16 {
 				builder.WriteString("\\u000" + strconv.FormatInt(int64(r), 16))
 			} else if r < 32 {
