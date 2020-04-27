@@ -108,23 +108,23 @@ func handlerOf(name string, params map[string]interface{}) Handler {
 	return newHandler(params)
 }
 
-// ================================= StandardHandler =================================
+// ================================= standard handler =================================
 
-// StandardHandler is a standard handler for use.
+// standardHandler is a standard handler for use.
 // Generally speaking, encoding a log to bytes then written by writer is the most of
 // handlers do. So we provide a standard handler, which only need a writer and an encoder.
 // Notice that this handler is not for config file but use in code, so we don't register it.
-type StandardHandler struct {
+type standardHandler struct {
 	writer     io.Writer
 	encoder    Encoder
 	timeFormat string
 }
 
-// NewStandardHandler returns a StandardHandler holder with given writer and encoder.
+// NewStandardHandler returns a standardHandler holder with given writer and encoder.
 // Encoder is how to encode a log to bytes, and we provide TextEncoder and JsonEncoder.
 // See logit.Encoder, logit.TextEncoder and logit.JsonEncoder.
 func NewStandardHandler(writer io.Writer, encoder Encoder, timeFormat string) Handler {
-	return &StandardHandler{
+	return &standardHandler{
 		writer:     writer,
 		encoder:    encoder,
 		timeFormat: timeFormat,
@@ -133,7 +133,7 @@ func NewStandardHandler(writer io.Writer, encoder Encoder, timeFormat string) Ha
 
 // Handle will encode log and write log by internal writer.
 // Return true so that handlers after it will be used.
-func (sh *StandardHandler) Handle(log *Log) bool {
+func (sh *standardHandler) Handle(log *Log) bool {
 	sh.writer.Write(sh.encoder.Encode(log, sh.timeFormat))
 	return true
 }

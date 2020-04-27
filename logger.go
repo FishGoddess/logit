@@ -142,7 +142,7 @@ func (l *Logger) Handlers() []Handler {
 	defer l.mu.RUnlock()
 
 	// 返回的是日志处理器的副本，防止被非法篡改
-	handlers := make([]Handler, 0, len(l.handlers))
+	handlers := make([]Handler, 0, len(l.handlers)+2)
 	return append(handlers, l.handlers...)
 }
 

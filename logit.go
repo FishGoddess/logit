@@ -28,6 +28,12 @@ var (
 )
 
 func init() {
+	// 这边留一个注意点，由于这个 newGlobalLogger 需要用到注册的 handlers
+	// 而这些 handlers 是使用 init 函数进行注册的，所以 newGlobalLogger 必须
+	// 在注册 handlers 的 init 函数执行完之后才能执行，也就是说存在隐形的依赖关系
+	// 这是由 Go 语言 init 函数的执行顺序决定的，至少在 Go v1.14 版本中这个执行顺序
+	// 是我们想要的执行顺序，但是之后的版本就不好说了，所以这边记录着这个点，万一以后真的
+	// 出现注册过的 handler 却提示找不到，就很可能是这个点引起的
 	globalLogger = newGlobalLogger()
 }
 
