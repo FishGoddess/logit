@@ -12,53 +12,24 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
-// Author: fish
+// Author: FishGoddess
 // Email: fishinlove@163.com
 // Created at 2020/02/29 22:55:31
 
 package logit
 
-// globalLogger is a Logger holder for global usage.
+// globalLogger is a logger for global usage.
+var globalLogger = newGlobalLogger()
+
+// newGlobalLogger returns a logger for global usage.
 // Default level is debug level.
-var globalLogger = NewLogger(DebugLevel, NewConsoleHandler(TextEncoder(), DefaultTimeFormat))
+func newGlobalLogger() *Logger {
+	return NewLogger(DebugLevel, NewConsoleHandler(TextEncoder(), DefaultTimeFormat))
+}
 
 // Me returns globalLogger for more usages.
 func Me() *Logger {
 	return globalLogger
-}
-
-// ChangeLevelTo will change the level of logit to newLevel.
-func ChangeLevelTo(level Level) Level {
-	return globalLogger.ChangeLevelTo(level)
-}
-
-// AddHandlers adds more handlers to logit, and all handlers added before will be retained.
-// If you want to remove all handlers, try logit.SetHandlers().
-// See logit.DefaultLoggerHandler.
-func AddHandlers(handlers ...Handler) {
-	globalLogger.AddHandlers(handlers...)
-}
-
-// SetHandlers replaces logit's handlers with handlers, all handlers added before will be removed.
-// If you want to add more handlers rather than replace them, try logit.AddHandlers().
-// Notice that at least one handler should be added, so if len(handlers) < 1, it returns false
-// which means setting failed. Return true if setting is successful.
-// See logit.DefaultLoggerHandler.
-func SetHandlers(handlers ...Handler) bool {
-	return globalLogger.SetHandlers(handlers...)
-}
-
-// EnableFileInfo means every log will contain file info like line number.
-// However, you should know that this is expensive in time.
-// So be sure you really need it or keep it disabled.
-func EnableFileInfo() {
-	globalLogger.EnableFileInfo()
-}
-
-// DisableFileInfo means every log will not contain file info like line number.
-// If you want file info again, try logit.EnableFileInfo().
-func DisableFileInfo() {
-	globalLogger.DisableFileInfo()
 }
 
 // callDepth is the depth of the method calling stack, which is about file name and line.
