@@ -44,7 +44,7 @@ module your_project_name
 go 1.14
 
 require (
-    github.com/FishGoddess/logit v0.1.5
+    github.com/FishGoddess/logit v0.2.1-alpha
 )
 ```
 
@@ -103,6 +103,8 @@ func main() {
 * [log_to_file](./_examples/log_to_file.go)
 
 _Check more examples in [_examples](./_examples)._
+
+_Learn more about config file in [_examples/config](./_examples/config)._
 
 ### 🔥 Benchmarks
 

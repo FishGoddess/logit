@@ -45,7 +45,7 @@ module your_project_name
 go 1.14
 
 require (
-    github.com/FishGoddess/logit v0.1.5
+    github.com/FishGoddess/logit v0.2.1-alpha
 )
 ```
 
@@ -101,6 +101,8 @@ func main() {
 * [log_to_file](./_examples/log_to_file.go)
 
 _更多使用案例请查看 [_examples](./_examples) 目录。_
+
+_配置文件模板请查看 [_examples/config](./_examples/config) 目录。_
 
 ### 🔥 性能测试
 

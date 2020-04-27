@@ -44,11 +44,11 @@ type DurationRollingFile struct {
 
 	// duration is the core field of this struct.
 	// Every times currentTime - lastTime >= duration, the file will
-	// roll to an entire new file for writing.
-	// Notice that its min value is one Second. See minDuration.
+	// roll to an entire new file for writing. This field should be always
+	// larger than minDuration for some safe considerations. See minDuration.
 	duration time.Duration
 
-	// nextFilename is a function for generating a new file name.
+	// nextFilename is a function for generating next file name.
 	// Every times rolling to next file will call it first.
 	// now is the time of calling this function, also the
 	// created time of next file.
@@ -64,10 +64,10 @@ const minDuration = 1 * time.Second
 
 // NewDurationRollingFile creates a new duration rolling file.
 // duration is how long did it roll to next file.
-// nextFilename is a function for generating a new file name.
+// nextFilename is a function for generating next file name.
 // Every times rolling to next file will call nextFilename first.
-// now is the time of calling this function, also the created time of next file.
-// Notice that duration's min value is one second. See minDuration.
+// now is the created time of next file. Notice that duration's min value
+// is one second. See minDuration.
 func NewDurationRollingFile(duration time.Duration, nextFilename func(now time.Time) string) *DurationRollingFile {
 
 	// 防止时间间隔太小导致滚动文件时 IO 的疯狂蠕动

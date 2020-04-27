@@ -28,23 +28,23 @@ func main() {
 
 	// Create a logger from config file.
 	//
-	// logger.cfg:
+	// logger.conf:
+	//
 	//     "level": "debug",
 	//
+	//     "caller": false,
+	//
 	//     "handlers": {
-	//        "console": {
-	//            "timeFormat":"unix",
-	//            "encoder":"json"
-	//        },
-	//        "file":{
-	//            "writer":{
-	//                "rolling":"off",
-	//                "file":"D:/logit.log"
-	//            }
-	//        }
+	//         "console": {
+	//             "timeFormat":"unix",
+	//             "encoder":"json"
+	//         },
+	//         "file":{
+	//             "path":"D:/logit.log"
+	//         }
 	//     }
 	//
-	logger := logit.NewLoggerFromConfigFile("./logger.cfg")
+	logger := logit.NewLoggerFrom("./logger.conf")
 	logger.Info("I am working!")
 	logger.Info("My level is " + logger.Level().String())
 	fmt.Println("fmt ==============================================")

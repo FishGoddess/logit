@@ -20,7 +20,9 @@ package logit
 
 import (
 	"errors"
+	"fmt"
 	"io"
+	"os"
 	"sync"
 )
 
@@ -30,16 +32,13 @@ const (
 )
 
 var (
-	// handlers stores all registered handlers.
+	// handlers store all handlers registered.
 	// mutexOfHandlers is for concurrency.
 	handlers        = map[string]func(params map[string]interface{}) Handler{}
 	mutexOfHandlers = &sync.RWMutex{}
 
 	// HandlerIsExistedError is an error happens on repeating handler name.
 	HandlerIsExistedError = errors.New("the name of handler you want to register already exists! May be you should give it an another name")
-
-	// HandlerIsNotExistedError is an error happens on failing to find the handler.
-	HandlerIsNotExistedError = errors.New("the handler you pointed is not existed! Please check the names of all handlers")
 )
 
 // Handler is an interface representation of log handler.
@@ -60,7 +59,27 @@ type Handler interface {
 // Return an error if the name is existed, and you should change another name for your handler.
 // Notice that newHandler has a parameter called params, which will be injected into newHandler
 // by logit automatically. Different handler may have different params, so what params should
-// be injected into newHandler is dependent to specific handler.
+// be injected into newHandler is dependent to specific handler. Actually, this params is a
+// mapping of config file. All params you write in config file will be injected here.
+// For example, your config file is like this:
+//
+//     "handlers": {
+//         "my-handler": {
+//             "db": "127.0.0.1:3306",
+//             "user": "me",
+//             "password": "you guess?",
+//             "maxConnections": 1024
+//         }
+//     }
+//
+// Then a map[string]interface{} {
+//            "db": "127.0.0.1:3306",
+//            "user": "me",
+//            "password": "you guess?",
+//            "maxConnections": 1024
+//        } will be injected to params.
+//
+// So you can use these params written in config file.
 func RegisterHandler(name string, newHandler func(params map[string]interface{}) Handler) error {
 	mutexOfHandlers.Lock()
 	defer mutexOfHandlers.Unlock()
@@ -71,17 +90,20 @@ func RegisterHandler(name string, newHandler func(params map[string]interface{})
 	return nil
 }
 
-// HandlerOf returns handler whose name is given name and params.
+// handlerOf returns handler whose name is given name and params.
 // Different handler may have different params, so what params should
 // be injected into newHandler is dependent to specific handler.
-// Notice that we use panic mechanism to check the name.
+// Notice that we use tips+exit mechanism to check the name.
 // This is a more convenient way to use handlers (we think).
-func HandlerOf(name string, params map[string]interface{}) Handler {
+// so if the handler doesn't exist, a tip will be printed and
+// the program will exit with status code -1.
+func handlerOf(name string, params map[string]interface{}) Handler {
 	mutexOfHandlers.RLock()
 	defer mutexOfHandlers.RUnlock()
 	newHandler, ok := handlers[name]
 	if !ok {
-		panic(HandlerIsNotExistedError)
+		fmt.Fprintf(os.Stderr, "Error: The handler \"%s\" doesn't exist! Please change it to another handler.\n", name)
+		os.Exit(-1)
 	}
 	return newHandler(params)
 }
@@ -99,6 +121,8 @@ type StandardHandler struct {
 }
 
 // NewStandardHandler returns a StandardHandler holder with given writer and encoder.
+// Encoder is how to encode a log to bytes, and we provide TextEncoder and JsonEncoder.
+// See logit.Encoder, logit.TextEncoder and logit.JsonEncoder.
 func NewStandardHandler(writer io.Writer, encoder Encoder, timeFormat string) Handler {
 	return &StandardHandler{
 		writer:     writer,

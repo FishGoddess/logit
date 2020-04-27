@@ -20,58 +20,36 @@ package logit
 
 import "testing"
 
-// 测试解析日志级别的方法
-func TestParseLevel(t *testing.T) {
-	level, err := ParseLevel("debug")
-	if err != nil || level != DebugLevel {
-		t.Fatal("ParseLevel 出现错误！")
-	}
-
-	level, err = ParseLevel("debug?")
-	if err == nil {
-		t.Fatal("ParseLevel 出现错误！")
-	}
-}
-
-// 测试将 fileConfig 转换成 Config 的方法
-func TestFileConfigToConfig(t *testing.T) {
-
-	config, err := parseFileConfig(fileConfig{
-		Level: "info",
-		Handlers: map[string]map[string]interface{}{
-			"console": {
-				"timeFormat": "2006年01月02日 15点04分05秒",
-			},
-		},
-	})
-	if err != nil {
-		t.Fatal(err.Error())
-	}
-
-	t.Logf("%v\n", config.Level)
-	for _, handler := range config.Handlers {
-		t.Logf("%T\n", handler)
-	}
-
-	logger := NewLoggerFrom(config)
-	logger.Info("info 测试 TestFileConfigToConfig...")
-	logger.Warn("warn 测试 TestFileConfigToConfig...")
-}
-
 // 测试解析配置文件的方法
 func TestParseConfigFile(t *testing.T) {
 
-	config, err := ParseConfigFile("./_examples/logger.cfg")
+	conf, err := parseConfigFile("./_examples/logger.conf")
 	if err != nil {
-		t.Fatal(err.Error())
+		t.Fatal("parseConfigFile 测试出现问题！")
 	}
 
-	t.Logf("%v\n", config.Level)
-	for _, handler := range config.Handlers {
-		t.Logf("%T\n", handler)
+	t.Logf("%v\n", conf.Level)
+	t.Logf("%v\n", conf.Caller)
+	for name, parmas := range conf.Handlers {
+		t.Logf("%s ==> %v\n", name, parmas)
 	}
+}
 
-	logger := NewLoggerFrom(config)
-	logger.Info("info 测试 TestFileConfigToConfig...")
-	logger.Warn("warn 测试 TestFileConfigToConfig...")
+// 测试从 config 中解析日志处理器的方法
+func TestParseHandlersFromConfig(t *testing.T) {
+
+	handlers := parseHandlersFromConfig(config{
+		Handlers: map[string]map[string]interface{}{
+			"console": {
+				"k1": "v1",
+			},
+			"file": {
+				"path": "Z:/TestParseHandlersFromConfig.log",
+				"k2":   "v2",
+			},
+		},
+	})
+	for i, handler := range handlers {
+		t.Logf("No.%d ==> %T\n", i+1, handler)
+	}
 }

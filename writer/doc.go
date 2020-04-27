@@ -17,12 +17,12 @@
 // Created at 2020/03/03 14:59:08
 
 /*
-Package writer provides some writers to extend your Logger.
+Package writer provides some writers to extend your logger.
 
 1. DurationRollingFile:
 
     // DurationRollingFile is a time sensitive file.
-    file := NewDurationRollingFile(24 * time.Hour, func(now time.Time) string {
+    file := NewDurationRollingFile(24*time.Hour, func(now time.Time) string {
         return "D:/" + now.Format("20060102-150405") + ".txt"
     })
     defer file.Close()

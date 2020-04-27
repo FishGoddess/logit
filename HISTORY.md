@@ -1,5 +1,16 @@
 ## ✒ 历史版本的特性介绍 (Features in old version)
 
+### v0.2.1-alpha
+> 此版本发布于 2020-04-27
+* 将 console handler 简化，目前使用 RegisterHandler 构造
+* 从 file handler 中抽取出 duration rolling 和 size rolling 两个日志处理器
+* 屏蔽了 HandlerOf 和 EncoderOf，只暴露特定的 API
+* 新增 TextEncoder 和 JsonEncoder 两个方法，可以获取到具体的日志编码器
+* 新增 NewConsoleHandler 和 NewFileHandler，分别对应控制台和文件日志处理器
+* 新增 NewDurationRollingHandler 和 NewSizeRollingHandler，分别对应时间间隔滚动和文件大小滚动的日志处理器
+* 删除了大量创建 Logger 的方法，这些方法会让人看起来很复杂很繁琐
+* 去除原有 Config 加 fileConfig 的配置设计，现在直接使用一个映射配置，然后组装成需要的参数
+
 ### v0.2.0-alpha
 > 此版本发布于 2020-04-24
 * 将 wrapper 修改为 writer
