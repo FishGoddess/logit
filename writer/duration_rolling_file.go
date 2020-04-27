@@ -58,9 +58,11 @@ type DurationRollingFile struct {
 	mu sync.Mutex
 }
 
-// minDuration prevents io system from creating file too fast.
-// Default is one second.
-const minDuration = 1 * time.Second
+const (
+	// minDuration prevents io system from creating file too fast.
+	// Default is one second.
+	minDuration = 1 * time.Second
+)
 
 // NewDurationRollingFile creates a new duration rolling file.
 // duration is how long did it roll to next file.

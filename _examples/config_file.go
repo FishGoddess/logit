@@ -44,7 +44,7 @@ func main() {
 	//         }
 	//     }
 	//
-	logger := logit.NewLoggerFrom("./logger.conf")
+	logger := logit.NewLoggerFromPath("./logger.conf")
 	logger.Info("I am working!")
 	logger.Info("My level is " + logger.Level().String())
 	fmt.Println("fmt ==============================================")

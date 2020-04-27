@@ -21,6 +21,7 @@ package logit
 import (
 	"bytes"
 	"encoding/json"
+	"io"
 	"io/ioutil"
 )
 
@@ -66,12 +67,12 @@ func jsonifyContent(content []byte) []byte {
 	return bytes.Join([][]byte{[]byte("{"), buffer, []byte("}")}, []byte(""))
 }
 
-// parseConfigFile parses a config file whose path is configFile and returns
-// a mapping config of it. Return an error if something wrong happened.
-func parseConfigFile(configFile string) (config, error) {
+// parseConfigFrom parses a config from reader which returns a mapping config.
+// Return an error if something wrong happened.
+func parseConfigFrom(reader io.Reader) (config, error) {
 
 	// 配置文件一般不会太大，直接全部读取进内存
-	content, err := ioutil.ReadFile(configFile)
+	content, err := ioutil.ReadAll(reader)
 	if err != nil {
 		return config{}, err
 	}
@@ -88,9 +89,9 @@ func parseConfigFile(configFile string) (config, error) {
 	return conf, nil
 }
 
-// parseHandlersFromConfig parses all handlers in conf.
+// parseHandlersFrom parses all handlers in conf.
 // Return a slice of all parsed handlers.
-func parseHandlersFromConfig(conf config) []Handler {
+func parseHandlersFrom(conf config) []Handler {
 	handlers := make([]Handler, 0, len(conf.Handlers)+2)
 	for name, params := range conf.Handlers {
 		handlers = append(handlers, handlerOf(name, params))

@@ -50,7 +50,7 @@ var (
 
 // parseLevel parses level and returns the Level of it.
 // If the level doesn't exist, a tip will be printed and
-// the program will exit with status code -3.
+// the program will exit with status code 3.
 func parseLevel(level string) Level {
 	for k, v := range levels {
 		if v == level {
@@ -58,7 +58,7 @@ func parseLevel(level string) Level {
 		}
 	}
 	fmt.Fprintf(os.Stderr, "Error: Level \"%s\" doesn't exist! Be sure your level is one of them: debug, info, warn, error, off\n", level)
-	os.Exit(-3)
+	os.Exit(3)
 	return OffLevel
 }
 

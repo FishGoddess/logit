@@ -30,8 +30,10 @@ import (
 	//"go.uber.org/zap/zapcore"
 )
 
-// 时间格式化字符串
-const timeFormat = "2006-01-02 15:04:05"
+const (
+	// 时间格式化字符串
+	timeFormat = "2006-01-02 15:04:05"
+)
 
 type nopWriter struct{}
 

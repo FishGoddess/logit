@@ -96,14 +96,14 @@ func RegisterHandler(name string, newHandler func(params map[string]interface{})
 // Notice that we use tips+exit mechanism to check the name.
 // This is a more convenient way to use handlers (we think).
 // so if the handler doesn't exist, a tip will be printed and
-// the program will exit with status code -1.
+// the program will exit with status code 1.
 func handlerOf(name string, params map[string]interface{}) Handler {
 	mutexOfHandlers.RLock()
 	defer mutexOfHandlers.RUnlock()
 	newHandler, ok := handlers[name]
 	if !ok {
 		fmt.Fprintf(os.Stderr, "Error: The handler \"%s\" doesn't exist! Please change it to another handler.\n", name)
-		os.Exit(-1)
+		os.Exit(1)
 	}
 	return newHandler(params)
 }

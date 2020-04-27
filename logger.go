@@ -19,6 +19,8 @@
 package logit
 
 import (
+	"io"
+	"os"
 	"runtime"
 	"sync"
 	"time"
@@ -178,8 +180,10 @@ func (l *Logger) releaseLog(log *Log) {
 	l.logs.Put(log)
 }
 
-// callDepth is the depth of the method calling stack, which is about file name and line number.
-const callDepth = 3
+const (
+	// callDepth is the depth of the method calling stack, which is about file name and line number.
+	callDepth = 3
+)
 
 // log handles msg by l.handlers, and level will affect the visibility of this msg.
 // Notice that callDepth is caller sensitive.
@@ -262,8 +266,36 @@ func (l *Logger) Error(msg string) {
 
 // ================================== extension ==================================
 
-// NewLoggerFrom returns a logger parsed from config file.
-// The configFile is the path of your config file. A config file
+// NewLoggerFrom returns a logger parsed from reader which returns a config.
+// The reader is the reader of your config. A config looks like:
+//
+//     "level": "debug",
+//     "caller": false,
+//     "handlers": {
+//         "console": {
+//             # I am a comment...
+//         }
+//     }
+//
+// Check config file templates to know about more information.
+func NewLoggerFrom(reader io.Reader) *Logger {
+
+	// 解析配置
+	conf, err := parseConfigFrom(reader)
+	if err != nil {
+		panic(err)
+	}
+
+	// 根据配置创建并初始化 logger
+	logger := NewLogger(parseLevel(conf.Level), parseHandlersFrom(conf)...)
+	if conf.Caller {
+		logger.EnableFileInfo()
+	}
+	return logger
+}
+
+// NewLoggerFromPath returns a logger parsed from config file.
+// pathOfConfigFile is the path of your config file. A config file
 // is a file like "xxx.conf", and its content looks like:
 //
 //     "level": "debug",
@@ -275,20 +307,15 @@ func (l *Logger) Error(msg string) {
 //     }
 //
 // Check config file templates to know about more information.
-func NewLoggerFrom(configFile string) *Logger {
+func NewLoggerFromPath(pathOfConfigFile string) *Logger {
 
-	// 解析配置文件
-	conf, err := parseConfigFile(configFile)
+	// 打开配置文件
+	file, err := os.Open(pathOfConfigFile)
 	if err != nil {
 		panic(err)
 	}
 
-	// 根据配置文件创建并初始化 logger
-	logger := NewLogger(parseLevel(conf.Level), parseHandlersFromConfig(conf)...)
-	if conf.Caller {
-		logger.EnableFileInfo()
-	}
-	return logger
+	return NewLoggerFrom(file)
 }
 
 // DebugFunc will output msg as a debug message.

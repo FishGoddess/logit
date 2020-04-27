@@ -18,13 +18,30 @@
 
 package logit
 
-// globalLogger is a logger for global usage.
-var globalLogger = newGlobalLogger()
+import (
+	"os"
+)
+
+var (
+	// globalLogger is a logger for global usage.
+	globalLogger *Logger
+)
+
+func init() {
+	globalLogger = newGlobalLogger()
+}
 
 // newGlobalLogger returns a logger for global usage.
-// Default level is debug level.
+// Notice that it will try to load "./logit.conf" first, but a logger for console
+// will be created if failed.
 func newGlobalLogger() *Logger {
-	return NewLogger(DebugLevel, NewConsoleHandler(TextEncoder(), DefaultTimeFormat))
+
+	file, err := os.Open("./logit.conf")
+	if err != nil {
+		return NewLogger(DebugLevel, NewConsoleHandler(TextEncoder(), DefaultTimeFormat))
+	}
+	defer file.Close()
+	return NewLoggerFrom(file)
 }
 
 // Me returns globalLogger for more usages.
@@ -32,8 +49,10 @@ func Me() *Logger {
 	return globalLogger
 }
 
-// callDepth is the depth of the method calling stack, which is about file name and line.
-const callDepthOfGlobalLogger = 3
+const (
+	// callDepth is the depth of the method calling stack, which is about file name and line.
+	callDepthOfGlobalLogger = 3
+)
 
 // Debug will output msg as a debug message.
 func Debug(msg string) {
