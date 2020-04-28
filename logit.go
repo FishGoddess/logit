@@ -41,7 +41,6 @@ func init() {
 // Notice that it will try to load "./logit.conf" first, but a logger for console
 // will be created if failed.
 func newGlobalLogger() *Logger {
-
 	file, err := os.Open("./logit.conf")
 	if err != nil {
 		return NewLogger(DebugLevel, NewConsoleHandler(TextEncoder(), DefaultTimeFormat))

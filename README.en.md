@@ -44,7 +44,7 @@ module your_project_name
 go 1.14
 
 require (
-    github.com/FishGoddess/logit v0.2.1-alpha
+    github.com/FishGoddess/logit v0.2.2-alpha
 )
 ```
 
@@ -89,6 +89,9 @@ func main() {
 		r := rand.New(rand.NewSource(time.Now().Unix()))
 		return "debug rand int: " + strconv.Itoa(r.Intn(100))
 	})
+
+	// If a config file "logit.conf" in "./", then logit will load it automatically.
+	// This is more convenience to use config file and logger.
 }
 ```
 

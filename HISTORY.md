@@ -1,5 +1,10 @@
 ## ✒ 历史版本的特性介绍 (Features in old version)
 
+### v0.2.2-alpha
+> 此版本发布于 2020-04-28
+* 改造全局使用的 logger，可以使用一个默认的配置文件来初始化全局 logger，方便使用
+* 增加 levelBasedHandler，里面是不同日志级别的日志处理器包装器，可以传一堆的 handler 进去
+
 ### v0.2.1-alpha
 > 此版本发布于 2020-04-27
 * 将 console handler 简化，目前使用 RegisterHandler 构造
