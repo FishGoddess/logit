@@ -12,18 +12,28 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
-// Author: fish
+// Author: FishGoddess
 // Email: fishinlove@163.com
 // Created at 2020/03/29 22:59:14
 
 package logit
 
-import "testing"
+import (
+	"os"
+	"testing"
+)
 
 // 测试解析配置文件的方法
 func TestParseConfigFile(t *testing.T) {
 
-	conf, err := parseConfigFile("./_examples/logger.conf")
+	// 打开配置文件
+	file, err := os.Open("./_examples/logger.conf")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	// 解析配置文件
+	conf, err := parseConfigFrom(file)
 	if err != nil {
 		t.Fatal("parseConfigFile 测试出现问题！")
 	}
@@ -38,7 +48,7 @@ func TestParseConfigFile(t *testing.T) {
 // 测试从 config 中解析日志处理器的方法
 func TestParseHandlersFromConfig(t *testing.T) {
 
-	handlers := parseHandlersFromConfig(config{
+	handlers := parseHandlersFrom(config{
 		Handlers: map[string]map[string]interface{}{
 			"console": {
 				"k1": "v1",

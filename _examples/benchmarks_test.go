@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
-// Author: fish
+// Author: FishGoddess
 // Email: fishinlove@163.com
 // Created at 2020/03/02 20:51:29
 
@@ -30,8 +30,10 @@ import (
 	//"go.uber.org/zap/zapcore"
 )
 
-// 时间格式化字符串
-const timeFormat = "2006-01-02 15:04:05"
+const (
+	// 时间格式化字符串
+	timeFormat = "2006-01-02 15:04:05"
+)
 
 type nopWriter struct{}
 

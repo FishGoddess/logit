@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
-// Author: fish
+// Author: FishGoddess
 // Email: fishinlove@163.com
 // Created at 2020/03/01 15:10:19
 
@@ -22,20 +22,24 @@ import "github.com/FishGoddess/logit"
 
 func main() {
 
+	// Use logit.Debug method to output a debug level message.
+	// Also, Info/Warn/Error method is available.
 	logit.Debug("Default logger level is debug.")
 
-	// Change logger level to info level.
-	// So debug log will be ignored.
-	logit.ChangeLevelTo(logit.InfoLevel)
+	// Change logger level to info level, so logs in debug level will be ignored.
+	// Notice that logit has blocked some methods for more refreshing method list.
+	// If you want to use some higher level methods, you should call logit.Me() to
+	// get the fully functional logger, then call what you want to call.
+	logit.Me().ChangeLevelTo(logit.InfoLevel)
 	logit.Debug("You never see me!")
 
 	// In particular, you can change level to OffLevel to disable the logger.
 	// So the info message next line will not be logged!
-	level := logit.ChangeLevelTo(logit.OffLevel)
+	level := logit.Me().ChangeLevelTo(logit.OffLevel)
 	logit.Info("I will not be logged!")
 
 	// Enable the Logger.
 	// The info message next line will be logged again!
-	logit.ChangeLevelTo(level)
+	logit.Me().ChangeLevelTo(level)
 	logit.Info("I am running again!")
 }

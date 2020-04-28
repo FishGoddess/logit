@@ -12,57 +12,52 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
-// Author: fish
+// Author: FishGoddess
 // Email: fishinlove@163.com
 // Created at 2020/02/29 22:55:31
 
 package logit
 
-// globalLogger is a Logger holder for global usage.
-// Default level is debug level.
-var globalLogger = NewLogger(DebugLevel, NewConsoleHandler(TextEncoder(), DefaultTimeFormat))
+import (
+	"os"
+)
+
+var (
+	// globalLogger is a logger for global usage.
+	globalLogger *Logger
+)
+
+func init() {
+	// 这边留一个注意点，由于这个 newGlobalLogger 需要用到注册的 handlers
+	// 而这些 handlers 是使用 init 函数进行注册的，所以 newGlobalLogger 必须
+	// 在注册 handlers 的 init 函数执行完之后才能执行，也就是说存在隐形的依赖关系
+	// 这是由 Go 语言 init 函数的执行顺序决定的，至少在 Go v1.14 版本中这个执行顺序
+	// 是我们想要的执行顺序，但是之后的版本就不好说了，所以这边记录着这个点，万一以后真的
+	// 出现注册过的 handler 却提示找不到，就很可能是这个点引起的
+	globalLogger = newGlobalLogger()
+}
+
+// newGlobalLogger returns a logger for global usage.
+// Notice that it will try to load "./logit.conf" first, but a logger for console
+// will be created if failed.
+func newGlobalLogger() *Logger {
+	file, err := os.Open("./logit.conf")
+	if err != nil {
+		return NewLogger(DebugLevel, NewConsoleHandler(TextEncoder(), DefaultTimeFormat))
+	}
+	defer file.Close()
+	return NewLoggerFrom(file)
+}
 
 // Me returns globalLogger for more usages.
 func Me() *Logger {
 	return globalLogger
 }
 
-// ChangeLevelTo will change the level of logit to newLevel.
-func ChangeLevelTo(level Level) Level {
-	return globalLogger.ChangeLevelTo(level)
-}
-
-// AddHandlers adds more handlers to logit, and all handlers added before will be retained.
-// If you want to remove all handlers, try logit.SetHandlers().
-// See logit.DefaultLoggerHandler.
-func AddHandlers(handlers ...Handler) {
-	globalLogger.AddHandlers(handlers...)
-}
-
-// SetHandlers replaces logit's handlers with handlers, all handlers added before will be removed.
-// If you want to add more handlers rather than replace them, try logit.AddHandlers().
-// Notice that at least one handler should be added, so if len(handlers) < 1, it returns false
-// which means setting failed. Return true if setting is successful.
-// See logit.DefaultLoggerHandler.
-func SetHandlers(handlers ...Handler) bool {
-	return globalLogger.SetHandlers(handlers...)
-}
-
-// EnableFileInfo means every log will contain file info like line number.
-// However, you should know that this is expensive in time.
-// So be sure you really need it or keep it disabled.
-func EnableFileInfo() {
-	globalLogger.EnableFileInfo()
-}
-
-// DisableFileInfo means every log will not contain file info like line number.
-// If you want file info again, try logit.EnableFileInfo().
-func DisableFileInfo() {
-	globalLogger.DisableFileInfo()
-}
-
-// callDepth is the depth of the method calling stack, which is about file name and line.
-const callDepthOfGlobalLogger = 3
+const (
+	// callDepth is the depth of the method calling stack, which is about file name and line.
+	callDepthOfGlobalLogger = 3
+)
 
 // Debug will output msg as a debug message.
 func Debug(msg string) {

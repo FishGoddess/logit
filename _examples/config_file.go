@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
-// Author: fish
+// Author: FishGoddess
 // Email: fishinlove@163.com
 // Created at 2020/03/30 14:21:28
 
@@ -44,7 +44,7 @@ func main() {
 	//         }
 	//     }
 	//
-	logger := logit.NewLoggerFrom("./logger.conf")
+	logger := logit.NewLoggerFromPath("./logger.conf")
 	logger.Info("I am working!")
 	logger.Info("My level is " + logger.Level().String())
 	fmt.Println("fmt ==============================================")

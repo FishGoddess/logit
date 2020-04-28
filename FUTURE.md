@@ -1,9 +1,11 @@
 ## ✒ 未来版本的新特性 (Features in future version)
 
 ### v0.2.x
-* 改造全局使用的 logger，可以使用一个默认的配置文件或者 flag 参数来初始化全局 logger
-* 增加 level_handler.go，里面是不同日志级别的日志处理器包装器，可以传一堆的 handler 进去
 * 增加 timeout_handler.go，里面是带超时功能的日志处理器包装器
+
+### v0.2.2-alpha
+* 改造全局使用的 logger，可以使用一个默认的配置文件来初始化全局 logger，方便使用
+* 增加 levelBasedHandler，里面是不同日志级别的日志处理器包装器，可以传一堆的 handler 进去
 
 ### v0.2.1-alpha
 * 将 console handler 简化，目前使用 RegisterHandler 构造

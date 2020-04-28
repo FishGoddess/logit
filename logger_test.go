@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
-// Author: fish
+// Author: FishGoddess
 // Email: fishinlove@163.com
 // Created at 2020/02/29 16:41:41
 
@@ -177,8 +177,8 @@ func TestLoggerInConcurrency(t *testing.T) {
 }
 
 // 测试从配置文件中创建一个 logger
-func TestNewLoggerFrom(t *testing.T) {
-	logger := NewLoggerFrom("./_examples/logger.conf")
+func TestNewLoggerFromPath(t *testing.T) {
+	logger := NewLoggerFromPath("./_examples/logger.conf")
 	logger.Info("Does it work? 这是测试日志信息，实际的日志信息可能比这个长，也可能比这个短！")
 }
 

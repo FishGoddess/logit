@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
-// Author: fish
+// Author: FishGoddess
 // Email: fishinlove@163.com
 // Created at 2020/03/03 14:58:21
 
@@ -58,9 +58,11 @@ type DurationRollingFile struct {
 	mu sync.Mutex
 }
 
-// minDuration prevents io system from creating file too fast.
-// Default is one second.
-const minDuration = 1 * time.Second
+const (
+	// minDuration prevents io system from creating file too fast.
+	// Default is one second.
+	minDuration = 1 * time.Second
+)
 
 // NewDurationRollingFile creates a new duration rolling file.
 // duration is how long did it roll to next file.

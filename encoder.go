@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
-// Author: fish
+// Author: FishGoddess
 // Email: fishinlove@163.com
 // Created at 2020/04/14 21:06:56
 
@@ -48,12 +48,12 @@ func (e Encoder) Encode(log *Log, timeFormat string) []byte {
 
 // encoderOf returns the encoder called name.
 // If the encoder doesn't exist, a tip will be printed and
-// the program will exit with status code -2.
+// the program will exit with status code 2.
 func encoderOf(name string) Encoder {
 	encoder, ok := encoders[name]
 	if !ok {
 		fmt.Fprintf(os.Stderr, "Error: The encoder \"%s\" you pointed doesn't exist! Try \"text\" or \"json\".\n", name)
-		os.Exit(-2)
+		os.Exit(2)
 	}
 	return encoder
 }

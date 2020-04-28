@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
-// Author: fish
+// Author: FishGoddess
 // Email: fishinlove@163.com
 // Created at 2020/03/05 00:11:50
 
@@ -72,9 +72,11 @@ type SizeRollingFile struct {
 	mu sync.Mutex
 }
 
-// minLimitedSize prevents io system from creating file too fast.
-// Default is 64 KB (64 * 1024 bytes).
-const minLimitedSize = 64 * KB
+const (
+	// minLimitedSize prevents io system from creating file too fast.
+	// Default is 64 KB (64 * 1024 bytes).
+	minLimitedSize = 64 * KB
+)
 
 // NewSizeRollingFile creates a new size rolling file.
 // limitedSize is how big did it roll to next file.

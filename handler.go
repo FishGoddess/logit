@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
-// Author: fish
+// Author: FishGoddess
 // Email: fishinlove@163.com
 // Created at 2020/03/06 13:36:28
 
@@ -96,35 +96,35 @@ func RegisterHandler(name string, newHandler func(params map[string]interface{})
 // Notice that we use tips+exit mechanism to check the name.
 // This is a more convenient way to use handlers (we think).
 // so if the handler doesn't exist, a tip will be printed and
-// the program will exit with status code -1.
+// the program will exit with status code 1.
 func handlerOf(name string, params map[string]interface{}) Handler {
 	mutexOfHandlers.RLock()
 	defer mutexOfHandlers.RUnlock()
 	newHandler, ok := handlers[name]
 	if !ok {
 		fmt.Fprintf(os.Stderr, "Error: The handler \"%s\" doesn't exist! Please change it to another handler.\n", name)
-		os.Exit(-1)
+		os.Exit(1)
 	}
 	return newHandler(params)
 }
 
-// ================================= StandardHandler =================================
+// ================================= standard handler =================================
 
-// StandardHandler is a standard handler for use.
+// standardHandler is a standard handler for use.
 // Generally speaking, encoding a log to bytes then written by writer is the most of
 // handlers do. So we provide a standard handler, which only need a writer and an encoder.
 // Notice that this handler is not for config file but use in code, so we don't register it.
-type StandardHandler struct {
+type standardHandler struct {
 	writer     io.Writer
 	encoder    Encoder
 	timeFormat string
 }
 
-// NewStandardHandler returns a StandardHandler holder with given writer and encoder.
+// NewStandardHandler returns a standardHandler holder with given writer and encoder.
 // Encoder is how to encode a log to bytes, and we provide TextEncoder and JsonEncoder.
 // See logit.Encoder, logit.TextEncoder and logit.JsonEncoder.
 func NewStandardHandler(writer io.Writer, encoder Encoder, timeFormat string) Handler {
-	return &StandardHandler{
+	return &standardHandler{
 		writer:     writer,
 		encoder:    encoder,
 		timeFormat: timeFormat,
@@ -133,7 +133,7 @@ func NewStandardHandler(writer io.Writer, encoder Encoder, timeFormat string) Ha
 
 // Handle will encode log and write log by internal writer.
 // Return true so that handlers after it will be used.
-func (sh *StandardHandler) Handle(log *Log) bool {
+func (sh *standardHandler) Handle(log *Log) bool {
 	sh.writer.Write(sh.encoder.Encode(log, sh.timeFormat))
 	return true
 }
