@@ -1,5 +1,33 @@
 ## ✒ 历史版本的特性介绍 (Features in old version)
 
+### v0.2.3
+> 此版本发布于 2020-05-01
+* 祝大家五一劳动节快乐！
+
+### v0.2.2-alpha
+> 此版本发布于 2020-04-28
+* 改造全局使用的 logger，可以使用一个默认的配置文件来初始化全局 logger，方便使用
+* 增加 levelBasedHandler，里面是不同日志级别的日志处理器包装器，可以传一堆的 handler 进去
+
+### v0.2.1-alpha
+> 此版本发布于 2020-04-27
+* 将 console handler 简化，目前使用 RegisterHandler 构造
+* 从 file handler 中抽取出 duration rolling 和 size rolling 两个日志处理器
+* 屏蔽了 HandlerOf 和 EncoderOf，只暴露特定的 API
+* 新增 TextEncoder 和 JsonEncoder 两个方法，可以获取到具体的日志编码器
+* 新增 NewConsoleHandler 和 NewFileHandler，分别对应控制台和文件日志处理器
+* 新增 NewDurationRollingHandler 和 NewSizeRollingHandler，分别对应时间间隔滚动和文件大小滚动的日志处理器
+* 删除了大量创建 Logger 的方法，这些方法会让人看起来很复杂很繁琐
+* 去除原有 Config 加 fileConfig 的配置设计，现在直接使用一个映射配置，然后组装成需要的参数
+
+### v0.2.0-alpha
+> 此版本发布于 2020-04-24
+* 将 wrapper 修改为 writer
+* 剔除了 default handler 和 json handler，整合进 standard handler 中
+* 提取出一个 encoder，方便内置处理器引用
+* 加入 console handler，专门负责输出到控制台的日志处理器
+* 加入 file handler，专门负责文件相关的日志处理器，包含时间滚动和大小滚动和不滚动的功能
+
 ### v0.1.5
 > 此版本发布于 2020-04-19
 * 完善 Json 处理器没有做字符转义的修复方案，详情查询 [issue/1](https://github.com/FishGoddess/logit/issues/1)

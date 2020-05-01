@@ -12,37 +12,34 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
-// Author: fish
+// Author: FishGoddess
 // Email: fishinlove@163.com
-// Created at 2020/03/05 17:30:21
+// Created at 2020/03/03 14:59:08
 
-package main
+/*
+Package writer provides some writers to extend your logger.
 
-import (
-    "time"
+1. DurationRollingFile:
 
-    "github.com/FishGoddess/logit/wrapper"
-)
-
-func main() {
-
-    // 1. DurationRollingFile is a time sensitive file.
-    durationRollingFile := wrapper.NewDurationRollingFile(24*time.Hour, func(now time.Time) string {
+    // DurationRollingFile is a time sensitive file.
+    file := NewDurationRollingFile(24*time.Hour, func(now time.Time) string {
         return "D:/" + now.Format("20060102-150405") + ".txt"
     })
-    defer durationRollingFile.Close()
+    defer file.Close()
 
     // You can use it like using os.File!
-    durationRollingFile.Write([]byte("Hello!"))
+    file.Write([]byte("Hello!"))
 
-    // =================================================================================
+2. SizeRollingFile:
 
-    // 2. SizeRollingFile is a file size sensitive file.
-    sizeRollingFile := wrapper.NewSizeRollingFile(64*wrapper.KB, func(now time.Time) string {
+    // SizeRollingFile is a file size sensitive file.
+    file := NewSizeRollingFile(64*KB, func (now time.Time) string {
         return "D:/" + now.Format("20060102150405.000") + ".txt"
     })
-    defer sizeRollingFile.Close()
+    defer file.Close()
 
     // You can use it like using os.File!
-    sizeRollingFile.Write([]byte("Hello!"))
-}
+    file.Write([]byte("Hello!"))
+
+*/
+package writer // import "github.com/FishGoddess/logit/writer"

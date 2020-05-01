@@ -45,7 +45,7 @@ module your_project_name
 go 1.14
 
 require (
-    github.com/FishGoddess/logit v0.1.5
+    github.com/FishGoddess/logit v0.2.3
 )
 ```
 
@@ -70,23 +70,29 @@ import (
 
 func main() {
     
-    // Log messages with four levels.
-    logit.Debug("I am a debug message!")
-    logit.Info("I am an info message!")
-    logit.Warn("I am a warn message!")
-    logit.Error("I am an error message!")
+	// Log messages with four levels.
+	logit.Debug("I am a debug message!")
+	logit.Info("I am an info message!")
+	logit.Warn("I am a warn message!")
+	logit.Error("I am an error message!")
 
-    // If you want to output log with file info, try this:
-    logit.EnableFileInfo()
-    logit.Info("Show file info!")
+	// Notice that logit has blocked some methods for more refreshing method list.
+	// If you want to use some higher level methods, you should call logit.Me() to
+	// get the fully functional logger, then call what you want to call.
+	// For example, if you want to output log with file info, try this:
+	logit.Me().EnableFileInfo()
+	logit.Info("Show file info!")
 
-    // If you have a long log and it is made of many variables, try this:
-    // The msg is the return value of msgGenerator.
-    logit.DebugFunc(func() string {
-        // Use time as the source of random number generator.
-        r := rand.New(rand.NewSource(time.Now().Unix()))
-        return "debug rand int: " + strconv.Itoa(r.Intn(100))
-    })
+	// If you have a long log and it is made of many variables, try this:
+	// The msg is the return value of msgGenerator.
+	logit.DebugFunc(func() string {
+		// Use time as the source of random number generator.
+		r := rand.New(rand.NewSource(time.Now().Unix()))
+		return "debug rand int: " + strconv.Itoa(r.Intn(100))
+	})
+
+	// If a config file "logit.conf" in "./", then logit will load it automatically.
+	// This is more convenience to use config file and logger.
 }
 ```
 
@@ -97,10 +103,12 @@ func main() {
 * [level_and_disable](./_examples/level_and_disable.go)
 * [config_file](./_examples/config_file.go)
 * [handler](./_examples/handler.go)
-* [wrapper](./_examples/wrapper.go)
+* [writer](./_examples/writer.go)
 * [log_to_file](./_examples/log_to_file.go)
 
 _更多使用案例请查看 [_examples](./_examples) 目录。_
+
+_配置文件模板请查看 [_examples/config](./_examples/config) 目录。_
 
 ### 🔥 性能测试
 

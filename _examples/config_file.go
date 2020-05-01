@@ -12,40 +12,45 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
-// Author: fish
+// Author: FishGoddess
 // Email: fishinlove@163.com
 // Created at 2020/03/30 14:21:28
 
 package main
 
 import (
-    "fmt"
+	"fmt"
 
-    "github.com/FishGoddess/logit"
+	"github.com/FishGoddess/logit"
 )
 
 func main() {
 
-    // Create a logger from config file.
-    //
-    // logger.cfg:
-    //     "level":"debug",
-    //     "handlers":{
-    //        "default":{
-    //            "timeFormat" : "2006/01/02 15:04"
-    //        },
-    //        "json":{
-    //            # "timeFormat" : "2006-01-02"
-    //        }
-    //     }
-    //
-    logger := logit.NewLoggerFromConfigFile("./logger.cfg")
-    logger.Info("I am working!")
-    logger.Info("My level is " + logger.Level().String())
-    fmt.Println("fmt ==============================================")
+	// Create a logger from config file.
+	//
+	// logger.conf:
+	//
+	//     "level": "debug",
+	//
+	//     "caller": false,
+	//
+	//     "handlers": {
+	//         "console": {
+	//             "timeFormat":"unix",
+	//             "encoder":"json"
+	//         },
+	//         "file":{
+	//             "path":"D:/logit.log"
+	//         }
+	//     }
+	//
+	logger := logit.NewLoggerFromPath("./logger.conf")
+	logger.Info("I am working!")
+	logger.Info("My level is " + logger.Level().String())
+	fmt.Println("fmt ==============================================")
 
-    handlers := logger.Handlers()
-    for i, handler := range handlers {
-        logger.Info(fmt.Sprintf("No.%d hadler ==> %T", i+1, handler))
-    }
+	handlers := logger.Handlers()
+	for i, handler := range handlers {
+		logger.Info(fmt.Sprintf("No.%d hadler ==> %T", i+1, handler))
+	}
 }

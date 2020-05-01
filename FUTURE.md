@@ -1,11 +1,34 @@
 ## ✒ 未来版本的新特性 (Features in future version)
 
-### v0.2.0
-* 继续完善配置文件，主要针对内置的日志处理器做适配
-* 合并目前的 DefaultHandler 和 JsonHandler
-* DefaultHandler 和 wrapper 进行配置文件的适配
-* 加入 FileHandler，专门负责文件相关的日志处理器
-* 增加分级日志处理器包装器，不同的级别可以使用不同的日志处理器
+### v0.2.3
+* 祝大家五一劳动节快乐！
+* ~~增加 timeout_handler.go，里面是带超时功能的日志处理器包装器~~
+    > 取消这个特性是因为，一般在需要获取某个执行时间很长甚至可能一直阻塞的操作的结果时才需要超时，
+    > 对于日志输出而言，我们并不需要获取日志输出操作的结果，所以这个特性意义不大。
+    > 还有一个原因就是，实现超时需要使用并发，在超时的任务里终止某个任务，
+    > 而 Go 语言并没有提供可以停止并销毁一个 goroutine 的方法，所以即使超时了，也没有办法终止这个任务
+    > 甚至可能造成 goroutine 的阻塞。综合上述，取消这个超时功能的日志处理器包装器。
+
+### v0.2.2-alpha
+* 改造全局使用的 logger，可以使用一个默认的配置文件来初始化全局 logger，方便使用
+* 增加 levelBasedHandler，里面是不同日志级别的日志处理器包装器，可以传一堆的 handler 进去
+
+### v0.2.1-alpha
+* 将 console handler 简化，目前使用 RegisterHandler 构造
+* 从 file handler 中抽取出 duration rolling 和 size rolling 两个日志处理器
+* 屏蔽了 HandlerOf 和 EncoderOf，只暴露特定的 API
+* 新增 TextEncoder 和 JsonEncoder 两个方法，可以获取到具体的日志编码器
+* 新增 NewConsoleHandler 和 NewFileHandler，分别对应控制台和文件日志处理器
+* 新增 NewDurationRollingHandler 和 NewSizeRollingHandler，分别对应时间间隔滚动和文件大小滚动的日志处理器
+* 删除了大量创建 Logger 的方法，这些方法会让人看起来很复杂很繁琐
+* 去除原有 Config 加 fileConfig 的配置设计，现在直接使用一个映射配置，然后组装成需要的参数
+
+### v0.2.0-alpha
+* 将 wrapper 修改为 writer
+* 剔除了 default handler 和 json handler，整合进 standard handler 中
+* 提取出一个 encoder，方便内置处理器引用
+* 加入 console handler，专门负责输出到控制台的日志处理器
+* 加入 file handler，专门负责文件相关的日志处理器，包含时间滚动和大小滚动和不滚动的功能
 
 ### v0.1.5
 * 完善 Json 处理器没有做字符转义的修复方案，详情查询 [issue/1](https://github.com/FishGoddess/logit/issues/1)

@@ -12,57 +12,58 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
-// Author: fish
+// Author: FishGoddess
 // Email: fishinlove@163.com
 // Created at 2020/03/01 14:18:33
 
 package logit
 
 import (
-    "errors"
-    "math"
+	"fmt"
+	"math"
+	"os"
 )
 
-// Level is the type representation of the level.
+// Level is the type representation of the logger level.
 type Level uint8
 
 const (
-    DebugLevel Level = iota
-    InfoLevel
-    WarnLevel
-    ErrorLevel
+	DebugLevel Level = iota
+	InfoLevel
+	WarnLevel
+	ErrorLevel
 
-    // OffLevel is for disabling a logger
-    OffLevel = math.MaxUint8
+	// OffLevel is for disabling a logger
+	OffLevel = math.MaxUint8
 )
 
 var (
-    // levels provides the name of all supported level.
-    levels = map[Level]string{
-        DebugLevel: "debug",
-        InfoLevel:  "info",
-        WarnLevel:  "warn",
-        ErrorLevel: "error",
-        OffLevel:   "off",
-    }
-
-    // LevelIsNotExisted is an error representation of a level is not existed.
-    LevelIsNotExisted = errors.New("level is not existed, be sure your level is one of them: debug, info, warn, error, off")
+	// levels store the names of all level provided.
+	levels = map[Level]string{
+		DebugLevel: "debug",
+		InfoLevel:  "info",
+		WarnLevel:  "warn",
+		ErrorLevel: "error",
+		OffLevel:   "off",
+	}
 )
 
-// ParseLevel parses level and returns the Level of it.
-// Return LevelIsNotExisted if level is not existed.
-func ParseLevel(level string) (Level, error) {
-    for k, v := range levels {
-        if v == level {
-            return k, nil
-        }
-    }
-    return 0, LevelIsNotExisted
+// parseLevel parses level and returns the Level of it.
+// If the level doesn't exist, a tip will be printed and
+// the program will exit with status code 3.
+func parseLevel(level string) Level {
+	for k, v := range levels {
+		if v == level {
+			return k
+		}
+	}
+	fmt.Fprintf(os.Stderr, "Error: Level \"%s\" doesn't exist! Be sure your level is one of them: debug, info, warn, error, off\n", level)
+	os.Exit(3)
+	return OffLevel
 }
 
-// The String method is used to print values passed as an operand
-// to any format that accepts a string or to an printer without format such as Print.
+// String returns the name of Level ll.
+// This method will be called when using printing operations like fmt.Println.
 func (ll Level) String() string {
-    return levels[ll]
+	return levels[ll]
 }
