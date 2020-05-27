@@ -24,7 +24,7 @@
 
 _Check [HISTORY.md](./HISTORY.md) and [FUTURE.md](./FUTURE.md) to know about more information._
 
-> v0.1.x is an interim version and will not be updated but fixed from now on. Next version v0.2.x is a big update which will bring new features and user experience, also it will be updated and maintained for a long time!
+> v0.1.x and older versions will not be supported anymore, please update to v0.2.x as quickly as possible. You will get some brand-new user experiences and supports for a long time!
 
 ### 🚀 Installation
 
@@ -44,7 +44,7 @@ module your_project_name
 go 1.14
 
 require (
-    github.com/FishGoddess/logit v0.2.3
+    github.com/FishGoddess/logit v0.2.4
 )
 ```
 

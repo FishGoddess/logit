@@ -19,6 +19,8 @@
 package logit
 
 import (
+	"os"
+	"path/filepath"
 	"strconv"
 	"testing"
 	"time"
@@ -36,7 +38,7 @@ func TestNewFileHandler(t *testing.T) {
 		}
 	}()
 
-	logger := NewLogger(DebugLevel, NewFileHandler("Z:/test.log", TextEncoder(), ""))
+	logger := NewLogger(DebugLevel, NewFileHandler(filepath.Join(os.TempDir(), "test.log"), TextEncoder(), ""))
 	for i := 0; i < 100; i++ {
 		logger.Info("我是第 " + strconv.Itoa(i) + " 条日志！")
 	}
@@ -46,7 +48,7 @@ func TestNewFileHandler(t *testing.T) {
 
 // 测试创建随时间间隔滚动的文件日志处理器
 func TestNewDurationRollingHandler(t *testing.T) {
-	logger := NewLogger(DebugLevel, NewDurationRollingHandler(time.Second, "Z:/", TextEncoder(), ""))
+	logger := NewLogger(DebugLevel, NewDurationRollingHandler(time.Second, os.TempDir(), TextEncoder(), ""))
 	for i := 0; i < 5; i++ {
 		logger.Info("1. info!!!!!!!! " + strconv.FormatInt(time.Now().Unix(), 10))
 		time.Sleep(time.Second)
@@ -56,7 +58,7 @@ func TestNewDurationRollingHandler(t *testing.T) {
 
 // 测试按照文件大小自动划分日志文件的日志处理器
 func TestNewSizeRollingHandler(t *testing.T) {
-	logger := NewLogger(DebugLevel, NewSizeRollingHandler(64*writer.KB, "Z:/", TextEncoder(), ""))
+	logger := NewLogger(DebugLevel, NewSizeRollingHandler(64*writer.KB, os.TempDir(), TextEncoder(), ""))
 	for i := 0; i < 2000; i++ {
 		logger.Debug("debug...")
 		logger.Info("info...")

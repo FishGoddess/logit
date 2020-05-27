@@ -52,7 +52,7 @@ func NewLevelBasedHandler(level Level, handlers ...Handler) Handler {
 }
 
 // Handle handles a log with handlers in lbh.
-// Notice that the handle process will be interrupted if one of them
+// Notice that the handling process will be interrupted if one of them
 // returned false. However, this method will always return true, so the handlers
 // after it will always be used.
 func (lbh *levelBasedHandler) Handle(log *Log) bool {
@@ -101,7 +101,7 @@ func registerDebugLevelHandler() {
 	})
 }
 
-// ================================  info level handler ================================
+// ================================ info level handler ================================
 
 // registerInfoLevelHandler registers info level handler which
 // only handles logs in info level.
@@ -127,7 +127,7 @@ func registerInfoLevelHandler() {
 	})
 }
 
-// ================================  warn level handler ================================
+// ================================ warn level handler ================================
 
 // registerWarnLevelHandler registers warn level handler which
 // only handles logs in warn level.
