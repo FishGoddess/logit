@@ -19,15 +19,46 @@
 package logit
 
 import (
+	"io/ioutil"
 	"os"
+	"path/filepath"
 	"testing"
 )
+
+// 创建 TestParseConfigFile 测试案例的配置文件
+func createParseConfigFileTestConfigFile(t *testing.T) string {
+
+	// 创建配置文件
+	configFile, err := ioutil.TempFile("", "TestParseConfigFile_*.conf")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer configFile.Close()
+
+	// 写入配置内容
+	configFile.WriteString(`
+		"level": "debug",
+		
+		"caller": false,
+		
+		"handlers": {
+		   "console": {
+			   "timeFormat": "unix",
+			   "encoder": "json"
+		   },
+		   "file": {
+			   "path": "` + escapeString(filepath.Join(os.TempDir(), "logit.log")) + `"
+		   }
+		}
+	`)
+	return configFile.Name()
+}
 
 // 测试解析配置文件的方法
 func TestParseConfigFile(t *testing.T) {
 
 	// 打开配置文件
-	file, err := os.Open("./_examples/logger.conf")
+	file, err := os.Open(createParseConfigFileTestConfigFile(t))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -54,7 +85,7 @@ func TestParseHandlersFromConfig(t *testing.T) {
 				"k1": "v1",
 			},
 			"file": {
-				"path": "Z:/TestParseHandlersFromConfig.log",
+				"path": escapeString(filepath.Join(os.TempDir(), "TestParseHandlersFromConfig.log")),
 				"k2":   "v2",
 			},
 		},

@@ -18,11 +18,57 @@
 
 package logit
 
-import "testing"
+import (
+	"io/ioutil"
+	"os"
+	"path/filepath"
+	"testing"
+)
+
+// 创建 TestLevelShieldedHandler 测试案例的配置文件
+func createLevelShieldedHandlerTestConfigFile(t *testing.T) string {
+
+	// 创建配置文件
+	configFile, err := ioutil.TempFile("", "createLevelShieldedHandlerTestConfigFile_*.conf")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer configFile.Close()
+
+	// 写入配置内容
+	configFile.WriteString(`
+		"handlers": {
+			"!debug": {
+				"file": {
+					"path": "` + escapeString(filepath.Join(os.TempDir(), "non-debug.log")) + `"
+				}
+			},
+			"!info": {
+				"file": {
+					"path": "` + escapeString(filepath.Join(os.TempDir(), "non-info.log")) + `"
+				}
+			},
+			"!warn": {
+				"file": {
+					"path": "` + escapeString(filepath.Join(os.TempDir(), "non-warn.log")) + `"
+				}
+			},
+			"!error": {
+				"file": {
+					"path": "` + escapeString(filepath.Join(os.TempDir(), "non-error.log")) + `"
+				}
+			},
+			"console": {
+				"encoder": "json"
+			}
+		}
+	`)
+	return configFile.Name()
+}
 
 // 测试屏蔽日志级别的日志处理器
 func TestLevelShieldedHandler(t *testing.T) {
-	logger := NewLoggerFromPath("./_examples/level_shielded_handler.conf")
+	logger := NewLoggerFromPath(createLevelShieldedHandlerTestConfigFile(t))
 	logger.Debug("debug 有几条？")
 	logger.Info("info 有几条？")
 	logger.Warn("warn 有几条？")

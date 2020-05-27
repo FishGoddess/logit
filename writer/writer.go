@@ -21,7 +21,7 @@ package writer
 import (
 	"math/rand"
 	"os"
-	"path"
+	"path/filepath"
 	"strconv"
 	"time"
 )
@@ -48,7 +48,7 @@ func NextFilename(directory string) func(now time.Time) string {
 	rand.Seed(time.Now().UnixNano())
 	return func(now time.Time) string {
 		name := now.Format("20060102-150405") + "-" + strconv.Itoa(rand.Intn(1000)) + SuffixOfLogFile
-		return path.Join(directory, name)
+		return filepath.Join(directory, name)
 	}
 }
 
