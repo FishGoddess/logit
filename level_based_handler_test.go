@@ -18,11 +18,57 @@
 
 package logit
 
-import "testing"
+import (
+	"io/ioutil"
+	"os"
+	"path/filepath"
+	"testing"
+)
+
+// 创建 LevelBasedHandler 测试案例的配置文件
+func createLevelBasedHandlerTestConfigFile(t *testing.T) string {
+
+	// 创建配置文件
+	configFile, err := ioutil.TempFile("", "createLevelBasedHandlerTestConfigFile_*.conf")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer configFile.Close()
+
+	// 写入配置内容
+	configFile.WriteString(`
+		"handlers": {
+			"debug": {
+				"file": {
+					"path": "` + escapeString(filepath.Join(os.TempDir(), "debug.log")) + `"
+				}
+			},
+			"info": {
+				"file": {
+					"path": "` + escapeString(filepath.Join(os.TempDir(), "info.log")) + `"
+				}
+			},
+			"warn": {
+				"file": {
+					"path": "` + escapeString(filepath.Join(os.TempDir(), "warn.log")) + `"
+				}
+			},
+			"error": {
+				"file": {
+					"path": "` + escapeString(filepath.Join(os.TempDir(), "error.log")) + `"
+				}
+			},
+			"console": {
+				"encoder": "json"
+			}
+		}
+	`)
+	return configFile.Name()
+}
 
 // 测试基于 debug 日志级别的日志处理器
 func TestDebugLevelHandler(t *testing.T) {
-	logger := NewLoggerFromPath("./_examples/level_based_handler.conf")
+	logger := NewLoggerFromPath(createLevelBasedHandlerTestConfigFile(t))
 	logger.Debug("debug 去哪了？")
 	logger.Info("info 有一条？")
 	logger.Warn("warn 有一条？")
@@ -31,7 +77,7 @@ func TestDebugLevelHandler(t *testing.T) {
 
 // 测试基于 info 日志级别的日志处理器
 func TestInfoLevelHandler(t *testing.T) {
-	logger := NewLoggerFromPath("./_examples/level_based_handler.conf")
+	logger := NewLoggerFromPath(createLevelBasedHandlerTestConfigFile(t))
 	logger.Debug("debug 有一条？")
 	logger.Info("info 去哪了？")
 	logger.Warn("warn 有一条？")
@@ -40,7 +86,7 @@ func TestInfoLevelHandler(t *testing.T) {
 
 // 测试基于 warn 日志级别的日志处理器
 func TestWarnLevelHandler(t *testing.T) {
-	logger := NewLoggerFromPath("./_examples/level_based_handler.conf")
+	logger := NewLoggerFromPath(createLevelBasedHandlerTestConfigFile(t))
 	logger.Debug("debug 有一条？")
 	logger.Info("info 有一条？")
 	logger.Warn("warn 去哪了？")
@@ -49,7 +95,7 @@ func TestWarnLevelHandler(t *testing.T) {
 
 // 测试基于 debug 日志级别的日志处理器
 func TestErrorLevelHandler(t *testing.T) {
-	logger := NewLoggerFromPath("./_examples/level_based_handler.conf")
+	logger := NewLoggerFromPath(createLevelBasedHandlerTestConfigFile(t))
 	logger.Debug("debug 有一条？")
 	logger.Info("info 有一条？")
 	logger.Warn("warn 有一条？")

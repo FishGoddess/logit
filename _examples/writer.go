@@ -32,8 +32,8 @@ func main() {
 	})
 	defer durationRollingFile.Close()
 
-	// You can use it like using os.File!
-	durationRollingFile.Write([]byte("Hello!"))
+	// You can use it like using io.Writer!
+	durationRollingFile.Write([]byte("durationRollingFile!"))
 
 	// =================================================================================
 
@@ -43,6 +43,6 @@ func main() {
 	})
 	defer sizeRollingFile.Close()
 
-	// You can use it like using os.File!
-	sizeRollingFile.Write([]byte("Hello!"))
+	// You can use it like using io.Writer!
+	sizeRollingFile.Write([]byte("sizeRollingFile!"))
 }

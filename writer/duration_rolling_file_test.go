@@ -20,6 +20,7 @@ package writer
 
 import (
 	"os"
+	"path/filepath"
 	"testing"
 	"time"
 )
@@ -33,13 +34,11 @@ func TestNewDurationRollingFile(t *testing.T) {
 		}
 	}()
 
-	root := "Z:/TestNewDurationRollingFile/"
+	root := filepath.Join(os.TempDir(), "TestNewDurationRollingFile")
 	os.RemoveAll(root)   // 先删除现有文件夹
 	os.Mkdir(root, 0666) // 再创建测试文件夹
 
-	file := NewDurationRollingFile(time.Second, func(now time.Time) string {
-		return root + now.Format("20060102150405.000") + ".log"
-	})
+	file := NewDurationRollingFile(time.Second, NextFilename(root))
 	defer file.Close()
 
 	for i := 0; i < 5; i++ {
@@ -62,6 +61,7 @@ func TestNewDurationRollingFile(t *testing.T) {
 		t.Fatal("文件滚动出现问题！")
 	}
 
+	file.Close()
 	file = NewDurationRollingFile(999*time.Millisecond, func(now time.Time) string {
 		return ""
 	})

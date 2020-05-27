@@ -20,8 +20,10 @@ package logit
 
 import (
 	"fmt"
+	"io/ioutil"
 	"math/rand"
 	"os"
+	"path/filepath"
 	"strconv"
 	"strings"
 	"sync"
@@ -176,9 +178,38 @@ func TestLoggerInConcurrency(t *testing.T) {
 	group.Wait()
 }
 
+// 创建 TestNewLoggerFromPath 测试案例的配置文件
+func createNewLoggerFromPathTestConfigFile(t *testing.T) string {
+
+	// 创建配置文件
+	configFile, err := ioutil.TempFile("", "TestNewLoggerFromPath_*.conf")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer configFile.Close()
+
+	// 写入配置内容
+	configFile.WriteString(`
+		"level": "debug",
+		
+		"caller": false,
+		
+		"handlers": {
+		   "console": {
+			   "timeFormat": "unix",
+			   "encoder": "json"
+		   },
+		   "file": {
+			   "path": "` + escapeString(filepath.Join(os.TempDir(), "logit.log")) + `"
+		   }
+		}
+	`)
+	return configFile.Name()
+}
+
 // 测试从配置文件中创建一个 logger
 func TestNewLoggerFromPath(t *testing.T) {
-	logger := NewLoggerFromPath("./_examples/logger.conf")
+	logger := NewLoggerFromPath(createNewLoggerFromPathTestConfigFile(t))
 	logger.Info("Does it work? 这是测试日志信息，实际的日志信息可能比这个长，也可能比这个短！")
 }
 
