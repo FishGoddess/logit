@@ -5,7 +5,9 @@
 
 **logit** is an easy-to-use, also level-based and config file first logger for [GoLang](https://golang.org) applications.
 
-[阅读中文版的 Read me](./README.md).
+[阅读中文版的 Read me](./README.md)
+
+[Introduction Video on BiliBili](https://www.bilibili.com/video/BV14t4y1y7rF)
 
 ### 🥇 Features
 
