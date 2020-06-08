@@ -13,7 +13,7 @@
 // limitations under the License.
 //
 // Author: FishGoddess
-// Email: fishinlove@163.com
+// Email: fishgoddess@qq.com
 // Created at 2020/02/29 21:59:13
 package main
 
@@ -47,6 +47,12 @@ func main() {
 		r := rand.New(rand.NewSource(time.Now().Unix()))
 		return "debug rand int: " + strconv.Itoa(r.Intn(100))
 	})
+
+	// Or you can use formatting method like this:
+	logit.Debugf("This is a debug msg with %d params: %s, %s", 2, "msgFormat", "msgParams")
+	logit.Infof("This is a debug msg with %d params: %s, %s", 2, "msgFormat", "msgParams")
+	logit.Warnf("This is a debug msg with %d params: %s, %s", 2, "msgFormat", "msgParams")
+	logit.Errorf("This is a debug msg with %d params: %s, %s", 2, "msgFormat", "msgParams")
 
 	// If a config file "logit.conf" in "./", then logit will load it automatically.
 	// This is more convenience to use config file and logger.
