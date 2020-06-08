@@ -106,3 +106,59 @@ func WarnFunc(msgGenerator func() string) {
 func ErrorFunc(msgGenerator func() string) {
 	globalLogger.log(callDepthOfGlobalLogger, ErrorLevel, msgGenerator())
 }
+
+// Debugf will output msg as a debug message.
+// The msg is the return value of generateMessage.
+// This is a way to output a long log made from many variables.
+// The msgFormat is the same as format in fmt.Printf, so you can use
+// all format it supports, such as '%d'.
+// msgParams is the params msgFormat needs, and it is variable-length, so
+// you can add all your params here.
+// You should know that this way to output msg is the most expensive way in time,
+// but it's still faster than other logging libs. If you care about performance,
+// than you should think about it, and if you don't, just use it without thinking.
+func Debugf(msgFormat string, msgParams ...interface{}) {
+	globalLogger.log(callDepth, DebugLevel, generateMessage(msgFormat, msgParams...))
+}
+
+// Infof will output msg as an info message.
+// The msg is the return value of generateMessage.
+// This is a way to output a long log made from many variables.
+// The msgFormat is the same as format in fmt.Printf, so you can use
+// all format it supports, such as '%d'.
+// msgParams is the params msgFormat needs, and it is variable-length, so
+// you can add all your params here.
+// You should know that this way to output msg is the most expensive way in time,
+// but it's still faster than other logging libs. If you care about performance,
+// than you should think about it, and if you don't, just use it without thinking.
+func Infof(msgFormat string, msgParams ...interface{}) {
+	globalLogger.log(callDepth, InfoLevel, generateMessage(msgFormat, msgParams...))
+}
+
+// Warnf will output msg as a warn message.
+// The msg is the return value of generateMessage.
+// This is a way to output a long log made from many variables.
+// The msgFormat is the same as format in fmt.Printf, so you can use
+// all format it supports, such as '%d'.
+// msgParams is the params msgFormat needs, and it is variable-length, so
+// you can add all your params here.
+// You should know that this way to output msg is the most expensive way in time,
+// but it's still faster than other logging libs. If you care about performance,
+// than you should think about it, and if you don't, just use it without thinking.
+func Warnf(msgFormat string, msgParams ...interface{}) {
+	globalLogger.log(callDepth, WarnLevel, generateMessage(msgFormat, msgParams...))
+}
+
+// Errorf will output msg as an error message.
+// The msg is the return value of generateMessage.
+// This is the better way to output a long log made from many variables.
+// The msgFormat is the same as format in fmt.Printf, so you can use
+// all format it supports, such as '%d'.
+// msgParams is the params msgFormat needs, and it is variable-length, so
+// you can add all your params here.
+// You should know that this way to output msg is the most expensive way in time,
+// but it's still faster than other logging libs. If you care about performance,
+// than you should think about it, and if you don't, just use it without thinking.
+func Errorf(msgFormat string, msgParams ...interface{}) {
+	globalLogger.log(callDepth, ErrorLevel, generateMessage(msgFormat, msgParams...))
+}

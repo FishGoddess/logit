@@ -46,7 +46,7 @@ module your_project_name
 go 1.14
 
 require (
-    github.com/FishGoddess/logit v0.2.4
+    github.com/FishGoddess/logit v0.2.5-alpha
 )
 ```
 
@@ -62,15 +62,15 @@ logit has no more external dependencies.
 package main
 
 import (
-    "math/rand"
-    "strconv"
-    "time"
-    
-    "github.com/FishGoddess/logit"
+	"math/rand"
+	"strconv"
+	"time"
+
+	"github.com/FishGoddess/logit"
 )
 
 func main() {
-    
+
 	// Log messages with four levels.
 	logit.Debug("I am a debug message!")
 	logit.Info("I am an info message!")
@@ -91,6 +91,12 @@ func main() {
 		r := rand.New(rand.NewSource(time.Now().Unix()))
 		return "debug rand int: " + strconv.Itoa(r.Intn(100))
 	})
+
+	// Or you can use formatting method like this:
+	logit.Debugf("This is a debug msg with %d params: %s, %s", 2, "msgFormat", "msgParams")
+	logit.Infof("This is a debug msg with %d params: %s, %s", 2, "msgFormat", "msgParams")
+	logit.Warnf("This is a debug msg with %d params: %s, %s", 2, "msgFormat", "msgParams")
+	logit.Errorf("This is a debug msg with %d params: %s, %s", 2, "msgFormat", "msgParams")
 
 	// If a config file "logit.conf" in "./", then logit will load it automatically.
 	// This is more convenience to use config file and logger.
@@ -119,12 +125,12 @@ $ go test -v ./_examples/benchmarks_test.go -bench=. -benchtime=10s
 
 > Benchmark file：[_examples/benchmarks_test.go](./_examples/benchmarks_test.go)
 
-| test case | times ran (large is better) |  ns/op (small is better) | features | extension |
+| test case | times ran (large is better) |  ns/op (small is better) | B/op | allocs/op |
 | -----------|--------|-------------|-------------|-------------|
-| **logit** | **6429907** | **1855 ns/op** | powerful | high |
-| golog | 3361483 | 3589 ns/op | easy | common |
-| zap | 2971119 | 4066 ns/op | complex | normal |
-| logrus | 1553419 | 7869 ns/op | normal | normal |
+| **logit** | **6429907** | **1855 ns/op** | 384 B/op | 8 allocs/op |
+| golog | 3361483 | 3589 ns/op | 712 B/op | 24 allocs/op |
+| zap | 2971119 | 4066 ns/op | 448 B/op | 16 allocs/op |
+| logrus | 1553419 | 7869 ns/op | 1633 B/op | 52 allocs/op |
 
 > Environment：I7-6700HQ CPU @ 2.6 GHZ, 16 GB RAM
 
@@ -142,6 +148,14 @@ $ go test -v ./_examples/benchmarks_test.go -bench=. -benchtime=10s
 **because of time.Time.AppendFormat. In v0.0.11 and higher versions, we use time cache mechanism to**
 **reduce the times of time format. However, is it worth to replace time format operation with concurrent competition?**
 **The answer is no, so we cancel this mechanism in v0.1.1-alpha and higher versions.**
+
+**4. You should know that some APIs like Debugf can't reach high performance as the same as others because of reflection, **
+**however, their performances are not as bad as we think: **
+
+| test case | times ran (large is better) |  ns/op (small is better) | B/op | allocs/op |
+| -----------|--------|-------------|-------------|-------------|
+| logit | **6429907** | **1855 ns/op** | 384 B/op | 8 allocs/op |
+| **logit-reflection ** | **5288931** | **2334 ns/op** | 424 B/op | 12 allocs/op |
 
 ### 👥 Contributing
 

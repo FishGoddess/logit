@@ -363,7 +363,7 @@ func generateMessage(format string, params ...interface{}) string {
 // but it's still faster than other logging libs. If you care about performance,
 // than you should think about it, and if you don't, just use it without thinking.
 func (l *Logger) Debugf(msgFormat string, msgParams ...interface{}) {
-	l.log(callDepth, DebugLevel, generateMessage(msgFormat, msgParams))
+	l.log(callDepth, DebugLevel, generateMessage(msgFormat, msgParams...))
 }
 
 // Infof will output msg as an info message.
@@ -377,7 +377,7 @@ func (l *Logger) Debugf(msgFormat string, msgParams ...interface{}) {
 // but it's still faster than other logging libs. If you care about performance,
 // than you should think about it, and if you don't, just use it without thinking.
 func (l *Logger) Infof(msgFormat string, msgParams ...interface{}) {
-	l.log(callDepth, InfoLevel, generateMessage(msgFormat, msgParams))
+	l.log(callDepth, InfoLevel, generateMessage(msgFormat, msgParams...))
 }
 
 // Warnf will output msg as a warn message.
@@ -391,7 +391,7 @@ func (l *Logger) Infof(msgFormat string, msgParams ...interface{}) {
 // but it's still faster than other logging libs. If you care about performance,
 // than you should think about it, and if you don't, just use it without thinking.
 func (l *Logger) Warnf(msgFormat string, msgParams ...interface{}) {
-	l.log(callDepth, WarnLevel, generateMessage(msgFormat, msgParams))
+	l.log(callDepth, WarnLevel, generateMessage(msgFormat, msgParams...))
 }
 
 // Errorf will output msg as an error message.
@@ -405,5 +405,5 @@ func (l *Logger) Warnf(msgFormat string, msgParams ...interface{}) {
 // but it's still faster than other logging libs. If you care about performance,
 // than you should think about it, and if you don't, just use it without thinking.
 func (l *Logger) Errorf(msgFormat string, msgParams ...interface{}) {
-	l.log(callDepth, ErrorLevel, generateMessage(msgFormat, msgParams))
+	l.log(callDepth, ErrorLevel, generateMessage(msgFormat, msgParams...))
 }
