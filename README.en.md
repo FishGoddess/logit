@@ -149,8 +149,8 @@ $ go test -v ./_examples/benchmarks_test.go -bench=. -benchtime=10s
 **reduce the times of time format. However, is it worth to replace time format operation with concurrent competition?**
 **The answer is no, so we cancel this mechanism in v0.1.1-alpha and higher versions.**
 
-**4. You should know that some APIs like Debugf can't reach high performance as the same as others because of reflection, **
-**however, their performances are not as bad as we think: **
+**4. You should know that some APIs like Debugf can't reach high performance as the same as others because of reflection,**
+**however, their performances are not as bad as we think:**
 
 | test case | times ran (large is better) |  ns/op (small is better) | B/op | allocs/op |
 | -----------|--------|-------------|-------------|-------------|
