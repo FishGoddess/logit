@@ -127,7 +127,7 @@ $ go test -v ./_examples/benchmarks_test.go -bench=. -benchtime=10s
 
 | test case | times ran (large is better) |  ns/op (small is better) | B/op | allocs/op |
 | -----------|--------|-------------|-------------|-------------|
-| **logit** | **6429907** | **1855 ns/op** | 384 B/op | 8 allocs/op |
+| **logit** | **6429907** | **1855 ns/op** | **384 B/op** | **8 allocs/op** |
 | golog | 3361483 | 3589 ns/op | 712 B/op | 24 allocs/op |
 | zap | 2971119 | 4066 ns/op | 448 B/op | 16 allocs/op |
 | logrus | 1553419 | 7869 ns/op | 1633 B/op | 52 allocs/op |
@@ -154,8 +154,8 @@ $ go test -v ./_examples/benchmarks_test.go -bench=. -benchtime=10s
 
 | test case | times ran (large is better) |  ns/op (small is better) | B/op | allocs/op |
 | -----------|--------|-------------|-------------|-------------|
-| logit | **6429907** | **1855 ns/op** | 384 B/op | 8 allocs/op |
-| **logit-reflection ** | **5288931** | **2334 ns/op** | 424 B/op | 12 allocs/op |
+| logit | 6429907 | 1855 ns/op | 384 B/op | 8 allocs/op |
+| **logit-reflection** | **5288931** | **2334 ns/op** | **424 B/op** | **12 allocs/op** |
 
 ### 👥 Contributing
 
