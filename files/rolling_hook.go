@@ -16,7 +16,7 @@
 // Email: fishgoddess@qq.com
 // Created at 2020/06/12 22:08:31
 
-package writer
+package files
 
 import (
 	"io/ioutil"
@@ -32,6 +32,10 @@ type RollingHook interface {
 
 // ============================= default rolling hook =============================
 type DefaultRollingHook struct{}
+
+func NewDefaultRollingHook() *DefaultRollingHook {
+	return &DefaultRollingHook{}
+}
 
 func (drh *DefaultRollingHook) BeforeRolling() {
 	// Do nothing...

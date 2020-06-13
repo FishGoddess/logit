@@ -19,7 +19,7 @@
 package logit
 
 import (
-	"github.com/FishGoddess/logit/writer"
+	"github.com/FishGoddess/logit/files"
 	"os"
 	"strconv"
 	"strings"
@@ -108,7 +108,7 @@ func registerConsoleHandler() {
 //
 func registerFileHandler() {
 	RegisterHandler("file", func(params map[string]interface{}) Handler {
-		path := pathOf(params, "./logit-"+strconv.FormatInt(time.Now().Unix(), 10)+writer.SuffixOfLogFile)
+		path := pathOf(params, "./logit-"+strconv.FormatInt(time.Now().Unix(), 10)+files.SuffixOfLogFile)
 		encoder, timeFormat := encoderAndTimeFormatOf(params, TextEncoder(), DefaultTimeFormat)
 		return NewFileHandler(path, encoder, timeFormat)
 	})
@@ -207,7 +207,7 @@ func registerSizeRollingHandler() {
 		// 滚动的文件大小，单位是 MB，默认是 64 MB
 		limit, directory := limitAndDirectoryOf(params, 64, "./")
 		encoder, timeFormat := encoderAndTimeFormatOf(params, TextEncoder(), DefaultTimeFormat)
-		return NewSizeRollingHandler(int64(limit)*writer.MB, directory, encoder, timeFormat)
+		return NewSizeRollingHandler(int64(limit)*files.MB, directory, encoder, timeFormat)
 	})
 }
 
@@ -282,7 +282,7 @@ func NewConsoleHandler(encoder Encoder, timeFormat string) Handler {
 // If the file of this path doesn't exist, a new file will be created.
 // See logit.Encoder, logit.TextEncoder, logit.JsonEncoder.
 func NewFileHandler(path string, encoder Encoder, timeFormat string) Handler {
-	file, err := writer.NewFile(path)
+	file, err := files.CreateFileOf(path)
 	if err != nil {
 		panic(err)
 	}
@@ -294,9 +294,9 @@ func NewFileHandler(path string, encoder Encoder, timeFormat string) Handler {
 // each duration has its own log file. Also you can point a directory
 // to be used to store all created log files.
 // See logit.Encoder, logit.TextEncoder, logit.JsonEncoder.
-// See writer.NewDurationRollingFile.
+// See files.NewDurationRollingFile.
 func NewDurationRollingHandler(limit time.Duration, directory string, encoder Encoder, timeFormat string) Handler {
-	file := writer.NewDurationRollingFile(limit, writer.NextFilename(directory))
+	file := files.NewDurationRollingFile(directory, limit)
 	return NewStandardHandler(file, encoder, timeFormat)
 }
 
@@ -305,8 +305,8 @@ func NewDurationRollingHandler(limit time.Duration, directory string, encoder En
 // and the log file will switch to a new one after reaching to max size.
 // Also you can point a directory to be used to store all created log files.
 // See logit.Encoder, logit.TextEncoder, logit.JsonEncoder.
-// See writer.NewSizeRollingFile.
+// See files.NewSizeRollingFile.
 func NewSizeRollingHandler(limit int64, directory string, encoder Encoder, timeFormat string) Handler {
-	file := writer.NewSizeRollingFile(limit, writer.NextFilename(directory))
+	file := files.NewSizeRollingFile(directory, limit)
 	return NewStandardHandler(file, encoder, timeFormat)
 }

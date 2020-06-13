@@ -16,7 +16,7 @@
 // Email: fishgoddess@qq.com
 // Created at 2020/06/11 21:15:37
 
-package writer
+package files
 
 import (
 	"math/rand"
@@ -32,11 +32,13 @@ func (ng NameGenerator) NextName(directory string, now time.Time) string {
 }
 
 func DefaultNameGenerator() func(directory string, now time.Time) string {
-	// TODO 考虑使用原子计数器替换随机数
+	// 考虑使用原子计数器替换随机数
 	// 这个 Seed 方法最好不要并发执行，但是这个方法有可能会被并发执行，这是个隐患
-	rand.Seed(time.Now().Unix())
+	// 在测试阶段就已经出现了随机数重复的情况，导致一个文件被写入多个文件的内容
+	// https://github.com/FishGoddess/logit/issues/7
+	rand.Seed(time.Now().UnixNano())
 	return func(directory string, now time.Time) string {
-		name := now.Format("20060102-150405") + "-" + strconv.Itoa(rand.Intn(1000)) + SuffixOfLogFile
+		name := now.Format("20060102-150405") + "-" + strconv.Itoa(rand.Intn(10000)) + SuffixOfLogFile
 		return filepath.Join(directory, name)
 	}
 }

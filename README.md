@@ -111,7 +111,7 @@ func main() {
 * [level_and_disable](./_examples/level_and_disable.go)
 * [config_file](./_examples/config_file.go)
 * [handler](./_examples/handler.go)
-* [writer](./_examples/writer.go)
+* [files](./_examples/files.go)
 * [log_to_file](./_examples/log_to_file.go)
 
 _更多使用案例请查看 [_examples](./_examples) 目录。_

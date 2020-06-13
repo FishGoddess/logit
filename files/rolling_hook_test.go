@@ -16,7 +16,7 @@
 // Email: fishgoddess@qq.com
 // Created at 2020/06/13 00:07:00
 
-package writer
+package files
 
 import (
 	"io/ioutil"

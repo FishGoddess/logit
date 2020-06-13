@@ -25,7 +25,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/FishGoddess/logit/writer"
+	"github.com/FishGoddess/logit/files"
 )
 
 // 测试创建文件日志处理器
@@ -58,7 +58,7 @@ func TestNewDurationRollingHandler(t *testing.T) {
 
 // 测试按照文件大小自动划分日志文件的日志处理器
 func TestNewSizeRollingHandler(t *testing.T) {
-	logger := NewLogger(DebugLevel, NewSizeRollingHandler(64*writer.KB, os.TempDir(), TextEncoder(), ""))
+	logger := NewLogger(DebugLevel, NewSizeRollingHandler(64*files.KB, os.TempDir(), TextEncoder(), ""))
 	for i := 0; i < 2000; i++ {
 		logger.Debug("debug...")
 		logger.Info("info...")

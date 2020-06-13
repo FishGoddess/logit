@@ -116,21 +116,21 @@ Package logit provides an easy way to use foundation for your logging operations
 
 	// NewDurationRollingLogger creates a duration rolling logger with given duration.
 	// You should appoint a directory to store all log files generated in this time.
-	// Notice that duration must not less than minDuration (generally time.Second), see writer.minDuration.
-	// Also, default filename of log file is like "20200304-145246-45.log", see writer.NewFilename.
+	// Notice that duration must not less than minDuration (generally time.Second), see files.minDuration.
+	// Also, default filename of log file is like "20200304-145246-45.log", see files.NewFilename.
 	// If you want to appoint another filename, check this and do it by this way.
-	// See writer.NewDurationRollingFile (it is an implement of io.writer).
+	// See files.NewDurationRollingFile (it is an implement of io.writer).
 	logger = logit.NewLogger(logit.DebugLevel, logit.NewDurationRollingHandler(24*time.Hour, "D:/", logit.TextEncoder(), logit.DefaultTimeFormat))
 	logger.Info("Rolling!!!")
 
 	// NewSizeRollingLogger creates a file size rolling logger with given limitedSize.
 	// You should appoint a directory to store all log files generated in this time.
-	// Notice that limitedSize must not less than minLimitedSize (generally 64 KB), see writer.minLimitedSize.
-	// Check writer.KB, writer.MB, writer.GB to know what unit you gonna to use.
+	// Notice that limitedSize must not less than minLimitedSize (generally 64 KB), see files.minLimitedSize.
+	// Check files.KB, files.MB, files.GB to know what unit you gonna to use.
 	// Also, default filename of log file is like "20200304-145246-45.log", see nextFilename.
 	// If you want to appoint another filename, check this and do it by this way.
-	// See writer.NewSizeRollingFile (it is an implement of io.writer).
-	logger = logit.NewLogger(logit.DebugLevel, logit.NewSizeRollingHandler(64*writer.KB, "D:/", logit.TextEncoder(), logit.DefaultTimeFormat))
+	// See files.NewSizeRollingFile (it is an implement of io.writer).
+	logger = logit.NewLogger(logit.DebugLevel, logit.NewSizeRollingHandler(64*files.KB, "D:/", logit.TextEncoder(), logit.DefaultTimeFormat))
 	logger.Info("file size???")
 
 5. handler:
