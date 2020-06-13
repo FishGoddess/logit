@@ -159,7 +159,7 @@ func registerDurationRollingHandler() {
 		// 滚动的时间间隔，单位是秒，默认是 1 天
 		limit, directory := limitAndDirectoryOf(params, 24*60*60, "./")
 		encoder, timeFormat := encoderAndTimeFormatOf(params, TextEncoder(), DefaultTimeFormat)
-		return NewDurationRollingHandler(time.Duration(limit)*time.Second, directory, encoder, timeFormat)
+		return NewDurationRollingHandler(directory, time.Duration(limit)*time.Second, encoder, timeFormat)
 	})
 }
 
@@ -207,7 +207,7 @@ func registerSizeRollingHandler() {
 		// 滚动的文件大小，单位是 MB，默认是 64 MB
 		limit, directory := limitAndDirectoryOf(params, 64, "./")
 		encoder, timeFormat := encoderAndTimeFormatOf(params, TextEncoder(), DefaultTimeFormat)
-		return NewSizeRollingHandler(int64(limit)*files.MB, directory, encoder, timeFormat)
+		return NewSizeRollingHandler(directory, int64(limit)*files.MB, encoder, timeFormat)
 	})
 }
 
@@ -295,7 +295,7 @@ func NewFileHandler(path string, encoder Encoder, timeFormat string) Handler {
 // to be used to store all created log files.
 // See logit.Encoder, logit.TextEncoder, logit.JsonEncoder.
 // See files.NewDurationRollingFile.
-func NewDurationRollingHandler(limit time.Duration, directory string, encoder Encoder, timeFormat string) Handler {
+func NewDurationRollingHandler(directory string, limit time.Duration, encoder Encoder, timeFormat string) Handler {
 	file := files.NewDurationRollingFile(directory, limit)
 	return NewStandardHandler(file, encoder, timeFormat)
 }
@@ -306,7 +306,7 @@ func NewDurationRollingHandler(limit time.Duration, directory string, encoder En
 // Also you can point a directory to be used to store all created log files.
 // See logit.Encoder, logit.TextEncoder, logit.JsonEncoder.
 // See files.NewSizeRollingFile.
-func NewSizeRollingHandler(limit int64, directory string, encoder Encoder, timeFormat string) Handler {
+func NewSizeRollingHandler(directory string, limit int64, encoder Encoder, timeFormat string) Handler {
 	file := files.NewSizeRollingFile(directory, limit)
 	return NewStandardHandler(file, encoder, timeFormat)
 }

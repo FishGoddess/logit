@@ -120,7 +120,7 @@ Package logit provides an easy way to use foundation for your logging operations
 	// Also, default filename of log file is like "20200304-145246-45.log", see files.NewFilename.
 	// If you want to appoint another filename, check this and do it by this way.
 	// See files.NewDurationRollingFile (it is an implement of io.writer).
-	logger = logit.NewLogger(logit.DebugLevel, logit.NewDurationRollingHandler(24*time.Hour, "D:/", logit.TextEncoder(), logit.DefaultTimeFormat))
+	logger = logit.NewLogger(logit.DebugLevel, logit.NewDurationRollingHandler("D:/", 24*time.Hour, logit.TextEncoder(), logit.DefaultTimeFormat))
 	logger.Info("Rolling!!!")
 
 	// NewSizeRollingLogger creates a file size rolling logger with given limitedSize.
@@ -130,7 +130,7 @@ Package logit provides an easy way to use foundation for your logging operations
 	// Also, default filename of log file is like "20200304-145246-45.log", see nextFilename.
 	// If you want to appoint another filename, check this and do it by this way.
 	// See files.NewSizeRollingFile (it is an implement of io.writer).
-	logger = logit.NewLogger(logit.DebugLevel, logit.NewSizeRollingHandler(64*files.KB, "D:/", logit.TextEncoder(), logit.DefaultTimeFormat))
+	logger = logit.NewLogger(logit.DebugLevel, logit.NewSizeRollingHandler("D:/", 64*files.KB, logit.TextEncoder(), logit.DefaultTimeFormat))
 	logger.Info("file size???")
 
 5. handler:
@@ -207,5 +207,5 @@ package logit // import "github.com/FishGoddess/logit"
 
 const (
 	// Version is the version string representation of logit.
-	Version = "v0.2.5-alpha"
+	Version = "v0.2.6-alpha"
 )

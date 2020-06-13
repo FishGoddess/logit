@@ -35,7 +35,7 @@ Package files provides some writers to extend your logger.
 		return filepath.Join(directory, now.Format("2006-01-02-15-04-05.log"))
 	})
 
-	// What's more, you can add a hook in rolling process, see RollingHook.
+	// What's more, you can add a hook in rolling process, see files.RollingHook.
 	//durationRollingFile.SetRollingHook(xxx)
 
 2. SizeRollingFile:
@@ -54,7 +54,7 @@ Package files provides some writers to extend your logger.
 		return filepath.Join(directory, now.Format("2006-01-02-15-04-05.log"))
 	})
 
-	// What's more, you can add a hook in rolling process, see RollingHook.
+	// What's more, you can add a hook in rolling process, see files.RollingHook.
 	//sizeRollingFile.SetRollingHook(xxx)
 
 */

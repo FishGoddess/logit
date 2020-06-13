@@ -3,8 +3,13 @@
 ### v0.2.7
 * 加入日志存活个数的特性
 
-### v0.2.6
+### v0.2.6-alpha
+* 对 writer 包进行重构，改名为 files 包
+* 废弃了原 writer 包的 NewFile 方法，并使用同包下的 CreateFileOf 代替
+* 引入 NameGenerator 和 RollingHook 两个组件
 * 加入日志存活天数的特性
+* 修改 NewDurationRollingHandler 的参数顺序
+* 修改 NewSizeRollingHandler 的参数顺序
 
 ### v0.2.5-alpha
 * 加入之前被移除的特性 - 可变长参数列表的日志输出支持，主要可以使用格式化字符串进行多参数传递
