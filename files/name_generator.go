@@ -19,10 +19,26 @@
 package files
 
 import (
+	"errors"
+	"fmt"
 	"math/rand"
+	"os"
 	"path/filepath"
 	"strconv"
+	"sync"
 	"time"
+)
+
+var (
+	// nameGenerators stores all nameGenerators registered.
+	// mutexOfNameGenerators is for concurrency.
+	nameGenerators = map[string]NameGenerator{
+		"default": DefaultNameGenerator(),
+	}
+	mutexOfNameGenerators = &sync.RWMutex{}
+
+	// NameGeneratorIsExistedError is an error happening on repeating nameGenerator name.
+	NameGeneratorIsExistedError = errors.New("the name of nameGenerator you want to register already exists! May be you should give it an another name")
 )
 
 // NameGenerator is the type for generating the name of every created file.
@@ -36,6 +52,37 @@ type NameGenerator func(string, time.Time) string
 func (ng NameGenerator) NextName(directory string, now time.Time) string {
 	return ng(directory, now)
 }
+
+// RegisterNameGenerator registers your nameGenerator to logit so that you can use them in config file.
+// Return an error if the name is existed, and you should change another name for your nameGenerator.
+func RegisterNameGenerator(name string, nameGenerator NameGenerator) error {
+	mutexOfNameGenerators.Lock()
+	defer mutexOfNameGenerators.Unlock()
+
+	if _, ok := nameGenerators[name]; ok {
+		return NameGeneratorIsExistedError
+	}
+	nameGenerators[name] = nameGenerator
+	return nil
+}
+
+// nameGeneratorOf returns nameGenerator whose name is given name.
+// Notice that we use tips+exit mechanism to check the name.
+// This is a more convenient way to use nameGenerator (we think).
+// so if the nameGenerator doesn't exist, a tip will be printed and
+// the program will exit with status code 10.
+func nameGeneratorOf(name string) NameGenerator {
+	mutexOfNameGenerators.RLock()
+	defer mutexOfNameGenerators.RUnlock()
+	nameGenerator, ok := nameGenerators[name]
+	if !ok {
+		fmt.Fprintf(os.Stderr, "Error: The nameGenerator \"%s\" doesn't exist! Please change it to another nameGenerator.\n", name)
+		os.Exit(10)
+	}
+	return nameGenerator
+}
+
+// ================================== default name generator ==================================
 
 // DefaultNameGenerator returns a name generator that creates a time-relative filename
 // with given now time. Also, it uses random number to ensure this filename is available.

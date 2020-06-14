@@ -19,6 +19,7 @@
 package files
 
 import (
+	"fmt"
 	"io/ioutil"
 	"testing"
 	"time"
@@ -62,7 +63,7 @@ func TestLifeRollingHookAfterRolling(t *testing.T) {
 	}
 
 	// 创建基于生命周期的滚动钩子器
-	rollingHook := NewLifeBasedRollingHook(4*time.Second, directory)
+	rollingHook := NewLifeBasedRollingHook(directory, 4*time.Second)
 
 	// 开始测试
 	// 判断滚动之前的文件数量是否正确
@@ -75,4 +76,65 @@ func TestLifeRollingHookAfterRolling(t *testing.T) {
 
 	rollingHook.AfterRolling()
 	checkFileCountInDirectory(3)
+}
+
+// 测试用的 rollingHook
+type testRollingHook struct{}
+
+func (trh *testRollingHook) BeforeRolling() {
+	fmt.Println("testRollingHook.BeforeRolling()...")
+}
+
+func (trh *testRollingHook) AfterRolling() {
+	fmt.Println("testRollingHook.AfterRolling()...")
+}
+
+// 测试注册 rollingHook 的方法
+func TestRegisterRollingHook(t *testing.T) {
+
+	// default 已经存在，测试是否报错
+	err := RegisterRollingHook("default", func(params map[string]interface{}) RollingHook {
+		return &testRollingHook{}
+	})
+	if err == nil {
+		t.Fatal("name 为 default 的 rollingHook 已经存在，本来要报错的，但是没有报错")
+	}
+
+	// life 已经存在，测试是否报错
+	err = RegisterRollingHook("life", func(params map[string]interface{}) RollingHook {
+		return &testRollingHook{}
+	})
+	if err == nil {
+		t.Fatal("name 为 life 的 rollingHook 已经存在，本来要报错的，但是没有报错")
+	}
+
+	// test 不存在，测试是否报错
+	err = RegisterRollingHook("TestRegisterRollingHook", func(params map[string]interface{}) RollingHook {
+		return &testRollingHook{}
+	})
+	if err != nil {
+		t.Fatal("name 为 test 的 rollingHook 不存在，不应该报错的，但是报错了")
+	}
+
+	rollingHook := rollingHookOf("TestRegisterRollingHook", map[string]interface{}{})
+	rollingHook.BeforeRolling()
+	rollingHook.AfterRolling()
+
+	//rollingHookOf("noExist", map[string]interface{}{})
+}
+
+// 测试 rollingHookOf 方法
+func TestRollingHookOf(t *testing.T) {
+
+	// 先注册，再获取
+	err := RegisterRollingHook("TestRollingHookOf", func(params map[string]interface{}) RollingHook {
+		return &testRollingHook{}
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	rollingHook := rollingHookOf("TestRollingHookOf", map[string]interface{}{})
+	rollingHook.BeforeRolling()
+	rollingHook.AfterRolling()
 }

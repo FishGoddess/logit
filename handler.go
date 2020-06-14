@@ -32,12 +32,12 @@ const (
 )
 
 var (
-	// handlers store all handlers registered.
+	// handlers stores all handlers registered.
 	// mutexOfHandlers is for concurrency.
 	handlers        = map[string]func(params map[string]interface{}) Handler{}
 	mutexOfHandlers = &sync.RWMutex{}
 
-	// HandlerIsExistedError is an error happens on repeating handler name.
+	// HandlerIsExistedError is an error happening on repeating handler name.
 	HandlerIsExistedError = errors.New("the name of handler you want to register already exists! May be you should give it an another name")
 )
 
@@ -55,7 +55,7 @@ type Handler interface {
 	Handle(log *Log) bool
 }
 
-// RegisterHandler registers your handler to logit so that you can use them easily.
+// RegisterHandler registers your handler to logit so that you can use them in config file.
 // Return an error if the name is existed, and you should change another name for your handler.
 // Notice that newHandler has a parameter called params, which will be injected into newHandler
 // by logit automatically. Different handler may have different params, so what params should
@@ -64,7 +64,7 @@ type Handler interface {
 // For example, your config file is like this:
 //
 //     "handlers": {
-//         "my-handler": {
+//         "myHandler": {
 //             "db": "127.0.0.1:3306",
 //             "user": "me",
 //             "password": "you guess?",
