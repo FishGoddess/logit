@@ -24,6 +24,7 @@ import (
 	"time"
 )
 
+// 测试 LifeRollingHook 的 AfterRolling 方法
 func TestLifeRollingHookAfterRolling(t *testing.T) {
 
 	// 创建测试文件夹

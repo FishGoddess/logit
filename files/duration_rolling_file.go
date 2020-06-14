@@ -39,6 +39,7 @@ type DurationRollingFile struct {
 	// file points the writer which will be used this moment.
 	file *os.File
 
+	// directory is the target storing all created files.
 	directory string
 
 	// lastTime is the created time of current file above.
@@ -50,12 +51,20 @@ type DurationRollingFile struct {
 	// larger than minDuration for some safe considerations. See minDuration.
 	duration time.Duration
 
+	// nameGenerator is for generating the name of every created file.
+	// You can customize your format of filename by implementing this function.
+	// Default is DefaultNameGenerator().
 	nameGenerator NameGenerator
 
+	// rollingHook is a hook that will be invoked in rolling process.
+	// This interface has two method: BeforeRolling and AfterRolling.
+	// BeforeRolling will be called before rolling to next file.
+	// AfterRolling will be called after rolling to next file.
+	// Default is DefaultRollingHook, and it will do nothing when rolling to next file.
 	rollingHook RollingHook
 
 	// mu is a lock for safe concurrency.
-	mu sync.Mutex
+	mu *sync.Mutex
 }
 
 const (
@@ -82,7 +91,7 @@ func NewDurationRollingFile(directory string, duration time.Duration) *DurationR
 		duration:      duration,
 		nameGenerator: DefaultNameGenerator(),
 		rollingHook:   NewDefaultRollingHook(),
-		mu:            sync.Mutex{},
+		mu:            &sync.Mutex{},
 	}
 }
 
@@ -131,14 +140,16 @@ func (drf *DurationRollingFile) Close() error {
 	return drf.file.Close()
 }
 
-func (drf *DurationRollingFile) SetNameGenerator(nameGenerator NameGenerator) {
+// SetNameGenerator replaces drf.nameGenerator to newNameGenerator.
+func (drf *DurationRollingFile) SetNameGenerator(newNameGenerator NameGenerator) {
 	drf.mu.Lock()
 	defer drf.mu.Unlock()
-	drf.nameGenerator = nameGenerator
+	drf.nameGenerator = newNameGenerator
 }
 
-func (drf *DurationRollingFile) SetRollingHook(rollingHook RollingHook) {
+// SetRollingHook replaces drf.rollingHook to newRollingHook.
+func (drf *DurationRollingFile) SetRollingHook(newRollingHook RollingHook) {
 	drf.mu.Lock()
 	defer drf.mu.Unlock()
-	drf.rollingHook = rollingHook
+	drf.rollingHook = newRollingHook
 }

@@ -25,36 +25,54 @@ import (
 	"time"
 )
 
+// RollingHook is a hook that will be invoked in rolling process.
+// This interface has two method: BeforeRolling and AfterRolling.
+// BeforeRolling will be called before rolling to next file.
+// AfterRolling will be called after rolling to next file.
+// You can do your job in both of methods.
 type RollingHook interface {
 	BeforeRolling()
 	AfterRolling()
 }
 
 // ============================= default rolling hook =============================
+
+// DefaultRollingHook is default rolling hook, which will do nothing on rolling to next file.
 type DefaultRollingHook struct{}
 
+// NewDefaultRollingHook returns a default rolling hook.
 func NewDefaultRollingHook() *DefaultRollingHook {
 	return &DefaultRollingHook{}
 }
 
+// BeforeRolling does nothing when rolling to next file.
 func (drh *DefaultRollingHook) BeforeRolling() {
 	// Do nothing...
 }
 
+// AfterRolling does nothing when rolling to next file.
 func (drh *DefaultRollingHook) AfterRolling() {
 	// Do nothing...
 }
 
 // ============================= life rolling hook =============================
 
+// LifeBasedRollingHook is a life based rolling hook.
+// It will tag a life on every file and if life runs out, this file will be removed.
 type LifeBasedRollingHook struct {
+
+	// DefaultRollingHook has default implement and BeforeRolling is reserved.
 	*DefaultRollingHook
 
+	// life is the life of every file.
 	life time.Duration
 
+	// directory is the target storing all files need to monitor.
 	directory string
 }
 
+// NewLifeBasedRollingHook returns a LifeBasedRollingHook holder.
+// life is the life of every file and directory is the target storing all files need to monitor.
 func NewLifeBasedRollingHook(life time.Duration, directory string) *LifeBasedRollingHook {
 	return &LifeBasedRollingHook{
 		DefaultRollingHook: &DefaultRollingHook{},
@@ -63,6 +81,8 @@ func NewLifeBasedRollingHook(life time.Duration, directory string) *LifeBasedRol
 	}
 }
 
+// AfterRolling checks life of all files and removes the dead files.
+// Remember, it will do nothing if this directory could not be read and modified.
 func (lrh *LifeBasedRollingHook) AfterRolling() {
 
 	fileInfos, err := ioutil.ReadDir(lrh.directory)

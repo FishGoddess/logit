@@ -40,12 +40,13 @@ type SizeRollingFile struct {
 	// file points the writer which will be used this moment.
 	file *os.File
 
+	// directory is the target storing all created files.
 	directory string
 
 	// limitedSize is the limited size of this file.
 	// File will roll to next file if its size has reached to limitedSize.
 	// This field should be always larger than minLimitedSize for some safe considerations.
-	// Notice that it doesn't mean every files must be this size due to our performance optimization
+	// Notice that it doesn't mean every file must be this size due to our performance optimization
 	// scheme. Generally it equals to file size, however, it will not equal to file size
 	// if someone modified this file. See currentSize.
 	limitedSize int64
@@ -70,12 +71,20 @@ type SizeRollingFile struct {
 	// created time of next file.
 	nextFilename func(now time.Time) string
 
+	// nameGenerator is for generating the name of every created file.
+	// You can customize your format of filename by implementing this function.
+	// Default is DefaultNameGenerator().
 	nameGenerator NameGenerator
 
+	// rollingHook is a hook that will be invoked in rolling process.
+	// This interface has two method: BeforeRolling and AfterRolling.
+	// BeforeRolling will be called before rolling to next file.
+	// AfterRolling will be called after rolling to next file.
+	// Default is DefaultRollingHook, and it will do nothing when rolling to next file.
 	rollingHook RollingHook
 
 	// mu is a lock for safe concurrency.
-	mu sync.Mutex
+	mu *sync.Mutex
 }
 
 const (
@@ -103,10 +112,11 @@ func NewSizeRollingFile(directory string, limitedSize int64) *SizeRollingFile {
 		currentSize:   0,
 		nameGenerator: DefaultNameGenerator(),
 		rollingHook:   NewDefaultRollingHook(),
-		mu:            sync.Mutex{},
+		mu:            &sync.Mutex{},
 	}
 }
 
+// doRollingTask does the whole task of rolling process.
 func (srf *SizeRollingFile) doRollingTask() {
 	srf.rollingHook.BeforeRolling()
 	srf.rollingToNextFile(time.Now())
@@ -183,12 +193,14 @@ func (srf *SizeRollingFile) Close() error {
 	return srf.file.Close()
 }
 
+// SetNameGenerator replaces srf.nameGenerator to newNameGenerator.
 func (srf *SizeRollingFile) SetNameGenerator(nameGenerator NameGenerator) {
 	srf.mu.Lock()
 	defer srf.mu.Unlock()
 	srf.nameGenerator = nameGenerator
 }
 
+// SetRollingHook replaces srf.rollingHook to newRollingHook.
 func (srf *SizeRollingFile) SetRollingHook(rollingHook RollingHook) {
 	srf.mu.Lock()
 	defer srf.mu.Unlock()

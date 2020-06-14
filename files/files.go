@@ -36,14 +36,6 @@ const (
 	SuffixOfLogFile = ".log"
 )
 
-// NewFile creates a new file with given filePath.
-// Return a new File or an error if failed.
-// Notice that the permission of new file is 0644, which means rw-rw-r-- in unix-like os.
-// Deprecated. It will be removed in next version and you can use files.CreateFileOf instead.
-func NewFile(filePath string) (*os.File, error) {
-	return CreateFileOf(filePath)
-}
-
 // CreateFileOf creates a new file with given filePath.
 // Return a new File or an error if failed.
 // Notice that the permission of new file is 0644, which means rw-rw-r-- in unix-like os.
