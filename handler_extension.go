@@ -185,7 +185,7 @@ func registerDurationRollingHandler() {
 // use your layout to format time, try this:
 //
 //         "handlers": {
-//             "duration": {
+//             "size": {
 //                 "limit": 16,
 //                 "directory": "D:/logs",
 //                 "timeFormat": "2006-01-02"
@@ -195,7 +195,7 @@ func registerDurationRollingHandler() {
 // Want a Json string? Try this:
 //
 //         "handlers":{
-//             "duration":{
+//             "size":{
 //                 "limit": 16,
 //                 "encoder": "json",
 //                 "directory": "D:/logs",
