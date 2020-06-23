@@ -1,5 +1,8 @@
 ## ✒ 未来版本的新特性 (Features in future version)
 
+### v0.2.8
+* 尝试整理包结构，精简 logit 包下的 API
+
 ### v0.2.7
 * 加入日志存活个数的特性
 

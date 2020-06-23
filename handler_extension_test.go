@@ -66,3 +66,15 @@ func TestNewSizeRollingHandler(t *testing.T) {
 		logger.Error("error...")
 	}
 }
+
+// 测试创建空的 RollingHandlerOptions
+func TestRollingHandlerOptions(t *testing.T) {
+	options := RollingHandlerOptions{}
+	t.Log(options)
+	if options.nameGenerator != nil {
+		t.Fatal("nameGenerator 应该是 nil 的，结果不是。。。")
+	}
+	if options.rollingHook != nil {
+		t.Fatal("rollingHook 应该是 nil 的，结果不是。。。")
+	}
+}
