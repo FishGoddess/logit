@@ -159,7 +159,8 @@ func registerDurationRollingHandler() {
 		// 滚动的时间间隔，单位是秒，默认是 1 天
 		limit, directory := limitAndDirectoryOf(params, 24*60*60, "./")
 		encoder, timeFormat := encoderAndTimeFormatOf(params, TextEncoder(), DefaultTimeFormat)
-		return NewDurationRollingHandler(directory, time.Duration(limit)*time.Second, encoder, timeFormat)
+		options := rollingHandlerOptionsOf(params, files.DefaultNameGenerator(), files.NewDefaultRollingHook())
+		return NewDurationRollingHandlerWithOptions(directory, time.Duration(limit)*time.Second, encoder, timeFormat, options)
 	})
 }
 
@@ -207,7 +208,8 @@ func registerSizeRollingHandler() {
 		// 滚动的文件大小，单位是 MB，默认是 64 MB
 		limit, directory := limitAndDirectoryOf(params, 64, "./")
 		encoder, timeFormat := encoderAndTimeFormatOf(params, TextEncoder(), DefaultTimeFormat)
-		return NewSizeRollingHandler(directory, int64(limit)*files.MB, encoder, timeFormat)
+		options := rollingHandlerOptionsOf(params, files.DefaultNameGenerator(), files.NewDefaultRollingHook())
+		return NewSizeRollingHandlerWithOptions(directory, int64(limit)*files.MB, encoder, timeFormat, options)
 	})
 }
 
@@ -266,6 +268,33 @@ func limitAndDirectoryOf(params map[string]interface{}, defaultLimit int, defaul
 	}
 
 	return limit, directory
+}
+
+// rollingHandlerOptionsOf returns rolling handler options in this params.
+// defaultNameGenerator and defaultRollingHook will be used if you don't set to params.
+func rollingHandlerOptionsOf(params map[string]interface{}, defaultNameGenerator files.NameGenerator, defaultRollingHook files.RollingHook) RollingHandlerOptions {
+
+	// 获取名字生成器配置
+	nameGenerator := defaultNameGenerator
+	if param, ok := params["nameGenerator"]; ok {
+		nameGenerator = files.NameGeneratorOf(param.(string))
+	}
+
+	// 获取滚动钩子配置
+	rollingHook := defaultRollingHook
+	if _, ok := params["rollingHook"]; ok {
+		param := params["rollingHook"].(map[string]map[string]interface{})
+		for rollingHookName, rollingHookParams := range param {
+			rollingHook = files.RollingHookOf(rollingHookName, rollingHookParams)
+			break
+		}
+	}
+
+	// 返回配置结果
+	return RollingHandlerOptions{
+		nameGenerator: nameGenerator,
+		rollingHook:   rollingHook,
+	}
 }
 
 // =============================== for public users ===============================

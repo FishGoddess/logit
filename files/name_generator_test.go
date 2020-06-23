@@ -42,7 +42,7 @@ func TestRegisterNameGenerator(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	nameGenerator := nameGeneratorOf("TestRegisterNameGenerator")
+	nameGenerator := NameGeneratorOf("TestRegisterNameGenerator")
 	if nameGenerator.NextName("", time.Now()) != "test" {
 		t.Fatal("注册可能失败了，获取也可能是失败了...")
 	}
@@ -59,7 +59,7 @@ func TestNameGeneratorOf(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	nameGenerator := nameGeneratorOf("TestNameGeneratorOf")
+	nameGenerator := NameGeneratorOf("TestNameGeneratorOf")
 	if nameGenerator.NextName("", time.Now()) != "test" {
 		t.Fatal("注册可能失败了，获取也可能是失败了...")
 	}

@@ -116,7 +116,7 @@ func TestRegisterRollingHook(t *testing.T) {
 		t.Fatal("name 为 test 的 rollingHook 不存在，不应该报错的，但是报错了")
 	}
 
-	rollingHook := rollingHookOf("TestRegisterRollingHook", map[string]interface{}{})
+	rollingHook := RollingHookOf("TestRegisterRollingHook", map[string]interface{}{})
 	rollingHook.BeforeRolling()
 	rollingHook.AfterRolling()
 
@@ -134,7 +134,7 @@ func TestRollingHookOf(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	rollingHook := rollingHookOf("TestRollingHookOf", map[string]interface{}{})
+	rollingHook := RollingHookOf("TestRollingHookOf", map[string]interface{}{})
 	rollingHook.BeforeRolling()
 	rollingHook.AfterRolling()
 }

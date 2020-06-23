@@ -86,12 +86,12 @@ func RegisterRollingHook(name string, newRollingHook func(params map[string]inte
 	return nil
 }
 
-// rollingHookOf returns rollingHook whose name is given name.
+// RollingHookOf returns rollingHook whose name is given name.
 // Notice that we use tips+exit mechanism to check the name.
 // This is a more convenient way to use rollingHook (we think).
 // so if the rollingHook doesn't exist, a tip will be printed and
 // the program will exit with status code 11.
-func rollingHookOf(name string, params map[string]interface{}) RollingHook {
+func RollingHookOf(name string, params map[string]interface{}) RollingHook {
 	mutexOfRollingHooks.RLock()
 	defer mutexOfRollingHooks.RUnlock()
 	newRollingHook, ok := rollingHooks[name]

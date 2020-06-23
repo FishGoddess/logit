@@ -66,12 +66,12 @@ func RegisterNameGenerator(name string, nameGenerator NameGenerator) error {
 	return nil
 }
 
-// nameGeneratorOf returns nameGenerator whose name is given name.
+// NameGeneratorOf returns nameGenerator whose name is given name.
 // Notice that we use tips+exit mechanism to check the name.
 // This is a more convenient way to use nameGenerator (we think).
 // so if the nameGenerator doesn't exist, a tip will be printed and
 // the program will exit with status code 10.
-func nameGeneratorOf(name string) NameGenerator {
+func NameGeneratorOf(name string) NameGenerator {
 	mutexOfNameGenerators.RLock()
 	defer mutexOfNameGenerators.RUnlock()
 	nameGenerator, ok := nameGenerators[name]
