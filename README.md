@@ -47,7 +47,7 @@ module your_project_name
 go 1.14
 
 require (
-    github.com/FishGoddess/logit v0.2.5-alpha
+    github.com/FishGoddess/logit v0.2.6-alpha
 )
 ```
 
@@ -111,7 +111,7 @@ func main() {
 * [level_and_disable](./_examples/level_and_disable.go)
 * [config_file](./_examples/config_file.go)
 * [handler](./_examples/handler.go)
-* [writer](./_examples/writer.go)
+* [files](./_examples/files.go)
 * [log_to_file](./_examples/log_to_file.go)
 
 _更多使用案例请查看 [_examples](./_examples) 目录。_
@@ -128,7 +128,7 @@ $ go test -v ./_examples/benchmarks_test.go -bench=. -benchtime=10s
 
 | 测试 | 单位时间内运行次数 (越大越好) |  每个操作消耗时间 (越小越好) | B/op (越小越好) | allocs/op (越小越好) |
 | -----------|--------|-------------|-------------|-------------|
-| **logit** | **6429907** | **1855 ns/op** | 384 B/op | 8 allocs/op |
+| **logit** | **6429907** | **1855 ns/op** | **384 B/op** | **8 allocs/op** |
 | golog | 3361483 | 3589 ns/op | 712 B/op | 24 allocs/op |
 | zap | 2971119 | 4066 ns/op | 448 B/op | 16 allocs/op |
 | logrus | 1553419 | 7869 ns/op | 1633 B/op | 52 allocs/op |
@@ -154,8 +154,8 @@ $ go test -v ./_examples/benchmarks_test.go -bench=. -benchtime=10s
 
 | 测试 | 单位时间内运行次数 (越大越好) |  每个操作消耗时间 (越小越好) | B/op (越小越好) | allocs/op (越小越好) |
 | -----------|--------|-------------|-------------|-------------|
-| logit | **6429907** | **1855 ns/op** | 384 B/op | 8 allocs/op |
-| **logit-使用反射技术 ** | **5288931** | **2334 ns/op** | 424 B/op | 12 allocs/op |
+| logit | 6429907 | 1855 ns/op | 384 B/op | 8 allocs/op |
+| **logit-使用反射技术** | **5288931** | **2334 ns/op** | **424 B/op** | **12 allocs/op** |
 
 ### 👥 贡献者
 

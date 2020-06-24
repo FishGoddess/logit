@@ -46,7 +46,7 @@ module your_project_name
 go 1.14
 
 require (
-    github.com/FishGoddess/logit v0.2.5-alpha
+    github.com/FishGoddess/logit v0.2.6-alpha
 )
 ```
 
@@ -110,7 +110,7 @@ func main() {
 * [level_and_disable](./_examples/level_and_disable.go)
 * [config_file](./_examples/config_file.go)
 * [handler](./_examples/handler.go)
-* [writer](./_examples/writer.go)
+* [files](./_examples/files.go)
 * [log_to_file](./_examples/log_to_file.go)
 
 _Check more examples in [_examples](./_examples)._
@@ -127,7 +127,7 @@ $ go test -v ./_examples/benchmarks_test.go -bench=. -benchtime=10s
 
 | test case | times ran (large is better) |  ns/op (small is better) | B/op | allocs/op |
 | -----------|--------|-------------|-------------|-------------|
-| **logit** | **6429907** | **1855 ns/op** | 384 B/op | 8 allocs/op |
+| **logit** | **6429907** | **1855 ns/op** | **384 B/op** | **8 allocs/op** |
 | golog | 3361483 | 3589 ns/op | 712 B/op | 24 allocs/op |
 | zap | 2971119 | 4066 ns/op | 448 B/op | 16 allocs/op |
 | logrus | 1553419 | 7869 ns/op | 1633 B/op | 52 allocs/op |
@@ -149,13 +149,13 @@ $ go test -v ./_examples/benchmarks_test.go -bench=. -benchtime=10s
 **reduce the times of time format. However, is it worth to replace time format operation with concurrent competition?**
 **The answer is no, so we cancel this mechanism in v0.1.1-alpha and higher versions.**
 
-**4. You should know that some APIs like Debugf can't reach high performance as the same as others because of reflection, **
-**however, their performances are not as bad as we think: **
+**4. You should know that some APIs like Debugf can't reach high performance as the same as others because of reflection,**
+**however, their performances are not as bad as we think:**
 
 | test case | times ran (large is better) |  ns/op (small is better) | B/op | allocs/op |
 | -----------|--------|-------------|-------------|-------------|
-| logit | **6429907** | **1855 ns/op** | 384 B/op | 8 allocs/op |
-| **logit-reflection ** | **5288931** | **2334 ns/op** | 424 B/op | 12 allocs/op |
+| logit | 6429907 | 1855 ns/op | 384 B/op | 8 allocs/op |
+| **logit-reflection** | **5288931** | **2334 ns/op** | **424 B/op** | **12 allocs/op** |
 
 ### 👥 Contributing
 

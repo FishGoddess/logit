@@ -38,7 +38,7 @@ func init() {
 }
 
 // newGlobalLogger returns a logger for global usage.
-// Notice that it will try to load "./logit.conf" first, but a logger for console
+// Notice that it will try to load "./logit.conf" first, but a logger to console
 // will be created if failed.
 func newGlobalLogger() *Logger {
 	file, err := os.Open("./logit.conf")
