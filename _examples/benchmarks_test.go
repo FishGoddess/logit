@@ -13,7 +13,7 @@
 // limitations under the License.
 //
 // Author: FishGoddess
-// Email: fishinlove@163.com
+// Email: fishgoddess@qq.com
 // Created at 2020/03/02 20:51:29
 
 package main
@@ -23,7 +23,7 @@ import (
 	//"time"
 
 	"github.com/FishGoddess/logit"
-	//"github.com/FishGoddess/logit/writer"
+	//"github.com/FishGoddess/logit/files"
 	//"github.com/kataras/golog"
 	//"github.com/sirupsen/logrus"
 	//"go.uber.org/zap"
@@ -172,7 +172,7 @@ func BenchmarkLogitLogger(b *testing.B) {
 //// 测试 logit 文件日志记录器的速度
 //func BenchmarkLogitFile(b *testing.B) {
 //
-//    file, _ := writer.NewFile("D:/BenchmarkLogitFile.log")
+//    file, _ := files.CreateFileOf("D:/BenchmarkLogitFile.log")
 //    logger := logit.NewLogger(logit.DebugLevel, logit.NewStandardHandler(file, logit.TextEncoder(), timeFormat))
 //
 //    // 测试用的日志任务
@@ -195,7 +195,7 @@ func BenchmarkLogitLogger(b *testing.B) {
 //func BenchmarkGologFile(b *testing.B) {
 //
 //    logger := golog.New()
-//    file, _ := writer.NewFile("D:/BenchmarkGologFile.log")
+//    file, _ := files.CreateFileOf("D:/BenchmarkGologFile.log")
 //    logger.SetOutput(file)
 //    logger.SetLevel("debug")
 //    logger.SetTimeFormat(timeFormat)
@@ -226,7 +226,7 @@ func BenchmarkLogitLogger(b *testing.B) {
 //        enc.AppendString(t.Format(timeFormat))
 //    }
 //    encoder := zapcore.NewConsoleEncoder(config)
-//    file, _ := writer.NewFile("D:/BenchmarkZapFile.log")
+//    file, _ := files.CreateFileOf("D:/BenchmarkZapFile.log")
 //    writeSyncer := zapcore.AddSync(file)
 //    core := zapcore.NewCore(encoder, writeSyncer, zapcore.DebugLevel)
 //    logger := zap.New(core)
@@ -253,7 +253,7 @@ func BenchmarkLogitLogger(b *testing.B) {
 //func BenchmarkLogrusFile(b *testing.B) {
 //
 //    logger := logrus.New()
-//    file, _ := writer.NewFile("D:/BenchmarkLogrusFile.log")
+//    file, _ := files.CreateFileOf("D:/BenchmarkLogrusFile.log")
 //    logger.SetOutput(file)
 //    logger.SetLevel(logrus.DebugLevel)
 //    logger.SetFormatter(&logrus.TextFormatter{

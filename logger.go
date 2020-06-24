@@ -13,12 +13,13 @@
 // limitations under the License.
 //
 // Author: FishGoddess
-// Email: fishinlove@163.com
+// Email: fishgoddess@qq.com
 // Created at 2020/02/29 15:39:02
 
 package logit
 
 import (
+	"fmt"
 	"io"
 	"os"
 	"runtime"
@@ -344,4 +345,65 @@ func (l *Logger) WarnFunc(msgGenerator func() string) {
 // This is the better way to output a long log made from many variables.
 func (l *Logger) ErrorFunc(msgGenerator func() string) {
 	l.log(callDepth, ErrorLevel, msgGenerator())
+}
+
+// generateMessage generates a message from format and params.
+func generateMessage(format string, params ...interface{}) string {
+	return fmt.Sprintf(format, params...)
+}
+
+// Debugf will output msg as a debug message.
+// The msg is the return value of generateMessage.
+// This is a way to output a long log made from many variables.
+// The msgFormat is the same as format in fmt.Printf, so you can use
+// all format it supports, such as '%d'.
+// msgParams is the params msgFormat needs, and it is variable-length, so
+// you can add all your params here.
+// You should know that this way to output msg is the most expensive way in time,
+// but it's still faster than other logging libs. If you care about performance,
+// than you should think about it, and if you don't, just use it without thinking.
+func (l *Logger) Debugf(msgFormat string, msgParams ...interface{}) {
+	l.log(callDepth, DebugLevel, generateMessage(msgFormat, msgParams...))
+}
+
+// Infof will output msg as an info message.
+// The msg is the return value of generateMessage.
+// This is a way to output a long log made from many variables.
+// The msgFormat is the same as format in fmt.Printf, so you can use
+// all format it supports, such as '%d'.
+// msgParams is the params msgFormat needs, and it is variable-length, so
+// you can add all your params here.
+// You should know that this way to output msg is the most expensive way in time,
+// but it's still faster than other logging libs. If you care about performance,
+// than you should think about it, and if you don't, just use it without thinking.
+func (l *Logger) Infof(msgFormat string, msgParams ...interface{}) {
+	l.log(callDepth, InfoLevel, generateMessage(msgFormat, msgParams...))
+}
+
+// Warnf will output msg as a warn message.
+// The msg is the return value of generateMessage.
+// This is a way to output a long log made from many variables.
+// The msgFormat is the same as format in fmt.Printf, so you can use
+// all format it supports, such as '%d'.
+// msgParams is the params msgFormat needs, and it is variable-length, so
+// you can add all your params here.
+// You should know that this way to output msg is the most expensive way in time,
+// but it's still faster than other logging libs. If you care about performance,
+// than you should think about it, and if you don't, just use it without thinking.
+func (l *Logger) Warnf(msgFormat string, msgParams ...interface{}) {
+	l.log(callDepth, WarnLevel, generateMessage(msgFormat, msgParams...))
+}
+
+// Errorf will output msg as an error message.
+// The msg is the return value of generateMessage.
+// This is the better way to output a long log made from many variables.
+// The msgFormat is the same as format in fmt.Printf, so you can use
+// all format it supports, such as '%d'.
+// msgParams is the params msgFormat needs, and it is variable-length, so
+// you can add all your params here.
+// You should know that this way to output msg is the most expensive way in time,
+// but it's still faster than other logging libs. If you care about performance,
+// than you should think about it, and if you don't, just use it without thinking.
+func (l *Logger) Errorf(msgFormat string, msgParams ...interface{}) {
+	l.log(callDepth, ErrorLevel, generateMessage(msgFormat, msgParams...))
 }

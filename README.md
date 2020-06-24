@@ -31,15 +31,11 @@ _历史版本的特性请查看 [HISTORY.md](./HISTORY.md)。未来版本的新�
 
 ### 🚀 安装方式
 
-唯一需要的依赖就是 [Golang 运行环境](https://golang.org).
-
-> Go modules
-
 ```bash
 $ go get -u github.com/FishGoddess/logit
 ```
 
-您也可以直接编辑 go.mod 文件，然后执行 _**go build**_。
+> 如果是 Go modules 的项目，您还可以直接编辑 go.mod 文件。
 
 ```bash
 module your_project_name
@@ -47,14 +43,8 @@ module your_project_name
 go 1.14
 
 require (
-    github.com/FishGoddess/logit v0.2.4
+    github.com/FishGoddess/logit v0.2.7
 )
-```
-
-> Go path
-
-```bash
-$ go get -u github.com/FishGoddess/logit
 ```
 
 logit 没有任何其他额外的依赖，纯使用 [Golang 标准库](https://golang.org) 完成。
@@ -63,15 +53,15 @@ logit 没有任何其他额外的依赖，纯使用 [Golang 标准库](https://g
 package main
 
 import (
-    "math/rand"
-    "strconv"
-    "time"
-    
-    "github.com/FishGoddess/logit"
+	"math/rand"
+	"strconv"
+	"time"
+
+	"github.com/FishGoddess/logit"
 )
 
 func main() {
-    
+
 	// Log messages with four levels.
 	logit.Debug("I am a debug message!")
 	logit.Info("I am an info message!")
@@ -93,6 +83,12 @@ func main() {
 		return "debug rand int: " + strconv.Itoa(r.Intn(100))
 	})
 
+	// Or you can use formatting method like this:
+	logit.Debugf("This is a debug msg with %d params: %s, %s", 2, "msgFormat", "msgParams")
+	logit.Infof("This is a debug msg with %d params: %s, %s", 2, "msgFormat", "msgParams")
+	logit.Warnf("This is a debug msg with %d params: %s, %s", 2, "msgFormat", "msgParams")
+	logit.Errorf("This is a debug msg with %d params: %s, %s", 2, "msgFormat", "msgParams")
+
 	// If a config file "logit.conf" in "./", then logit will load it automatically.
 	// This is more convenience to use config file and logger.
 }
@@ -105,7 +101,7 @@ func main() {
 * [level_and_disable](./_examples/level_and_disable.go)
 * [config_file](./_examples/config_file.go)
 * [handler](./_examples/handler.go)
-* [writer](./_examples/writer.go)
+* [files](./_examples/files.go)
 * [log_to_file](./_examples/log_to_file.go)
 
 _更多使用案例请查看 [_examples](./_examples) 目录。_
@@ -120,12 +116,12 @@ $ go test -v ./_examples/benchmarks_test.go -bench=. -benchtime=10s
 
 > 测试文件：[_examples/benchmarks_test.go](./_examples/benchmarks_test.go)
 
-| 测试 | 单位时间内运行次数 (越大越好) |  每个操作消耗时间 (越小越好) | 功能性 | 扩展性 |
+| 测试 | 单位时间内运行次数 (越大越好) |  每个操作消耗时间 (越小越好) | B/op (越小越好) | allocs/op (越小越好) |
 | -----------|--------|-------------|-------------|-------------|
-| **logit** | **6429907** | **1855 ns/op** | 强大 | 高 |
-| golog | 3361483 | 3589 ns/op | 简单 | 一般 |
-| zap | 2971119 | 4066 ns/op | 复杂 | 正常 |
-| logrus | 1553419 | 7869 ns/op | 正常 | 正常 |
+| **logit** | **6429907** | **1855 ns/op** | **384 B/op** | **8 allocs/op** |
+| golog | 3361483 | 3589 ns/op | 712 B/op | 24 allocs/op |
+| zap | 2971119 | 4066 ns/op | 448 B/op | 16 allocs/op |
+| logrus | 1553419 | 7869 ns/op | 1633 B/op | 52 allocs/op |
 
 > 测试环境：I7-6700HQ CPU @ 2.6 GHZ，16 GB RAM
 
@@ -143,6 +139,13 @@ $ go test -v ./_examples/benchmarks_test.go -bench=. -benchtime=10s
 **主要体现在 time.Time.AppendFormat 的调用上。在 v0.0.11 版本中使用了时间缓存机制进行优化，**
 **目前存在一个疑惑就是使用并发竞争去换取时间格式化的性能消耗究竟值不值得？**
 **答案是不值得，我们在 v0.1.1-alpha 及更高版本中取消了这个时间缓存机制。**
+
+**4. 值得注意的是，Debugf 一类带格式化的 API 性能达不到这个水平，因为还是使用了反射技术，但是性能依旧是不差的：**
+
+| 测试 | 单位时间内运行次数 (越大越好) |  每个操作消耗时间 (越小越好) | B/op (越小越好) | allocs/op (越小越好) |
+| -----------|--------|-------------|-------------|-------------|
+| logit | 6429907 | 1855 ns/op | 384 B/op | 8 allocs/op |
+| **logit-使用反射技术** | **5288931** | **2334 ns/op** | **424 B/op** | **12 allocs/op** |
 
 ### 👥 贡献者
 

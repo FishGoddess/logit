@@ -13,7 +13,7 @@
 // limitations under the License.
 //
 // Author: FishGoddess
-// Email: fishinlove@163.com
+// Email: fishgoddess@qq.com
 // Created at 2020/02/29 15:41:09
 
 /*
@@ -41,6 +41,12 @@ Package logit provides an easy way to use foundation for your logging operations
 		r := rand.New(rand.NewSource(time.Now().Unix()))
 		return "debug rand int: " + strconv.Itoa(r.Intn(100))
 	})
+
+	// Or you can use formatting method like this:
+	logit.Debugf("This is a debug msg with %d params: %s, %s", 2, "msgFormat", "msgParams")
+	logit.Infof("This is a debug msg with %d params: %s, %s", 2, "msgFormat", "msgParams")
+	logit.Warnf("This is a debug msg with %d params: %s, %s", 2, "msgFormat", "msgParams")
+	logit.Errorf("This is a debug msg with %d params: %s, %s", 2, "msgFormat", "msgParams")
 
 	// If a config file "logit.conf" in "./", then logit will load it automatically.
 	// This is more convenience to use config file and logger.
@@ -84,21 +90,25 @@ Package logit provides an easy way to use foundation for your logging operations
 
 3. level_and_disable:
 
+	// Use logit.Debug method to output a debug level message.
+	// Also, Info/Warn/Error method is available.
 	logit.Debug("Default logger level is debug.")
 
-	// Change logger level to info level.
-	// So debug log will be ignored.
-	logit.ChangeLevelTo(logit.InfoLevel)
+	// Change logger level to info level, so logs in debug level will be ignored.
+	// Notice that logit has blocked some methods for more refreshing method list.
+	// If you want to use some higher level methods, you should call logit.Me() to
+	// get the fully functional logger, then call what you want to call.
+	logit.Me().ChangeLevelTo(logit.InfoLevel)
 	logit.Debug("You never see me!")
 
 	// In particular, you can change level to OffLevel to disable the logger.
 	// So the info message next line will not be logged!
-	level := logit.ChangeLevelTo(logit.OffLevel)
+	level := logit.Me().ChangeLevelTo(logit.OffLevel)
 	logit.Info("I will not be logged!")
 
 	// Enable the Logger.
 	// The info message next line will be logged again!
-	logit.ChangeLevelTo(level)
+	logit.Me().ChangeLevelTo(level)
 	logit.Info("I am running again!")
 
 4. log to file:
@@ -110,42 +120,42 @@ Package logit provides an easy way to use foundation for your logging operations
 
 	// NewDurationRollingLogger creates a duration rolling logger with given duration.
 	// You should appoint a directory to store all log files generated in this time.
-	// Notice that duration must not less than minDuration (generally time.Second), see writer.minDuration.
-	// Also, default filename of log file is like "20200304-145246-45.log", see writer.NewFilename.
+	// Notice that duration must not less than minDuration (generally time.Second), see files.minDuration.
+	// Also, default filename of log file is like "20200304-145246-45.log", see files.NewFilename.
 	// If you want to appoint another filename, check this and do it by this way.
-	// See writer.NewDurationRollingFile (it is an implement of io.writer).
-	logger = logit.NewLogger(logit.DebugLevel, logit.NewDurationRollingHandler(24*time.Hour, "D:/", logit.TextEncoder(), logit.DefaultTimeFormat))
+	// See files.NewDurationRollingFile (it is an implement of io.writer).
+	logger = logit.NewLogger(logit.DebugLevel, logit.NewDurationRollingHandler("D:/", 24*time.Hour, logit.TextEncoder(), logit.DefaultTimeFormat))
 	logger.Info("Rolling!!!")
 
 	// NewSizeRollingLogger creates a file size rolling logger with given limitedSize.
 	// You should appoint a directory to store all log files generated in this time.
-	// Notice that limitedSize must not less than minLimitedSize (generally 64 KB), see writer.minLimitedSize.
-	// Check writer.KB, writer.MB, writer.GB to know what unit you gonna to use.
+	// Notice that limitedSize must not less than minLimitedSize (generally 64 KB), see files.minLimitedSize.
+	// Check files.KB, files.MB, files.GB to know what unit you gonna to use.
 	// Also, default filename of log file is like "20200304-145246-45.log", see nextFilename.
 	// If you want to appoint another filename, check this and do it by this way.
-	// See writer.NewSizeRollingFile (it is an implement of io.writer).
-	logger = logit.NewLogger(logit.DebugLevel, logit.NewSizeRollingHandler(64*writer.KB, "D:/", logit.TextEncoder(), logit.DefaultTimeFormat))
+	// See files.NewSizeRollingFile (it is an implement of io.writer).
+	logger = logit.NewLogger(logit.DebugLevel, logit.NewSizeRollingHandler("D:/", 64*files.KB, logit.TextEncoder(), logit.DefaultTimeFormat))
 	logger.Info("file size???")
 
 5. handler:
 
-    type myHandler struct{}
+	type myHandler struct{}
 
-    // Customize your own handler.
-    func (mh *myHandler) Handle(log *logit.Log) bool {
-        os.Stdout.Write([]byte("myHandler: "))
-        os.Stdout.Write(logit.TextEncoder().Encode(log, "")) // Try `os.Stdout.WriteString(log.Msg())` ?
-        return true
-    }
+	// Customize your own handler.
+	func (mh *myHandler) Handle(log *logit.Log) bool {
+		os.Stdout.Write([]byte("myHandler: "))
+		os.Stdout.Write(logit.TextEncoder().Encode(log, "")) // Try `os.Stdout.WriteString(log.Msg())` ?
+		return true
+	}
 
-    func init() {
-        // We recommend you to register your handler to logit, so that
-        // you can use your handler in config file.
-        // See logit.RegisterHandler.
-        logit.RegisterHandler("myHandler", func(params map[string]interface{}) logit.Handler {
-            return &myHandler{}
-        })
-    }
+	func init() {
+		// We recommend you to register your handler to logit, so that
+		// you can use your handler in config file.
+		// See logit.RegisterHandler.
+		logit.RegisterHandler("myHandler", func(params map[string]interface{}) logit.Handler {
+			return &myHandler{}
+		})
+	}
 
 	// Create a logger holder with a console handler.
 	logger := logit.NewLogger(logit.DebugLevel, logit.NewConsoleHandler(logit.TextEncoder(), logit.DefaultTimeFormat))
@@ -186,7 +196,7 @@ Package logit provides an easy way to use foundation for your logging operations
 	//         }
 	//     }
 	//
-	logger := logit.NewLoggerFrom("./logger.conf")
+	logger := logit.NewLoggerFromPath("./logger.conf")
 	logger.Info("I am working!")
 	logger.Info("My level is " + logger.Level().String())
 	fmt.Println("fmt ==============================================")
@@ -201,5 +211,5 @@ package logit // import "github.com/FishGoddess/logit"
 
 const (
 	// Version is the version string representation of logit.
-	Version = "v0.2.4"
+	Version = "v0.2.7"
 )

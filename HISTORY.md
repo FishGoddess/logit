@@ -1,4 +1,20 @@
-## ✒ 历史版本的特性介绍 (Features in old version)
+## ✒ 历史版本的特性介绍 (Features in old versions)
+
+### v0.2.7
+> 此版本发布于 2020-06-25
+* 修复了 DefaultNameGenerator 可能产生重复文件名的 bug
+
+### v0.2.6-alpha
+> 此版本发布于 2020-06-24
+* 对 writer 包进行重构，改名为 files 包
+* 废弃了原 writer 包的 NewFile 方法，并使用同包下的 CreateFileOf 代替
+* 引入 NameGenerator 组件
+* 修改 NewDurationRollingHandler 的参数顺序
+* 修改 NewSizeRollingHandler 的参数顺序
+
+### v0.2.5-alpha
+> 此版本发布于 2020-06-08
+* 加入之前被移除的特性 - 可变长参数列表的日志输出支持，主要可以使用格式化字符串进行多参数传递
 
 ### v0.2.4
 > 此版本发布于 2020-05-27

@@ -13,10 +13,10 @@
 // limitations under the License.
 //
 // Author: FishGoddess
-// Email: fishinlove@163.com
+// Email: fishgoddess@qq.com
 // Created at 2020/03/05 00:11:50
 
-package writer
+package files
 
 import (
 	"errors"
@@ -40,10 +40,13 @@ type SizeRollingFile struct {
 	// file points the writer which will be used this moment.
 	file *os.File
 
+	// directory is the target storing all created files.
+	directory string
+
 	// limitedSize is the limited size of this file.
 	// File will roll to next file if its size has reached to limitedSize.
 	// This field should be always larger than minLimitedSize for some safe considerations.
-	// Notice that it doesn't mean every files must be this size due to our performance optimization
+	// Notice that it doesn't mean every file must be this size due to our performance optimization
 	// scheme. Generally it equals to file size, however, it will not equal to file size
 	// if someone modified this file. See currentSize.
 	limitedSize int64
@@ -62,14 +65,13 @@ type SizeRollingFile struct {
 	// won't waste the time we spent on file.Stat() ^_^.
 	currentSize int64
 
-	// nextFilename is a function for generating next file name.
-	// Every times rolling to next file will call it first.
-	// now is the time of calling this function, also the
-	// created time of next file.
-	nextFilename func(now time.Time) string
+	// nameGenerator is for generating the name of every created file.
+	// You can customize your format of filename by implementing this function.
+	// Default is DefaultNameGenerator().
+	nameGenerator NameGenerator
 
 	// mu is a lock for safe concurrency.
-	mu sync.Mutex
+	mu *sync.Mutex
 }
 
 const (
@@ -84,21 +86,19 @@ const (
 // Every times rolling to next file will call nextFilename first.
 // now is the created time of next file. Notice that limitedSize's min value
 // is 64 KB (64 * 1024 bytes). See minLimitedSize.
-func NewSizeRollingFile(limitedSize int64, nextFilename func(now time.Time) string) *SizeRollingFile {
+func NewSizeRollingFile(directory string, limitedSize int64) *SizeRollingFile {
 
 	// 防止文件限制尺寸太小导致滚动文件时 IO 的疯狂蠕动
 	if limitedSize < minLimitedSize {
 		panic(errors.New("LimitedSize is smaller than " + strconv.FormatUint(uint64(minLimitedSize)>>10, 10) + " KB!\n"))
 	}
 
-	// 获取当前时间，并生成第一个文件
-	file, _ := generateFirstFile(nextFilename)
 	return &SizeRollingFile{
-		file:         file,
-		limitedSize:  limitedSize,
-		currentSize:  0,
-		nextFilename: nextFilename,
-		mu:           sync.Mutex{},
+		directory:     directory,
+		limitedSize:   limitedSize,
+		currentSize:   0,
+		nameGenerator: DefaultNameGenerator(),
+		mu:            &sync.Mutex{},
 	}
 }
 
@@ -106,7 +106,7 @@ func NewSizeRollingFile(limitedSize int64, nextFilename func(now time.Time) stri
 func (srf *SizeRollingFile) rollingToNextFile(now time.Time) {
 
 	// 如果创建新文件发生错误，就继续使用当前的文件，等到下一次时间间隔再重试
-	newFile, err := NewFile(srf.nextFilename(now))
+	newFile, err := CreateFileOf(srf.nameGenerator.NextName(srf.directory, now))
 	if err != nil {
 		return
 	}
@@ -119,6 +119,14 @@ func (srf *SizeRollingFile) rollingToNextFile(now time.Time) {
 
 // ensureFileIsCorrect ensures srf is writing to a correct file this moment.
 func (srf *SizeRollingFile) ensureFileIsCorrect() {
+
+	// file 为 nil，进行初始化
+	if srf.file == nil {
+		srf.rollingToNextFile(time.Now())
+		return
+	}
+
+	// 判断文件大小是否超过限制值
 	if srf.currentSize >= srf.limitedSize {
 
 		// 这时候还不能确定 currentSize 是正确的，需要通过系统调用查询文件真实大小
@@ -162,4 +170,11 @@ func (srf *SizeRollingFile) Close() error {
 	srf.mu.Lock()
 	defer srf.mu.Unlock()
 	return srf.file.Close()
+}
+
+// SetNameGenerator replaces srf.nameGenerator to newNameGenerator.
+func (srf *SizeRollingFile) SetNameGenerator(nameGenerator NameGenerator) {
+	srf.mu.Lock()
+	defer srf.mu.Unlock()
+	srf.nameGenerator = nameGenerator
 }

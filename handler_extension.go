@@ -13,13 +13,13 @@
 // limitations under the License.
 //
 // Author: FishGoddess
-// Email: fishinlove@163.com
+// Email: fishgoddess@qq.com
 // Created at 2020/04/24 23:37:56
 
 package logit
 
 import (
-	"github.com/FishGoddess/logit/writer"
+	"github.com/FishGoddess/logit/files"
 	"os"
 	"strconv"
 	"strings"
@@ -108,7 +108,7 @@ func registerConsoleHandler() {
 //
 func registerFileHandler() {
 	RegisterHandler("file", func(params map[string]interface{}) Handler {
-		path := pathOf(params, "./logit-"+strconv.FormatInt(time.Now().Unix(), 10)+writer.SuffixOfLogFile)
+		path := pathOf(params, "./logit-"+strconv.FormatInt(time.Now().Unix(), 10)+files.SuffixOfLogFile)
 		encoder, timeFormat := encoderAndTimeFormatOf(params, TextEncoder(), DefaultTimeFormat)
 		return NewFileHandler(path, encoder, timeFormat)
 	})
@@ -159,7 +159,7 @@ func registerDurationRollingHandler() {
 		// 滚动的时间间隔，单位是秒，默认是 1 天
 		limit, directory := limitAndDirectoryOf(params, 24*60*60, "./")
 		encoder, timeFormat := encoderAndTimeFormatOf(params, TextEncoder(), DefaultTimeFormat)
-		return NewDurationRollingHandler(time.Duration(limit)*time.Second, directory, encoder, timeFormat)
+		return NewDurationRollingHandler(directory, time.Duration(limit)*time.Second, encoder, timeFormat)
 	})
 }
 
@@ -184,7 +184,7 @@ func registerDurationRollingHandler() {
 // use your layout to format time, try this:
 //
 //         "handlers": {
-//             "duration": {
+//             "size": {
 //                 "limit": 16,
 //                 "directory": "D:/logs",
 //                 "timeFormat": "2006-01-02"
@@ -194,7 +194,7 @@ func registerDurationRollingHandler() {
 // Want a Json string? Try this:
 //
 //         "handlers":{
-//             "duration":{
+//             "size":{
 //                 "limit": 16,
 //                 "encoder": "json",
 //                 "directory": "D:/logs",
@@ -207,7 +207,7 @@ func registerSizeRollingHandler() {
 		// 滚动的文件大小，单位是 MB，默认是 64 MB
 		limit, directory := limitAndDirectoryOf(params, 64, "./")
 		encoder, timeFormat := encoderAndTimeFormatOf(params, TextEncoder(), DefaultTimeFormat)
-		return NewSizeRollingHandler(int64(limit)*writer.MB, directory, encoder, timeFormat)
+		return NewSizeRollingHandler(directory, int64(limit)*files.MB, encoder, timeFormat)
 	})
 }
 
@@ -282,7 +282,7 @@ func NewConsoleHandler(encoder Encoder, timeFormat string) Handler {
 // If the file of this path doesn't exist, a new file will be created.
 // See logit.Encoder, logit.TextEncoder, logit.JsonEncoder.
 func NewFileHandler(path string, encoder Encoder, timeFormat string) Handler {
-	file, err := writer.NewFile(path)
+	file, err := files.CreateFileOf(path)
 	if err != nil {
 		panic(err)
 	}
@@ -294,9 +294,9 @@ func NewFileHandler(path string, encoder Encoder, timeFormat string) Handler {
 // each duration has its own log file. Also you can point a directory
 // to be used to store all created log files.
 // See logit.Encoder, logit.TextEncoder, logit.JsonEncoder.
-// See writer.NewDurationRollingFile.
-func NewDurationRollingHandler(limit time.Duration, directory string, encoder Encoder, timeFormat string) Handler {
-	file := writer.NewDurationRollingFile(limit, writer.NextFilename(directory))
+// See files.NewDurationRollingFile.
+func NewDurationRollingHandler(directory string, limit time.Duration, encoder Encoder, timeFormat string) Handler {
+	file := files.NewDurationRollingFile(directory, limit)
 	return NewStandardHandler(file, encoder, timeFormat)
 }
 
@@ -305,8 +305,8 @@ func NewDurationRollingHandler(limit time.Duration, directory string, encoder En
 // and the log file will switch to a new one after reaching to max size.
 // Also you can point a directory to be used to store all created log files.
 // See logit.Encoder, logit.TextEncoder, logit.JsonEncoder.
-// See writer.NewSizeRollingFile.
-func NewSizeRollingHandler(limit int64, directory string, encoder Encoder, timeFormat string) Handler {
-	file := writer.NewSizeRollingFile(limit, writer.NextFilename(directory))
+// See files.NewSizeRollingFile.
+func NewSizeRollingHandler(directory string, limit int64, encoder Encoder, timeFormat string) Handler {
+	file := files.NewSizeRollingFile(directory, limit)
 	return NewStandardHandler(file, encoder, timeFormat)
 }

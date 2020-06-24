@@ -13,12 +13,13 @@
 // limitations under the License.
 //
 // Author: FishGoddess
-// Email: fishinlove@163.com
+// Email: fishgoddess@qq.com
 // Created at 2020/03/05 16:10:31
 
-package writer
+package files
 
 import (
+	"io/ioutil"
 	"os"
 	"path/filepath"
 	"testing"
@@ -34,11 +35,13 @@ func TestNewSizeRollingFile(t *testing.T) {
 		}
 	}()
 
-	root := filepath.Join(os.TempDir(), "TestNewSizeRollingFile")
-	os.RemoveAll(root)   // 先删除现有文件夹
-	os.Mkdir(root, 0666) // 再创建测试文件夹
+	// 创建临时测试文件夹
+	root, err := ioutil.TempDir("", "TestNewSizeRollingFile_*")
+	if err != nil {
+		t.Fatal(err)
+	}
 
-	file := NewSizeRollingFile(64*KB, NextFilename(root))
+	file := NewSizeRollingFile(root, 64*KB)
 	defer file.Close()
 
 	b := make([]byte, 1024)
@@ -62,7 +65,33 @@ func TestNewSizeRollingFile(t *testing.T) {
 	}
 
 	file.Close()
-	file = NewSizeRollingFile(0, func(now time.Time) string {
+	file = NewSizeRollingFile("", 0)
+	file.SetNameGenerator(func(directory string, now time.Time) string {
 		return ""
 	})
+}
+
+// 测试名字生成器的设置方法
+func TestSizeRollingFileSetNameGenerator(t *testing.T) {
+
+	dir, err := ioutil.TempDir("", "TestSizeRollingFileSetNameGenerator_*")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	// 创建文件，并写入内容
+	file := NewSizeRollingFile(dir, 64*KB)
+	defer file.Close()
+	for i := 0; i < 10000; i++ {
+		file.Write([]byte("  hello!  "))
+	}
+
+	// 更换命名器，等待滚动时间到了之后，再次写入内容
+	file.SetNameGenerator(func(directory string, now time.Time) string {
+		return filepath.Join(directory, now.Format("2006年01月02日的15点04分05秒产生的文件.log"))
+	})
+	time.Sleep(2 * time.Second)
+	for i := 0; i < 10000; i++ {
+		file.Write([]byte("   hi!!   "))
+	}
 }

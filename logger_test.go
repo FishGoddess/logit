@@ -13,7 +13,7 @@
 // limitations under the License.
 //
 // Author: FishGoddess
-// Email: fishinlove@163.com
+// Email: fishgoddess@qq.com
 // Created at 2020/02/29 16:41:41
 
 package logit
@@ -231,4 +231,14 @@ func TestLoggerLogFunction(t *testing.T) {
 
 	// test escaping
 	logger.Info(`test "double quotes"\t\b \u0003 \u0019 !!!!`)
+}
+
+// 测试带格式化的日志输出方法
+func TestLoggerOutputWithFormat(t *testing.T) {
+	logger := NewLogger(DebugLevel, NewStandardHandler(os.Stdout, TextEncoder(), DefaultTimeFormat))
+	logger.EnableFileInfo()
+	logger.Debugf("Debugf... %d %s %.3f", 123, "幸福呢", 123.123456)
+	logger.Infof("Infof... %d %s %.3f", 123, "幸福呢", 123.123456)
+	logger.Warnf("Warnf... %d %s %.3f", 123, "幸福呢", 123.123456)
+	logger.Errorf("Errorf... %d %s %.3f", 123, "幸福呢", 123.123456)
 }
