@@ -90,21 +90,25 @@ Package logit provides an easy way to use foundation for your logging operations
 
 3. level_and_disable:
 
+	// Use logit.Debug method to output a debug level message.
+	// Also, Info/Warn/Error method is available.
 	logit.Debug("Default logger level is debug.")
 
-	// Change logger level to info level.
-	// So debug log will be ignored.
-	logit.ChangeLevelTo(logit.InfoLevel)
+	// Change logger level to info level, so logs in debug level will be ignored.
+	// Notice that logit has blocked some methods for more refreshing method list.
+	// If you want to use some higher level methods, you should call logit.Me() to
+	// get the fully functional logger, then call what you want to call.
+	logit.Me().ChangeLevelTo(logit.InfoLevel)
 	logit.Debug("You never see me!")
 
 	// In particular, you can change level to OffLevel to disable the logger.
 	// So the info message next line will not be logged!
-	level := logit.ChangeLevelTo(logit.OffLevel)
+	level := logit.Me().ChangeLevelTo(logit.OffLevel)
 	logit.Info("I will not be logged!")
 
 	// Enable the Logger.
 	// The info message next line will be logged again!
-	logit.ChangeLevelTo(level)
+	logit.Me().ChangeLevelTo(level)
 	logit.Info("I am running again!")
 
 4. log to file:
@@ -135,23 +139,23 @@ Package logit provides an easy way to use foundation for your logging operations
 
 5. handler:
 
-    type myHandler struct{}
+	type myHandler struct{}
 
-    // Customize your own handler.
-    func (mh *myHandler) Handle(log *logit.Log) bool {
-        os.Stdout.Write([]byte("myHandler: "))
-        os.Stdout.Write(logit.TextEncoder().Encode(log, "")) // Try `os.Stdout.WriteString(log.Msg())` ?
-        return true
-    }
+	// Customize your own handler.
+	func (mh *myHandler) Handle(log *logit.Log) bool {
+		os.Stdout.Write([]byte("myHandler: "))
+		os.Stdout.Write(logit.TextEncoder().Encode(log, "")) // Try `os.Stdout.WriteString(log.Msg())` ?
+		return true
+	}
 
-    func init() {
-        // We recommend you to register your handler to logit, so that
-        // you can use your handler in config file.
-        // See logit.RegisterHandler.
-        logit.RegisterHandler("myHandler", func(params map[string]interface{}) logit.Handler {
-            return &myHandler{}
-        })
-    }
+	func init() {
+		// We recommend you to register your handler to logit, so that
+		// you can use your handler in config file.
+		// See logit.RegisterHandler.
+		logit.RegisterHandler("myHandler", func(params map[string]interface{}) logit.Handler {
+			return &myHandler{}
+		})
+	}
 
 	// Create a logger holder with a console handler.
 	logger := logit.NewLogger(logit.DebugLevel, logit.NewConsoleHandler(logit.TextEncoder(), logit.DefaultTimeFormat))
@@ -192,7 +196,7 @@ Package logit provides an easy way to use foundation for your logging operations
 	//         }
 	//     }
 	//
-	logger := logit.NewLoggerFrom("./logger.conf")
+	logger := logit.NewLoggerFromPath("./logger.conf")
 	logger.Info("I am working!")
 	logger.Info("My level is " + logger.Level().String())
 	fmt.Println("fmt ==============================================")
@@ -207,5 +211,5 @@ package logit // import "github.com/FishGoddess/logit"
 
 const (
 	// Version is the version string representation of logit.
-	Version = "v0.2.6-alpha"
+	Version = "v0.2.7"
 )

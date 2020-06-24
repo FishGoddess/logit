@@ -8,7 +8,7 @@
 * 加入日志存活个数的特性
 
 ### v0.2.7
-* 修复 DefaultNameGenerator 生成文件名可能重复的 bug
+* 修复了 DefaultNameGenerator 可能产生重复文件名的 bug
 
 ### v0.2.6-alpha
 * 对 writer 包进行重构，改名为 files 包
