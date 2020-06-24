@@ -41,9 +41,6 @@ func main() {
 		return filepath.Join(directory, now.Format("2006-01-02-15-04-05.log"))
 	})
 
-	// What's more, you can add a hook in rolling process, see files.RollingHook.
-	//durationRollingFile.SetRollingHook(xxx)
-
 	// =================================================================================
 
 	// 2. SizeRollingFile is a file size sensitive file.
@@ -59,7 +56,4 @@ func main() {
 		// now is the time calling this method.
 		return filepath.Join(directory, now.Format("2006-01-02-15-04-05.log"))
 	})
-
-	// What's more, you can add a hook in rolling process, see files.RollingHook.
-	//sizeRollingFile.SetRollingHook(xxx)
 }

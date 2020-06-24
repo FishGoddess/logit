@@ -19,7 +19,6 @@
 package files
 
 import (
-	"fmt"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -37,7 +36,7 @@ func TestNewDurationRollingFile(t *testing.T) {
 	}()
 
 	// 创建临时测试文件夹
-	root, err := ioutil.TempDir("", "TestNewDurationRollingFile_")
+	root, err := ioutil.TempDir("", "TestNewDurationRollingFile_*")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -75,7 +74,7 @@ func TestNewDurationRollingFile(t *testing.T) {
 // 测试名字生成器的设置方法
 func TestDurationRollingFileSetNameGenerator(t *testing.T) {
 
-	dir, err := ioutil.TempDir("", "TestDurationRollingFileSetNameGenerator_")
+	dir, err := ioutil.TempDir("", "TestDurationRollingFileSetNameGenerator_*")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -89,35 +88,6 @@ func TestDurationRollingFileSetNameGenerator(t *testing.T) {
 	file.SetNameGenerator(func(directory string, now time.Time) string {
 		return filepath.Join(directory, now.Format("2006年01月02日的15点04分05秒产生的文件.log"))
 	})
-	time.Sleep(2 * time.Second)
-	file.Write([]byte("hi!"))
-}
-
-// 测试使用的 rolling hook
-type testDurationRollingFileRollingHook struct{}
-
-func (tdrfrh *testDurationRollingFileRollingHook) BeforeRolling() {
-	fmt.Println("before rolling...")
-}
-
-func (tdrfrh *testDurationRollingFileRollingHook) AfterRolling() {
-	fmt.Println("after rolling...")
-}
-
-// 测试名字生成器的设置方法
-func TestDurationRollingFileSetRollingHook(t *testing.T) {
-
-	dir, err := ioutil.TempDir("", "TestDurationRollingFileSetRollingHook_")
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	file := NewDurationRollingFile(dir, 2*time.Second)
-	defer file.Close()
-
-	file.Write([]byte("hello!"))
-	file.SetRollingHook(&testDurationRollingFileRollingHook{})
-
 	time.Sleep(2 * time.Second)
 	file.Write([]byte("hi!"))
 }

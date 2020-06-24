@@ -65,23 +65,10 @@ type SizeRollingFile struct {
 	// won't waste the time we spent on file.Stat() ^_^.
 	currentSize int64
 
-	// nextFilename is a function for generating next file name.
-	// Every times rolling to next file will call it first.
-	// now is the time of calling this function, also the
-	// created time of next file.
-	nextFilename func(now time.Time) string
-
 	// nameGenerator is for generating the name of every created file.
 	// You can customize your format of filename by implementing this function.
 	// Default is DefaultNameGenerator().
 	nameGenerator NameGenerator
-
-	// rollingHook is a hook that will be invoked in rolling process.
-	// This interface has two method: BeforeRolling and AfterRolling.
-	// BeforeRolling will be called before rolling to next file.
-	// AfterRolling will be called after rolling to next file.
-	// Default is DefaultRollingHook, and it will do nothing when rolling to next file.
-	rollingHook RollingHook
 
 	// mu is a lock for safe concurrency.
 	mu *sync.Mutex
@@ -111,16 +98,8 @@ func NewSizeRollingFile(directory string, limitedSize int64) *SizeRollingFile {
 		limitedSize:   limitedSize,
 		currentSize:   0,
 		nameGenerator: DefaultNameGenerator(),
-		rollingHook:   NewDefaultRollingHook(),
 		mu:            &sync.Mutex{},
 	}
-}
-
-// doRollingTask does the whole task of rolling process.
-func (srf *SizeRollingFile) doRollingTask() {
-	srf.rollingHook.BeforeRolling()
-	srf.rollingToNextFile(time.Now())
-	srf.rollingHook.AfterRolling()
 }
 
 // rollingToNextFile will roll to next file for srf.
@@ -143,7 +122,7 @@ func (srf *SizeRollingFile) ensureFileIsCorrect() {
 
 	// file 为 nil，进行初始化
 	if srf.file == nil {
-		srf.doRollingTask()
+		srf.rollingToNextFile(time.Now())
 		return
 	}
 
@@ -157,7 +136,7 @@ func (srf *SizeRollingFile) ensureFileIsCorrect() {
 		// 1. err != nil，获取文件真实大小失败，选择相信 currentSize
 		// 2. 真实文件大小确实大于 limitedSize
 		if err != nil || fileInfo.Size() >= srf.limitedSize {
-			srf.doRollingTask()
+			srf.rollingToNextFile(time.Now())
 			return
 		}
 
@@ -198,11 +177,4 @@ func (srf *SizeRollingFile) SetNameGenerator(nameGenerator NameGenerator) {
 	srf.mu.Lock()
 	defer srf.mu.Unlock()
 	srf.nameGenerator = nameGenerator
-}
-
-// SetRollingHook replaces srf.rollingHook to newRollingHook.
-func (srf *SizeRollingFile) SetRollingHook(rollingHook RollingHook) {
-	srf.mu.Lock()
-	defer srf.mu.Unlock()
-	srf.rollingHook = rollingHook
 }

@@ -159,8 +159,7 @@ func registerDurationRollingHandler() {
 		// 滚动的时间间隔，单位是秒，默认是 1 天
 		limit, directory := limitAndDirectoryOf(params, 24*60*60, "./")
 		encoder, timeFormat := encoderAndTimeFormatOf(params, TextEncoder(), DefaultTimeFormat)
-		options := rollingHandlerOptionsOf(params, files.DefaultNameGenerator(), files.NewDefaultRollingHook())
-		return NewDurationRollingHandlerWithOptions(directory, time.Duration(limit)*time.Second, encoder, timeFormat, options)
+		return NewDurationRollingHandler(directory, time.Duration(limit)*time.Second, encoder, timeFormat)
 	})
 }
 
@@ -208,8 +207,7 @@ func registerSizeRollingHandler() {
 		// 滚动的文件大小，单位是 MB，默认是 64 MB
 		limit, directory := limitAndDirectoryOf(params, 64, "./")
 		encoder, timeFormat := encoderAndTimeFormatOf(params, TextEncoder(), DefaultTimeFormat)
-		options := rollingHandlerOptionsOf(params, files.DefaultNameGenerator(), files.NewDefaultRollingHook())
-		return NewSizeRollingHandlerWithOptions(directory, int64(limit)*files.MB, encoder, timeFormat, options)
+		return NewSizeRollingHandler(directory, int64(limit)*files.MB, encoder, timeFormat)
 	})
 }
 
@@ -270,33 +268,6 @@ func limitAndDirectoryOf(params map[string]interface{}, defaultLimit int, defaul
 	return limit, directory
 }
 
-// rollingHandlerOptionsOf returns rolling handler options in this params.
-// defaultNameGenerator and defaultRollingHook will be used if you don't set to params.
-func rollingHandlerOptionsOf(params map[string]interface{}, defaultNameGenerator files.NameGenerator, defaultRollingHook files.RollingHook) RollingHandlerOptions {
-
-	// 获取名字生成器配置
-	nameGenerator := defaultNameGenerator
-	if param, ok := params["nameGenerator"]; ok {
-		nameGenerator = files.NameGeneratorOf(param.(string))
-	}
-
-	// 获取滚动钩子配置
-	rollingHook := defaultRollingHook
-	if _, ok := params["rollingHook"]; ok {
-		param := params["rollingHook"].(map[string]map[string]interface{})
-		for rollingHookName, rollingHookParams := range param {
-			rollingHook = files.RollingHookOf(rollingHookName, rollingHookParams)
-			break
-		}
-	}
-
-	// 返回配置结果
-	return RollingHandlerOptions{
-		nameGenerator: nameGenerator,
-		rollingHook:   rollingHook,
-	}
-}
-
 // =============================== for public users ===============================
 
 // NewConsoleHandler returns a handler for console.
@@ -325,7 +296,8 @@ func NewFileHandler(path string, encoder Encoder, timeFormat string) Handler {
 // See logit.Encoder, logit.TextEncoder, logit.JsonEncoder.
 // See files.NewDurationRollingFile.
 func NewDurationRollingHandler(directory string, limit time.Duration, encoder Encoder, timeFormat string) Handler {
-	return NewDurationRollingHandlerWithOptions(directory, limit, encoder, timeFormat, RollingHandlerOptions{})
+	file := files.NewDurationRollingFile(directory, limit)
+	return NewStandardHandler(file, encoder, timeFormat)
 }
 
 // NewSizeRollingHandler returns a handler which uses
@@ -335,68 +307,6 @@ func NewDurationRollingHandler(directory string, limit time.Duration, encoder En
 // See logit.Encoder, logit.TextEncoder, logit.JsonEncoder.
 // See files.NewSizeRollingFile.
 func NewSizeRollingHandler(directory string, limit int64, encoder Encoder, timeFormat string) Handler {
-	return NewSizeRollingHandlerWithOptions(directory, limit, encoder, timeFormat, RollingHandlerOptions{})
-}
-
-// RollingHandlerOptions includes two options for creating duration rolling handler
-// and size rolling handler. NameGenerator is for generating the name of created files,
-// and rollingHook is a hook which will be triggered on rolling to next file.
-// See files.NameGenerator and files.RollingHook.
-type RollingHandlerOptions struct {
-	nameGenerator files.NameGenerator
-	rollingHook   files.RollingHook
-}
-
-// filledDurationRollingFileWithOptions fills file with non-nil options.
-func filledDurationRollingFileWithOptions(file *files.DurationRollingFile, options RollingHandlerOptions) {
-	if options.nameGenerator != nil {
-		file.SetNameGenerator(options.nameGenerator)
-	}
-	if options.rollingHook != nil {
-		file.SetRollingHook(options.rollingHook)
-	}
-}
-
-// filledSizeRollingFileWithOptions fills file with non-nil options.
-func filledSizeRollingFileWithOptions(file *files.SizeRollingFile, options RollingHandlerOptions) {
-	if options.nameGenerator != nil {
-		file.SetNameGenerator(options.nameGenerator)
-	}
-	if options.rollingHook != nil {
-		file.SetRollingHook(options.rollingHook)
-	}
-}
-
-// NewDurationRollingHandlerWithOptions returns a handler which uses
-// a duration rolling file to write logs. The limit is duration, and
-// each duration has its own log file. Also you can point a directory
-// to be used to store all created log files. Notice that you should
-// point an options object which includes nameGenerator and rollingHook.
-// NameGenerator is for generating the name of created files, and rollingHook
-// is a hook which will be triggered on rolling to next file. However,
-// both of them is not necessary, so if one of them is nil then this "one"
-// option will be ignored. See logit.RollingHandlerOptions.
-// See logit.Encoder, logit.TextEncoder, logit.JsonEncoder.
-// See files.NewDurationRollingFile.
-func NewDurationRollingHandlerWithOptions(directory string, limit time.Duration, encoder Encoder, timeFormat string, options RollingHandlerOptions) Handler {
-	file := files.NewDurationRollingFile(directory, limit)
-	filledDurationRollingFileWithOptions(file, options)
-	return NewStandardHandler(file, encoder, timeFormat)
-}
-
-// NewSizeRollingHandlerWithOptions returns a handler which uses
-// a size rolling file to write logs. The limit is the max size of log file,
-// and the log file will switch to a new one after reaching to max size.
-// Also you can point a directory to be used to store all created log files.
-// Notice that you should point an options object which includes nameGenerator
-// and rollingHook. NameGenerator is for generating the name of created files,
-// and rollingHook is a hook which will be triggered on rolling to next file.
-// However, both of them is not necessary, so if one of them is nil then this "one"
-// option will be ignored. See logit.RollingHandlerOptions.
-// See logit.Encoder, logit.TextEncoder, logit.JsonEncoder.
-// See files.NewSizeRollingFile.
-func NewSizeRollingHandlerWithOptions(directory string, limit int64, encoder Encoder, timeFormat string, options RollingHandlerOptions) Handler {
 	file := files.NewSizeRollingFile(directory, limit)
-	filledSizeRollingFileWithOptions(file, options)
 	return NewStandardHandler(file, encoder, timeFormat)
 }

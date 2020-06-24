@@ -19,7 +19,6 @@
 package logit
 
 import (
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"strconv"
@@ -65,51 +64,5 @@ func TestNewSizeRollingHandler(t *testing.T) {
 		logger.Info("info...")
 		logger.Warn("warn...")
 		logger.Error("error...")
-	}
-}
-
-// 测试创建空的 RollingHandlerOptions
-func TestRollingHandlerOptions(t *testing.T) {
-	options := RollingHandlerOptions{}
-	t.Log(options)
-	if options.nameGenerator != nil {
-		t.Fatal("nameGenerator 应该是 nil 的，结果不是。。。")
-	}
-	if options.rollingHook != nil {
-		t.Fatal("rollingHook 应该是 nil 的，结果不是。。。")
-	}
-}
-
-func TestNewDurationRollingHandlerWithOptions(t *testing.T) {
-
-	// 准备测试环境
-	testDirectory, err := ioutil.TempDir("", "TestNewDurationRollingHandlerWithOptions_*")
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	// 创建日志处理器
-	handler := NewDurationRollingHandlerWithOptions(testDirectory, time.Second, TextEncoder(), "", RollingHandlerOptions{
-		nameGenerator: func(directory string, now time.Time) string {
-			return filepath.Join(directory, now.Format("2006年01月02日-15点04分05秒.log"))
-		},
-		rollingHook: files.NewLifeBasedRollingHook(testDirectory, 500*time.Millisecond),
-	})
-
-	// TODO 这个测试通不过，发现 rollingHook 中的 now.Sub(file.ModTime()) 是负数。。。
-	// TODO 这个 RollingHook 机制需要取消掉，因为涉及到太多原本的代码了，考虑使用定时任务解决
-	logger := NewLogger(DebugLevel, handler)
-	logger.Info("1")
-	time.Sleep(900 * time.Millisecond)
-	logger.Info("2")
-	time.Sleep(1 * time.Second)
-	logger.Info("3")
-	time.Sleep(1200 * time.Millisecond)
-	logger.Info("4")
-
-	infos, err := ioutil.ReadDir(testDirectory)
-	if err != nil || len(infos) != 2 {
-		t.Log("len(infos) == 2 ? ", len(infos) == 2)
-		t.Fatal(err)
 	}
 }

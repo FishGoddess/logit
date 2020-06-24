@@ -56,13 +56,6 @@ type DurationRollingFile struct {
 	// Default is DefaultNameGenerator().
 	nameGenerator NameGenerator
 
-	// rollingHook is a hook that will be invoked in rolling process.
-	// This interface has two method: BeforeRolling and AfterRolling.
-	// BeforeRolling will be called before rolling to next file.
-	// AfterRolling will be called after rolling to next file.
-	// Default is DefaultRollingHook, and it will do nothing when rolling to next file.
-	rollingHook RollingHook
-
 	// mu is a lock for safe concurrency.
 	mu *sync.Mutex
 }
@@ -90,7 +83,6 @@ func NewDurationRollingFile(directory string, duration time.Duration) *DurationR
 		directory:     directory,
 		duration:      duration,
 		nameGenerator: DefaultNameGenerator(),
-		rollingHook:   NewDefaultRollingHook(),
 		mu:            &sync.Mutex{},
 	}
 }
@@ -114,9 +106,7 @@ func (drf *DurationRollingFile) rollingToNextFile(now time.Time) {
 func (drf *DurationRollingFile) ensureFileIsCorrect() {
 	now := time.Now()
 	if drf.file == nil || now.Sub(drf.lastTime) >= drf.duration {
-		drf.rollingHook.BeforeRolling()
 		drf.rollingToNextFile(now)
-		drf.rollingHook.AfterRolling()
 	}
 }
 
@@ -145,11 +135,4 @@ func (drf *DurationRollingFile) SetNameGenerator(newNameGenerator NameGenerator)
 	drf.mu.Lock()
 	defer drf.mu.Unlock()
 	drf.nameGenerator = newNameGenerator
-}
-
-// SetRollingHook replaces drf.rollingHook to newRollingHook.
-func (drf *DurationRollingFile) SetRollingHook(newRollingHook RollingHook) {
-	drf.mu.Lock()
-	defer drf.mu.Unlock()
-	drf.rollingHook = newRollingHook
 }
