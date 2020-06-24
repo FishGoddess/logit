@@ -31,15 +31,11 @@ _历史版本的特性请查看 [HISTORY.md](./HISTORY.md)。未来版本的新�
 
 ### 🚀 安装方式
 
-唯一需要的依赖就是 [Golang 运行环境](https://golang.org).
-
-> Go modules
-
 ```bash
 $ go get -u github.com/FishGoddess/logit
 ```
 
-您也可以直接编辑 go.mod 文件，然后执行 _**go build**_。
+> 如果是 Go modules 的项目，您还可以直接编辑 go.mod 文件。
 
 ```bash
 module your_project_name
@@ -49,12 +45,6 @@ go 1.14
 require (
     github.com/FishGoddess/logit v0.2.7
 )
-```
-
-> Go path
-
-```bash
-$ go get -u github.com/FishGoddess/logit
 ```
 
 logit 没有任何其他额外的依赖，纯使用 [Golang 标准库](https://golang.org) 完成。

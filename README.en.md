@@ -30,15 +30,11 @@ _Check [HISTORY.md](./HISTORY.md) and [FUTURE.md](./FUTURE.md) to know about mor
 
 ### 🚀 Installation
 
-The only requirement is the [Golang Programming Language](https://golang.org).
-
-> Go modules
-
 ```bash
 $ go get -u github.com/FishGoddess/logit
 ```
 
-Or edit your project's go.mod file and execute _**go build**_.
+> Or edit your project's go.mod file if you are using Go modules.
 
 ```bash
 module your_project_name
@@ -48,12 +44,6 @@ go 1.14
 require (
     github.com/FishGoddess/logit v0.2.7
 )
-```
-
-> Go path
-
-```bash
-$ go get -u github.com/FishGoddess/logit
 ```
 
 logit has no more external dependencies.
