@@ -42,7 +42,7 @@ module your_project_name
 go 1.14
 
 require (
-    github.com/FishGoddess/logit v0.2.7
+    github.com/FishGoddess/logit v0.2.8
 )
 ```
 
@@ -153,7 +153,6 @@ If you find that something is not working as expected please open an _**issue**_
 
 ### 📦 Projects using logit
 
-| Project | Author | Description |
-| -----------|--------|-------------|
-|  |  |  |
-
+| Project | Author | Description | link |
+| -----------|--------|-------------| ---------------- |
+| postar | avino-plan | An easy-to-use and low-coupling email service | [Github](https://github.com/avino-plan/postar) / [Gitee](https://gitee.com/avino-plan/postar) |

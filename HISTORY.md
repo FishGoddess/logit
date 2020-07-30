@@ -1,5 +1,9 @@
 ## ✒ 历史版本的特性介绍 (Features in old versions)
 
+### v0.2.8
+> 此版本发布于 2020-07-30
+* 去掉 JsonEncoder 的 key 空格
+
 ### v0.2.7
 > 此版本发布于 2020-06-25
 * 修复了 DefaultNameGenerator 可能产生重复文件名的 bug

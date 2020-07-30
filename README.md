@@ -43,7 +43,7 @@ module your_project_name
 go 1.14
 
 require (
-    github.com/FishGoddess/logit v0.2.7
+    github.com/FishGoddess/logit v0.2.8
 )
 ```
 
@@ -153,7 +153,6 @@ $ go test -v ./_examples/benchmarks_test.go -bench=. -benchtime=10s
 
 ### 📦 使用 logit 的项目
 
-| 项目 | 作者 | 描述 |
-| -----------|--------|-------------|
-|  |  |  |
-
+| 项目 | 作者 | 描述 | 链接 |
+| -----------|--------|-------------| ---------------- |
+| postar | avino-plan | 一个极易上手的低耦合高性能邮件服务 | [Github](https://github.com/avino-plan/postar) / [码云](https://gitee.com/avino-plan/postar) |

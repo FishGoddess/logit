@@ -104,7 +104,7 @@ func JsonEncoder() Encoder {
 		buffer := bytes.NewBuffer(make([]byte, 0, 64))
 		buffer.WriteString(`{"level":"`)
 		buffer.WriteString(log.Level().String())
-		buffer.WriteString(`", "time":`)
+		buffer.WriteString(`","time":`)
 
 		// 判断是否需要格式化时间
 		if timeFormat != "" {
@@ -115,11 +115,11 @@ func JsonEncoder() Encoder {
 
 		// 如果有文件信息，就把文件信息也加进去
 		if log.file != "" && log.Line() != 0 {
-			buffer.WriteString(`, "file":"` + log.File())
-			buffer.WriteString(`", "line":` + strconv.Itoa(log.Line()))
+			buffer.WriteString(`,"file":"` + log.File())
+			buffer.WriteString(`","line":` + strconv.Itoa(log.Line()))
 		}
 
-		buffer.WriteString(`, "msg":"`)
+		buffer.WriteString(`,"msg":"`)
 		buffer.WriteString(escapeString(log.Msg()))
 		buffer.WriteString("\"}\n")
 		return buffer.Bytes()
