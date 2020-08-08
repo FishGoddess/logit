@@ -20,6 +20,7 @@ package files
 
 import (
 	"os"
+	"path/filepath"
 )
 
 const (
@@ -40,5 +41,12 @@ const (
 // Return a new File or an error if failed.
 // Notice that the permission of new file is 0644, which means rw-rw-r-- in unix-like os.
 func CreateFileOf(filePath string) (*os.File, error) {
+
+	// 如果这个文件路径的父级目录不存在，全部自动创建
+	// issue: https://github.com/FishGoddess/logit/issues/8
+	err := os.MkdirAll(filepath.Dir(filePath), 0644)
+	if err != nil {
+		return nil, err
+	}
 	return os.OpenFile(filePath, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0664)
 }
