@@ -19,10 +19,10 @@
 package logit
 
 import (
-	"bytes"
 	"encoding/json"
 	"io"
 	"io/ioutil"
+	"strings"
 )
 
 // config is the config mapping the config file.
@@ -50,21 +50,29 @@ type config struct {
 // a reading-friendly config file is born, and it is not a standard Json string any more.
 // This method jsonifyContent will fix this so that we can use Json parser to
 // parse our config file.
-func jsonifyContent(content []byte) []byte {
+func jsonifyContent(content string) []byte {
 
 	// 我们的配置文件是支持注释的，而 Json 规范中并没有对注释的支持，所以我们需要对注释进行擦除
-	// 注意：注释只能是单独起一行，并且以 # 开头
-	var buffer []byte
-	lines := bytes.Split(content, []byte("\n"))
+	// 注意：注释只能是单独起一行，并且以 # 或 // 开头，未来的版本将只支持 // 作为注释
+	var buffer []string
+	lines := strings.Split(content, "\n")
 	for _, line := range lines {
-		if !bytes.HasPrefix(bytes.TrimSpace(line), []byte("#")) {
-			buffer = append(buffer, line...)
+		line = strings.TrimSpace(line)
+		isNotEmpty := !(line == "")
+		isNotComment := !(strings.HasPrefix(line, "#") || strings.HasPrefix(line, "//"))
+		if isNotEmpty && isNotComment {
+			buffer = append(buffer, line)
 		}
 	}
 
-	// 由于配置文件使用 Json 格式，而 Json 规范要求使用 {} 包裹内容，但这个 {} 不方便配置文件的阅读，
-	// 所以我们设定在配置文件中不使用 {} 包裹，而是交给我们读取出来之后进行包裹
-	return bytes.Join([][]byte{[]byte("{"), buffer, []byte("}")}, []byte(""))
+	// 由于配置文件使用 Json 格式，而 Json 规范要求使用 {} 包裹内容，但这个 {} 不方便配置文件的阅读
+	// 一开始我们设定在配置文件中不使用 {} 包裹，而是交给我们读取出来之后进行包裹
+	// 但这样的处理反而看起来有点别扭，所以还是推荐把 {} 加上，未来的版本将不会进行自动包裹
+	result := strings.Join(buffer, "")
+	if strings.HasPrefix(result, "{") && strings.HasSuffix(result, "}") {
+		return []byte(result)
+	}
+	return []byte(strings.Join([]string{"{", result, "}"}, ""))
 }
 
 // parseConfigFrom parses a config from reader which returns a mapping config.
@@ -81,7 +89,7 @@ func parseConfigFrom(reader io.Reader) (config, error) {
 	conf := config{
 		Level: "debug",
 	}
-	err = json.Unmarshal(jsonifyContent(content), &conf)
+	err = json.Unmarshal(jsonifyContent(string(content)), &conf)
 	if err != nil {
 		return config{}, err
 	}
