@@ -1,0 +1,157 @@
+// logit config template v0.2.10
+// Notice that starting with // is comment, and it must be a new line
+// Grammar is based on Json, but adds more features to let it become more configured and easy-to-read
+// You should always use / or \\ instead of \, because some special characters should be escaped
+{
+    // Logger level, all valid values are debug, info, warn, error, off
+    // Default is "debug"
+    // If you set it to "off", then logger will be disabled
+    "level": "info",
+    // Caller will determine weather you need caller info or not. All valid value is true and false
+    // Notice that adding caller will use runtime method which costs lots of time
+    // So set it to true only when you really need it
+    // Default is false
+    "caller": false,
+    // Logger handler, you can add more than one handlers to your logger
+    // All valid values are console, file, duration, size
+    // Only you has registered your handler to logit by logit.RegisterHandler then it can be used here
+    // At lease add one handler or it will panic
+    "handlers": {
+        // Notice that what params can be set here is dependent to what handler you use
+        // Also, every param you set here will be injected into newHandler in logit.RegisterHandler as kv pair form
+        // Config file is only responsible for injection, so handlers have responsibility to decide how to use these params
+        // Different handler may have different params, check document of using handler to know about more information
+
+        // console handler
+        // These are all supported params
+        "console": {
+            // Log encoder, all valid values are text, json
+            // text: Encode log to plain text, such as `[info] [2020-04-24 13:14:15] xxx`
+            // json: Encode log to Json, such as `{"level":"info", "time":"2020-04-24 13:14:15", "msg":"xxx"}`
+            // Default is "text"
+            "encoder": "text",
+            // How to format time, if this value is "unix", then unix format will be used
+            // Default is "2006-01-02 15:04:05"
+            // "timeFormat": "unix",
+            "timeFormat": "2006-01-02"
+        },
+        // file handler
+        // These are all supported params
+        "file": {
+            // The path of the log file
+            // Default is "./logit-[created unix time].log"
+            "path": "D:/logit.log",
+            // Log encoder, all valid values are text, json
+            // text: Encode log to plain text, such as `[info] [2020-04-24 13:14:15] xxx`
+            // json: Encode log to Json, such as `{"level":"info", "time":"2020-04-24 13:14:15", "msg":"xxx"}`
+            // Default is "text"
+            "encoder": "text",
+            // How to format time, if this value is "unix", then unix format will be used
+            // Default is 2006-01-02 15:04:05
+            // "timeFormat": "unix",
+            "timeFormat": "2006-01-02"
+        },
+        // duration handler
+        // These are all supported params
+        "duration": {
+            // The destination folder stores all log files created
+            // default is ./
+            "directory": "D:/",
+            // Duration, the unit is second
+            // Assume that a log file was created on 10:00:00, and limit is 60, then when the time
+            // is 10:01:00, a new log file will be created and roll to it
+            // Default is one day
+            "limit": 60,
+            // Log encoder, all valid values are text, json
+            // text: Encode log to plain text, such as `[info] [2020-04-24 13:14:15] xxx`
+            // json: Encode log to Json, such as `{"level":"info", "time":"2020-04-24 13:14:15", "msg":"xxx"}`
+            // Default is text
+            "encoder": "text",
+            // How to format time, if this value is "unix", then unix format will be used
+            // Default is 2006-01-02 15:04:05
+            // "timeFormat": "unix",
+            "timeFormat": "2006-01-02"
+        },
+        // size handler
+        // These are all supported params
+        "size": {
+            // The destination folder stores all log files created
+            // default is ./
+            "directory": "D:/",
+            // Max size of log file, the unit is MB
+            // Assume that limit is 16, then when the size of log file is 16 MB, a new
+            // log file will be created and roll to it
+            // Default is 64 MB
+            "limit": 16,
+            // Log encoder, all valid values are text, json
+            // text: Encode log to plain text, such as `[info] [2020-04-24 13:14:15] xxx`
+            // json: Encode log to Json, such as `{"level":"info", "time":"2020-04-24 13:14:15", "msg":"xxx"}`
+            // Default is text
+            "encoder": "text",
+            // How to format time, if this value is "unix", then unix format will be used
+            // Default is 2006-01-02 15:04:05
+            // "timeFormat": "unix",
+            "timeFormat": "2006-01-02"
+        },
+        // level based handlers
+        // There are four kinds of this handlers: debug, info, warn, error
+        // They are only a wrapper which only does a log level filtering
+        // For example, the debug level handler only handles logs in debug level
+        // Every level based handler can have many handlers, such as console handler, even one more level based handler
+        // So how to handle logs is dependent to specifically added handlers, and you can add all registered handlers above
+        "debug": {
+            "console": {},
+            "file": {
+                "path": "D:/debug.log"
+            }
+        },
+        "info": {
+            "console": {},
+            "file": {
+                "path": "D:/info.log"
+            }
+        },
+        "warn": {
+            "console": {},
+            "file": {
+                "path": "D:/warn.log"
+            }
+        },
+        "error": {
+            "console": {},
+            "file": {
+                "path": "D:/error.log"
+            }
+        },
+        // level shielded handlers
+        // There are four kinds of this handlers: !debug, !info, !warn, !error
+        // They are only a wrapper which only does a log level filtering
+        // For example, the !debug level shielded handler only handles logs in all levels except debug level
+        // Every level shielded handler can have many handlers, such as console handler, even one more level shielded handler
+        // So how to handle logs is dependent to specifically added handlers, and you can add all registered handlers above
+        "!debug": {
+            "console": {},
+            "file": {
+                "path": "D:/non-debug.log"
+            }
+        },
+        "!info": {
+            "console": {},
+            "file": {
+                "path": "D:/non-info.log"
+            }
+        },
+        "!warn": {
+            "console": {},
+            "file": {
+                "path": "D:/non-warn.log"
+            }
+        },
+        "!error": {
+            "console": {},
+            "file": {
+                "path": "D:/non-error.log"
+            }
+        }
+    }
+}
