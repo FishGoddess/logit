@@ -37,6 +37,9 @@ func createParseConfigFileTestConfigFile(t *testing.T) string {
 
 	// 写入配置内容
 	configFile.WriteString(`
+    {
+        # 这是注释
+        // 这也是注释
 		"level": "debug",
 		
 		"caller": false,
@@ -50,6 +53,7 @@ func createParseConfigFileTestConfigFile(t *testing.T) string {
 			   "path": "` + escapeString(filepath.Join(os.TempDir(), "logit.log")) + `"
 		   }
 		}
+    }
 	`)
 	return configFile.Name()
 }
@@ -66,7 +70,7 @@ func TestParseConfigFile(t *testing.T) {
 	// 解析配置文件
 	conf, err := parseConfigFrom(file)
 	if err != nil {
-		t.Fatal("parseConfigFile 测试出现问题！")
+		t.Fatal("parseConfigFile 测试出现问题！", err)
 	}
 
 	t.Logf("%v\n", conf.Level)

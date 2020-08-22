@@ -180,7 +180,7 @@ Package logit provides an easy way to use foundation for your logging operations
 
 	// Create a logger from config file.
 	//
-	// logger.conf:
+	// logger.json:
 	//
 	//     "level": "debug",
 	//
@@ -196,7 +196,7 @@ Package logit provides an easy way to use foundation for your logging operations
 	//         }
 	//     }
 	//
-	logger := logit.NewLoggerFromPath("./logger.conf")
+	logger := logit.NewLoggerFromPath("./logger.json")
 	logger.Info("I am working!")
 	logger.Info("My level is " + logger.Level().String())
 	fmt.Println("fmt ==============================================")
@@ -211,5 +211,5 @@ package logit // import "github.com/FishGoddess/logit"
 
 const (
 	// Version is the version string representation of logit.
-	Version = "v0.2.9"
+	Version = "v0.2.10"
 )
