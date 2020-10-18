@@ -156,3 +156,4 @@ If you find that something is not working as expected please open an _**issue**_
 | Project | Author | Description | link |
 | -----------|--------|-------------| ---------------- |
 | postar | avino-plan | An easy-to-use and low-coupling email service | [Github](https://github.com/avino-plan/postar) / [Gitee](https://gitee.com/avino-plan/postar) |
+| kafo | FishGoddess | A high-performance and distributed cache middleware | [Github](https://github.com/FishGoddess/kafo) / [Gitee](https://gitee.com/FishGoddess/kafo) |

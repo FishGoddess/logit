@@ -156,3 +156,4 @@ $ go test -v ./_examples/benchmarks_test.go -bench=. -benchtime=10s
 | 项目 | 作者 | 描述 | 链接 |
 | -----------|--------|-------------| ---------------- |
 | postar | avino-plan | 一个极易上手的低耦合高性能邮件服务 | [Github](https://github.com/avino-plan/postar) / [码云](https://gitee.com/avino-plan/postar) |
+| kafo | FishGoddess | 一个高性能的轻量级分布式缓存中间件 | [Github](https://github.com/FishGoddess/kafo) / [码云](https://gitee.com/FishGoddess/kafo) |
