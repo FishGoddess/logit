@@ -18,10 +18,6 @@
 
 package logit
 
-import (
-	"os"
-)
-
 var (
 	// globalLogger is a logger for global usage.
 	globalLogger *Logger
@@ -41,12 +37,7 @@ func init() {
 // Notice that it will try to load "./logit.conf" first, but a logger to console
 // will be created if failed.
 func newGlobalLogger() *Logger {
-	file, err := os.Open("./logit.conf")
-	if err != nil {
-		return NewLogger(DebugLevel, NewConsoleHandler(TextEncoder(), DefaultTimeFormat))
-	}
-	defer file.Close()
-	return NewLoggerFrom(file)
+	return NewLogger()
 }
 
 // Me returns globalLogger for more usages.

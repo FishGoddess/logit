@@ -19,13 +19,8 @@
 package logit
 
 import (
-	"fmt"
 	"math"
-	"os"
 )
-
-// Level is the type representation of the logger level.
-type Level uint8
 
 const (
 	DebugLevel Level = iota
@@ -33,12 +28,12 @@ const (
 	WarnLevel
 	ErrorLevel
 
-	// OffLevel is for disabling a logger
+	// OffLevel is for turning off the logger.
 	OffLevel = math.MaxUint8
 )
 
 var (
-	// levels store the names of all level provided.
+	// levels store all names of levels provided.
 	levels = map[Level]string{
 		DebugLevel: "debug",
 		InfoLevel:  "info",
@@ -48,21 +43,10 @@ var (
 	}
 )
 
-// parseLevel parses level and returns the Level of it.
-// If the level doesn't exist, a tip will be printed and
-// the program will exit with status code 3.
-func parseLevel(level string) Level {
-	for k, v := range levels {
-		if v == level {
-			return k
-		}
-	}
-	fmt.Fprintf(os.Stderr, "Error: Level \"%s\" doesn't exist! Be sure your level is one of them: debug, info, warn, error, off\n", level)
-	os.Exit(3)
-	return OffLevel
-}
+// Level is position of one log.
+type Level uint8
 
-// String returns the name of Level ll.
+// String returns the name of ll.
 // This method will be called when using printing operations like fmt.Println.
 func (ll Level) String() string {
 	return levels[ll]

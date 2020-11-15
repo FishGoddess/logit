@@ -18,12 +18,6 @@
 
 package main
 
-import (
-	"fmt"
-
-	"github.com/FishGoddess/logit"
-)
-
 func main() {
 
 	// Create a logger from config file.
@@ -42,13 +36,5 @@ func main() {
 	//         }
 	//     }
 	// }
-	logger := logit.NewLoggerFromPath("./logger.json")
-	logger.Info("I am working!")
-	logger.Info("My level is " + logger.Level().String())
-	fmt.Println("fmt ==============================================")
 
-	handlers := logger.Handlers()
-	for i, handler := range handlers {
-		logger.Info(fmt.Sprintf("No.%d hadler ==> %T", i+1, handler))
-	}
 }

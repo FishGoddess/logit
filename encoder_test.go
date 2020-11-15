@@ -19,30 +19,65 @@
 package logit
 
 import (
+	"fmt"
 	"testing"
 	"time"
 )
 
-// 测试获取编码器
-func TestEncoderOf(t *testing.T) {
+// prepareTestLog prepares one log for testing.
+func prepareTestLog() *Log {
+	return &Log{
+		msg:    "test",
+		level:  InfoLevel,
+		time:   time.Date(2020, time.November, 13, 19, 43, 23, 0, time.Local),
+		caller: nil,
+	}
+}
 
-	// 这个不存在的编码器退出程序
-	//encoder := encoderOf("fake-encoder")
-	//if encoder != nil {
-	//	t.Fatal("encoderOf 中 encoder 应该为 nil")
-	//}
+// go test -v -cover -run=^TestTextEncoder$
+func TestTextEncoder(t *testing.T) {
 
-	log := &Log{
-		level: DebugLevel,
-		now:   time.Now(),
-		msg:   "xxx",
+	encoder := TextEncoder()
+
+	log := prepareTestLog()
+	logString := string(encoder.Encode(log, "2006-01-02 15:04:05"))
+	result := "[info] [2020-11-13 19:43:23] test\n"
+	if logString != result {
+		t.Fatalf("encoded log (%s) is wrong", logString)
 	}
 
-	// 判断获取的编码器是否正确
-	if string(encoderOf("text").Encode(log, DefaultTimeFormat)) != string(TextEncoder().Encode(log, DefaultTimeFormat)) {
-		t.Fatal("encoderOf(\"text\") 出现问题！")
+	log.level = ErrorLevel
+	log.caller = &caller{
+		File: "encoder_test.go",
+		Line: 36,
 	}
-	if string(encoderOf("json").Encode(log, "")) != string(JsonEncoder().Encode(log, "")) {
-		t.Fatal("encoderOf(\"json\") 出现问题！")
+	logString = string(encoder.Encode(log, ""))
+	result = fmt.Sprintf("[error] [%d] [encoder_test.go:36] test\n", log.time.Unix())
+	if logString != result {
+		t.Fatalf("encoded log (%s) is wrong", logString)
+	}
+}
+
+// go test -v -cover -run=^TestJsonEncoder$
+func TestJsonEncoder(t *testing.T) {
+
+	encoder := JsonEncoder()
+
+	log := prepareTestLog()
+	logString := string(encoder.Encode(log, "2006/01/02 15:04:05"))
+	result := "{\"level\":\"info\",\"time\":\"2020/11/13 19:43:23\",\"msg\":\"test\"}\n"
+	if logString != result {
+		t.Fatalf("encoded log (%s) is wrong", logString)
+	}
+
+	log.level = ErrorLevel
+	log.caller = &caller{
+		File: "encoder_test.go",
+		Line: 36,
+	}
+	logString = string(encoder.Encode(log, ""))
+	result = fmt.Sprintf("{\"level\":\"error\",\"time\":%d,\"file\":\"encoder_test.go\",\"line\":36,\"msg\":\"test\"}\n", log.time.Unix())
+	if logString != result {
+		t.Fatalf("encoded log (%s) is wrong", logString)
 	}
 }

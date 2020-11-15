@@ -20,42 +20,18 @@ package logit
 
 import (
 	"bytes"
-	"fmt"
-	"os"
 	"strconv"
 	"strings"
 )
 
-var (
-	// encoders store all encoders provided.
-	// Call encoderOf method to use one of encoders below.
-	// Actually, this field is for me, not for you, ha:)
-	encoders = map[string]Encoder{
-		"text": TextEncoder(),
-		"json": JsonEncoder(),
-	}
-)
-
 // Encoder is for encoding a log to bytes with timeFormat.
-// No matter what you do, remember, return it in bytes form.
+// No matter what you do, remember, return this log as bytes.
 type Encoder func(log *Log, timeFormat string) []byte
 
 // Encode encodes a log to bytes with timeFormat.
 // This is Encoder's substitute, and only for more code-readable.
 func (e Encoder) Encode(log *Log, timeFormat string) []byte {
 	return e(log, timeFormat)
-}
-
-// encoderOf returns the encoder called name.
-// If the encoder doesn't exist, a tip will be printed and
-// the program will exit with status code 2.
-func encoderOf(name string) Encoder {
-	encoder, ok := encoders[name]
-	if !ok {
-		fmt.Fprintf(os.Stderr, "Error: The encoder \"%s\" you pointed doesn't exist! Try \"text\" or \"json\".\n", name)
-		os.Exit(2)
-	}
-	return encoder
 }
 
 // =================================== text encoder ===================================
@@ -65,25 +41,24 @@ func encoderOf(name string) Encoder {
 func TextEncoder() Encoder {
 	return func(log *Log, timeFormat string) []byte {
 
-		// 组装 log
 		buffer := bytes.NewBuffer(make([]byte, 0, 64))
 		buffer.WriteString("[")
 		buffer.WriteString(log.Level().String())
 		buffer.WriteString("] [")
 
-		// 判断是否需要格式化时间
+		// format time
 		if timeFormat != "" {
-			buffer.WriteString(log.Now().Format(timeFormat))
+			buffer.WriteString(log.Time().Format(timeFormat))
 		} else {
-			buffer.WriteString(strconv.FormatInt(log.Now().Unix(), 10))
+			buffer.WriteString(strconv.FormatInt(log.Time().Unix(), 10))
 		}
 
 		buffer.WriteString("] ")
 
-		// 如果有文件信息，就把文件信息也加进去
-		if log.file != "" && log.Line() != 0 {
+		// Add caller information if need
+		if caller, ok := log.Caller(); ok {
 			buffer.WriteString("[")
-			buffer.WriteString(log.File() + ":" + strconv.Itoa(log.Line()))
+			buffer.WriteString(caller.File + ":" + strconv.Itoa(caller.Line))
 			buffer.WriteString("] ")
 		}
 
@@ -95,28 +70,28 @@ func TextEncoder() Encoder {
 
 // =================================== json encoder ===================================
 
-// JsonEncoder encodes a log to a Json string like `{"level":"debug", "time":"2020-03-22 22:35:00", "msg":"log content..."}` in bytes.
+// JsonEncoder encodes a log to a Json string in bytes.
 // If timeFormat == "", then it will not format time and keep time in unix form.
+// The result looks like `{"level":"debug", "time":"2020-03-22 22:35:00", "msg":"log content..."}`.
 func JsonEncoder() Encoder {
 	return func(log *Log, timeFormat string) []byte {
 
-		// 组装 log
 		buffer := bytes.NewBuffer(make([]byte, 0, 64))
 		buffer.WriteString(`{"level":"`)
 		buffer.WriteString(log.Level().String())
 		buffer.WriteString(`","time":`)
 
-		// 判断是否需要格式化时间
+		// format time
 		if timeFormat != "" {
-			buffer.WriteString(strconv.Quote(log.Now().Format(timeFormat)))
+			buffer.WriteString(strconv.Quote(log.Time().Format(timeFormat)))
 		} else {
-			buffer.WriteString(strconv.FormatInt(log.Now().Unix(), 10))
+			buffer.WriteString(strconv.FormatInt(log.Time().Unix(), 10))
 		}
 
-		// 如果有文件信息，就把文件信息也加进去
-		if log.file != "" && log.Line() != 0 {
-			buffer.WriteString(`,"file":"` + log.File())
-			buffer.WriteString(`","line":` + strconv.Itoa(log.Line()))
+		// Add caller information if need
+		if caller, ok := log.Caller(); ok {
+			buffer.WriteString(`,"file":"` + caller.File)
+			buffer.WriteString(`","line":` + strconv.Itoa(caller.Line))
 		}
 
 		buffer.WriteString(`,"msg":"`)
@@ -126,7 +101,7 @@ func JsonEncoder() Encoder {
 	}
 }
 
-// escapeString is for escaping string from special characters, such as double quotes.
+// escapeString escapes string from special characters, such as double quotes.
 // See issue: https://github.com/FishGoddess/logit/issues/1
 func escapeString(s string) string {
 
@@ -134,13 +109,13 @@ func escapeString(s string) string {
 	runes := []rune(s)
 	for _, r := range runes {
 
-		// Json 中需要进行转义的字符主要是 \ 和 "，还有控制字符（\u0020 以内的 ascii 字符）
+		// The main character should be escaped is \ and " and ascii less than \u0020
 		switch r {
 		case '"', '\\':
 			builder.WriteRune('\\')
 			builder.WriteRune(r)
 		default:
-			// ascii 小于 16 的需要在前面补 \u000，介于 [16, 32) 之间的需要补 \u00
+			// Notice: ascii < 16 needs to add \u000 to behind, ascii in [16, 32) needs to add \u00 to behind
 			if r < 16 {
 				builder.WriteString("\\u000" + strconv.FormatInt(int64(r), 16))
 			} else if r < 32 {
@@ -150,6 +125,5 @@ func escapeString(s string) string {
 			}
 		}
 	}
-
 	return builder.String()
 }

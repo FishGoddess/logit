@@ -19,90 +19,34 @@
 package logit
 
 import (
-	"encoding/json"
-	"io"
-	"io/ioutil"
-	"strings"
+	"fmt"
 )
 
-// config is the config mapping the config file.
-type config struct {
+var (
+	// encoders store all encoders provided.
+	// Actually, this field is for me, not for you, ha:)
+	encoders = map[string]Encoder{
+		"text": TextEncoder(),
+		"json": JsonEncoder(),
+	}
+)
 
-	// Level is the logger level in string form.
-	Level string `json:"level"`
-
-	// Caller will determine weather you need caller info in log or not.
-	// Notice that adding caller will call a runtime method which costs lots of time,
-	// so set it to true only when you really need it.
-	Caller bool `json:"caller"`
-
-	// Handlers is the handlers you want to use mapping to config file.
-	Handlers map[string]map[string]interface{} `json:"handlers"`
-}
-
-// jsonifyContent normalize content to a standard json string in bytes.
-// We make a new config format which is transformed from Json.
-// As we know, a standard Json string is strict in format. However,
-// the worst thing when using a Json as config file is we can't add any
-// comments so we have no idea that why we use this configuration in our config.
-// So we must transform it. The first thing we do is let it supports comments.
-// Also, the "{}" in Json string is redundant in a config file. After doing these,
-// a reading-friendly config file is born, and it is not a standard Json string any more.
-// This method jsonifyContent will fix this so that we can use Json parser to
-// parse our config file.
-func jsonifyContent(content string) []byte {
-
-	// 我们的配置文件是支持注释的，而 Json 规范中并没有对注释的支持，所以我们需要对注释进行擦除
-	// 注意：注释只能是单独起一行，并且以 # 或 // 开头，未来的版本将只支持 // 作为注释
-	var buffer []string
-	lines := strings.Split(content, "\n")
-	for _, line := range lines {
-		line = strings.TrimSpace(line)
-		isNotEmpty := !(line == "")
-		isNotComment := !(strings.HasPrefix(line, "#") || strings.HasPrefix(line, "//"))
-		if isNotEmpty && isNotComment {
-			buffer = append(buffer, line)
+// levelOf returns the real level of passed level and an error if not found.
+func levelOf(level string) (Level, error) {
+	for k, v := range levels {
+		if v == level {
+			return k, nil
 		}
 	}
-
-	// 由于配置文件使用 Json 格式，而 Json 规范要求使用 {} 包裹内容，但这个 {} 不方便配置文件的阅读
-	// 一开始我们设定在配置文件中不使用 {} 包裹，而是交给我们读取出来之后进行包裹
-	// 但这样的处理反而看起来有点别扭，所以还是推荐把 {} 加上，未来的版本将不会进行自动包裹
-	result := strings.Join(buffer, "")
-	if strings.HasPrefix(result, "{") && strings.HasSuffix(result, "}") {
-		return []byte(result)
-	}
-	return []byte(strings.Join([]string{"{", result, "}"}, ""))
+	return OffLevel, fmt.Errorf("level \"%s\" doesn't exist! Try: debug, info, warn, error, off", level)
 }
 
-// parseConfigFrom parses a config from reader which returns a mapping config.
-// Return an error if something wrong happened.
-func parseConfigFrom(reader io.Reader) (config, error) {
-
-	// 配置文件一般不会太大，直接全部读取进内存
-	content, err := ioutil.ReadAll(reader)
-	if err != nil {
-		return config{}, err
+// encoderOf returns the encoder called name.
+// If the encoder doesn't exist, an error will be returned.
+func encoderOf(name string) (Encoder, error) {
+	encoder, ok := encoders[name]
+	if !ok {
+		return nil, fmt.Errorf("encoder \"%s\" doesn't exist! Try: text or json", name)
 	}
-
-	// 反序列化出配置
-	conf := config{
-		Level: "debug",
-	}
-	err = json.Unmarshal(jsonifyContent(string(content)), &conf)
-	if err != nil {
-		return config{}, err
-	}
-
-	return conf, nil
-}
-
-// parseHandlersFrom parses all handlers in conf.
-// Return a slice of all parsed handlers.
-func parseHandlersFrom(conf config) []Handler {
-	handlers := make([]Handler, 0, len(conf.Handlers)+2)
-	for name, params := range conf.Handlers {
-		handlers = append(handlers, handlerOf(name, params))
-	}
-	return handlers
+	return encoder, nil
 }
