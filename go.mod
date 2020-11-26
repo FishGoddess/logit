@@ -1,3 +1,3 @@
 module github.com/FishGoddess/logit
 
-go 1.14
+go 1.15

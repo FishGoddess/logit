@@ -27,6 +27,11 @@ import (
 	"time"
 )
 
+const (
+	// callDepth is the depth of calling stack, which is about file name and line number.
+	callDepth = 3
+)
+
 // Logger is the type of logging output.
 type Logger struct {
 
@@ -43,11 +48,13 @@ type Logger struct {
 	// logger to OffLevel, it will shut up and log nothing.
 	level Level
 
-	// encoder is used to encode a log to bytes.
-	encoder Encoder
+	// encoders are used to encode a log to bytes.
+	// Every level has own encoder.
+	encoders map[Level]Encoder
 
-	// writer is used to output an encoded log.
-	writer io.Writer
+	// writers are used to output an encoded log.
+	// Every level has own writer.
+	writers map[Level]io.Writer
 
 	// needCaller is a flag to check if logs should contain caller's info or not.
 	// This feature is useful but expensive in performance, so set to false if you don't need it.
@@ -67,9 +74,19 @@ type Logger struct {
 // NewLogger returns a new logger instance with default settings.
 func NewLogger() *Logger {
 	return &Logger{
-		level:      InfoLevel,
-		encoder:    TextEncoder(),
-		writer:     os.Stdout,
+		level: InfoLevel,
+		encoders: map[Level]Encoder{
+			DebugLevel: TextEncoder(),
+			InfoLevel:  TextEncoder(),
+			WarnLevel:  TextEncoder(),
+			ErrorLevel: TextEncoder(),
+		},
+		writers: map[Level]io.Writer{
+			DebugLevel: os.Stdout,
+			InfoLevel:  os.Stdout,
+			WarnLevel:  os.Stdout,
+			ErrorLevel: os.Stderr,
+		},
 		needCaller: false,
 		timeFormat: "2006-01-02 15:04:05",
 		logs: &sync.Pool{
@@ -81,9 +98,9 @@ func NewLogger() *Logger {
 	}
 }
 
-// ChangeLevelTo will change the logger level of current logger to newLevel.
-// It returns old level of current logger.
-func (l *Logger) ChangeLevelTo(newLevel Level) Level {
+// SetLevel will change the logging level to newLevel.
+// It returns the old level.
+func (l *Logger) SetLevel(newLevel Level) Level {
 	l.lock.Lock()
 	defer l.lock.Unlock()
 	oldLevel := l.level
@@ -98,21 +115,101 @@ func (l *Logger) Level() Level {
 	return l.level
 }
 
-// EnableFileInfo means every log will contain file info like line number.
-// However, you should know that this is expensive in time.
-// So be sure you really need it or keep it disabled.
-func (l *Logger) EnableFileInfo() {
+// SetEncoder sets encoder to new one.
+// This encoder will apply to all levels.
+func (l *Logger) SetEncoder(encoder Encoder) {
 	l.lock.Lock()
 	defer l.lock.Unlock()
-	l.needCaller = true
+	l.encoders[DebugLevel] = encoder
+	l.encoders[InfoLevel] = encoder
+	l.encoders[WarnLevel] = encoder
+	l.encoders[ErrorLevel] = encoder
 }
 
-// DisableFileInfo means every log will not contain file info like line number.
-// If you want file info again, try l.EnableFileInfo().
-func (l *Logger) DisableFileInfo() {
+// SetDebugEncoder sets encoder of debug to new one.
+func (l *Logger) SetDebugEncoder(encoder Encoder) {
 	l.lock.Lock()
 	defer l.lock.Unlock()
-	l.needCaller = false
+	l.encoders[DebugLevel] = encoder
+}
+
+// SetInfoEncoder sets encoder of info to new one.
+func (l *Logger) SetInfoEncoder(encoder Encoder) {
+	l.lock.Lock()
+	defer l.lock.Unlock()
+	l.encoders[InfoLevel] = encoder
+}
+
+// SetWarnEncoder sets encoder of warn to new one.
+func (l *Logger) SetWarnEncoder(encoder Encoder) {
+	l.lock.Lock()
+	defer l.lock.Unlock()
+	l.encoders[WarnLevel] = encoder
+}
+
+// SetErrorEncoder sets encoder of error to new one.
+func (l *Logger) SetErrorEncoder(encoder Encoder) {
+	l.lock.Lock()
+	defer l.lock.Unlock()
+	l.encoders[ErrorLevel] = encoder
+}
+
+// SetWriter sets writer to new one.
+// This writer will apply to all levels.
+func (l *Logger) SetWriter(writer io.Writer) {
+	l.lock.Lock()
+	defer l.lock.Unlock()
+	l.writers[DebugLevel] = writer
+	l.writers[InfoLevel] = writer
+	l.writers[WarnLevel] = writer
+	l.writers[ErrorLevel] = writer
+}
+
+// SetDebugWriter sets writer of debug to new one.
+func (l *Logger) SetDebugWriter(writer io.Writer) {
+	l.lock.Lock()
+	defer l.lock.Unlock()
+	l.writers[DebugLevel] = writer
+}
+
+// SetInfoWriter sets writer of info to new one.
+func (l *Logger) SetInfoWriter(writer io.Writer) {
+	l.lock.Lock()
+	defer l.lock.Unlock()
+	l.writers[InfoLevel] = writer
+}
+
+// SetWarnWriter sets writer of warn to new one.
+func (l *Logger) SetWarnWriter(writer io.Writer) {
+	l.lock.Lock()
+	defer l.lock.Unlock()
+	l.writers[WarnLevel] = writer
+}
+
+// SetErrorWriter sets writer of error to new one.
+func (l *Logger) SetErrorWriter(writer io.Writer) {
+	l.lock.Lock()
+	defer l.lock.Unlock()
+	l.writers[ErrorLevel] = writer
+}
+
+// NeedCaller sets needCaller to new one.
+// If true, then every log will contain file name and line number.
+// However, you should know that this is expensive in time.
+// So be sure you really need it or keep it false.
+func (l *Logger) NeedCaller(needCaller bool) {
+	l.lock.Lock()
+	defer l.lock.Unlock()
+	l.needCaller = needCaller
+}
+
+// TimeFormat sets timeFormat to new one.
+// This format follows the format in time package of Go.
+// Yep, it is "2006-01-02 15:04:05".
+func (l *Logger) TimeFormat(timeFormat string) {
+	l.lock.Lock()
+	defer l.lock.Unlock()
+	l.timeFormat = timeFormat
 }
 
 // newLog returns a Log holder from object pool.
@@ -120,8 +217,8 @@ func (l *Logger) DisableFileInfo() {
 func (l *Logger) newLog(level Level, msg string) *Log {
 	log := l.logs.Get().(*Log)
 	log.level = level
-	log.time = time.Now()
 	log.msg = msg
+	log.time = time.Now()
 	return log
 }
 
@@ -134,65 +231,51 @@ func (l *Logger) releaseLog(log *Log) {
 	l.logs.Put(log)
 }
 
-const (
-	// callDepth is the depth of the method calling stack, which is about file name and line number.
-	callDepth = 3
-)
-
-// log handles msg by l.handlers, and level will affect the visibility of this msg.
-// Notice that callDepth is caller sensitive.
-func (l *Logger) log(callDepth int, level Level, msg string) {
-
-	// 加上读锁
-	l.lock.RLock()
-
-	// 日志记录器的级别高于日志的级别，不进行记录
-	if l.level > level {
-		l.lock.RUnlock()
-		return
-	}
-
-	// 提前释放读锁，后续操作非常消耗时间，可以不用加锁了，彻底释放并发的天性
-	// 但是 needCaller 的获取需要保证并发安全，就在释放锁之前拷贝一份副本
-	// 即使释放锁之后有人修改了这个属性，也和这里无关了，因为在执行这个 log 方法的时间点上，
-	// 这个属性的值就已经确定了，并且不允许被修改了，这类似于 copy on write 的解决思路
-	// 这个解决并发竞争的方案是否没有问题，需要时间的验证才知道
-	needCaller := l.needCaller
-	l.lock.RUnlock()
-
-	// 处理日志
-	log := l.newLog(level, msg)
-	defer l.releaseLog(log)
-
-	// 如果需要调用者的信息，对当前的 msg 进行包装
-	if needCaller {
-		wrapLogWithCaller(callDepth, log)
-	}
-	l.handleLog(log)
-}
-
-// handleLog handles log with l.handlers.
-// Notice that if one handler returns false, then all handlers after it
-// will not be used anymore.
-func (l *Logger) handleLog(log *Log) {
-	// TODO handle...
-}
-
-// wrapLogWithCaller wraps log with caller info.
+// wrapLogWithCaller wraps log with caller.
 // This function is too expensive because of runtime.Caller.
 // Notice that callDepth is the depth of calling stack. See callDepth.
-func wrapLogWithCaller(callDepth int, log *Log) {
+func wrapLogWithCaller(log *Log, callDepth int) {
 
 	log.caller = &caller{
 		File: "unknown file",
 		Line: -1,
 	}
 
-	// 这个 callDepth 是 runtime.Caller 方法的参数，表示要获取第几层调用者的信息
 	if _, file, line, ok := runtime.Caller(callDepth); ok {
 		log.caller.File = file
 		log.caller.Line = line
 	}
+}
+
+// handleLog handles log with encoders and writers.
+func (l *Logger) handleLog(log *Log) {
+	encoder := l.encoders[log.level]
+	writer := l.writers[log.level]
+	writer.Write(encoder.Encode(log, l.timeFormat))
+}
+
+// log handles msg by l.handlers, and level will affect the visibility of this msg.
+// Notice that callDepth is caller sensitive.
+func (l *Logger) log(callDepth int, level Level, msg string) {
+
+	l.lock.RLock()
+
+	if l.level > level {
+		l.lock.RUnlock()
+		return
+	}
+
+	// Use copy-on-write way to keep high performance
+	needCaller := l.needCaller
+	l.lock.RUnlock()
+
+	log := l.newLog(level, msg)
+	defer l.releaseLog(log)
+
+	if needCaller {
+		wrapLogWithCaller(log, callDepth)
+	}
+	l.handleLog(log)
 }
 
 // Debug will output msg as a debug message.
@@ -214,8 +297,6 @@ func (l *Logger) Warn(msg string) {
 func (l *Logger) Error(msg string) {
 	l.log(callDepth, ErrorLevel, msg)
 }
-
-// ================================== extension ==================================
 
 // generateMessage generates a message from format and params.
 func generateMessage(format string, params ...interface{}) string {

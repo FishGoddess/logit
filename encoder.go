@@ -24,12 +24,12 @@ import (
 	"strings"
 )
 
-// Encoder is for encoding a log to bytes with timeFormat.
+// Encoder encodes a log to bytes with timeFormat.
 // No matter what you do, remember, return this log as bytes.
 type Encoder func(log *Log, timeFormat string) []byte
 
 // Encode encodes a log to bytes with timeFormat.
-// This is Encoder's substitute, and only for more code-readable.
+// This is Encoder's substitute and only for more code-readable.
 func (e Encoder) Encode(log *Log, timeFormat string) []byte {
 	return e(log, timeFormat)
 }
@@ -46,7 +46,7 @@ func TextEncoder() Encoder {
 		buffer.WriteString(log.Level().String())
 		buffer.WriteString("] [")
 
-		// format time
+		// Format time
 		if timeFormat != "" {
 			buffer.WriteString(log.Time().Format(timeFormat))
 		} else {
@@ -55,7 +55,7 @@ func TextEncoder() Encoder {
 
 		buffer.WriteString("] ")
 
-		// Add caller information if need
+		// Check caller
 		if caller, ok := log.Caller(); ok {
 			buffer.WriteString("[")
 			buffer.WriteString(caller.File + ":" + strconv.Itoa(caller.Line))
@@ -81,14 +81,14 @@ func JsonEncoder() Encoder {
 		buffer.WriteString(log.Level().String())
 		buffer.WriteString(`","time":`)
 
-		// format time
+		// Format time
 		if timeFormat != "" {
 			buffer.WriteString(strconv.Quote(log.Time().Format(timeFormat)))
 		} else {
 			buffer.WriteString(strconv.FormatInt(log.Time().Unix(), 10))
 		}
 
-		// Add caller information if need
+		// Check caller
 		if caller, ok := log.Caller(); ok {
 			buffer.WriteString(`,"file":"` + caller.File)
 			buffer.WriteString(`","line":` + strconv.Itoa(caller.Line))

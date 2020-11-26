@@ -67,7 +67,7 @@ func BenchmarkLogitLogger(b *testing.B) {
 
 	// 测试用的日志记录器
 	logger := logit.NewLogger()
-	logger.ChangeLevelTo(logit.DebugLevel)
+	logger.SetLevel(logit.DebugLevel)
 
 	// 测试用的日志任务
 	logTask := func() {
@@ -173,8 +173,9 @@ func BenchmarkLogitLogger(b *testing.B) {
 //// 测试 logit 文件日志记录器的速度
 //func BenchmarkLogitFile(b *testing.B) {
 //
-//    file, _ := files.CreateFileOf("D:/BenchmarkLogitFile.log")
-//    logger := logit.NewLogger(logit.DebugLevel, logit.NewStandardHandler(file, logit.TextEncoder(), timeFormat))
+//    file, _ := files.CreateFileOf("Z:/BenchmarkLogitFile.log")
+//    logger := logit.NewLogger()
+//    logger.SetLevel(logit.DebugLevel)
 //
 //    // 测试用的日志任务
 //    logTask := func() {
@@ -196,7 +197,7 @@ func BenchmarkLogitLogger(b *testing.B) {
 //func BenchmarkGologFile(b *testing.B) {
 //
 //    logger := golog.New()
-//    file, _ := files.CreateFileOf("D:/BenchmarkGologFile.log")
+//    file, _ := files.CreateFileOf("Z:/BenchmarkGologFile.log")
 //    logger.SetOutput(file)
 //    logger.SetLevel("debug")
 //    logger.SetTimeFormat(timeFormat)
@@ -227,7 +228,7 @@ func BenchmarkLogitLogger(b *testing.B) {
 //        enc.AppendString(t.Format(timeFormat))
 //    }
 //    encoder := zapcore.NewConsoleEncoder(config)
-//    file, _ := files.CreateFileOf("D:/BenchmarkZapFile.log")
+//    file, _ := files.CreateFileOf("Z:/BenchmarkZapFile.log")
 //    writeSyncer := zapcore.AddSync(file)
 //    core := zapcore.NewCore(encoder, writeSyncer, zapcore.DebugLevel)
 //    logger := zap.New(core)
@@ -254,7 +255,7 @@ func BenchmarkLogitLogger(b *testing.B) {
 //func BenchmarkLogrusFile(b *testing.B) {
 //
 //    logger := logrus.New()
-//    file, _ := files.CreateFileOf("D:/BenchmarkLogrusFile.log")
+//    file, _ := files.CreateFileOf("Z:/BenchmarkLogrusFile.log")
 //    logger.SetOutput(file)
 //    logger.SetLevel(logrus.DebugLevel)
 //    logger.SetFormatter(&logrus.TextFormatter{

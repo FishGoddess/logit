@@ -14,27 +14,28 @@
 //
 // Author: FishGoddess
 // Email: fishgoddess@qq.com
-// Created at 2020/03/30 14:21:28
+// Created at 2020/11/26 23:26:22
 
-package main
+package logit
 
-func main() {
+import "testing"
 
-	// Create a logger from config file.
-	//
-	// logger.json:
-	// {
-	//     "level": "debug",
-	//     "caller": false,
-	//     "handlers": {
-	//         "console": {
-	//             "timeFormat": "unix",
-	//             "encoder": "json"
-	//         },
-	//         "file": {
-	//             "path": "D:/logit.log"
-	//         }
-	//     }
-	// }
+// go test -v -cover -run=^TestLevelString$
+func TestLevelString(t *testing.T) {
 
+	if DebugLevel.String() != "debug" {
+		t.Fatalf("debug level %s is wrong", DebugLevel.String())
+	}
+
+	if InfoLevel.String() != "info" {
+		t.Fatalf("info level %s is wrong", InfoLevel.String())
+	}
+
+	if WarnLevel.String() != "warn" {
+		t.Fatalf("warn level %s is wrong", WarnLevel.String())
+	}
+
+	if ErrorLevel.String() != "error" {
+		t.Fatalf("error level %s is wrong", ErrorLevel.String())
+	}
 }
