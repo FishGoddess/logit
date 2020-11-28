@@ -26,12 +26,12 @@
 
 _Check [HISTORY.md](./HISTORY.md) and [FUTURE.md](./FUTURE.md) to know about more information._
 
-> v0.1.x and older versions will not be supported anymore, please update to v0.2.x as quickly as possible. You will get some brand-new user experiences and supports for a long time!
+> Currently, stable version is v0.2.x, but a brand-new version v0.3.x is alpha with a more elegant design!
 
 ### 🚀 Installation
 
 ```bash
-$ go get -u github.com/FishGoddess/logit
+$ go get github.com/FishGoddess/logit
 ```
 
 > Or edit your project's go.mod file if you are using Go modules.

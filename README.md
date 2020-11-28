@@ -27,12 +27,12 @@
 
 _历史版本的特性请查看 [HISTORY.md](./HISTORY.md)。未来版本的新特性和计划请查看 [FUTURE.md](./FUTURE.md)。_
 
-> v0.1.x 及以下版本已经停止维护，请尽快升级到 v0.2.x 版本！您将感受到全新的使用体验，并可以享受长期的更新和维护！
+> 目前稳定的是 v0.2.x 版本，但是 v0.3.x 版本已经出了第一个体验版，这是一个全新设计的版本，废除了很多冗余设计！
 
 ### 🚀 安装方式
 
 ```bash
-$ go get -u github.com/FishGoddess/logit
+$ go get github.com/FishGoddess/logit
 ```
 
 > 如果是 Go modules 的项目，您还可以直接编辑 go.mod 文件。
