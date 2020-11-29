@@ -34,78 +34,65 @@ _Check [HISTORY.md](./HISTORY.md) and [FUTURE.md](./FUTURE.md) to know about mor
 $ go get github.com/FishGoddess/logit
 ```
 
-> Or edit your project's go.mod file if you are using Go modules.
-
-```bash
-module your_project_name
-
-go 1.14
-
-require (
-    github.com/FishGoddess/logit v0.2.10
-)
-```
-
-logit has no more external dependencies.
+### 📖 Examples
 
 ```go
 package main
 
 import (
-	"math/rand"
-	"strconv"
-	"time"
+	"os"
 
 	"github.com/FishGoddess/logit"
 )
 
 func main() {
 
-	// Log messages with four levels.
-	logit.Debug("I am a debug message!")
-	logit.Info("I am an info message!")
-	logit.Warn("I am a warn message!")
-	logit.Error("I am an error message!")
+	// There are four levels can be logged
+	logit.Debug("Hello, I am debug!") // Ignore because default level is info
+	logit.Info("Hello, I am info!")
+	logit.Warn("Hello, I am warn!")
+	logit.Error("Hello, I am error!")
 
-	// Notice that logit has blocked some methods for more refreshing method list.
-	// If you want to use some higher level methods, you should call logit.Me() to
-	// get the fully functional logger, then call what you want to call.
-	// For example, if you want to output log with file info, try this:
-	logit.Me().EnableFileInfo()
-	logit.Info("Show file info!")
+	// You can format log with some parameters if you want
+	logit.DebugF("Hello, I am debugF %d!", 2) // Ignore because default level is info
+	logit.InfoF("Hello, I am infoF %d!", 2)
+	logit.WarnF("Hello, I am warnF %d!", 2)
+	logit.ErrorF("Hello, I am errorF %d!", 2)
 
-	// If you have a long log and it is made of many variables, try this:
-	// The msg is the return value of msgGenerator.
-	logit.DebugFunc(func() string {
-		// Use time as the source of random number generator.
-		r := rand.New(rand.NewSource(time.Now().Unix()))
-		return "debug rand int: " + strconv.Itoa(r.Intn(100))
-	})
+	// logit.Me() returns a completed logger for use
 
-	// Or you can use formatting method like this:
-	logit.Debugf("This is a debug msg with %d params: %s, %s", 2, "msgFormat", "msgParams")
-	logit.Infof("This is a debug msg with %d params: %s, %s", 2, "msgFormat", "msgParams")
-	logit.Warnf("This is a debug msg with %d params: %s, %s", 2, "msgFormat", "msgParams")
-	logit.Errorf("This is a debug msg with %d params: %s, %s", 2, "msgFormat", "msgParams")
+	// Set level to debug
+	logit.Me().SetLevel(logit.DebugLevel)
 
-	// If a config file "logit.conf" in "./", then logit will load it automatically.
-	// This is more convenience to use config file and logger.
+	// Log won't carry caller information in default
+	// So, try NeedCaller if you need
+	logit.Me().NeedCaller(true)
+
+	// Set format of time in log
+	logit.Me().TimeFormat("2006/01/02 15:04:05")
+
+	// Set encoder and writer
+	// Actually, every level has own encoder and writer
+	// This way will set encoder and writer of all levels to the same one
+	logit.Me().SetEncoder(logit.JsonEncoder())
+	logit.Me().SetWriter(os.Stdout)
+
+	// We also provide some functions to set encoder and writer of each level
+	logit.Me().SetDebugEncoder(logit.JsonEncoder())
+	logit.Me().SetInfoEncoder(logit.JsonEncoder())
+	logit.Me().SetWarnEncoder(logit.JsonEncoder())
+	logit.Me().SetErrorEncoder(logit.JsonEncoder())
+	logit.Me().SetDebugWriter(os.Stdout)
+	logit.Me().SetInfoWriter(os.Stdout)
+	logit.Me().SetWarnWriter(os.Stdout)
+	logit.Me().SetErrorWriter(os.Stdout)
 }
 ```
 
-### 📖 Examples
-
 * [basic](./_examples/basic.go)
 * [logger](./_examples/logger.go)
-* [level_and_disable](./_examples/level_and_disable.go)
-* [config_file](./_examples/config_file.go)
-* [handler](./_examples/handler.go)
-* [files](./_examples/files.go)
-* [log_to_file](./_examples/log_to_file.go)
 
 _Check more examples in [_examples](./_examples)._
-
-_Learn more about config file in [_examples/config](./_examples/config)._
 
 ### 🔥 Benchmarks
 
@@ -117,12 +104,12 @@ $ go test -v ./_examples/benchmarks_test.go -bench=. -benchtime=10s
 
 | test case | times ran (large is better) |  ns/op (small is better) | B/op | allocs/op |
 | -----------|--------|-------------|-------------|-------------|
-| **logit** | **6429907** | **1855 ns/op** | **384 B/op** | **8 allocs/op** |
-| golog | 3361483 | 3589 ns/op | 712 B/op | 24 allocs/op |
-| zap | 2971119 | 4066 ns/op | 448 B/op | 16 allocs/op |
-| logrus | 1553419 | 7869 ns/op | 1633 B/op | 52 allocs/op |
+| **logit** | **7513623** | **1612 ns/op** | **384 B/op** | **8 allocs/op** |
+| golog | 4569554 | 2631 ns/op | 712 B/op | 24 allocs/op |
+| zap | 3891336 | 3084 ns/op | 448 B/op | 16 allocs/op |
+| logrus | 2089682 | 5769 ns/op | 1633 B/op | 52 allocs/op |
 
-> Environment：I7-6700HQ CPU @ 2.6 GHZ, 16 GB RAM
+> Environment：R7-4700U CPU @ 2.0 GHZ，16 GB RAM
 
 **Notice:**
 
@@ -139,13 +126,13 @@ $ go test -v ./_examples/benchmarks_test.go -bench=. -benchtime=10s
 **reduce the times of time format. However, is it worth to replace time format operation with concurrent competition?**
 **The answer is no, so we cancel this mechanism in v0.1.1-alpha and higher versions.**
 
-**4. You should know that some APIs like Debugf can't reach high performance as the same as others because of reflection,**
+**4. You should know that some APIs like DebugF can't reach high performance as the same as others because of reflection,**
 **however, their performances are not as bad as we think:**
 
 | test case | times ran (large is better) |  ns/op (small is better) | B/op | allocs/op |
 | -----------|--------|-------------|-------------|-------------|
-| logit | 6429907 | 1855 ns/op | 384 B/op | 8 allocs/op |
-| **logit-reflection** | **5288931** | **2334 ns/op** | **424 B/op** | **12 allocs/op** |
+| logit | 7513623 | 1612 ns/op | 384 B/op | 8 allocs/op |
+| **logit-reflection** | **6042254** | **1984 ns/op** | **424 B/op** | **12 allocs/op** |
 
 ### 👥 Contributing
 
