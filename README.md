@@ -91,6 +91,7 @@ func main() {
 
 * [basic](./_examples/basic.go)
 * [logger](./_examples/logger.go)
+* [encoder](./_examples/encoder.go)
 
 _更多使用案例请查看 [_examples](./_examples) 目录。_
 
