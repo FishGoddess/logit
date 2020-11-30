@@ -23,24 +23,6 @@ import (
 	"sync"
 )
 
-// Roller is an interface of rolling a file writer.
-// File writer will call TimeToRoll() to know if time to roll before writing,
-// and if true, the Roll() will be called.
-type Roller interface {
-
-	// TimeToRoll returns true if need rolling or false.
-	// Although file is a pointer, you shouldn't change it in this method.
-	// Remember, file in this method should be read only.
-	TimeToRoll(fw *FileWriter) bool
-
-	// Roll will roll this file and returns an error if failed.
-	// Although file is a pointer, you shouldn't change it in this method.
-	// Return an os.File instance will be fine.
-	Roll(fw *FileWriter) (*os.File, error)
-}
-
-// =================================== file writer ===================================
-
 // FileWriter writes logs to one or more files.
 // We provide a powerful writer of file, which can roll to several files
 // automatically in some conditions.
