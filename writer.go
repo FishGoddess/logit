@@ -19,8 +19,14 @@
 package logit
 
 import (
+	"fmt"
 	"os"
 	"sync"
+)
+
+const (
+	// maxRetriedTimes is the max times which will retry after error.
+	maxRetriedTimes = 10
 )
 
 // FileWriter writes logs to one or more files.
@@ -36,19 +42,19 @@ type FileWriter struct {
 
 	// seq is the serial number of rolling file.
 	// If name is "test.log" and seq is 1, then the file rolled will be "test.log.0000000001"
-	seq uint32
+	seq int
 
-	// rollers stores all rollers will be used.
+	// checkers stores all checkers will be used.
 	// If one of them say: "Time to roll!", then this file writer will start to roll.
-	// After rolling, the rollers after it will not be used this loop.
-	rollers []Roller
+	// After rolling, the checkers after it will be skipped in this loop.
+	checkers []Checker
 
 	// lock is for safe-concurrency.
-	lock *sync.RWMutex
+	lock *sync.Mutex
 }
 
-// NewFileWriter returns a new file writer with given name and rollers.
-func NewFileWriter(name string, rollers ...Roller) (*FileWriter, error) {
+// NewFileWriter returns a new file writer with given name and checkers.
+func NewFileWriter(name string, checkers ...Checker) (*FileWriter, error) {
 
 	file, err := os.OpenFile(name, os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0644)
 	if err != nil {
@@ -56,28 +62,43 @@ func NewFileWriter(name string, rollers ...Roller) (*FileWriter, error) {
 	}
 
 	return &FileWriter{
-		name:    name,
-		file:    file,
-		seq:     0,
-		rollers: rollers,
-		lock:    &sync.RWMutex{},
+		name:     name,
+		file:     file,
+		seq:      0,
+		checkers: checkers,
+		lock:     &sync.Mutex{},
 	}, nil
+}
+
+// roll changes fw.file to a new file and nothing happens if failed.
+func (fw *FileWriter) roll() {
+
+	fw.seq++
+	fw.file.Close()
+	for i := 0; i < maxRetriedTimes; i++ {
+		if os.Rename(fw.name, fmt.Sprintf("%s.%.10d", fw.name, fw.seq)) != nil {
+			continue
+		}
+		for j := 0; j < maxRetriedTimes; j++ {
+			if newFile, err := os.OpenFile(fw.name, os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0644); err == nil {
+				fw.file = newFile
+				return
+			}
+		}
+	}
 }
 
 // Write writes len(p) bytes from p to file and returns an error if failed.
 // The precise count of written bytes is n.
 func (fw *FileWriter) Write(p []byte) (n int, err error) {
 
-	fw.lock.RLock()
-	defer fw.lock.RUnlock()
+	fw.lock.Lock()
+	defer fw.lock.Unlock()
 
 	// Check rolling condition first and replace to newFile only if roll returns nil error
-	for _, roller := range fw.rollers {
-		if roller.TimeToRoll(fw) {
-			if newFile, err := roller.Roll(fw); err == nil {
-				fw.file = newFile
-				break
-			}
+	for _, checker := range fw.checkers {
+		if checker.Check(fw, len(p)) {
+			fw.roll()
 		}
 	}
 	return fw.file.Write(p)
@@ -87,6 +108,6 @@ func (fw *FileWriter) Write(p []byte) (n int, err error) {
 func (fw *FileWriter) Close() error {
 	fw.lock.Lock()
 	defer fw.lock.Unlock()
-	fw.rollers = nil
+	fw.checkers = nil
 	return fw.file.Close()
 }

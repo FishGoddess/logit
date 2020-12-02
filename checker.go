@@ -18,20 +18,13 @@
 
 package logit
 
-import "os"
+// Checker is an interface of checking if a file writer need to roll.
+// File writer will call Check() to know if time to roll before writing.
+type Checker interface {
 
-// Roller is an interface of rolling a file writer.
-// File writer will call TimeToRoll() to know if time to roll before writing,
-// and if true, the Roll() will be called.
-type Roller interface {
-
-	// TimeToRoll returns true if need rolling or false.
-	// Although file is a pointer, you shouldn't change it in this method.
-	// Remember, file in this method should be read only.
-	TimeToRoll(fw *FileWriter) bool
-
-	// Roll will roll this file and returns an error if failed.
-	// Although file is a pointer, you shouldn't change it in this method.
-	// Return an os.File instance will be fine.
-	Roll(fw *FileWriter) (*os.File, error)
+	// Check returns true if a file writer need to roll.
+	// Although file is a pointer, you shouldn't modify it in this method.
+	// Remember, fw in this method should be read only.
+	// n is the length of slice to be written, and we provide it for some purposes.
+	Check(fw *FileWriter, n int) bool
 }
