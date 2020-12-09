@@ -70,20 +70,26 @@ func NewFileWriter(name string, checkers ...Checker) (*FileWriter, error) {
 	}, nil
 }
 
+// nextName returns next file name of fw.
+func (fw *FileWriter) nextName() string {
+	return fmt.Sprintf("%s.%.10d", fw.name, fw.seq)
+}
+
 // roll changes fw.file to a new file and nothing happens if failed.
 func (fw *FileWriter) roll() {
 
 	fw.seq++
 	fw.file.Close()
 	for i := 0; i < maxRetriedTimes; i++ {
-		if os.Rename(fw.name, fmt.Sprintf("%s.%.10d", fw.name, fw.seq)) != nil {
-			continue
+		if os.Rename(fw.name, fw.nextName()) == nil {
+			break
 		}
-		for j := 0; j < maxRetriedTimes; j++ {
-			if newFile, err := os.OpenFile(fw.name, os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0644); err == nil {
-				fw.file = newFile
-				return
-			}
+	}
+
+	for j := 0; j < maxRetriedTimes; j++ {
+		if newFile, err := os.OpenFile(fw.name, os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0644); err == nil {
+			fw.file = newFile
+			return
 		}
 	}
 }
