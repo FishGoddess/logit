@@ -37,7 +37,7 @@ func (tc *testChecker) Check(fw *FileWriter, n int) bool {
 // prepareTestDirAndName prepares directory and name of file for testing.
 func prepareTestDirAndName(t *testing.T) (testDir string, name string) {
 
-	testDir = filepath.Join(os.TempDir(), "TestFileWriter")
+	testDir = filepath.Join(os.TempDir(), t.Name() + "_" +time.Now().Format("20060102150405.log"))
 	err := os.Mkdir(testDir, 0644)
 	if err != nil {
 		t.Fatal(err)

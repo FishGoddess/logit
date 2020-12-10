@@ -20,6 +20,7 @@ package logit
 
 import (
 	"fmt"
+	"math"
 	"os"
 	"sync"
 )
@@ -42,7 +43,7 @@ type FileWriter struct {
 
 	// seq is the serial number of rolling file.
 	// If name is "test.log" and seq is 1, then the file rolled will be "test.log.0000000001"
-	seq int
+	seq int64
 
 	// checkers stores all checkers will be used.
 	// If one of them say: "Time to roll!", then this file writer will start to roll.
@@ -77,6 +78,10 @@ func (fw *FileWriter) nextName() string {
 
 // roll changes fw.file to a new file and nothing happens if failed.
 func (fw *FileWriter) roll() {
+
+	if fw.seq >= math.MaxInt64 {
+		fw.seq = 0
+	}
 
 	fw.seq++
 	fw.file.Close()

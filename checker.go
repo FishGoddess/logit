@@ -72,7 +72,7 @@ type TimeChecker struct {
 }
 
 // NewTimeChecker returns a new TimeChecker with given duration.
-// Everytime currentTime - lastTime >= duration, Check() will return true.
+// Every time currentTime - lastTime >= duration, Check() will return true.
 // If duration is less than minDuration, then duration will be set to minDuration.
 // See minDuration.
 func NewTimeChecker(duration time.Duration) *TimeChecker {
@@ -88,7 +88,12 @@ func NewTimeChecker(duration time.Duration) *TimeChecker {
 
 // Check checks fw with lastTime and duration.
 func (tc *TimeChecker) Check(fw *FileWriter, n int) bool {
-	return time.Now().Sub(tc.lastTime) >= tc.duration
+	now := time.Now()
+	if now.Sub(tc.lastTime) >= tc.duration {
+		tc.lastTime = now
+		return true
+	}
+	return false
 }
 
 // ================================= size checker =================================
@@ -134,16 +139,17 @@ func NewSizeChecker(limitedSize int64) *SizeChecker {
 // Check checks fw with limitedSize and currentSize.
 func (sc *SizeChecker) Check(fw *FileWriter, n int) bool {
 
+	sc.currentSize += int64(n)
 	if sc.currentSize >= sc.limitedSize {
 
 		// 1. err != nil: failed to fetch real size, choose to believe currentSize
 		// 2. real size >= limitedSize
 		fileInfo, err := fw.file.Stat()
-		if err != nil || fileInfo.Size() >= sc.limitedSize {
-			sc.currentSize = 0
+		if err != nil || fileInfo.Size()+int64(n) >= sc.limitedSize {
+			sc.currentSize = int64(n)
 			return true
 		}
-		sc.currentSize = fileInfo.Size()
+		sc.currentSize = fileInfo.Size() + int64(n)
 	}
 	return false
 }
