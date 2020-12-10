@@ -39,6 +39,10 @@ const (
 	// minLimitedSize prevents io system from creating file too fast.
 	// Default is 64 KB (64 * 1024 bytes).
 	minLimitedSize = 64 * KB
+
+	// minLimitedCount prevents io system from creating file too fast.
+	// Default is 3.
+	minLimitedCount = 3
 )
 
 // Checker is an interface of checking if a file writer need to roll.
@@ -89,6 +93,7 @@ func (tc *TimeChecker) Check(fw *FileWriter, n int) bool {
 
 // ================================= size checker =================================
 
+// SizeChecker is an implement of Checker of size dimension.
 type SizeChecker struct {
 
 	// limitedSize is the limited size when Check() returns true.
@@ -135,10 +140,9 @@ func (sc *SizeChecker) Check(fw *FileWriter, n int) bool {
 		// 2. real size >= limitedSize
 		fileInfo, err := fw.file.Stat()
 		if err != nil || fileInfo.Size() >= sc.limitedSize {
+			sc.currentSize = 0
 			return true
 		}
-
-		// Correct currentSize
 		sc.currentSize = fileInfo.Size()
 	}
 	return false
@@ -146,6 +150,40 @@ func (sc *SizeChecker) Check(fw *FileWriter, n int) bool {
 
 // ================================= count checker =================================
 
+// CountChecker is an implement of Checker of count dimension.
 type CountChecker struct {
 
+	// limitedCount is the limited count when Check() returns true.
+	// Check() will return true if currentCount has reached to limitedCount.
+	// This field should be always larger than minLimitedCount for some safe considerations.
+	limitedCount int
+
+	// currentCount equals to the count of current file checked.
+	// The currentCount will reset to 0 when checked file has rolled to the next file.
+	currentCount int
+}
+
+// NewCountChecker returns a new CountChecker with given limitedCount.
+// Every time count >= limitedCount, Check() will return true.
+// If limitedCount is less than minLimitedCount, then limitedCount will be set to minLimitedCount.
+// See minLimitedCount.
+func NewCountChecker(limitedCount int) *CountChecker {
+
+	if limitedCount < minLimitedCount {
+		limitedCount = minLimitedCount
+	}
+	return &CountChecker{
+		limitedCount: limitedCount,
+		currentCount: 0,
+	}
+}
+
+// Check checks fw with limitedCount and currentCount.
+func (cc *CountChecker) Check(fw *FileWriter, n int) bool {
+	cc.currentCount++
+	if cc.currentCount >= cc.limitedCount {
+		cc.currentCount = 0
+		return true
+	}
+	return false
 }
