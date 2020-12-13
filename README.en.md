@@ -11,15 +11,14 @@
 
 ### 🥇 Features
 
-* Modularization design, easy to extend your logger with wrapper and handler
+* Modularization design, easy to extend your logger with encoders and writers
 * Level-based logging, and there are four levels to use
 * Config file supports, you can use a config file to change you logger flexibility even it has been a binary
-* Log Function supports, it is a better way to output a very long log
 * Enable or disable Logger, you can disable or switch to a higher level in your production environment
 * Log file supports, and you can customer the name of your log file
-* Duration rolling supports, which means it will roll to a new log file by duration automatically, such as one day one log file
-* File size rolling supports, which means it will roll to a new log file by file size automatically, such as one 64 MB one log file
-* Log handler supports, you can extend logger with your own log handler easily
+* Time rolling supports, such as one day one log file
+* File size rolling supports, such as one 64 MB one log file
+* Count rolling supports, such as 1000 logging operations one log file
 * High-performance supports, by avoiding to call runtime.Caller
 * Time format supports, you can format time in your way
 * Log as Json string supports, by using provided JsonLoggerHandler
@@ -92,6 +91,7 @@ func main() {
 * [basic](./_examples/basic.go)
 * [logger](./_examples/logger.go)
 * [encoder](./_examples/encoder.go)
+* [writer](./_examples/writer.go)
 
 _Check more examples in [_examples](./_examples)._
 
