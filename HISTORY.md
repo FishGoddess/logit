@@ -1,5 +1,11 @@
 ## ✒ 历史版本的特性介绍 (Features in old versions)
 
+### v0.3.1-alpha
+> 此版本发布于 2020-12-13
+* 日志文件自动分割处理，支持 Checker 机制检查是否需要分割
+* 内置三种 Checker，分别是 TimeChecker，SizeChecker，CountChecker
+* 多种检查器可以叠加效果，只要其中有一个达到分割的条件都会进行分割
+
 ### v0.3.0-alpha
 > 此版本发布于 2020-11-28
 * 大幅度重构版本，废除了 handler 设计
