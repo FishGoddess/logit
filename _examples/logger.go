@@ -14,53 +14,40 @@
 //
 // Author: FishGoddess
 // Email: fishgoddess@qq.com
-// Created at 2020/03/01 14:51:46
+// Created at 2020/11/27 23:40:29
 
 package main
 
 import (
-	"math/rand"
 	"os"
-	"strconv"
-	"time"
 
 	"github.com/FishGoddess/logit"
 )
 
 func main() {
 
-	// NewDevelopLogger creates a new Logger holder for developing, generally log to terminal or console.
-	// You can switch to logit.NewProductionLogger for production environment.
-	//logger := logit.NewProductionLogger(os.Stdout)
-	logger := logit.NewLogger(logit.DebugLevel, logit.NewConsoleHandler(logit.TextEncoder(), logit.DefaultTimeFormat))
+	// Create a new logger and set its level to debug
+	logger := logit.NewLogger()
+	logger.SetLevel(logit.DebugLevel)
 
-	// Then you will be easy to log!
-	logger.Debug("this is a debug message!")
-	logger.Info("this is an info message!")
-	logger.Warn("this is a warn message!")
-	logger.Error("this is an error message!")
+	// Then, just use it like normal logger
+	logger.Debug("Hello, I am debug!")
+	logger.Info("Hello, I am info!")
+	logger.Warn("Hello, I am warn!")
+	logger.Error("Hello, I am error!")
 
-	// NewLoggerWithoutEncoder creates a new Logger holder with given level and handlers.
-	// As you know, file also can be written, just replace os.Stdout with your file!
-	// A logger is made of level and handlers, so we provide some handlers for use, see logit.Handler.
-	// This method is the most original way to create a logger for use.
-	logger = logit.NewLogger(logit.DebugLevel, logit.NewStandardHandler(os.Stdout, logit.TextEncoder(), "2006/01/02 15:04:05"))
-	logger.Info("What time is it now?")
+	// Log won't carry caller information in default
+	// So, try NeedCaller if you need
+	logger.NeedCaller(true)
 
-	// For convenience, we provide a register mechanism and you can use handlers like this:
-	logger = logit.NewLogger(logit.DebugLevel, logit.NewConsoleHandler(logit.TextEncoder(), logit.DefaultTimeFormat))
-	logger.Info("What handler is it now?")
+	// Set format of time in log
+	logger.TimeFormat("2006/01/02 15:04:05")
 
-	// If you want to output log with file info, try this:
-	logger.EnableFileInfo()
-	logger.Info("What file is it? Which line?")
-	logger.DisableFileInfo()
+	// Set encoder and writer
+	// Actually, every level has own encoder and writer
+	// This way will set encoder and writer of all levels to the same one
+	logger.SetEncoder(logit.JsonEncoder())
+	logger.SetWriter(os.Stdout)
 
-	// If you have a long log and it is made of many variables, try this:
-	// The msg is the return value of msgGenerator.
-	logger.DebugFunc(func() string {
-		// Use time as the source of random number generator.
-		r := rand.New(rand.NewSource(time.Now().Unix()))
-		return "debug rand int: " + strconv.Itoa(r.Intn(100))
-	})
+	// More features can be discovered by API
 }

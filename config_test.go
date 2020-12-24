@@ -18,83 +18,28 @@
 
 package logit
 
-import (
-	"io/ioutil"
-	"os"
-	"path/filepath"
-	"testing"
-)
+import "testing"
 
-// 创建 TestParseConfigFile 测试案例的配置文件
-func createParseConfigFileTestConfigFile(t *testing.T) string {
+// go test -v -cover -run=^TestLevelOf$
+func TestLevelOf(t *testing.T) {
 
-	// 创建配置文件
-	configFile, err := ioutil.TempFile("", "TestParseConfigFile_*.conf")
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer configFile.Close()
-
-	// 写入配置内容
-	configFile.WriteString(`
-    {
-        # 这是注释
-        // 这也是注释
-		"level": "debug",
-		
-		"caller": false,
-		
-		"handlers": {
-		   "console": {
-			   "timeFormat": "unix",
-			   "encoder": "json"
-		   },
-		   "file": {
-			   "path": "` + escapeString(filepath.Join(os.TempDir(), "logit.log")) + `"
-		   }
-		}
-    }
-	`)
-	return configFile.Name()
-}
-
-// 测试解析配置文件的方法
-func TestParseConfigFile(t *testing.T) {
-
-	// 打开配置文件
-	file, err := os.Open(createParseConfigFileTestConfigFile(t))
-	if err != nil {
-		t.Fatal(err)
+	if level, err := levelOf("notExistedLevel"); err == nil {
+		t.Fatalf("level (%s) should not be returned", level)
 	}
 
-	// 解析配置文件
-	conf, err := parseConfigFrom(file)
-	if err != nil {
-		t.Fatal("parseConfigFile 测试出现问题！", err)
-	}
-
-	t.Logf("%v\n", conf.Level)
-	t.Logf("%v\n", conf.Caller)
-	for name, parmas := range conf.Handlers {
-		t.Logf("%s ==> %v\n", name, parmas)
+	if level, err := levelOf("info"); err != nil || level != InfoLevel {
+		t.Fatalf("returned level (%s) is wrong", level)
 	}
 }
 
-// 测试从 config 中解析日志处理器的方法
-func TestParseHandlersFromConfig(t *testing.T) {
+// go test -v -cover -run=^TestEncodeOf$
+func TestEncodeOf(t *testing.T) {
 
-	handlers := parseHandlersFrom(config{
-		Handlers: map[string]map[string]interface{}{
-			"console": {
-				"k1": "v1",
-			},
-			"file": {
-				"path": escapeString(filepath.Join(os.TempDir(), "TestParseHandlersFromConfig.log")),
-				"k2":   "v2",
-			},
-		},
-	})
-	for i, handler := range handlers {
-		t.Logf("No.%d ==> %T\n", i+1, handler)
+	if _, err := encoderOf("notExistedEncoder"); err == nil {
+		t.Fatal("encoder should not be returned")
+	}
+
+	if _, err := encoderOf("text"); err != nil {
+		t.Fatal("failed to get encoder")
 	}
 }

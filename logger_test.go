@@ -19,226 +19,192 @@
 package logit
 
 import (
+	"bytes"
 	"fmt"
-	"io/ioutil"
-	"math/rand"
-	"os"
-	"path/filepath"
-	"strconv"
-	"strings"
-	"sync"
 	"testing"
 )
 
-// 测试日志记录器的 Debug 方法
-func TestLoggerDebug(t *testing.T) {
-	logger := NewLogger(DebugLevel, NewStandardHandler(os.Stdout, TextEncoder(), DefaultTimeFormat))
-	logger.Debug("这是 debug 信息。。。")
-}
+// go test -v -cover -run=^TestLoggerLevel$
+func TestLoggerLevel(t *testing.T) {
 
-// 测试日志记录器的 Debug 方法
-func TestLoggerInfo(t *testing.T) {
-	logger := NewLogger(DebugLevel, NewStandardHandler(os.Stdout, TextEncoder(), DefaultTimeFormat))
-	logger.Info("这是 info 信息。。。")
-}
+	logger := NewLogger()
 
-// 测试日志记录器的 Debug 方法
-func TestLoggerWarn(t *testing.T) {
-	logger := NewLogger(DebugLevel, NewStandardHandler(os.Stdout, TextEncoder(), DefaultTimeFormat))
-	logger.Warn("这是 warn 信息。。。")
-}
-
-// 测试日志记录器的 Debug 方法
-func TestLoggerError(t *testing.T) {
-	logger := NewLogger(DebugLevel, NewStandardHandler(os.Stdout, TextEncoder(), DefaultTimeFormat))
-	logger.Error("这是 error 信息。。。")
-}
-
-// 测试调整日志记录器为运行状态的方法
-func TestLoggerEnable(t *testing.T) {
-	logger := NewLogger(DebugLevel, NewStandardHandler(os.Stdout, TextEncoder(), DefaultTimeFormat))
-	logger.Debug("1. 这是 debug 信息。。。")
-	level := logger.ChangeLevelTo(OffLevel)
-	logger.Debug("2. 这是 debug 信息。。。")
-	logger.ChangeLevelTo(level)
-	logger.Debug("3. 这是 debug 信息。。。")
-}
-
-// 测试日志记录器的级别控制是否可用
-func TestLevel(t *testing.T) {
-	logger := NewLogger(DebugLevel, NewStandardHandler(os.Stdout, TextEncoder(), DefaultTimeFormat))
-	logger.Debug(logger.Level().String())
-	logger.Info("这条 info 级别的内容可以显示吗？")
-	logger.Warn("这条 warn 级别的内容可以显示吗？")
-	logger.Error("这条 error 级别的内容可以显示吗？")
-}
-
-// 测试更改日志级别是否可用
-func TestLoggerChangeLevelTo(t *testing.T) {
-	logger := NewLogger(WarnLevel, NewStandardHandler(os.Stdout, TextEncoder(), DefaultTimeFormat))
-	logger.Info("Logger's level is warn, so info message will not be logged!")
-
-	logger.ChangeLevelTo(InfoLevel)
-	logger.Info("Now info message will be logged!")
-
-	logger.ChangeLevelTo(ErrorLevel)
-	logger.Warn("Now only error messages will be logged!")
-}
-
-// 测试文件信息显示的开关是否可用
-func TestLoggerEnableAndDisableFileInfo(t *testing.T) {
-	logger := NewLogger(DebugLevel, NewStandardHandler(os.Stdout, TextEncoder(), DefaultTimeFormat))
-	logger.Warn("没有文件信息！")
-	logger.EnableFileInfo()
-	logger.Warn("有文件信息？是否正确？")
-	logger.DisableFileInfo()
-	logger.Warn("现在应该没有文件信息了吧！")
-}
-
-type myHandler struct{}
-
-// 定制自己的日志处理器
-func (mh *myHandler) Handle(log *Log) bool {
-	os.Stdout.Write([]byte("myHandler: "))
-	os.Stdout.Write(TextEncoder().Encode(log, DefaultTimeFormat))
-	return true
-}
-
-// 测试增加处理器是否可用
-func TestLoggerAddHandlersAndSetHandlers(t *testing.T) {
-	logger := NewLogger(DebugLevel, NewStandardHandler(os.Stdout, TextEncoder(), DefaultTimeFormat))
-	logger.Info("当前的日志处理器：" + fmt.Sprintf("%v", logger.handlers))
-
-	if len(logger.handlers) != 1 {
-		t.Fatal("处理器个数不正确！")
+	if logger.Level() != logger.level {
+		t.Fatalf("level returned %v is wrong", logger.Level())
 	}
 
-	logger.AddHandlers(&myHandler{})
-	logger.Info("当前的日志处理器：" + fmt.Sprintf("%v", logger.handlers))
-
-	if len(logger.handlers) != 2 {
-		t.Fatal("处理器个数不正确！")
-	}
-
-	ok := logger.SetHandlers()
-	if ok {
-		t.Fatal("SetHandlers 应该返回 false！")
-	}
-
-	logger.SetHandlers(&myHandler{})
-	logger.Info("当前的日志处理器：" + fmt.Sprintf("%v", logger.handlers))
-
-	if len(logger.handlers) != 1 {
-		t.Fatal("处理器个数不正确！")
+	realOldLevel := logger.level
+	if oldLevel := logger.SetLevel(InfoLevel); oldLevel != realOldLevel || logger.level != InfoLevel {
+		t.Fatalf("level set or old level %v is wrong", oldLevel)
 	}
 }
 
-// 测试获取日志处理器的方法
-func TestLoggerHandlers(t *testing.T) {
-	logger := NewLogger(DebugLevel, NewConsoleHandler(JsonEncoder(), ""))
-	handlers := logger.Handlers()
+// go test -v -cover -run=^TestLoggerNeedCaller$
+func TestLoggerNeedCaller(t *testing.T) {
 
-	// 需要判断地址是否一样，一样说明有问题
-	if &handlers[0] == &logger.handlers[0] {
-		t.Fatal("handlers 获取的数据和底层数据地址一样！这是有问题的！")
+	logger := NewLogger()
+
+	logger.NeedCaller(true)
+	if logger.needCaller != true {
+		t.Fatal("needCaller set is wrong")
 	}
+}
 
-	// 显示每个日志处理器的地址
-	logger.Info("handlers 个数：" + strconv.Itoa(len(handlers)))
-	logger.InfoFunc(func() string {
-		builder := strings.Builder{}
-		for _, handler := range handlers {
-			builder.WriteString(fmt.Sprintf("%p ", &handler))
+// go test -v -cover -run=^TestLoggerTimeFormat$
+func TestLoggerTimeFormat(t *testing.T) {
+
+	logger := NewLogger()
+
+	logger.TimeFormat("2006/01/02 15:04:05")
+	if logger.timeFormat != "2006/01/02 15:04:05" {
+		t.Fatal("timeFormat set is wrong")
+	}
+}
+
+// go test -v -cover -run=^TestLoggerSetEncoder$
+func TestLoggerSetEncoder(t *testing.T) {
+
+	logger := NewLogger()
+
+	logger.SetEncoder(func(log *Log, timeFormat string) []byte {
+		return []byte("TestLoggerSetEncoder")
+	})
+
+	encoders := logger.encoders
+	for level, encoder := range encoders {
+		encoded := string(encoder.Encode(nil, ""))
+		if encoded != "TestLoggerSetEncoder" {
+			t.Fatalf("encoded %s of level %v is wrong", encoded, level)
 		}
-		return builder.String()
+	}
+}
+
+// go test -v -cover -run=^TestLoggerSetEncoderByLevel$
+func TestLoggerSetEncoderByLevel(t *testing.T) {
+
+	logger := NewLogger()
+
+	logger.SetDebugEncoder(func(log *Log, timeFormat string) []byte {
+		return []byte(DebugLevel.String())
 	})
 
-	// 尝试非法篡改日志处理器
-	handlers[0] = &myHandler{}
-	logger.Warn("这条信息需要显示出来！")
-}
+	logger.SetInfoEncoder(func(log *Log, timeFormat string) []byte {
+		return []byte(InfoLevel.String())
+	})
 
-// 测试并发情况下使用 Logger
-func TestLoggerInConcurrency(t *testing.T) {
+	logger.SetWarnEncoder(func(log *Log, timeFormat string) []byte {
+		return []byte(WarnLevel.String())
+	})
 
-	logger := NewLogger(DebugLevel, NewConsoleHandler(JsonEncoder(), ""))
+	logger.SetErrorEncoder(func(log *Log, timeFormat string) []byte {
+		return []byte(ErrorLevel.String())
+	})
 
-	group := sync.WaitGroup{}
-	for i := 0; i < 100; i++ {
-		group.Add(1)
-		go func(num int) {
-			if num == 30 || num == 60 {
-				logger.ChangeLevelTo(InfoLevel)
-			}
-			logger.Info(strconv.Itoa(num))
-			group.Done()
-		}(i)
-	}
-
-	group.Wait()
-}
-
-// 创建 TestNewLoggerFromPath 测试案例的配置文件
-func createNewLoggerFromPathTestConfigFile(t *testing.T) string {
-
-	// 创建配置文件
-	configFile, err := ioutil.TempFile("", "TestNewLoggerFromPath_*.conf")
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer configFile.Close()
-
-	// 写入配置内容
-	configFile.WriteString(`
-		"level": "debug",
-		
-		"caller": false,
-		
-		"handlers": {
-		   "console": {
-			   "timeFormat": "unix",
-			   "encoder": "json"
-		   },
-		   "file": {
-			   "path": "` + escapeString(filepath.Join(os.TempDir(), "logit.log")) + `"
-		   }
+	encoders := logger.encoders
+	for level, encoder := range encoders {
+		encoded := string(encoder.Encode(nil, ""))
+		if encoded != level.String() {
+			t.Fatalf("encoded %s of level %v is wrong", encoded, level)
 		}
-	`)
-	return configFile.Name()
+	}
 }
 
-// 测试从配置文件中创建一个 logger
-func TestNewLoggerFromPath(t *testing.T) {
-	logger := NewLoggerFromPath(createNewLoggerFromPathTestConfigFile(t))
-	logger.Info("Does it work? 这是测试日志信息，实际的日志信息可能比这个长，也可能比这个短！")
+// go test -v -cover -run=^TestLoggerSetWriter$
+func TestLoggerSetWriter(t *testing.T) {
+
+	logger := NewLogger()
+
+	buffer := bytes.NewBuffer(make([]byte, 0))
+	logger.SetWriter(buffer)
+
+	writers := logger.writers
+	for _, writer := range writers {
+		_, err := writer.Write([]byte("1"))
+		if err != nil {
+			t.Fatal(err)
+		}
+	}
+
+	s := buffer.String()
+	if s != "1111" {
+		t.Fatalf("write %s to buffer is wrong", s)
+	}
 }
 
-// 测试输出日志是从函数中生成的几个方法
-func TestLoggerLogFunction(t *testing.T) {
-	logger := NewLogger(DebugLevel, NewConsoleHandler(JsonEncoder(), ""))
-	logger.DebugFunc(func() string {
-		return "debug rand int: " + strconv.Itoa(rand.Intn(100))
-	})
-	logger.InfoFunc(func() string {
-		return "info rand int: " + strconv.Itoa(rand.Intn(100))
-	})
-	logger.WarnFunc(func() string {
-		return "warn rand int: " + strconv.Itoa(rand.Intn(100))
-	})
-	logger.ErrorFunc(func() string {
-		return "error rand int: " + strconv.Itoa(rand.Intn(100))
-	})
+// go test -v -cover -run=^TestLoggerSetWriterByLevel$
+func TestLoggerSetWriterByLevel(t *testing.T) {
 
-	// test escaping
-	logger.Info(`test "double quotes"\t\b \u0003 \u0019 !!!!`)
+	logger := NewLogger()
+
+	writers := map[Level]*bytes.Buffer{
+		DebugLevel: bytes.NewBuffer(make([]byte, 0)),
+		InfoLevel:  bytes.NewBuffer(make([]byte, 0)),
+		WarnLevel:  bytes.NewBuffer(make([]byte, 0)),
+		ErrorLevel: bytes.NewBuffer(make([]byte, 0)),
+	}
+
+	logger.SetDebugWriter(writers[DebugLevel])
+	logger.SetInfoWriter(writers[InfoLevel])
+	logger.SetWarnWriter(writers[WarnLevel])
+	logger.SetErrorWriter(writers[ErrorLevel])
+
+	for level, writer := range logger.writers {
+		_, err := writer.Write([]byte(level.String()))
+		if err != nil {
+			t.Fatal(err)
+		}
+	}
+
+	for level, writer := range writers {
+		s := writer.String()
+		if s != level.String() {
+			t.Fatalf("write %s to buffer of level %v is wrong", s, level)
+		}
+	}
 }
 
-// 测试带格式化的日志输出方法
-func TestLoggerOutputWithFormat(t *testing.T) {
-	logger := NewLogger(DebugLevel, NewStandardHandler(os.Stdout, TextEncoder(), DefaultTimeFormat))
-	logger.EnableFileInfo()
-	logger.Debugf("Debugf... %d %s %.3f", 123, "幸福呢", 123.123456)
-	logger.Infof("Infof... %d %s %.3f", 123, "幸福呢", 123.123456)
-	logger.Warnf("Warnf... %d %s %.3f", 123, "幸福呢", 123.123456)
-	logger.Errorf("Errorf... %d %s %.3f", 123, "幸福呢", 123.123456)
+// go test -v -cover -run=^TestLoggerCore$
+func TestLoggerCore(t *testing.T) {
+
+	logger := NewLogger()
+	logger.SetLevel(DebugLevel)
+
+	buffer := bytes.NewBuffer(make([]byte, 0))
+	logger.SetEncoder(func(log *Log, timeFormat string) []byte {
+		return []byte(log.msg)
+	})
+	logger.SetWriter(buffer)
+
+	logger.Debug(DebugLevel.String())
+	logger.Info(InfoLevel.String())
+	logger.Warn(WarnLevel.String())
+	logger.Error(ErrorLevel.String())
+
+	s := buffer.String()
+	if s != DebugLevel.String()+InfoLevel.String()+WarnLevel.String()+ErrorLevel.String() {
+		t.Fatalf("core log %s is wrong", s)
+	}
+}
+
+// go test -v -cover -run=^TestLoggerCoreF$
+func TestLoggerCoreF(t *testing.T) {
+
+	logger := NewLogger()
+	logger.SetLevel(DebugLevel)
+
+	buffer := bytes.NewBuffer(make([]byte, 0))
+	logger.SetEncoder(func(log *Log, timeFormat string) []byte {
+		return []byte(log.msg)
+	})
+	logger.SetWriter(buffer)
+
+	logger.DebugF("%sF", DebugLevel.String())
+	logger.InfoF("%sF", InfoLevel.String())
+	logger.WarnF("%sF", WarnLevel.String())
+	logger.ErrorF("%sF", ErrorLevel.String())
+
+	s := buffer.String()
+	if s != fmt.Sprintf("%sF%sF%sF%sF", DebugLevel.String(), InfoLevel.String(), WarnLevel.String(), ErrorLevel.String()) {
+		t.Fatalf("coreF log %s is wrong", s)
+	}
 }

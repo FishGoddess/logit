@@ -14,46 +14,55 @@
 //
 // Author: FishGoddess
 // Email: fishgoddess@qq.com
-// Created at 2020/02/29 21:59:13
+// Created at 2020/11/27 23:39:30
+
 package main
 
 import (
-	"math/rand"
-	"strconv"
-	"time"
+	"os"
 
 	"github.com/FishGoddess/logit"
 )
 
 func main() {
 
-	// Log messages with four levels.
-	logit.Debug("I am a debug message!")
-	logit.Info("I am an info message!")
-	logit.Warn("I am a warn message!")
-	logit.Error("I am an error message!")
+	// There are four levels can be logged
+	logit.Debug("Hello, I am debug!") // Ignore because default level is info
+	logit.Info("Hello, I am info!")
+	logit.Warn("Hello, I am warn!")
+	logit.Error("Hello, I am error!")
 
-	// Notice that logit has blocked some methods for more refreshing method list.
-	// If you want to use some higher level methods, you should call logit.Me() to
-	// get the fully functional logger, then call what you want to call.
-	// For example, if you want to output log with file info, try this:
-	logit.Me().EnableFileInfo()
-	logit.Info("Show file info!")
+	// You can format log with some parameters if you want
+	logit.DebugF("Hello, I am debugF %d!", 2) // Ignore because default level is info
+	logit.InfoF("Hello, I am infoF %d!", 2)
+	logit.WarnF("Hello, I am warnF %d!", 2)
+	logit.ErrorF("Hello, I am errorF %d!", 2)
 
-	// If you have a long log and it is made of many variables, try this:
-	// The msg is the return value of msgGenerator.
-	logit.DebugFunc(func() string {
-		// Use time as the source of random number generator.
-		r := rand.New(rand.NewSource(time.Now().Unix()))
-		return "debug rand int: " + strconv.Itoa(r.Intn(100))
-	})
+	// logit.Me() returns a completed logger for use
 
-	// Or you can use formatting method like this:
-	logit.Debugf("This is a debug msg with %d params: %s, %s", 2, "msgFormat", "msgParams")
-	logit.Infof("This is a debug msg with %d params: %s, %s", 2, "msgFormat", "msgParams")
-	logit.Warnf("This is a debug msg with %d params: %s, %s", 2, "msgFormat", "msgParams")
-	logit.Errorf("This is a debug msg with %d params: %s, %s", 2, "msgFormat", "msgParams")
+	// Set level to debug
+	logit.Me().SetLevel(logit.DebugLevel)
 
-	// If a config file "logit.conf" in "./", then logit will load it automatically.
-	// This is more convenience to use config file and logger.
+	// Log won't carry caller information in default
+	// So, try NeedCaller if you need
+	logit.Me().NeedCaller(true)
+
+	// Set format of time in log
+	logit.Me().TimeFormat("2006/01/02 15:04:05")
+
+	// Set encoder and writer
+	// Actually, every level has own encoder and writer
+	// This way will set encoder and writer of all levels to the same one
+	logit.Me().SetEncoder(logit.JsonEncoder())
+	logit.Me().SetWriter(os.Stdout)
+
+	// We also provide some functions to set encoder and writer of each level
+	logit.Me().SetDebugEncoder(logit.JsonEncoder())
+	logit.Me().SetInfoEncoder(logit.JsonEncoder())
+	logit.Me().SetWarnEncoder(logit.JsonEncoder())
+	logit.Me().SetErrorEncoder(logit.JsonEncoder())
+	logit.Me().SetDebugWriter(os.Stdout)
+	logit.Me().SetInfoWriter(os.Stdout)
+	logit.Me().SetWarnWriter(os.Stdout)
+	logit.Me().SetErrorWriter(os.Stdout)
 }

@@ -19,197 +19,149 @@
 /*
 Package logit provides an easy way to use foundation for your logging operations.
 
-1. the basic usage:
+1. basic
 
-	// Log messages with four levels.
-	logit.Debug("I am a debug message!")
-	logit.Info("I am an info message!")
-	logit.Warn("I am a warn message!")
-	logit.Error("I am an error message!")
+	// There are four levels can be logged
+	logit.Debug("Hello, I am debug!") // Ignore because default level is info
+	logit.Info("Hello, I am info!")
+	logit.Warn("Hello, I am warn!")
+	logit.Error("Hello, I am error!")
 
-	// Notice that logit has blocked some methods for more refreshing method list.
-	// If you want to use some higher level methods, you should call logit.Me() to
-	// get the fully functional logger, then call what you want to call.
-	// For example, if you want to output log with file info, try this:
-	logit.Me().EnableFileInfo()
-	logit.Info("Show file info!")
+	// You can format log with some parameters if you want
+	logit.DebugF("Hello, I am debugF %d!", 2) // Ignore because default level is info
+	logit.InfoF("Hello, I am infoF %d!", 2)
+	logit.WarnF("Hello, I am warnF %d!", 2)
+	logit.ErrorF("Hello, I am errorF %d!", 2)
 
-	// If you have a long log and it is made of many variables, try this:
-	// The msg is the return value of msgGenerator.
-	logit.DebugFunc(func() string {
-		// Use time as the source of random number generator.
-		r := rand.New(rand.NewSource(time.Now().Unix()))
-		return "debug rand int: " + strconv.Itoa(r.Intn(100))
+	// logit.Me() returns a completed logger for use
+
+	// Set level to debug
+	logit.Me().SetLevel(logit.DebugLevel)
+
+	// Log won't carry caller information in default
+	// So, try NeedCaller if you need
+	logit.Me().NeedCaller(true)
+
+	// Set format of time in log
+	logit.Me().TimeFormat("2006/01/02 15:04:05")
+
+	// Set encoder and writer
+	// Actually, every level has own encoder and writer
+	// This way will set encoder and writer of all levels to the same one
+	logit.Me().SetEncoder(logit.JsonEncoder())
+	logit.Me().SetWriter(os.Stdout)
+
+	// We also provide some functions to set encoder and writer of each level
+	logit.Me().SetDebugEncoder(logit.JsonEncoder())
+	logit.Me().SetInfoEncoder(logit.JsonEncoder())
+	logit.Me().SetWarnEncoder(logit.JsonEncoder())
+	logit.Me().SetErrorEncoder(logit.JsonEncoder())
+	logit.Me().SetDebugWriter(os.Stdout)
+	logit.Me().SetInfoWriter(os.Stdout)
+	logit.Me().SetWarnWriter(os.Stdout)
+	logit.Me().SetErrorWriter(os.Stdout)
+
+2. logger
+
+	// Create a new logger and set its level to debug
+	logger := logit.NewLogger()
+	logger.SetLevel(logit.DebugLevel)
+
+	// Then, just use it like normal logger
+	logger.Debug("Hello, I am debug!")
+	logger.Info("Hello, I am info!")
+	logger.Warn("Hello, I am warn!")
+	logger.Error("Hello, I am error!")
+
+	// Log won't carry caller information in default
+	// So, try NeedCaller if you need
+	logger.NeedCaller(true)
+
+	// Set format of time in log
+	logger.TimeFormat("2006/01/02 15:04:05")
+
+	// Set encoder and writer
+	// Actually, every level has own encoder and writer
+	// This way will set encoder and writer of all levels to the same one
+	logger.SetEncoder(logit.JsonEncoder())
+	logger.SetWriter(os.Stdout)
+
+	// More features can be discovered by API
+
+3. encoder
+
+	// Use default encoder
+	logit.Info("Default encoder is like this...")
+
+	// We provide some encoders, such as text and json
+	// Try TextEncoder() and JsonEncoder()
+	logit.Me().SetEncoder(logit.TextEncoder())
+	logit.Me().SetEncoder(logit.JsonEncoder())
+
+	// In fact, encoder is a function like "func(log *logit.Log, timeFormat string) []byte"
+	// All information of log is stored in log
+	// timeFormat is a layout for formatting time
+	// No matter what you do, return a byte slice
+	// The returned slice will be written by logger
+	logit.Me().SetEncoder(func(log *logit.Log, timeFormat string) []byte {
+		logTime := log.Time().Format(timeFormat)
+		return []byte(logTime + " => " + log.Msg() + "\r\n")
 	})
+	logit.Info("My encoder...")
 
-	// Or you can use formatting method like this:
-	logit.Debugf("This is a debug msg with %d params: %s, %s", 2, "msgFormat", "msgParams")
-	logit.Infof("This is a debug msg with %d params: %s, %s", 2, "msgFormat", "msgParams")
-	logit.Warnf("This is a debug msg with %d params: %s, %s", 2, "msgFormat", "msgParams")
-	logit.Errorf("This is a debug msg with %d params: %s, %s", 2, "msgFormat", "msgParams")
-
-	// If a config file "logit.conf" in "./", then logit will load it automatically.
-	// This is more convenience to use config file and logger.
-
-2. logger:
-
-	// NewDevelopLogger creates a new Logger holder for developing, generally log to terminal or console.
-	// You can switch to logit.NewProductionLogger for production environment.
-	//logger := logit.NewProductionLogger(os.Stdout)
-	logger := logit.NewLogger(logit.DebugLevel, logit.NewConsoleHandler(logit.TextEncoder(), logit.DefaultTimeFormat))
-
-	// Then you will be easy to log!
-	logger.Debug("this is a debug message!")
-	logger.Info("this is an info message!")
-	logger.Warn("this is a warn message!")
-	logger.Error("this is an error message!")
-
-	// NewLoggerWithoutEncoder creates a new Logger holder with given level and handlers.
-	// As you know, file also can be written, just replace os.Stdout with your file!
-	// A logger is made of level and handlers, so we provide some handlers for use, see logit.Handler.
-	// This method is the most original way to create a logger for use.
-	logger = logit.NewLogger(logit.DebugLevel, logit.NewStandardHandler(os.Stdout, logit.TextEncoder(), "2006/01/02 15:04:05"))
-	logger.Info("What time is it now?")
-
-	// For convenience, we provide a register mechanism and you can use handlers like this:
-	logger = logit.NewLogger(logit.DebugLevel, logit.NewConsoleHandler(logit.TextEncoder(), logit.DefaultTimeFormat))
-	logger.Info("What handler is it now?")
-
-	// If you want to output log with file info, try this:
-	logger.EnableFileInfo()
-	logger.Info("What file is it? Which line?")
-	logger.DisableFileInfo()
-
-	// If you have a long log and it is made of many variables, try this:
-	// The msg is the return value of msgGenerator.
-	logger.DebugFunc(func() string {
-		// Use time as the source of random number generator.
-		r := rand.New(rand.NewSource(time.Now().Unix()))
-		return "debug rand int: " + strconv.Itoa(r.Intn(100))
+	// You can set encoder of each level, for example:
+	logit.Me().SetErrorEncoder(func(log *logit.Log, timeFormat string) []byte {
+		logTime := log.Time().Format(timeFormat)
+		return []byte("[Error] " + logTime + " => " + log.Msg() + "\n")
 	})
+	logit.Error("Panic...")
 
-3. level_and_disable:
+	// If you have a logger, just use it as logit.Me()
+	logger := logit.NewLogger()
+	logger.SetEncoder(logit.TextEncoder())
+	logger.SetWarnEncoder(logit.JsonEncoder())
 
-	// Use logit.Debug method to output a debug level message.
-	// Also, Info/Warn/Error method is available.
-	logit.Debug("Default logger level is debug.")
+4. writer
 
-	// Change logger level to info level, so logs in debug level will be ignored.
-	// Notice that logit has blocked some methods for more refreshing method list.
-	// If you want to use some higher level methods, you should call logit.Me() to
-	// get the fully functional logger, then call what you want to call.
-	logit.Me().ChangeLevelTo(logit.InfoLevel)
-	logit.Debug("You never see me!")
+	// We provide a writer writing to file
+	// "./test.log" is the path of this file
+	writer, err := logit.NewFileWriter("Z:/test.log")
+	if err != nil {
+		panic(err)
+	}
+	defer writer.Close()
 
-	// In particular, you can change level to OffLevel to disable the logger.
-	// So the info message next line will not be logged!
-	level := logit.Me().ChangeLevelTo(logit.OffLevel)
-	logit.Info("I will not be logged!")
+	// Use Write() to write something to file underlying
+	writer.Write([]byte("Something new..."))
 
-	// Enable the Logger.
-	// The info message next line will be logged again!
-	logit.Me().ChangeLevelTo(level)
-	logit.Info("I am running again!")
+	// Also, we provide some checkers for advanced features
+	// Every writing operation will call Check() in checker
+	// If one checker's Check() returns true, then this file will roll to a new file
+	// The old file will be renamed to be like "xxx.log.0000000001"
+	// These are all checkers we provide:
+	logit.NewTimeChecker(24 * time.Hour)
+	logit.NewSizeChecker(64 * logit.MB)
+	logit.NewCountChecker(1000)
 
-4. log to file:
+	// If you want to use one of them above, try this:
+	newWriter, err := logit.NewFileWriter("Z:/test_checker.log", logit.NewSizeChecker(128*logit.KB))
+	if err != nil {
+		panic(err)
+	}
+	defer newWriter.Close()
 
-	// NewFileLogger creates a new logger which logs to file.
-	// It just need a file path like "D:/test.log" and a logger level.
-	logger := logit.NewLogger(logit.DebugLevel, logit.NewFileHandler("D:/test.log", logit.TextEncoder(), logit.DefaultTimeFormat))
-	logger.Info("I am info message！")
-
-	// NewDurationRollingLogger creates a duration rolling logger with given duration.
-	// You should appoint a directory to store all log files generated in this time.
-	// Notice that duration must not less than minDuration (generally time.Second), see files.minDuration.
-	// Also, default filename of log file is like "20200304-145246-45.log", see files.NewFilename.
-	// If you want to appoint another filename, check this and do it by this way.
-	// See files.NewDurationRollingFile (it is an implement of io.writer).
-	logger = logit.NewLogger(logit.DebugLevel, logit.NewDurationRollingHandler("D:/", 24*time.Hour, logit.TextEncoder(), logit.DefaultTimeFormat))
-	logger.Info("Rolling!!!")
-
-	// NewSizeRollingLogger creates a file size rolling logger with given limitedSize.
-	// You should appoint a directory to store all log files generated in this time.
-	// Notice that limitedSize must not less than minLimitedSize (generally 64 KB), see files.minLimitedSize.
-	// Check files.KB, files.MB, files.GB to know what unit you gonna to use.
-	// Also, default filename of log file is like "20200304-145246-45.log", see nextFilename.
-	// If you want to appoint another filename, check this and do it by this way.
-	// See files.NewSizeRollingFile (it is an implement of io.writer).
-	logger = logit.NewLogger(logit.DebugLevel, logit.NewSizeRollingHandler("D:/", 64*files.KB, logit.TextEncoder(), logit.DefaultTimeFormat))
-	logger.Info("file size???")
-
-5. handler:
-
-	type myHandler struct{}
-
-	// Customize your own handler.
-	func (mh *myHandler) Handle(log *logit.Log) bool {
-		os.Stdout.Write([]byte("myHandler: "))
-		os.Stdout.Write(logit.TextEncoder().Encode(log, "")) // Try `os.Stdout.WriteString(log.Msg())` ?
-		return true
+	// Check how many files starting with "test_checker.log"?
+	for i := 0; i < 10000; i++ {
+		newWriter.Write([]byte(fmt.Sprintf("Something new with checker...%d\n", i)))
 	}
 
-	func init() {
-		// We recommend you to register your handler to logit, so that
-		// you can use your handler in config file.
-		// See logit.RegisterHandler.
-		logit.RegisterHandler("myHandler", func(params map[string]interface{}) logit.Handler {
-			return &myHandler{}
-		})
-	}
-
-	// Create a logger holder with a console handler.
-	logger := logit.NewLogger(logit.DebugLevel, logit.NewConsoleHandler(logit.TextEncoder(), logit.DefaultTimeFormat))
-	logger.Info("before adding handlers...")
-	fmt.Println("fmt =========================================")
-
-	// Add handlers to logger.
-	// There are three handlers in logger because logger has one handler inside before adding.
-	// See logit.NewConsoleHandler.
-	logger.AddHandlers(&myHandler{}, logit.NewConsoleHandler(logit.JsonEncoder(), ""))
-	logger.Info("after adding two handlers...")
-	fmt.Println("fmt =========================================")
-
-	// Set handlers to logger.
-	// There are one handler in logger because all handlers inside was removed.
-	// If you register your handler to logit by logit.RegisterHandler, then you can
-	// use your handler everywhere like this:
-	logger.SetHandlers(&myHandler{})
-	logger.Info("after setting one handlers...")
-
-6. config file:
-
-	// Create a logger from config file.
-	//
-	// logger.json:
-	//
-	//     "level": "debug",
-	//
-	//     "caller": false,
-	//
-	//     "handlers": {
-	//         "console": {
-	//             "timeFormat":"unix",
-	//             "encoder":"json"
-	//         },
-	//         "file":{
-	//             "path":"D:/logit.log"
-	//         }
-	//     }
-	//
-	logger := logit.NewLoggerFromPath("./logger.json")
-	logger.Info("I am working!")
-	logger.Info("My level is " + logger.Level().String())
-	fmt.Println("fmt ==============================================")
-
-	handlers := logger.Handlers()
-	for i, handler := range handlers {
-		logger.Info(fmt.Sprintf("No.%d hadler ==> %T", i+1, handler))
-	}
+	// Also, you can use more than one of them in a writer
+	//logit.NewFileWriter("Z:/test_checker.log", logit.NewTimeChecker(24*time.Hour), logit.NewSizeChecker(128*logit.KB))
 
 */
 package logit // import "github.com/FishGoddess/logit"
 
 const (
 	// Version is the version string representation of logit.
-	Version = "v0.2.10"
+	Version = "v0.3.2"
 )

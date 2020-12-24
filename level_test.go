@@ -14,40 +14,28 @@
 //
 // Author: FishGoddess
 // Email: fishgoddess@qq.com
-// Created at 2020/03/01 14:18:33
+// Created at 2020/11/26 23:26:22
 
 package logit
 
-import (
-	"math"
-)
+import "testing"
 
-const (
-	DebugLevel Level = iota
-	InfoLevel
-	WarnLevel
-	ErrorLevel
+// go test -v -cover -run=^TestLevelString$
+func TestLevelString(t *testing.T) {
 
-	// OffLevel is for turning off the logger.
-	OffLevel = math.MaxUint8
-)
-
-var (
-	// levels store all names of levels provided.
-	levels = map[Level]string{
-		DebugLevel: "debug",
-		InfoLevel:  "info",
-		WarnLevel:  "warn",
-		ErrorLevel: "error",
-		OffLevel:   "off",
+	if DebugLevel.String() != "debug" {
+		t.Fatalf("debug level %s is wrong", DebugLevel.String())
 	}
-)
 
-// Level is position of one log.
-type Level uint8
+	if InfoLevel.String() != "info" {
+		t.Fatalf("info level %s is wrong", InfoLevel.String())
+	}
 
-// String returns the name of ll.
-// This method will be called when using printing operations like fmt.Println.
-func (ll Level) String() string {
-	return levels[ll]
+	if WarnLevel.String() != "warn" {
+		t.Fatalf("warn level %s is wrong", WarnLevel.String())
+	}
+
+	if ErrorLevel.String() != "error" {
+		t.Fatalf("error level %s is wrong", ErrorLevel.String())
+	}
 }

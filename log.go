@@ -20,31 +20,35 @@ package logit
 
 import "time"
 
+// caller stores some calling information.
+type caller struct {
+
+	// File is the file path of this log.
+	File string
+
+	// Line is the line number in file.
+	Line int
+}
+
 // Log is representation of a logging message, including all information about this message.
 type Log struct {
 
-	// logger is the publisher of this log.
-	logger *Logger
+	// msg is the message of this log.
+	msg string
 
 	// level is the level of this log.
 	level Level
 
-	// now is the publishing time of this log.
-	now time.Time
+	// time is the publishing time of this log.
+	time time.Time
 
-	// file is the file path of this log.
-	file string
-
-	// line is the line number in file.
-	line int
-
-	// msg is the message of this log.
-	msg string
+	// caller stores some calling information, such as file path and line number.
+	caller *caller
 }
 
-// Logger returns the publisher of this log.
-func (l *Log) Logger() *Logger {
-	return l.logger
+// Msg returns the message of this log.
+func (l *Log) Msg() string {
+	return l.msg
 }
 
 // Level returns the level of this log.
@@ -52,22 +56,13 @@ func (l *Log) Level() Level {
 	return l.level
 }
 
-// Now returns the publishing time of this log.
-func (l *Log) Now() time.Time {
-	return l.now
+// Time returns the publishing time of this log.
+func (l *Log) Time() time.Time {
+	return l.time
 }
 
-// File returns the file path of this log.
-func (l *Log) File() string {
-	return l.file
-}
-
-// Line returns the line number in file of this log.
-func (l *Log) Line() int {
-	return l.line
-}
-
-// Msg returns the message of this log.
-func (l *Log) Msg() string {
-	return l.msg
+// Caller returns the caller information of this log.
+// Notice that ok will be false if this log doesn't have caller information.
+func (l *Log) Caller() (caller *caller, ok bool) {
+	return l.caller, l.caller != nil
 }

@@ -3,8 +3,7 @@
 [![License](_icon/license.svg)](https://www.apache.org/licenses/LICENSE-2.0.html)
 [![Go Doc](_icon/godoc.svg)](https://pkg.go.dev/github.com/FishGoddess/logit?tab=doc)
 
-
-**logit** 是一个简单易用并且是基于级别控制和配置文件的日志库，可以应用于所有的 [GoLang](https://golang.org) 应用程序中。
+**logit** 是一个基于级别控制的高性能日志库，可以应用于所有的 [GoLang](https://golang.org) 应用程序中。
 
 [Read me in English](./README.en.md)
 
@@ -12,101 +11,88 @@
 
 ### 🥇 功能特性
 
-* 独特的日志输出模块设计，使用 wrapper 和 handler 装载特定的模块，实现扩展功能
+* 独特的日志输出模块设计，使用 encoder 和 writer 装载特定的模块，实现扩展功能
 * 支持日志级别控制，一共有四个日志级别，分别是 debug，info，warn 和 error
-* 支持配置文件，可以让用户在项目编译成二进制之后还能灵活地控制日志的设置
-* 支持日志记录函数，使用回调的形式获取日志内容，对长日志内容的组织逻辑会更清晰
 * 支持开启或者关闭日志功能，线上环境可以关闭或调高日志级别
 * 支持记录日志到文件中，并且可以自定义日志文件名
-* 支持按照时间间隔进行自动划分日志文件，比如每一天划分一个日志文件
-* 支持按照文件大小进行自动划分日志文件，比如每 64 MB 划分一个日志文件
-* 增加日志处理器模块，支持用户自定义日志处理逻辑，具有很高的扩展能力
+* 支持按照时间间隔进行自动分割日志文件，比如每一天分割一个日志文件
+* 支持按照文件大小进行自动分割日志文件，比如每 64 MB 分割一个日志文件
+* 支持按照日志记录次数进行自动分割日志文件，比如每记录 1000 条日志分割一个日志文件
 * 支持不输出文件信息，避免 runtime.Caller 方法的调用，具有很高的性能
 * 支持调整时间格式化输出，让用户自定义时间输出的格式
 * 支持以 Json 形式输出日志信息，更方便后续对日志进行解析
 
 _历史版本的特性请查看 [HISTORY.md](./HISTORY.md)。未来版本的新特性和计划请查看 [FUTURE.md](./FUTURE.md)。_
 
-> v0.1.x 及以下版本已经停止维护，请尽快升级到 v0.2.x 版本！您将感受到全新的使用体验，并可以享受长期的更新和维护！
+> v0.3.x 版本已经出了第一个稳定版，这是一个全新设计的版本，废除了很多冗余设计！
 
 ### 🚀 安装方式
 
 ```bash
-$ go get -u github.com/FishGoddess/logit
+$ go get github.com/FishGoddess/logit
 ```
 
-> 如果是 Go modules 的项目，您还可以直接编辑 go.mod 文件。
-
-```bash
-module your_project_name
-
-go 1.14
-
-require (
-    github.com/FishGoddess/logit v0.2.10
-)
-```
-
-logit 没有任何其他额外的依赖，纯使用 [Golang 标准库](https://golang.org) 完成。
+### 📖 参考案例
 
 ```go
 package main
 
 import (
-	"math/rand"
-	"strconv"
-	"time"
+	"os"
 
 	"github.com/FishGoddess/logit"
 )
 
 func main() {
 
-	// Log messages with four levels.
-	logit.Debug("I am a debug message!")
-	logit.Info("I am an info message!")
-	logit.Warn("I am a warn message!")
-	logit.Error("I am an error message!")
+	// There are four levels can be logged
+	logit.Debug("Hello, I am debug!") // Ignore because default level is info
+	logit.Info("Hello, I am info!")
+	logit.Warn("Hello, I am warn!")
+	logit.Error("Hello, I am error!")
 
-	// Notice that logit has blocked some methods for more refreshing method list.
-	// If you want to use some higher level methods, you should call logit.Me() to
-	// get the fully functional logger, then call what you want to call.
-	// For example, if you want to output log with file info, try this:
-	logit.Me().EnableFileInfo()
-	logit.Info("Show file info!")
+	// You can format log with some parameters if you want
+	logit.DebugF("Hello, I am debugF %d!", 2) // Ignore because default level is info
+	logit.InfoF("Hello, I am infoF %d!", 2)
+	logit.WarnF("Hello, I am warnF %d!", 2)
+	logit.ErrorF("Hello, I am errorF %d!", 2)
 
-	// If you have a long log and it is made of many variables, try this:
-	// The msg is the return value of msgGenerator.
-	logit.DebugFunc(func() string {
-		// Use time as the source of random number generator.
-		r := rand.New(rand.NewSource(time.Now().Unix()))
-		return "debug rand int: " + strconv.Itoa(r.Intn(100))
-	})
+	// logit.Me() returns a completed logger for use
 
-	// Or you can use formatting method like this:
-	logit.Debugf("This is a debug msg with %d params: %s, %s", 2, "msgFormat", "msgParams")
-	logit.Infof("This is a debug msg with %d params: %s, %s", 2, "msgFormat", "msgParams")
-	logit.Warnf("This is a debug msg with %d params: %s, %s", 2, "msgFormat", "msgParams")
-	logit.Errorf("This is a debug msg with %d params: %s, %s", 2, "msgFormat", "msgParams")
+	// Set level to debug
+	logit.Me().SetLevel(logit.DebugLevel)
 
-	// If a config file "logit.conf" in "./", then logit will load it automatically.
-	// This is more convenience to use config file and logger.
+	// Log won't carry caller information in default
+	// So, try NeedCaller if you need
+	logit.Me().NeedCaller(true)
+
+	// Set format of time in log
+	logit.Me().TimeFormat("2006/01/02 15:04:05")
+
+	// Set encoder and writer
+	// Actually, every level has own encoder and writer
+	// This way will set encoder and writer of all levels to the same one
+	logit.Me().SetEncoder(logit.JsonEncoder())
+	logit.Me().SetWriter(os.Stdout)
+
+	// We also provide some functions to set encoder and writer of each level
+	logit.Me().SetDebugEncoder(logit.JsonEncoder())
+	logit.Me().SetInfoEncoder(logit.JsonEncoder())
+	logit.Me().SetWarnEncoder(logit.JsonEncoder())
+	logit.Me().SetErrorEncoder(logit.JsonEncoder())
+	logit.Me().SetDebugWriter(os.Stdout)
+	logit.Me().SetInfoWriter(os.Stdout)
+	logit.Me().SetWarnWriter(os.Stdout)
+	logit.Me().SetErrorWriter(os.Stdout)
 }
 ```
 
-### 📖 参考案例
-
 * [basic](./_examples/basic.go)
 * [logger](./_examples/logger.go)
-* [level_and_disable](./_examples/level_and_disable.go)
-* [config_file](./_examples/config_file.go)
-* [handler](./_examples/handler.go)
-* [files](./_examples/files.go)
-* [log_to_file](./_examples/log_to_file.go)
+* [encoder](./_examples/encoder.go)
+* [writer](./_examples/writer.go)
 
 _更多使用案例请查看 [_examples](./_examples) 目录。_
-
-_配置文件模板请查看 [_examples/config](./_examples/config) 目录。_
 
 ### 🔥 性能测试
 
@@ -118,12 +104,12 @@ $ go test -v ./_examples/benchmarks_test.go -bench=. -benchtime=10s
 
 | 测试 | 单位时间内运行次数 (越大越好) |  每个操作消耗时间 (越小越好) | B/op (越小越好) | allocs/op (越小越好) |
 | -----------|--------|-------------|-------------|-------------|
-| **logit** | **6429907** | **1855 ns/op** | **384 B/op** | **8 allocs/op** |
-| golog | 3361483 | 3589 ns/op | 712 B/op | 24 allocs/op |
-| zap | 2971119 | 4066 ns/op | 448 B/op | 16 allocs/op |
-| logrus | 1553419 | 7869 ns/op | 1633 B/op | 52 allocs/op |
+| **logit** | **7513623** | **1612 ns/op** | **384 B/op** | **8 allocs/op** |
+| golog | 4569554 | 2631 ns/op | 712 B/op | 24 allocs/op |
+| zap | 3891336 | 3084 ns/op | 448 B/op | 16 allocs/op |
+| logrus | 2089682 | 5769 ns/op | 1633 B/op | 52 allocs/op |
 
-> 测试环境：I7-6700HQ CPU @ 2.6 GHZ，16 GB RAM
+> 测试环境：R7-4700U CPU @ 2.0 GHZ，16 GB RAM
 
 **注意：**
 
@@ -140,12 +126,12 @@ $ go test -v ./_examples/benchmarks_test.go -bench=. -benchtime=10s
 **目前存在一个疑惑就是使用并发竞争去换取时间格式化的性能消耗究竟值不值得？**
 **答案是不值得，我们在 v0.1.1-alpha 及更高版本中取消了这个时间缓存机制。**
 
-**4. 值得注意的是，Debugf 一类带格式化的 API 性能达不到这个水平，因为还是使用了反射技术，但是性能依旧是不差的：**
+**4. 值得注意的是，DebugF 一类带格式化的 API 性能达不到这个水平，因为还是使用了反射技术，但是性能依旧是不差的：**
 
 | 测试 | 单位时间内运行次数 (越大越好) |  每个操作消耗时间 (越小越好) | B/op (越小越好) | allocs/op (越小越好) |
 | -----------|--------|-------------|-------------|-------------|
-| logit | 6429907 | 1855 ns/op | 384 B/op | 8 allocs/op |
-| **logit-使用反射技术** | **5288931** | **2334 ns/op** | **424 B/op** | **12 allocs/op** |
+| logit | 7513623 | 1612 ns/op | 384 B/op | 8 allocs/op |
+| **logit-使用反射技术** | **6042254** | **1984 ns/op** | **424 B/op** | **12 allocs/op** |
 
 ### 👥 贡献者
 
