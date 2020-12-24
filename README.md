@@ -3,7 +3,7 @@
 [![License](_icon/license.svg)](https://www.apache.org/licenses/LICENSE-2.0.html)
 [![Go Doc](_icon/godoc.svg)](https://pkg.go.dev/github.com/FishGoddess/logit?tab=doc)
 
-**logit** 是一个简单易用并且是基于级别控制和配置文件的日志库，可以应用于所有的 [GoLang](https://golang.org) 应用程序中。
+**logit** 是一个基于级别控制的高性能日志库，可以应用于所有的 [GoLang](https://golang.org) 应用程序中。
 
 [Read me in English](./README.en.md)
 
@@ -13,7 +13,6 @@
 
 * 独特的日志输出模块设计，使用 encoder 和 writer 装载特定的模块，实现扩展功能
 * 支持日志级别控制，一共有四个日志级别，分别是 debug，info，warn 和 error
-* 支持配置文件，可以让用户在项目编译成二进制之后还能灵活地控制日志的设置
 * 支持开启或者关闭日志功能，线上环境可以关闭或调高日志级别
 * 支持记录日志到文件中，并且可以自定义日志文件名
 * 支持按照时间间隔进行自动分割日志文件，比如每一天分割一个日志文件
@@ -25,7 +24,7 @@
 
 _历史版本的特性请查看 [HISTORY.md](./HISTORY.md)。未来版本的新特性和计划请查看 [FUTURE.md](./FUTURE.md)。_
 
-> 目前稳定的是 v0.2.x 版本，但是 v0.3.x 版本已经出了第一个体验版，这是一个全新设计的版本，废除了很多冗余设计！
+> v0.3.x 版本已经出了第一个稳定版，这是一个全新设计的版本，废除了很多冗余设计！
 
 ### 🚀 安装方式
 

@@ -121,10 +121,47 @@ Package logit provides an easy way to use foundation for your logging operations
 	logger.SetEncoder(logit.TextEncoder())
 	logger.SetWarnEncoder(logit.JsonEncoder())
 
+4. writer
+
+	// We provide a writer writing to file
+	// "./test.log" is the path of this file
+	writer, err := logit.NewFileWriter("Z:/test.log")
+	if err != nil {
+		panic(err)
+	}
+	defer writer.Close()
+
+	// Use Write() to write something to file underlying
+	writer.Write([]byte("Something new..."))
+
+	// Also, we provide some checkers for advanced features
+	// Every writing operation will call Check() in checker
+	// If one checker's Check() returns true, then this file will roll to a new file
+	// The old file will be renamed to be like "xxx.log.0000000001"
+	// These are all checkers we provide:
+	logit.NewTimeChecker(24 * time.Hour)
+	logit.NewSizeChecker(64 * logit.MB)
+	logit.NewCountChecker(1000)
+
+	// If you want to use one of them above, try this:
+	newWriter, err := logit.NewFileWriter("Z:/test_checker.log", logit.NewSizeChecker(128*logit.KB))
+	if err != nil {
+		panic(err)
+	}
+	defer newWriter.Close()
+
+	// Check how many files starting with "test_checker.log"?
+	for i := 0; i < 10000; i++ {
+		newWriter.Write([]byte(fmt.Sprintf("Something new with checker...%d\n", i)))
+	}
+
+	// Also, you can use more than one of them in a writer
+	//logit.NewFileWriter("Z:/test_checker.log", logit.NewTimeChecker(24*time.Hour), logit.NewSizeChecker(128*logit.KB))
+
 */
 package logit // import "github.com/FishGoddess/logit"
 
 const (
 	// Version is the version string representation of logit.
-	Version = "v0.3.0-alpha"
+	Version = "v0.3.2"
 )

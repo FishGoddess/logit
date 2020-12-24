@@ -19,11 +19,12 @@
 package main
 
 import (
+	"os"
+	"path/filepath"
 	"testing"
 	//"time"
 
 	"github.com/FishGoddess/logit"
-	"github.com/FishGoddess/logit/files"
 	//"github.com/kataras/golog"
 	//"github.com/sirupsen/logrus"
 	//"go.uber.org/zap"
@@ -175,10 +176,19 @@ func BenchmarkLogitLogger(b *testing.B) {
 
 // ******************************************************
 
+// 创建文件
+func createFileOf(filePath string) (*os.File, error) {
+	err := os.MkdirAll(filepath.Dir(filePath), 0644)
+	if err != nil {
+		return nil, err
+	}
+	return os.OpenFile(filePath, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0644)
+}
+
 // 测试 logit 文件日志记录器的速度
 func BenchmarkLogitFile(b *testing.B) {
 
-	file, _ := files.CreateFileOf("Z:/BenchmarkLogitFile.log")
+	file, _ := createFileOf("Z:/BenchmarkLogitFile.log")
 	logger := logit.NewLogger()
 	logger.SetLevel(logit.DebugLevel)
 	logger.TimeFormat(timeFormat)
@@ -204,7 +214,7 @@ func BenchmarkLogitFile(b *testing.B) {
 //func BenchmarkGologFile(b *testing.B) {
 //
 //	logger := golog.New()
-//	file, _ := files.CreateFileOf("Z:/BenchmarkGologFile.log")
+//	file, _ := createFileOf("Z:/BenchmarkGologFile.log")
 //	logger.SetOutput(file)
 //	logger.SetLevel("debug")
 //	logger.SetTimeFormat(timeFormat)
@@ -235,7 +245,7 @@ func BenchmarkLogitFile(b *testing.B) {
 //		enc.AppendString(t.Format(timeFormat))
 //	}
 //	encoder := zapcore.NewConsoleEncoder(config)
-//	file, _ := files.CreateFileOf("Z:/BenchmarkZapFile.log")
+//	file, _ := createFileOf("Z:/BenchmarkZapFile.log")
 //	writeSyncer := zapcore.AddSync(file)
 //	core := zapcore.NewCore(encoder, writeSyncer, zapcore.DebugLevel)
 //	logger := zap.New(core)
@@ -262,7 +272,7 @@ func BenchmarkLogitFile(b *testing.B) {
 //func BenchmarkLogrusFile(b *testing.B) {
 //
 //	logger := logrus.New()
-//	file, _ := files.CreateFileOf("Z:/BenchmarkLogrusFile.log")
+//	file, _ := createFileOf("Z:/BenchmarkLogrusFile.log")
 //	logger.SetOutput(file)
 //	logger.SetLevel(logrus.DebugLevel)
 //	logger.SetFormatter(&logrus.TextFormatter{

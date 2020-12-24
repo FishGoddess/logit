@@ -3,7 +3,7 @@
 [![License](_icon/license.svg)](https://www.apache.org/licenses/LICENSE-2.0.html)
 [![Go Doc](_icon/godoc.svg)](https://pkg.go.dev/github.com/FishGoddess/logit?tab=doc)
 
-**logit** is an easy-to-use, also level-based and config file first logger for [GoLang](https://golang.org) applications.
+**logit** is a level-based and high-performance logger for [GoLang](https://golang.org) applications.
 
 [阅读中文版的 Read me](./README.md)
 
@@ -13,7 +13,6 @@
 
 * Modularization design, easy to extend your logger with encoders and writers
 * Level-based logging, and there are four levels to use
-* Config file supports, you can use a config file to change you logger flexibility even it has been a binary
 * Enable or disable Logger, you can disable or switch to a higher level in your production environment
 * Log file supports, and you can customer the name of your log file
 * Time rolling supports, such as one day one log file
@@ -25,7 +24,7 @@
 
 _Check [HISTORY.md](./HISTORY.md) and [FUTURE.md](./FUTURE.md) to know about more information._
 
-> Currently, stable version is v0.2.x, but a brand-new version v0.3.x is alpha with a more elegant design!
+> The brand-new version v0.3.x is released with a more elegant design!
 
 ### 🚀 Installation
 
