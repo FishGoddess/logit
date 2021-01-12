@@ -33,10 +33,10 @@ func main() {
 	logit.Error("Hello, I am error!")
 
 	// You can format log with some parameters if you want
-	logit.DebugF("Hello, I am debugF %d!", 2) // Ignore because default level is info
-	logit.InfoF("Hello, I am infoF %d!", 2)
-	logit.WarnF("Hello, I am warnF %d!", 2)
-	logit.ErrorF("Hello, I am errorF %d!", 2)
+	logit.Debug("Hello, I am debug %d!", 2) // Ignore because default level is info
+	logit.Info("Hello, I am info %d!", 2)
+	logit.Warn("Hello, I am warn %d!", 2)
+	logit.Error("Hello, I am error %d!", 2)
 
 	// logit.Me() returns a completed logger for use
 
@@ -46,6 +46,7 @@ func main() {
 	// Log won't carry caller information in default
 	// So, try NeedCaller if you need
 	logit.Me().NeedCaller(true)
+	logit.Info("I need caller!")
 
 	// Set format of time in log
 	logit.Me().TimeFormat("2006/01/02 15:04:05")

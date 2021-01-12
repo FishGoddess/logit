@@ -52,10 +52,10 @@ func main() {
 	logit.Error("Hello, I am error!")
 
 	// You can format log with some parameters if you want
-	logit.DebugF("Hello, I am debugF %d!", 2) // Ignore because default level is info
-	logit.InfoF("Hello, I am infoF %d!", 2)
-	logit.WarnF("Hello, I am warnF %d!", 2)
-	logit.ErrorF("Hello, I am errorF %d!", 2)
+	logit.Debug("Hello, I am debug %d!", 2) // Ignore because default level is info
+	logit.Info("Hello, I am info %d!", 2)
+	logit.Warn("Hello, I am warn %d!", 2)
+	logit.Error("Hello, I am error %d!", 2)
 
 	// logit.Me() returns a completed logger for use
 
@@ -65,6 +65,7 @@ func main() {
 	// Log won't carry caller information in default
 	// So, try NeedCaller if you need
 	logit.Me().NeedCaller(true)
+	logit.Info("I need caller!")
 
 	// Set format of time in log
 	logit.Me().TimeFormat("2006/01/02 15:04:05")
@@ -126,7 +127,7 @@ $ go test -v ./_examples/benchmarks_test.go -bench=. -benchtime=10s
 **目前存在一个疑惑就是使用并发竞争去换取时间格式化的性能消耗究竟值不值得？**
 **答案是不值得，我们在 v0.1.1-alpha 及更高版本中取消了这个时间缓存机制。**
 
-**4. 值得注意的是，DebugF 一类带格式化的 API 性能达不到这个水平，因为还是使用了反射技术，但是性能依旧是不差的：**
+**4. 值得注意的是，格式化的性能达不到这个水平，因为还是使用了反射技术，但是性能依旧是不差的：**
 
 | 测试 | 单位时间内运行次数 (越大越好) |  每个操作消耗时间 (越小越好) | B/op (越小越好) | allocs/op (越小越好) |
 | -----------|--------|-------------|-------------|-------------|

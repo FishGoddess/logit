@@ -34,77 +34,21 @@ func Me() *Logger {
 }
 
 // Debug will output msg as a debug message.
-func Debug(msg string) {
-	globalLogger.log(callDepthOfGlobalLogger, DebugLevel, msg)
+func Debug(msg string, params ...interface{}) {
+	globalLogger.log(callDepthOfGlobalLogger, DebugLevel, msg, params...)
 }
 
 // Info will output msg as an info message.
-func Info(msg string) {
-	globalLogger.log(callDepthOfGlobalLogger, InfoLevel, msg)
+func Info(msg string, params ...interface{}) {
+	globalLogger.log(callDepthOfGlobalLogger, InfoLevel, msg, params...)
 }
 
 // Warn will output msg as a warn message.
-func Warn(msg string) {
-	globalLogger.log(callDepthOfGlobalLogger, WarnLevel, msg)
+func Warn(msg string, params ...interface{}) {
+	globalLogger.log(callDepthOfGlobalLogger, WarnLevel, msg, params...)
 }
 
 // Error will output msg as an error message.
-func Error(msg string) {
-	globalLogger.log(callDepthOfGlobalLogger, ErrorLevel, msg)
-}
-
-// DebugF will output msg as a debug message.
-// The msg is the return value of generateMessage.
-// This is a way to output a long log made from many variables.
-// The msgFormat is the same as format in fmt.Printf, so you can use
-// all format it supports, such as '%d'.
-// msgParams is the params msgFormat needs, and it is variable-length, so
-// you can add all your params here.
-// You should know that this way to output msg is the most expensive way in time,
-// but it's still faster than other logging libs. If you care about performance,
-// than you should think about it, and if you don't, just use it without thinking.
-func DebugF(msgFormat string, msgParams ...interface{}) {
-	globalLogger.log(callDepth, DebugLevel, generateMessage(msgFormat, msgParams...))
-}
-
-// InfoF will output msg as an info message.
-// The msg is the return value of generateMessage.
-// This is a way to output a long log made from many variables.
-// The msgFormat is the same as format in fmt.Printf, so you can use
-// all format it supports, such as '%d'.
-// msgParams is the params msgFormat needs, and it is variable-length, so
-// you can add all your params here.
-// You should know that this way to output msg is the most expensive way in time,
-// but it's still faster than other logging libs. If you care about performance,
-// than you should think about it, and if you don't, just use it without thinking.
-func InfoF(msgFormat string, msgParams ...interface{}) {
-	globalLogger.log(callDepth, InfoLevel, generateMessage(msgFormat, msgParams...))
-}
-
-// WarnF will output msg as a warn message.
-// The msg is the return value of generateMessage.
-// This is a way to output a long log made from many variables.
-// The msgFormat is the same as format in fmt.Printf, so you can use
-// all format it supports, such as '%d'.
-// msgParams is the params msgFormat needs, and it is variable-length, so
-// you can add all your params here.
-// You should know that this way to output msg is the most expensive way in time,
-// but it's still faster than other logging libs. If you care about performance,
-// than you should think about it, and if you don't, just use it without thinking.
-func WarnF(msgFormat string, msgParams ...interface{}) {
-	globalLogger.log(callDepth, WarnLevel, generateMessage(msgFormat, msgParams...))
-}
-
-// ErrorF will output msg as an error message.
-// The msg is the return value of generateMessage.
-// This is the better way to output a long log made from many variables.
-// The msgFormat is the same as format in fmt.Printf, so you can use
-// all format it supports, such as '%d'.
-// msgParams is the params msgFormat needs, and it is variable-length, so
-// you can add all your params here.
-// You should know that this way to output msg is the most expensive way in time,
-// but it's still faster than other logging libs. If you care about performance,
-// than you should think about it, and if you don't, just use it without thinking.
-func ErrorF(msgFormat string, msgParams ...interface{}) {
-	globalLogger.log(callDepth, ErrorLevel, generateMessage(msgFormat, msgParams...))
+func Error(msg string, params ...interface{}) {
+	globalLogger.log(callDepthOfGlobalLogger, ErrorLevel, msg, params...)
 }

@@ -52,10 +52,10 @@ func main() {
 	logit.Error("Hello, I am error!")
 
 	// You can format log with some parameters if you want
-	logit.DebugF("Hello, I am debugF %d!", 2) // Ignore because default level is info
-	logit.InfoF("Hello, I am infoF %d!", 2)
-	logit.WarnF("Hello, I am warnF %d!", 2)
-	logit.ErrorF("Hello, I am errorF %d!", 2)
+	logit.Debug("Hello, I am debug %d!", 2) // Ignore because default level is info
+	logit.Info("Hello, I am info %d!", 2)
+	logit.Warn("Hello, I am warn %d!", 2)
+	logit.Error("Hello, I am error %d!", 2)
 
 	// logit.Me() returns a completed logger for use
 
@@ -65,6 +65,7 @@ func main() {
 	// Log won't carry caller information in default
 	// So, try NeedCaller if you need
 	logit.Me().NeedCaller(true)
+	logit.Info("I need caller!")
 
 	// Set format of time in log
 	logit.Me().TimeFormat("2006/01/02 15:04:05")
@@ -126,7 +127,7 @@ $ go test -v ./_examples/benchmarks_test.go -bench=. -benchtime=10s
 **reduce the times of time format. However, is it worth to replace time format operation with concurrent competition?**
 **The answer is no, so we cancel this mechanism in v0.1.1-alpha and higher versions.**
 
-**4. You should know that some APIs like DebugF can't reach high performance as the same as others because of reflection,**
+**4. You should know that format can't reach high performance as the same as others because of reflection,**
 **however, their performances are not as bad as we think:**
 
 | test case | times ran (large is better) |  ns/op (small is better) | B/op | allocs/op |
