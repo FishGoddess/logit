@@ -186,8 +186,8 @@ func TestLoggerCore(t *testing.T) {
 	}
 }
 
-// go test -v -cover -run=^TestLoggerCoreF$
-func TestLoggerCoreF(t *testing.T) {
+// go test -v -cover -run=^TestLoggerCoreParams$
+func TestLoggerCoreParams(t *testing.T) {
 
 	logger := NewLogger()
 	logger.SetLevel(DebugLevel)
@@ -198,13 +198,13 @@ func TestLoggerCoreF(t *testing.T) {
 	})
 	logger.SetWriter(buffer)
 
-	logger.DebugF("%sF", DebugLevel.String())
-	logger.InfoF("%sF", InfoLevel.String())
-	logger.WarnF("%sF", WarnLevel.String())
-	logger.ErrorF("%sF", ErrorLevel.String())
+	logger.Debug("%sF", DebugLevel.String())
+	logger.Info("%sF", InfoLevel.String())
+	logger.Warn("%sF", WarnLevel.String())
+	logger.Error("%sF", ErrorLevel.String())
 
 	s := buffer.String()
 	if s != fmt.Sprintf("%sF%sF%sF%sF", DebugLevel.String(), InfoLevel.String(), WarnLevel.String(), ErrorLevel.String()) {
-		t.Fatalf("coreF log %s is wrong", s)
+		t.Fatalf("coreParams log %s is wrong", s)
 	}
 }

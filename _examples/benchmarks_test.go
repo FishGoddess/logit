@@ -77,10 +77,10 @@ func BenchmarkLogitLogger(b *testing.B) {
 		logger.Error("error...")
 	}
 	//logTask := func() {
-	//	logger.DebugF("debug...")
-	//	logger.InfoF("info...")
-	//	logger.WarnF("warning...")
-	//	logger.ErrorF("error...")
+	//	logger.Debug("debug%s", "...")
+	//	logger.Info("info%s", "...")
+	//	logger.Warn("warning%s", "...")
+	//	logger.Error("error%s", "...")
 	//}
 
 	// 开始性能测试

@@ -1,5 +1,9 @@
 ## ✒ 历史版本的特性介绍 (Features in old versions)
 
+### v0.3.3
+> 此版本发布于 2021-01-12
+* 去除了 DebugF 一类格式化的 API，统一使用 Debug 一类 API
+
 ### v0.3.2
 > 此版本发布于 2020-12-24
 * 废弃了 files 包
