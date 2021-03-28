@@ -19,46 +19,32 @@
 package main
 
 import (
-	"fmt"
-	"time"
-
 	"github.com/FishGoddess/logit"
 )
 
 func main() {
 
 	// We provide a writer writing to file
-	// "./test.log" is the path of this file
-	writer, err := logit.NewFileWriter("Z:/test.log")
+	// You should use a config instance to initialize this writer
+	// logit.DefaultConfig() returns a default config
+	// config.LogFileName is the path of this file
+	// However, it isn't the final name of log file
+	// We will add a date suffix to the name, so the final name will look like "test.log.20210328"
+	// This means every day has its own log file, and it's an automatic task
+	config := logit.DefaultConfig()
+	config.LogFileName = "Z:/test.log"
+
+	writer, err := logit.NewFileWriter(config)
 	if err != nil {
 		panic(err)
 	}
 	defer writer.Close()
 
 	// Use Write() to write something to file underlying
-	writer.Write([]byte("Something new..."))
+	writer.Write([]byte("Something new...\n"))
 
-	// Also, we provide some checkers for advanced features
-	// Every writing operation will call Check() in checker
-	// If one checker's Check() returns true, then this file will roll to a new file
-	// The old file will be renamed to be like "xxx.log.0000000001"
-	// These are all checkers we provide:
-	logit.NewTimeChecker(24 * time.Hour)
-	logit.NewSizeChecker(64 * logit.MB)
-	logit.NewCountChecker(1000)
-
-	// If you want to use one of them above, try this:
-	newWriter, err := logit.NewFileWriter("Z:/test_checker.log", logit.NewSizeChecker(128*logit.KB))
-	if err != nil {
-		panic(err)
-	}
-	defer newWriter.Close()
-
-	// Check how many files starting with "test_checker.log"?
-	for i := 0; i < 10000; i++ {
-		newWriter.Write([]byte(fmt.Sprintf("Something new with checker...%d\n", i)))
-	}
-
-	// Also, you can use more than one of them in a writer
-	//logit.NewFileWriter("Z:/test_checker.log", logit.NewTimeChecker(24*time.Hour), logit.NewSizeChecker(128*logit.KB))
+	// Use file writer in logger
+	logger := logit.NewLogger()
+	logger.SetWriter(writer)
+	logger.Info("log by file writer")
 }

@@ -29,7 +29,47 @@ var (
 		"text": TextEncoder(),
 		"json": JsonEncoder(),
 	}
+
+	// defaultConfig is default config.
+	defaultConfig = Config{
+		LogFileName:      "logit.log",
+		MaxLogFileNumber: 100,
+		MaxLogFileSize:   1024,
+	}
 )
+
+// Config is the configuration of logit.
+type Config struct {
+
+	// LogFileName is the name of log file.
+	LogFileName string
+
+	// MaxLogFileNumber is the max number of log files.
+	MaxLogFileNumber int
+
+	// MaxLogFileSize is the max size of one log file.
+	// The unit is MB.
+	MaxLogFileSize int64
+}
+
+// DefaultConfig returns a default config.
+func DefaultConfig() Config {
+	return defaultConfig
+}
+
+// checkConfig checks if this config is legal.
+func checkConfig(config Config) {
+
+	if config.MaxLogFileNumber < 1 {
+		panic(fmt.Errorf("config.MaxFileNumber %d is less than 1", config.MaxLogFileNumber))
+	}
+
+	if config.MaxLogFileSize < 1 {
+		panic(fmt.Errorf("config.MaxLogFileSize %dMB is less than 1MB", config.MaxLogFileSize))
+	}
+}
+
+// ======================================== for convenience ========================================
 
 // levelOf returns the real level of passed level and an error if not found.
 func levelOf(level string) (Level, error) {

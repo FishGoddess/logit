@@ -26,18 +26,10 @@ import (
 	"time"
 )
 
-// testChecker is for testing.
-type testChecker struct{}
-
-// Check returns if n is odd.
-func (tc *testChecker) Check(fw *FileWriter, n int) bool {
-	return n&1 == 0
-}
-
 // prepareTestDirAndName prepares directory and name of file for testing.
 func prepareTestDirAndName(t *testing.T) (testDir string, name string) {
 
-	testDir = filepath.Join(os.TempDir(), t.Name() + "_" +time.Now().Format("20060102150405.log"))
+	testDir = filepath.Join(os.TempDir(), t.Name() + "_" +time.Now().Format("20060102150405000"))
 	err := os.Mkdir(testDir, 0644)
 	if err != nil {
 		t.Fatal(err)
@@ -91,7 +83,9 @@ func TestFileWriter(t *testing.T) {
 	testDir, name := prepareTestDirAndName(t)
 	t.Log("name of file is", name)
 
-	writer, err := NewFileWriter(name, &testChecker{})
+	config := DefaultConfig()
+	config.LogFileName = name
+	writer, err := NewFileWriter(config)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -105,14 +99,5 @@ func TestFileWriter(t *testing.T) {
 	writer.Write([]byte("d"))
 	writer.Write([]byte("efg"))
 	checkNamesLength(t, testDir, 1)
-	checkFileContent(t, name, "abcdefg")
-
-	writer.Write([]byte("1234"))
-	checkNamesLength(t, testDir, 2)
-	checkFileContent(t, name, "1234")
-	checkFileContent(t, writer.nextName(), "abcdefg")
-
-	if _, err = writer.Write([]byte("???")); err != nil {
-		t.Fatal(err)
-	}
+	checkFileContent(t, writer.newLogFileName(time.Now()), "abcdefg")
 }
