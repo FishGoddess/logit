@@ -37,10 +37,10 @@ func prepareTestLog() *Log {
 // go test -v -cover -run=^TestTextEncoder$
 func TestTextEncoder(t *testing.T) {
 
-	encoder := TextEncoder()
+	encoder := NewTextEncoder("2006-01-02 15:04:05")
 
 	log := prepareTestLog()
-	logString := string(encoder.Encode(log, "2006-01-02 15:04:05"))
+	logString := string(encoder.Encode(log))
 	result := "[info] [2020-11-13 19:43:23] test\n"
 	if logString != result {
 		t.Fatalf("encoded log (%s) is wrong", logString)
@@ -51,7 +51,9 @@ func TestTextEncoder(t *testing.T) {
 		File: "encoder_test.go",
 		Line: 36,
 	}
-	logString = string(encoder.Encode(log, ""))
+
+	encoder = NewTextEncoder("")
+	logString = string(encoder.Encode(log))
 	result = fmt.Sprintf("[error] [%d] [encoder_test.go:36] test\n", log.time.Unix())
 	if logString != result {
 		t.Fatalf("encoded log (%s) is wrong", logString)
@@ -61,10 +63,10 @@ func TestTextEncoder(t *testing.T) {
 // go test -v -cover -run=^TestJsonEncoder$
 func TestJsonEncoder(t *testing.T) {
 
-	encoder := JsonEncoder()
+	encoder := NewJsonEncoder("2006/01/02 15:04:05")
 
 	log := prepareTestLog()
-	logString := string(encoder.Encode(log, "2006/01/02 15:04:05"))
+	logString := string(encoder.Encode(log))
 	result := "{\"level\":\"info\",\"time\":\"2020/11/13 19:43:23\",\"msg\":\"test\"}\n"
 	if logString != result {
 		t.Fatalf("encoded log (%s) is wrong", logString)
@@ -75,7 +77,9 @@ func TestJsonEncoder(t *testing.T) {
 		File: "encoder_test.go",
 		Line: 36,
 	}
-	logString = string(encoder.Encode(log, ""))
+
+	encoder = NewJsonEncoder("")
+	logString = string(encoder.Encode(log))
 	result = fmt.Sprintf("{\"level\":\"error\",\"time\":%d,\"file\":\"encoder_test.go\",\"line\":36,\"msg\":\"test\"}\n", log.time.Unix())
 	if logString != result {
 		t.Fatalf("encoded log (%s) is wrong", logString)

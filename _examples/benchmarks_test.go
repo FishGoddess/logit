@@ -41,7 +41,7 @@ func (w *nopWriter) Write(p []byte) (n int, err error) {
 }
 
 /*
-BenchmarkLogitLogger-16          3749071               956 ns/op             384 B/op          8 allocs/op
+BenchmarkLogitLogger-16          3950809               917 ns/op             128 B/op          4 allocs/op
 
 BenchmarkGologLogger-16          2191954              1646 ns/op             713 B/op         24 allocs/op
 
@@ -51,7 +51,7 @@ BenchmarkLogrusLogger-16          922870              3898 ns/op            1634
 
 **********************************************************************************************************
 
-BenchmarkLogitFile-16             499884              7157 ns/op             384 B/op          8 allocs/op
+BenchmarkLogitFile-16             486379              7202 ns/op             128 B/op          4 allocs/op
 
 BenchmarkGologFile-16             264644             13595 ns/op             713 B/op         24 allocs/op
 
@@ -66,7 +66,6 @@ func BenchmarkLogitLogger(b *testing.B) {
 	// 测试用的日志记录器
 	logger := logit.NewLogger()
 	logger.SetLevel(logit.DebugLevel)
-	logger.TimeFormat(timeFormat)
 	logger.SetWriter(&nopWriter{})
 
 	// 测试用的日志任务
@@ -191,7 +190,6 @@ func BenchmarkLogitFile(b *testing.B) {
 	file, _ := createFileOf("Z:/BenchmarkLogitFile.log")
 	logger := logit.NewLogger()
 	logger.SetLevel(logit.DebugLevel)
-	logger.TimeFormat(timeFormat)
 	logger.SetWriter(file)
 
 	// 测试用的日志任务

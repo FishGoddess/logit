@@ -30,6 +30,8 @@ import (
 const (
 	// callDepth is the depth of calling stack, which is about file name and line number.
 	callDepth = 3
+
+	TimeFormat = "2006-01-02 15:04:05"
 )
 
 // Logger is the type of logging output.
@@ -60,9 +62,6 @@ type Logger struct {
 	// This feature is useful but expensive in performance, so set to false if you don't need it.
 	needCaller bool
 
-	// timeFormat is used to format time.
-	timeFormat string
-
 	// logs is a log pool caching some log instances.
 	// It is for reducing memory allocation.
 	logs *sync.Pool
@@ -76,10 +75,10 @@ func NewLogger() *Logger {
 	return &Logger{
 		level: InfoLevel,
 		encoders: map[Level]Encoder{
-			DebugLevel: TextEncoder(),
-			InfoLevel:  TextEncoder(),
-			WarnLevel:  TextEncoder(),
-			ErrorLevel: TextEncoder(),
+			DebugLevel: NewTextEncoder(TimeFormat),
+			InfoLevel:  NewTextEncoder(TimeFormat),
+			WarnLevel:  NewTextEncoder(TimeFormat),
+			ErrorLevel: NewTextEncoder(TimeFormat),
 		},
 		writers: map[Level]io.Writer{
 			DebugLevel: os.Stdout,
@@ -88,7 +87,6 @@ func NewLogger() *Logger {
 			ErrorLevel: os.Stderr,
 		},
 		needCaller: false,
-		timeFormat: "2006-01-02 15:04:05",
 		logs: &sync.Pool{
 			New: func() interface{} {
 				return &Log{}
@@ -203,15 +201,6 @@ func (l *Logger) NeedCaller(needCaller bool) {
 	l.needCaller = needCaller
 }
 
-// TimeFormat sets timeFormat to new one.
-// This format follows the format in time package of Go.
-// Yep, it is "2006-01-02 15:04:05".
-func (l *Logger) TimeFormat(timeFormat string) {
-	l.lock.Lock()
-	defer l.lock.Unlock()
-	l.timeFormat = timeFormat
-}
-
 // newLog returns a Log holder from object pool.
 // Notice that not every holder returned is new, as you know, that is why we use a pool.
 func (l *Logger) newLog(level Level, msg string) *Log {
@@ -251,7 +240,7 @@ func wrapLogWithCaller(log *Log, callDepth int) {
 func (l *Logger) handleLog(log *Log) {
 	encoder := l.encoders[log.level]
 	writer := l.writers[log.level]
-	writer.Write(encoder.Encode(log, l.timeFormat))
+	writer.Write(encoder.Encode(log))
 }
 
 // log handles msg by l.handlers, and level will affect the visibility of this msg.

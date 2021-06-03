@@ -22,82 +22,79 @@ import (
 	"bytes"
 	"strconv"
 	"strings"
+	"sync"
 )
 
-// Encoder encodes a log to bytes with timeFormat.
+// Encoder encodes a log to bytes.
 // No matter what you do, remember, return this log as bytes.
-type Encoder func(log *Log, timeFormat string) []byte
-
-// Encode encodes a log to bytes with timeFormat.
-// This is Encoder's substitute and only for more code-readable.
-func (e Encoder) Encode(log *Log, timeFormat string) []byte {
-	return e(log, timeFormat)
+type Encoder interface {
+	Encode(log *Log) []byte
 }
 
 // =================================== text encoder ===================================
 
-// TextEncoder encodes a log to a plain string like "[Info] [2020-03-06 16:10:44] msg" in bytes.
-// If timeFormat == "", then it will not format time and keep time in unix form.
-func TextEncoder() Encoder {
-	return func(log *Log, timeFormat string) []byte {
+type TextEncoder struct {
+	timeFormat string
+	buffers    *sync.Pool
+}
 
-		buffer := bytes.NewBuffer(make([]byte, 0, 64))
-		buffer.WriteString("[")
-		buffer.WriteString(log.Level().String())
-		buffer.WriteString("] [")
-
-		// Format time
-		if timeFormat != "" {
-			buffer.WriteString(log.Time().Format(timeFormat))
-		} else {
-			buffer.WriteString(strconv.FormatInt(log.Time().Unix(), 10))
-		}
-
-		buffer.WriteString("] ")
-
-		// Check caller
-		if caller, ok := log.Caller(); ok {
-			buffer.WriteString("[")
-			buffer.WriteString(caller.File + ":" + strconv.Itoa(caller.Line))
-			buffer.WriteString("] ")
-		}
-
-		buffer.WriteString(log.Msg())
-		buffer.WriteString("\n")
-		return buffer.Bytes()
+func NewTextEncoder(timeFormat string) *TextEncoder {
+	return &TextEncoder{
+		timeFormat: timeFormat,
+		buffers: &sync.Pool{
+			New: func() interface{} {
+				return bytes.NewBuffer(make([]byte, 0, 64))
+			},
+		},
 	}
+}
+
+func (te *TextEncoder) Encode(log *Log) []byte {
+
+	buffer := te.buffers.Get().(*bytes.Buffer)
+	buffer.Reset()
+	defer te.buffers.Put(buffer)
+
+	buffer.WriteString("[")
+	buffer.WriteString(log.Level().String())
+	buffer.WriteString("] [")
+
+	// Format time
+	if te.timeFormat != "" {
+		buffer.WriteString(log.Time().Format(te.timeFormat))
+	} else {
+		buffer.WriteString(strconv.FormatInt(log.Time().Unix(), 10))
+	}
+
+	buffer.WriteString("] ")
+
+	// Check caller
+	if caller, ok := log.Caller(); ok {
+		buffer.WriteString("[")
+		buffer.WriteString(caller.File + ":" + strconv.Itoa(caller.Line))
+		buffer.WriteString("] ")
+	}
+
+	buffer.WriteString(log.Msg())
+	buffer.WriteString("\n")
+	return buffer.Bytes()
 }
 
 // =================================== json encoder ===================================
 
-// JsonEncoder encodes a log to a Json string in bytes.
-// If timeFormat == "", then it will not format time and keep time in unix form.
-// The result looks like `{"level":"debug", "time":"2020-03-22 22:35:00", "msg":"log content..."}`.
-func JsonEncoder() Encoder {
-	return func(log *Log, timeFormat string) []byte {
+type JsonEncoder struct {
+	timeFormat string
+	buffers    *sync.Pool
+}
 
-		buffer := bytes.NewBuffer(make([]byte, 0, 64))
-		buffer.WriteString(`{"level":"`)
-		buffer.WriteString(log.Level().String())
-		buffer.WriteString(`","time":`)
-
-		// Format time
-		if timeFormat != "" {
-			buffer.WriteString(strconv.Quote(log.Time().Format(timeFormat)))
-		} else {
-			buffer.WriteString(strconv.FormatInt(log.Time().Unix(), 10))
-		}
-
-		// Check caller
-		if caller, ok := log.Caller(); ok {
-			buffer.WriteString(`,"file":"` + caller.File)
-			buffer.WriteString(`","line":` + strconv.Itoa(caller.Line))
-		}
-
-		buffer.WriteString(`,"msg":"`)
-		buffer.WriteString(escapeString(log.Msg()))
-		buffer.WriteString("\"}\n")
-		return buffer.Bytes()
+func NewJsonEncoder(timeFormat string) *JsonEncoder {
+	return &JsonEncoder{
+		timeFormat: timeFormat,
+		buffers: &sync.Pool{
+			New: func() interface{} {
+				return bytes.NewBuffer(make([]byte, 0, 64))
+			},
+		},
 	}
 }
 
@@ -126,4 +123,33 @@ func escapeString(s string) string {
 		}
 	}
 	return builder.String()
+}
+
+func (je *JsonEncoder) Encode(log *Log) []byte {
+
+	buffer := je.buffers.Get().(*bytes.Buffer)
+	buffer.Reset()
+	defer je.buffers.Put(buffer)
+
+	buffer.WriteString(`{"level":"`)
+	buffer.WriteString(log.Level().String())
+	buffer.WriteString(`","time":`)
+
+	// Format time
+	if je.timeFormat != "" {
+		buffer.WriteString(strconv.Quote(log.Time().Format(je.timeFormat)))
+	} else {
+		buffer.WriteString(strconv.FormatInt(log.Time().Unix(), 10))
+	}
+
+	// Check caller
+	if caller, ok := log.Caller(); ok {
+		buffer.WriteString(`,"file":"` + caller.File)
+		buffer.WriteString(`","line":` + strconv.Itoa(caller.Line))
+	}
+
+	buffer.WriteString(`,"msg":"`)
+	buffer.WriteString(escapeString(log.Msg()))
+	buffer.WriteString("\"}\n")
+	return buffer.Bytes()
 }

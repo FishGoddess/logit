@@ -40,13 +40,10 @@ func main() {
 	// So, try NeedCaller if you need
 	logger.NeedCaller(true)
 
-	// Set format of time in log
-	logger.TimeFormat("2006/01/02 15:04:05")
-
 	// Set encoder and writer
 	// Actually, every level has own encoder and writer
 	// This way will set encoder and writer of all levels to the same one
-	logger.SetEncoder(logit.JsonEncoder())
+	logger.SetEncoder(logit.NewJsonEncoder(logit.TimeFormat))
 	logger.SetWriter(os.Stdout)
 
 	// More features can be discovered by API

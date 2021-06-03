@@ -43,20 +43,17 @@ Package logit provides an easy way to use foundation for your logging operations
 	logit.Me().NeedCaller(true)
 	logit.Info("I need caller!")
 
-	// Set format of time in log
-	logit.Me().TimeFormat("2006/01/02 15:04:05")
-
 	// Set encoder and writer
 	// Actually, every level has own encoder and writer
 	// This way will set encoder and writer of all levels to the same one
-	logit.Me().SetEncoder(logit.JsonEncoder())
+	logit.Me().SetEncoder(logit.NewJsonEncoder("2006-01-02 15:04:05"))
 	logit.Me().SetWriter(os.Stdout)
 
 	// We also provide some functions to set encoder and writer of each level
-	logit.Me().SetDebugEncoder(logit.JsonEncoder())
-	logit.Me().SetInfoEncoder(logit.JsonEncoder())
-	logit.Me().SetWarnEncoder(logit.JsonEncoder())
-	logit.Me().SetErrorEncoder(logit.JsonEncoder())
+	logit.Me().SetDebugEncoder(logit.NewJsonEncoder("2006-01-02 15:04:05"))
+	logit.Me().SetInfoEncoder(logit.NewJsonEncoder("2006-01-02 15:04:05"))
+	logit.Me().SetWarnEncoder(logit.NewJsonEncoder("2006-01-02 15:04:05"))
+	logit.Me().SetErrorEncoder(logit.NewJsonEncoder("2006-01-02 15:04:05"))
 	logit.Me().SetDebugWriter(os.Stdout)
 	logit.Me().SetInfoWriter(os.Stdout)
 	logit.Me().SetWarnWriter(os.Stdout)
@@ -78,13 +75,10 @@ Package logit provides an easy way to use foundation for your logging operations
 	// So, try NeedCaller if you need
 	logger.NeedCaller(true)
 
-	// Set format of time in log
-	logger.TimeFormat("2006/01/02 15:04:05")
-
 	// Set encoder and writer
 	// Actually, every level has own encoder and writer
 	// This way will set encoder and writer of all levels to the same one
-	logger.SetEncoder(logit.JsonEncoder())
+	logger.SetEncoder(logit.NewJsonEncoder(logit.TimeFormat))
 	logger.SetWriter(os.Stdout)
 
 	// More features can be discovered by API
@@ -95,32 +89,26 @@ Package logit provides an easy way to use foundation for your logging operations
 	logit.Info("Default encoder is like this...")
 
 	// We provide some encoders, such as text and json
-	// Try TextEncoder() and JsonEncoder()
-	logit.Me().SetEncoder(logit.TextEncoder())
-	logit.Me().SetEncoder(logit.JsonEncoder())
+	// Try TextEncoder and JsonEncoder
+	logit.Me().SetEncoder(logit.NewTextEncoder("2006-01-02 15:04:05"))
+	logit.Me().SetEncoder(logit.NewJsonEncoder("2006-01-02 15:04:05"))
 
-	// In fact, encoder is a function like "func(log *logit.Log, timeFormat string) []byte"
+	// In fact, encoder is an interface like "func(log *logit.Log) []byte"
+	// So you can implement your own encoder as you want
 	// All information of log is stored in log
-	// timeFormat is a layout for formatting time
 	// No matter what you do, return a byte slice
 	// The returned slice will be written by logger
-	logit.Me().SetEncoder(func(log *logit.Log, timeFormat string) []byte {
-		logTime := log.Time().Format(timeFormat)
-		return []byte(logTime + " => " + log.Msg() + "\r\n")
-	})
+	logit.Me().SetEncoder(logit.NewTextEncoder("2006-01-02 15:04:05"))
 	logit.Info("My encoder...")
 
 	// You can set encoder of each level, for example:
-	logit.Me().SetErrorEncoder(func(log *logit.Log, timeFormat string) []byte {
-		logTime := log.Time().Format(timeFormat)
-		return []byte("[Error] " + logTime + " => " + log.Msg() + "\n")
-	})
+	logit.Me().SetErrorEncoder(logit.NewJsonEncoder(logit.TimeFormat))
 	logit.Error("Panic...")
 
 	// If you have a logger, just use it as logit.Me()
 	logger := logit.NewLogger()
-	logger.SetEncoder(logit.TextEncoder())
-	logger.SetWarnEncoder(logit.JsonEncoder())
+	logger.SetEncoder(logit.NewTextEncoder("2006-01-02 15:04:05"))
+	logger.SetWarnEncoder(logit.NewJsonEncoder("2006-01-02 15:04:05"))
 
 4. writer
 

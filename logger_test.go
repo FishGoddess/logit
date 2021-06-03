@@ -50,59 +50,41 @@ func TestLoggerNeedCaller(t *testing.T) {
 	}
 }
 
-// go test -v -cover -run=^TestLoggerTimeFormat$
-func TestLoggerTimeFormat(t *testing.T) {
+type testLoggerSetEncoder struct{}
 
-	logger := NewLogger()
-
-	logger.TimeFormat("2006/01/02 15:04:05")
-	if logger.timeFormat != "2006/01/02 15:04:05" {
-		t.Fatal("timeFormat set is wrong")
-	}
-}
+func (testLoggerSetEncoder) Encode(log *Log) []byte { return []byte("TestLoggerSetEncoder") }
 
 // go test -v -cover -run=^TestLoggerSetEncoder$
 func TestLoggerSetEncoder(t *testing.T) {
 
 	logger := NewLogger()
-
-	logger.SetEncoder(func(log *Log, timeFormat string) []byte {
-		return []byte("TestLoggerSetEncoder")
-	})
+	logger.SetEncoder(&testLoggerSetEncoder{})
 
 	encoders := logger.encoders
 	for level, encoder := range encoders {
-		encoded := string(encoder.Encode(nil, ""))
+		encoded := string(encoder.Encode(nil))
 		if encoded != "TestLoggerSetEncoder" {
 			t.Fatalf("encoded %s of level %v is wrong", encoded, level)
 		}
 	}
 }
 
+type testLoggerSetByLevelEncoder struct{}
+
+func (testLoggerSetByLevelEncoder) Encode(log *Log) []byte { return []byte(log.level.String()) }
+
 // go test -v -cover -run=^TestLoggerSetEncoderByLevel$
 func TestLoggerSetEncoderByLevel(t *testing.T) {
 
 	logger := NewLogger()
-
-	logger.SetDebugEncoder(func(log *Log, timeFormat string) []byte {
-		return []byte(DebugLevel.String())
-	})
-
-	logger.SetInfoEncoder(func(log *Log, timeFormat string) []byte {
-		return []byte(InfoLevel.String())
-	})
-
-	logger.SetWarnEncoder(func(log *Log, timeFormat string) []byte {
-		return []byte(WarnLevel.String())
-	})
-
-	logger.SetErrorEncoder(func(log *Log, timeFormat string) []byte {
-		return []byte(ErrorLevel.String())
-	})
+	logger.SetDebugEncoder(&testLoggerSetByLevelEncoder{})
+	logger.SetInfoEncoder(&testLoggerSetByLevelEncoder{})
+	logger.SetWarnEncoder(&testLoggerSetByLevelEncoder{})
+	logger.SetErrorEncoder(&testLoggerSetByLevelEncoder{})
 
 	encoders := logger.encoders
 	for level, encoder := range encoders {
-		encoded := string(encoder.Encode(nil, ""))
+		encoded := string(encoder.Encode(&Log{level: level}))
 		if encoded != level.String() {
 			t.Fatalf("encoded %s of level %v is wrong", encoded, level)
 		}
@@ -163,6 +145,10 @@ func TestLoggerSetWriterByLevel(t *testing.T) {
 	}
 }
 
+type testLoggerCoreEncoder struct{}
+
+func (testLoggerCoreEncoder) Encode(log *Log) []byte { return []byte(log.msg) }
+
 // go test -v -cover -run=^TestLoggerCore$
 func TestLoggerCore(t *testing.T) {
 
@@ -170,9 +156,7 @@ func TestLoggerCore(t *testing.T) {
 	logger.SetLevel(DebugLevel)
 
 	buffer := bytes.NewBuffer(make([]byte, 0))
-	logger.SetEncoder(func(log *Log, timeFormat string) []byte {
-		return []byte(log.msg)
-	})
+	logger.SetEncoder(&testLoggerCoreEncoder{})
 	logger.SetWriter(buffer)
 
 	logger.Debug(DebugLevel.String())
@@ -186,6 +170,10 @@ func TestLoggerCore(t *testing.T) {
 	}
 }
 
+type testLoggerCoreParamsEncoder struct{}
+
+func (testLoggerCoreParamsEncoder) Encode(log *Log) []byte { return []byte(log.msg) }
+
 // go test -v -cover -run=^TestLoggerCoreParams$
 func TestLoggerCoreParams(t *testing.T) {
 
@@ -193,9 +181,7 @@ func TestLoggerCoreParams(t *testing.T) {
 	logger.SetLevel(DebugLevel)
 
 	buffer := bytes.NewBuffer(make([]byte, 0))
-	logger.SetEncoder(func(log *Log, timeFormat string) []byte {
-		return []byte(log.msg)
-	})
+	logger.SetEncoder(&testLoggerCoreParamsEncoder{})
 	logger.SetWriter(buffer)
 
 	logger.Debug("%sF", DebugLevel.String())

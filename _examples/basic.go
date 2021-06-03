@@ -48,20 +48,17 @@ func main() {
 	logit.Me().NeedCaller(true)
 	logit.Info("I need caller!")
 
-	// Set format of time in log
-	logit.Me().TimeFormat("2006/01/02 15:04:05")
-
 	// Set encoder and writer
 	// Actually, every level has own encoder and writer
 	// This way will set encoder and writer of all levels to the same one
-	logit.Me().SetEncoder(logit.JsonEncoder())
+	logit.Me().SetEncoder(logit.NewJsonEncoder("2006-01-02 15:04:05"))
 	logit.Me().SetWriter(os.Stdout)
 
 	// We also provide some functions to set encoder and writer of each level
-	logit.Me().SetDebugEncoder(logit.JsonEncoder())
-	logit.Me().SetInfoEncoder(logit.JsonEncoder())
-	logit.Me().SetWarnEncoder(logit.JsonEncoder())
-	logit.Me().SetErrorEncoder(logit.JsonEncoder())
+	logit.Me().SetDebugEncoder(logit.NewJsonEncoder("2006-01-02 15:04:05"))
+	logit.Me().SetInfoEncoder(logit.NewJsonEncoder("2006-01-02 15:04:05"))
+	logit.Me().SetWarnEncoder(logit.NewJsonEncoder("2006-01-02 15:04:05"))
+	logit.Me().SetErrorEncoder(logit.NewJsonEncoder("2006-01-02 15:04:05"))
 	logit.Me().SetDebugWriter(os.Stdout)
 	logit.Me().SetInfoWriter(os.Stdout)
 	logit.Me().SetWarnWriter(os.Stdout)

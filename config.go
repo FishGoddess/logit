@@ -26,8 +26,8 @@ var (
 	// encoders store all encoders provided.
 	// Actually, this field is for me, not for you, ha:)
 	encoders = map[string]Encoder{
-		"text": TextEncoder(),
-		"json": JsonEncoder(),
+		"text": NewTextEncoder(TimeFormat),
+		"json": NewJsonEncoder(TimeFormat),
 	}
 
 	// defaultConfig is default config.
