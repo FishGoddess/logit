@@ -98,19 +98,19 @@ _Check more examples in [_examples](./_examples)._
 ### 🔥 Benchmarks
 
 ```bash
-$ go test -v ./_examples/benchmarks_test.go -bench=. -benchtime=10s
+$ go test -v ./_examples/benchmarks_test.go -bench=. -benchtime=3s
 ```
 
 > Benchmark file：[_examples/benchmarks_test.go](./_examples/benchmarks_test.go)
 
 | test case | times ran (large is better) |  ns/op (small is better) | B/op | allocs/op |
 | -----------|--------|-------------|-------------|-------------|
-| **logit** | **7513623** | **1612 ns/op** | **384 B/op** | **8 allocs/op** |
+| **logit** | **3749071** | **956 ns/op** | **384 B/op** | **8 allocs/op** |
 | golog | 4569554 | 2631 ns/op | 712 B/op | 24 allocs/op |
 | zap | 3891336 | 3084 ns/op | 448 B/op | 16 allocs/op |
 | logrus | 2089682 | 5769 ns/op | 1633 B/op | 52 allocs/op |
 
-> Environment：R7-4700U CPU @ 2.0 GHZ，16 GB RAM
+> Environment：R7-5800X CPU @ 3.8 GHZ，32 GB RAM
 
 **Notice:**
 
@@ -132,8 +132,8 @@ $ go test -v ./_examples/benchmarks_test.go -bench=. -benchtime=10s
 
 | test case | times ran (large is better) |  ns/op (small is better) | B/op | allocs/op |
 | -----------|--------|-------------|-------------|-------------|
-| logit | 7513623 | 1612 ns/op | 384 B/op | 8 allocs/op |
-| **logit-reflection** | **6042254** | **1984 ns/op** | **424 B/op** | **12 allocs/op** |
+| logit | 3749071 | 956 ns/op | 384 B/op | 8 allocs/op |
+| **logit-reflection** | **2863317** | **1259 ns/op** | **424 B/op** | **12 allocs/op** |
 
 ### 👥 Contributing
 

@@ -41,23 +41,23 @@ func (w *nopWriter) Write(p []byte) (n int, err error) {
 }
 
 /*
-BenchmarkLogitLogger-8           7513623              1612 ns/op             384 B/op          8 allocs/op
+BenchmarkLogitLogger-16          3749071               956 ns/op             384 B/op          8 allocs/op
 
-BenchmarkGologLogger-8           4569554              2631 ns/op             712 B/op         24 allocs/op
+BenchmarkGologLogger-16          2191954              1646 ns/op             713 B/op         24 allocs/op
 
-BenchmarkZapLogger-8             3891336              3084 ns/op             448 B/op         16 allocs/op
+BenchmarkZapLogger-16            1650854              2182 ns/op             449 B/op         16 allocs/op
 
-BenchmarkLogrusLogger-8          2089682              5769 ns/op            1633 B/op         52 allocs/op
+BenchmarkLogrusLogger-16          922870              3898 ns/op            1634 B/op         52 allocs/op
 
-***************************************************************************************************************
+**********************************************************************************************************
 
-BenchmarkLogitFile-8             1418325              8371 ns/op             384 B/op          8 allocs/op
+BenchmarkLogitFile-16             499884              7157 ns/op             384 B/op          8 allocs/op
 
-BenchmarkGologFile-8              740568             16245 ns/op             712 B/op         24 allocs/op
+BenchmarkGologFile-16             264644             13595 ns/op             713 B/op         24 allocs/op
 
-BenchmarkZapFile-8               1000000             10608 ns/op             448 B/op         16 allocs/op
+BenchmarkZapFile-16               421682              8523 ns/op             449 B/op         16 allocs/op
 
-BenchmarkLogrusFile-8             888735             13595 ns/op            1633 B/op         52 allocs/op
+BenchmarkLogrusFile-16            346075             10300 ns/op            1634 B/op         52 allocs/op
 */
 
 // 测试 logit 日志记录器的速度

@@ -98,19 +98,19 @@ _更多使用案例请查看 [_examples](./_examples) 目录。_
 ### 🔥 性能测试
 
 ```bash
-$ go test -v ./_examples/benchmarks_test.go -bench=. -benchtime=10s
+$ go test -v ./_examples/benchmarks_test.go -bench=. -benchtime=3s
 ```
 
 > 测试文件：[_examples/benchmarks_test.go](./_examples/benchmarks_test.go)
 
 | 测试 | 单位时间内运行次数 (越大越好) |  每个操作消耗时间 (越小越好) | B/op (越小越好) | allocs/op (越小越好) |
 | -----------|--------|-------------|-------------|-------------|
-| **logit** | **7513623** | **1612 ns/op** | **384 B/op** | **8 allocs/op** |
+| **logit** | **3749071** | **956 ns/op** | **384 B/op** | **8 allocs/op** |
 | golog | 4569554 | 2631 ns/op | 712 B/op | 24 allocs/op |
 | zap | 3891336 | 3084 ns/op | 448 B/op | 16 allocs/op |
 | logrus | 2089682 | 5769 ns/op | 1633 B/op | 52 allocs/op |
 
-> 测试环境：R7-4700U CPU @ 2.0 GHZ，16 GB RAM
+> 测试环境：R7-5800X CPU @ 3.8 GHZ，32 GB RAM
 
 **注意：**
 
@@ -131,8 +131,8 @@ $ go test -v ./_examples/benchmarks_test.go -bench=. -benchtime=10s
 
 | 测试 | 单位时间内运行次数 (越大越好) |  每个操作消耗时间 (越小越好) | B/op (越小越好) | allocs/op (越小越好) |
 | -----------|--------|-------------|-------------|-------------|
-| logit | 7513623 | 1612 ns/op | 384 B/op | 8 allocs/op |
-| **logit-使用反射技术** | **6042254** | **1984 ns/op** | **424 B/op** | **12 allocs/op** |
+| logit | 3749071 | 956 ns/op | 384 B/op | 8 allocs/op |
+| **logit-使用反射技术** | **2863317** | **1259 ns/op** | **424 B/op** | **12 allocs/op** |
 
 ### 👥 贡献者
 
