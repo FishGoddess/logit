@@ -23,15 +23,39 @@ import (
 	"time"
 )
 
+// go test -v -cover -run=^TestCaller$
+func TestCaller(t *testing.T) {
+
+	c := newCaller()
+	if c.File != "unknown file" || c.Line != -1 {
+		t.Fatalf("newCaller returns a wrong caller %+v", c)
+	}
+
+	c.File = "TestCaller.go"
+	c.Line = 36
+	c.reset()
+	if c.File != "unknown file" || c.Line != -1 {
+		t.Fatalf("reset doesn't reset caller %+v", c)
+	}
+
+	defer func() {
+		err := recover()
+		if err != nil {
+			t.Fatal("do reset on nil caller panic")
+		}
+	}()
+
+	c = nil
+	c.reset()
+}
+
 // go test -v -cover -run=^TestLog$
 func TestLog(t *testing.T) {
 
-	log := &Log{
-		msg:    "test",
-		level:  DebugLevel,
-		time:   time.Now(),
-		caller: nil,
-	}
+	log := newLog()
+	log.level = DebugLevel
+	log.msg = "test"
+	log.time = time.Now()
 
 	if log.Msg() != log.msg {
 		t.Fatalf("msg returned %s is wrong!", log.Msg())
@@ -49,13 +73,24 @@ func TestLog(t *testing.T) {
 		t.Fatalf("caller %v is wrong", caller)
 	}
 
-	log.caller = &caller{
-		File: "file.go",
-		Line: 123,
-	}
+	log.setCaller("file.go", 123)
 
 	caller, ok := log.Caller()
 	if !ok || caller.File != "file.go" || caller.Line != 123 {
+		t.Fatalf("caller %+v is wrong", caller)
+	}
+
+	log.reset()
+
+	if log.Msg() != "" {
+		t.Fatalf("msg returned %s is wrong!", log.Msg())
+	}
+
+	if log.Level() != DebugLevel {
+		t.Fatalf("level returned %d is wrong!", log.Level())
+	}
+
+	if caller, ok := log.Caller(); ok {
 		t.Fatalf("caller %v is wrong", caller)
 	}
 }

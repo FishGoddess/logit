@@ -26,12 +26,11 @@ import (
 
 // prepareTestLog prepares one log for testing.
 func prepareTestLog() *Log {
-	return &Log{
-		msg:    "test",
-		level:  InfoLevel,
-		time:   time.Date(2020, time.November, 13, 19, 43, 23, 0, time.Local),
-		caller: nil,
-	}
+	result := newLog()
+	result.msg = "test"
+	result.level = InfoLevel
+	result.time = time.Date(2020, time.November, 13, 19, 43, 23, 0, time.Local)
+	return result
 }
 
 // go test -v -cover -run=^TestTextEncoder$
@@ -41,20 +40,17 @@ func TestTextEncoder(t *testing.T) {
 
 	log := prepareTestLog()
 	logString := string(encoder.Encode(log))
-	result := "[info] [2020-11-13 19:43:23] test\n"
+	result := "2020-11-13 19:43:23\tinfo\ttest\n"
 	if logString != result {
 		t.Fatalf("encoded log (%s) is wrong", logString)
 	}
 
 	log.level = ErrorLevel
-	log.caller = &caller{
-		File: "encoder_test.go",
-		Line: 36,
-	}
+	log.setCaller("encoder_test.go", 36)
 
 	encoder = NewTextEncoder("")
 	logString = string(encoder.Encode(log))
-	result = fmt.Sprintf("[error] [%d] [encoder_test.go:36] test\n", log.time.Unix())
+	result = fmt.Sprintf("%d\terror\tencoder_test.go:36\ttest\n", log.time.Unix())
 	if logString != result {
 		t.Fatalf("encoded log (%s) is wrong", logString)
 	}
@@ -73,10 +69,7 @@ func TestJsonEncoder(t *testing.T) {
 	}
 
 	log.level = ErrorLevel
-	log.caller = &caller{
-		File: "encoder_test.go",
-		Line: 36,
-	}
+	log.setCaller("encoder_test.go", 36)
 
 	encoder = NewJsonEncoder("")
 	logString = string(encoder.Encode(log))

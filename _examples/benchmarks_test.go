@@ -66,7 +66,8 @@ func BenchmarkLogitLogger(b *testing.B) {
 	// 测试用的日志记录器
 	logger := logit.NewLogger()
 	logger.SetLevel(logit.DebugLevel)
-	logger.SetWriter(&nopWriter{})
+	logger.Encoders().SetEncoder(logit.NewTextEncoder(logit.TimeFormat))
+	logger.Writers().SetWriter(&nopWriter{})
 
 	// 测试用的日志任务
 	logTask := func() {
@@ -190,7 +191,8 @@ func BenchmarkLogitFile(b *testing.B) {
 	file, _ := createFileOf("Z:/BenchmarkLogitFile.log")
 	logger := logit.NewLogger()
 	logger.SetLevel(logit.DebugLevel)
-	logger.SetWriter(file)
+	logger.Encoders().SetEncoder(logit.NewTextEncoder(logit.TimeFormat))
+	logger.Writers().SetWriter(file)
 
 	// 测试用的日志任务
 	logTask := func() {

@@ -29,13 +29,13 @@ func TestLoggerLevel(t *testing.T) {
 
 	logger := NewLogger()
 
-	if logger.Level() != logger.level {
+	if logger.Level() != logger.level.Load().(Level) {
 		t.Fatalf("level returned %v is wrong", logger.Level())
 	}
 
-	realOldLevel := logger.level
-	if oldLevel := logger.SetLevel(InfoLevel); oldLevel != realOldLevel || logger.level != InfoLevel {
-		t.Fatalf("level set or old level %v is wrong", oldLevel)
+	logger.SetLevel(InfoLevel)
+	if logger.level.Load().(Level) != InfoLevel {
+		t.Fatalf("level set %+v is wrong", logger.level.Load().(Level))
 	}
 }
 
@@ -44,9 +44,9 @@ func TestLoggerNeedCaller(t *testing.T) {
 
 	logger := NewLogger()
 
-	logger.NeedCaller(true)
-	if logger.needCaller != true {
-		t.Fatal("needCaller set is wrong")
+	logger.SetNeedCaller(true)
+	if logger.needCaller.Load().(bool) != true {
+		t.Fatalf("needCaller set %+v is wrong", logger.needCaller.Load().(bool))
 	}
 }
 
@@ -58,11 +58,11 @@ func (testLoggerSetEncoder) Encode(log *Log) []byte { return []byte("TestLoggerS
 func TestLoggerSetEncoder(t *testing.T) {
 
 	logger := NewLogger()
-	logger.SetEncoder(&testLoggerSetEncoder{})
+	logger.Encoders().SetEncoder(&testLoggerSetEncoder{})
 
-	encoders := logger.encoders
-	for level, encoder := range encoders {
-		encoded := string(encoder.Encode(nil))
+	encoders := logger.Encoders()
+	for level, _ := range levels {
+		encoded := string(encoders.of(level).Encode(nil))
 		if encoded != "TestLoggerSetEncoder" {
 			t.Fatalf("encoded %s of level %v is wrong", encoded, level)
 		}
@@ -77,14 +77,14 @@ func (testLoggerSetByLevelEncoder) Encode(log *Log) []byte { return []byte(log.l
 func TestLoggerSetEncoderByLevel(t *testing.T) {
 
 	logger := NewLogger()
-	logger.SetDebugEncoder(&testLoggerSetByLevelEncoder{})
-	logger.SetInfoEncoder(&testLoggerSetByLevelEncoder{})
-	logger.SetWarnEncoder(&testLoggerSetByLevelEncoder{})
-	logger.SetErrorEncoder(&testLoggerSetByLevelEncoder{})
+	logger.Encoders().SetDebugEncoder(&testLoggerSetByLevelEncoder{})
+	logger.Encoders().SetInfoEncoder(&testLoggerSetByLevelEncoder{})
+	logger.Encoders().SetWarnEncoder(&testLoggerSetByLevelEncoder{})
+	logger.Encoders().SetErrorEncoder(&testLoggerSetByLevelEncoder{})
 
 	encoders := logger.encoders
-	for level, encoder := range encoders {
-		encoded := string(encoder.Encode(&Log{level: level}))
+	for level, _ := range levels {
+		encoded := string(encoders.of(level).Encode(&Log{level: level}))
 		if encoded != level.String() {
 			t.Fatalf("encoded %s of level %v is wrong", encoded, level)
 		}
@@ -97,18 +97,18 @@ func TestLoggerSetWriter(t *testing.T) {
 	logger := NewLogger()
 
 	buffer := bytes.NewBuffer(make([]byte, 0))
-	logger.SetWriter(buffer)
+	logger.Writers().SetWriter(buffer)
 
-	writers := logger.writers
-	for _, writer := range writers {
-		_, err := writer.Write([]byte("1"))
+	writers := logger.Writers()
+	for level, _ := range levels {
+		_, err := writers.of(level).Write([]byte("1"))
 		if err != nil {
 			t.Fatal(err)
 		}
 	}
 
 	s := buffer.String()
-	if s != "1111" {
+	if s != "11111" {
 		t.Fatalf("write %s to buffer is wrong", s)
 	}
 }
@@ -125,13 +125,13 @@ func TestLoggerSetWriterByLevel(t *testing.T) {
 		ErrorLevel: bytes.NewBuffer(make([]byte, 0)),
 	}
 
-	logger.SetDebugWriter(writers[DebugLevel])
-	logger.SetInfoWriter(writers[InfoLevel])
-	logger.SetWarnWriter(writers[WarnLevel])
-	logger.SetErrorWriter(writers[ErrorLevel])
+	logger.Writers().SetDebugWriter(writers[DebugLevel])
+	logger.Writers().SetInfoWriter(writers[InfoLevel])
+	logger.Writers().SetWarnWriter(writers[WarnLevel])
+	logger.Writers().SetErrorWriter(writers[ErrorLevel])
 
-	for level, writer := range logger.writers {
-		_, err := writer.Write([]byte(level.String()))
+	for level, _ := range writers {
+		_, err := logger.Writers().of(level).Write([]byte(level.String()))
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -156,8 +156,8 @@ func TestLoggerCore(t *testing.T) {
 	logger.SetLevel(DebugLevel)
 
 	buffer := bytes.NewBuffer(make([]byte, 0))
-	logger.SetEncoder(&testLoggerCoreEncoder{})
-	logger.SetWriter(buffer)
+	logger.Encoders().SetEncoder(&testLoggerCoreEncoder{})
+	logger.Writers().SetWriter(buffer)
 
 	logger.Debug(DebugLevel.String())
 	logger.Info(InfoLevel.String())
@@ -181,8 +181,8 @@ func TestLoggerCoreParams(t *testing.T) {
 	logger.SetLevel(DebugLevel)
 
 	buffer := bytes.NewBuffer(make([]byte, 0))
-	logger.SetEncoder(&testLoggerCoreParamsEncoder{})
-	logger.SetWriter(buffer)
+	logger.Encoders().SetEncoder(&testLoggerCoreParamsEncoder{})
+	logger.Writers().SetWriter(buffer)
 
 	logger.Debug("%sF", DebugLevel.String())
 	logger.Info("%sF", InfoLevel.String())

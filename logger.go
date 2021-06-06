@@ -20,7 +20,6 @@ package logit
 
 import (
 	"fmt"
-	"io"
 	"os"
 	"runtime"
 	"sync"
@@ -28,8 +27,8 @@ import (
 )
 
 const (
-	// callDepth is the depth of calling stack, which is about file name and line number.
-	callDepth = 3
+	// callerDepth is the depth of calling stack, which is about file name and line number.
+	callerDepth = 3
 
 	TimeFormat = "2006-01-02 15:04:05"
 )
@@ -37,30 +36,9 @@ const (
 // Logger is the type of logging output.
 type Logger struct {
 
-	// level is the position of log.
-	// In this version of logit, there are five levels:
-	//
-	//  DebugLevel, InfoLevel, WarnLevel, ErrorLevel, OffLevel.
-	//
-	// Higher level has higher visibility which means
-	// one debug log will not be logged in one Logger set to InfoLevel.
-	// That's we called level-based logger.
-	//
-	// In particular, OffLevel is the highest level, so if you set one
-	// logger to OffLevel, it will shut up and log nothing.
-	level Level
-
-	// encoders are used to encode a log to bytes.
-	// Every level has own encoder.
-	encoders map[Level]Encoder
-
-	// writers are used to output an encoded log.
-	// Every level has own writer.
-	writers map[Level]io.Writer
-
-	// needCaller is a flag to check if logs should contain caller's info or not.
-	// This feature is useful but expensive in performance, so set to false if you don't need it.
-	needCaller bool
+	// core is the core of this logger.
+	// Some settings are set in this core, such as level of logger and need caller or not.
+	*core
 
 	// logs is a log pool caching some log instances.
 	// It is for reducing memory allocation.
@@ -72,133 +50,19 @@ type Logger struct {
 
 // NewLogger returns a new logger instance with default settings.
 func NewLogger() *Logger {
+	c := newCore(NewTextEncoder(TimeFormat), os.Stdout)
+	c.SetLevel(InfoLevel)
+	c.SetNeedCaller(false)
+	c.Writers().SetErrorWriter(os.Stderr)
 	return &Logger{
-		level: InfoLevel,
-		encoders: map[Level]Encoder{
-			DebugLevel: NewTextEncoder(TimeFormat),
-			InfoLevel:  NewTextEncoder(TimeFormat),
-			WarnLevel:  NewTextEncoder(TimeFormat),
-			ErrorLevel: NewTextEncoder(TimeFormat),
-		},
-		writers: map[Level]io.Writer{
-			DebugLevel: os.Stdout,
-			InfoLevel:  os.Stdout,
-			WarnLevel:  os.Stdout,
-			ErrorLevel: os.Stderr,
-		},
-		needCaller: false,
+		core: c,
 		logs: &sync.Pool{
 			New: func() interface{} {
-				return &Log{}
+				return newLog()
 			},
 		},
 		lock: &sync.RWMutex{},
 	}
-}
-
-// SetLevel will change the logging level to newLevel.
-// It returns the old level.
-func (l *Logger) SetLevel(newLevel Level) Level {
-	l.lock.Lock()
-	defer l.lock.Unlock()
-	oldLevel := l.level
-	l.level = newLevel
-	return oldLevel
-}
-
-// Level returns the logger level of current Logger.
-func (l *Logger) Level() Level {
-	l.lock.RLock()
-	defer l.lock.RUnlock()
-	return l.level
-}
-
-// SetEncoder sets encoder to new one.
-// This encoder will apply to all levels.
-func (l *Logger) SetEncoder(encoder Encoder) {
-	l.lock.Lock()
-	defer l.lock.Unlock()
-	l.encoders[DebugLevel] = encoder
-	l.encoders[InfoLevel] = encoder
-	l.encoders[WarnLevel] = encoder
-	l.encoders[ErrorLevel] = encoder
-}
-
-// SetDebugEncoder sets encoder of debug to new one.
-func (l *Logger) SetDebugEncoder(encoder Encoder) {
-	l.lock.Lock()
-	defer l.lock.Unlock()
-	l.encoders[DebugLevel] = encoder
-}
-
-// SetInfoEncoder sets encoder of info to new one.
-func (l *Logger) SetInfoEncoder(encoder Encoder) {
-	l.lock.Lock()
-	defer l.lock.Unlock()
-	l.encoders[InfoLevel] = encoder
-}
-
-// SetWarnEncoder sets encoder of warn to new one.
-func (l *Logger) SetWarnEncoder(encoder Encoder) {
-	l.lock.Lock()
-	defer l.lock.Unlock()
-	l.encoders[WarnLevel] = encoder
-}
-
-// SetErrorEncoder sets encoder of error to new one.
-func (l *Logger) SetErrorEncoder(encoder Encoder) {
-	l.lock.Lock()
-	defer l.lock.Unlock()
-	l.encoders[ErrorLevel] = encoder
-}
-
-// SetWriter sets writer to new one.
-// This writer will apply to all levels.
-func (l *Logger) SetWriter(writer io.Writer) {
-	l.lock.Lock()
-	defer l.lock.Unlock()
-	l.writers[DebugLevel] = writer
-	l.writers[InfoLevel] = writer
-	l.writers[WarnLevel] = writer
-	l.writers[ErrorLevel] = writer
-}
-
-// SetDebugWriter sets writer of debug to new one.
-func (l *Logger) SetDebugWriter(writer io.Writer) {
-	l.lock.Lock()
-	defer l.lock.Unlock()
-	l.writers[DebugLevel] = writer
-}
-
-// SetInfoWriter sets writer of info to new one.
-func (l *Logger) SetInfoWriter(writer io.Writer) {
-	l.lock.Lock()
-	defer l.lock.Unlock()
-	l.writers[InfoLevel] = writer
-}
-
-// SetWarnWriter sets writer of warn to new one.
-func (l *Logger) SetWarnWriter(writer io.Writer) {
-	l.lock.Lock()
-	defer l.lock.Unlock()
-	l.writers[WarnLevel] = writer
-}
-
-// SetErrorWriter sets writer of error to new one.
-func (l *Logger) SetErrorWriter(writer io.Writer) {
-	l.lock.Lock()
-	defer l.lock.Unlock()
-	l.writers[ErrorLevel] = writer
-}
-
-// NeedCaller sets needCaller to new one.
-// If true, then every log will contain file name and line number.
-// However, you should know that this is expensive in time.
-// So be sure you really need it or keep it false.
-func (l *Logger) NeedCaller(needCaller bool) {
-	l.lock.Lock()
-	defer l.lock.Unlock()
-	l.needCaller = needCaller
 }
 
 // newLog returns a Log holder from object pool.
@@ -213,79 +77,63 @@ func (l *Logger) newLog(level Level, msg string) *Log {
 
 // releaseLog releases log to object pool so that this log can be reused next time.
 func (l *Logger) releaseLog(log *Log) {
-	if caller, ok := log.Caller(); ok {
-		caller.File = ""
-		caller.Line = 0
-	}
+	log.reset()
 	l.logs.Put(log)
 }
 
 // wrapLogWithCaller wraps log with caller.
 // This function is too expensive because of runtime.Caller.
-// Notice that callDepth is the depth of calling stack. See callDepth.
-func wrapLogWithCaller(log *Log, callDepth int) {
-
-	log.caller = &caller{
-		File: "unknown file",
-		Line: -1,
-	}
-
-	if _, file, line, ok := runtime.Caller(callDepth); ok {
-		log.caller.File = file
-		log.caller.Line = line
+// Notice that callerDepth is the depth of calling stack. See callerDepth.
+func wrapLogWithCaller(log *Log, callerDepth int) {
+	if _, file, line, ok := runtime.Caller(callerDepth); ok {
+		log.setCaller(file, line)
 	}
 }
 
 // handleLog handles log with encoders and writers.
 func (l *Logger) handleLog(log *Log) {
-	encoder := l.encoders[log.level]
-	writer := l.writers[log.level]
+	encoder := l.Encoders().of(log.level)
+	writer := l.Writers().of(log.level)
 	writer.Write(encoder.Encode(log))
 }
 
 // log handles msg by l.handlers, and level will affect the visibility of this msg.
-// Notice that callDepth is caller sensitive.
-func (l *Logger) log(callDepth int, level Level, msg string, params ...interface{}) {
+// Notice that callerDepth is caller sensitive.
+func (l *Logger) log(callerDepth int, level Level, msg string, params ...interface{}) {
 
-	l.lock.RLock()
-
-	if l.level > level {
-		l.lock.RUnlock()
+	if l.Level() > level {
 		return
 	}
-
-	// Use copy-on-write way to keep high performance
-	needCaller := l.needCaller
-	l.lock.RUnlock()
 
 	if len(params) > 0 {
 		msg = fmt.Sprintf(msg, params...)
 	}
+
 	log := l.newLog(level, msg)
 	defer l.releaseLog(log)
 
-	if needCaller {
-		wrapLogWithCaller(log, callDepth)
+	if l.NeedCaller() {
+		wrapLogWithCaller(log, callerDepth)
 	}
 	l.handleLog(log)
 }
 
 // Debug will output msg as a debug message.
 func (l *Logger) Debug(msg string, params ...interface{}) {
-	l.log(callDepth, DebugLevel, msg, params...)
+	l.log(callerDepth, DebugLevel, msg, params...)
 }
 
 // Info will output msg as an info message.
 func (l *Logger) Info(msg string, params ...interface{}) {
-	l.log(callDepth, InfoLevel, msg, params...)
+	l.log(callerDepth, InfoLevel, msg, params...)
 }
 
 // Warn will output msg as a warn message.
 func (l *Logger) Warn(msg string, params ...interface{}) {
-	l.log(callDepth, WarnLevel, msg, params...)
+	l.log(callerDepth, WarnLevel, msg, params...)
 }
 
 // Error will output msg as an error message.
 func (l *Logger) Error(msg string, params ...interface{}) {
-	l.log(callDepth, ErrorLevel, msg, params...)
+	l.log(callerDepth, ErrorLevel, msg, params...)
 }
