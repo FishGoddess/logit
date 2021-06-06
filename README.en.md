@@ -63,25 +63,25 @@ func main() {
 	logit.Me().SetLevel(logit.DebugLevel)
 
 	// Log won't carry caller information in default
-	// So, try NeedCaller if you need
-	logit.Me().NeedCaller(true)
+	// So, try SetNeedCaller if you need
+	logit.Me().SetNeedCaller(true)
 	logit.Info("I need caller!")
 
 	// Set encoder and writer
 	// Actually, every level has own encoder and writer
 	// This way will set encoder and writer of all levels to the same one
-	logit.Me().SetEncoder(logit.NewJsonEncoder("2006-01-02 15:04:05"))
-	logit.Me().SetWriter(os.Stdout)
+	logit.Me().Encoders().SetEncoder(logit.NewJsonEncoder("2006-01-02 15:04:05"))
+	logit.Me().Writers().SetWriter(os.Stdout)
 
 	// We also provide some functions to set encoder and writer of each level
-	logit.Me().SetDebugEncoder(logit.NewJsonEncoder("2006-01-02 15:04:05"))
-	logit.Me().SetInfoEncoder(logit.NewJsonEncoder("2006-01-02 15:04:05"))
-	logit.Me().SetWarnEncoder(logit.NewJsonEncoder("2006-01-02 15:04:05"))
-	logit.Me().SetErrorEncoder(logit.NewJsonEncoder("2006-01-02 15:04:05"))
-	logit.Me().SetDebugWriter(os.Stdout)
-	logit.Me().SetInfoWriter(os.Stdout)
-	logit.Me().SetWarnWriter(os.Stdout)
-	logit.Me().SetErrorWriter(os.Stdout)
+	logit.Me().Encoders().SetDebugEncoder(logit.NewJsonEncoder("2006-01-02 15:04:05"))
+	logit.Me().Encoders().SetInfoEncoder(logit.NewJsonEncoder("2006-01-02 15:04:05"))
+	logit.Me().Encoders().SetWarnEncoder(logit.NewJsonEncoder("2006-01-02 15:04:05"))
+	logit.Me().Encoders().SetErrorEncoder(logit.NewJsonEncoder("2006-01-02 15:04:05"))
+	logit.Me().Writers().SetDebugWriter(os.Stdout)
+	logit.Me().Writers().SetInfoWriter(os.Stdout)
+	logit.Me().Writers().SetWarnWriter(os.Stdout)
+	logit.Me().Writers().SetErrorWriter(os.Stdout)
 }
 ```
 
@@ -114,7 +114,7 @@ $ go test -v ./_examples/benchmarks_test.go -bench=. -benchtime=3s
 **1. Fetching file info will call runtime.Caller, which is expensive,**
 **and we keep this feature, and provide a switch to turn off it for high-performance.**
 
-**4. You should know that format can't reach high performance as the same as others because of reflection,**
+**2. You should know that format can't reach high performance as the same as others because of reflection,**
 **however, their performances are not as bad as we think:**
 
 | test case | times ran (large is better) |  ns/op (small is better) | B/op | allocs/op |
