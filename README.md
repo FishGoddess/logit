@@ -100,26 +100,29 @@ $ go test -v ./_examples/benchmarks_test.go -bench=. -benchtime=3s
 
 > 测试文件：[_examples/benchmarks_test.go](./_examples/benchmarks_test.go)
 
+| 测试（输出到内存） | 单位时间内运行次数 (越大越好) |  每个操作消耗时间 (越小越好) | B/op (越小越好) | allocs/op (越小越好) |
+| -----------|--------|-------------|-------------|-------------|
+| **logit** | **3775916** | **&nbsp; 949 ns/op** | **&nbsp; 128 B/op** | **&nbsp; 4 allocs/op** |
+| zap | 1674750 | 2143 ns/op | &nbsp; 449 B/op | 16 allocs/op |
+| golog | 2223093 | 1619 ns/op | &nbsp; 713 B/op | 24 allocs/op |
+| logrus | &nbsp; 899808 | 3968 ns/op | 1634 B/op | 52 allocs/op |
+
+| 测试（输出到文件） | 单位时间内运行次数 (越大越好) |  每个操作消耗时间 (越小越好) | B/op (越小越好) | allocs/op (越小越好) |
+| -----------|--------|-------------|-------------|-------------|
+| **logit** | **3556720** | **&nbsp; 1009 ns/op** | **&nbsp; 129 B/op** | **&nbsp; 4 allocs/op** |
+| **logit-不使用缓冲写出器** | **&nbsp; 499887** | **&nbsp; 7176 ns/op** | **&nbsp; 128 B/op** | **&nbsp; 4 allocs/op** |
+| zap | &nbsp; 409000 | &nbsp; 8580 ns/op | &nbsp; 449 B/op | 16 allocs/op |
+| golog | &nbsp; 257083 | 13884 ns/op | &nbsp; 713 B/op | 24 allocs/op |
+| logrus | &nbsp; 327198 | 10699 ns/op | 1634 B/op | 52 allocs/op |
+
+> 测试环境：R7-5800X CPU@3.8GHZ，32GB RAM，512GB SSD
+
+**注意：格式化的性能达不到这个水平，因为还是使用了反射技术，但是性能依旧是不差的：**
+
 | 测试 | 单位时间内运行次数 (越大越好) |  每个操作消耗时间 (越小越好) | B/op (越小越好) | allocs/op (越小越好) |
 | -----------|--------|-------------|-------------|-------------|
-| **logit** | **3950809** | **917 ns/op** | **128 B/op** | **4 allocs/op** |
-| golog | 4569554 | 2631 ns/op | 712 B/op | 24 allocs/op |
-| zap | 3891336 | 3084 ns/op | 448 B/op | 16 allocs/op |
-| logrus | 2089682 | 5769 ns/op | 1633 B/op | 52 allocs/op |
-
-> 测试环境：R7-5800X CPU @ 3.8 GHZ，32 GB RAM
-
-**注意：**
-
-**1. 输出文件信息会有运行时操作（runtime.Caller 方法），非常影响性能，**
-**如果你更在乎性能，那我们也提供了一个选项可以关闭文件信息的查询！**
-
-**2. 值得注意的是，格式化的性能达不到这个水平，因为还是使用了反射技术，但是性能依旧是不差的：**
-
-| 测试 | 单位时间内运行次数 (越大越好) |  每个操作消耗时间 (越小越好) | B/op (越小越好) | allocs/op (越小越好) |
-| -----------|--------|-------------|-------------|-------------|
-| logit | 3950809 | 917 ns/op | 128 B/op | 4 allocs/op |
-| **logit-使用反射技术** | **2984533** | **1197 ns/op** | **168 B/op** | **8 allocs/op** |
+| logit | 3775916 | &nbsp; 949 ns/op | 128 B/op | 4 allocs/op |
+| **logit-使用格式化日志** | **2931703** | **1233 ns/op** | **168 B/op** | **8 allocs/op** |
 
 ### 👥 贡献者
 

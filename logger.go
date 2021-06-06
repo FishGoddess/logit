@@ -50,6 +50,7 @@ type Logger struct {
 
 // NewLogger returns a new logger instance with default settings.
 func NewLogger() *Logger {
+
 	c := newCore(NewTextEncoder(TimeFormat), os.Stdout)
 	c.SetLevel(InfoLevel)
 	c.SetNeedCaller(false)

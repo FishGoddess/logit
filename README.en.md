@@ -100,27 +100,30 @@ $ go test -v ./_examples/benchmarks_test.go -bench=. -benchtime=3s
 
 > Benchmark file：[_examples/benchmarks_test.go](./_examples/benchmarks_test.go)
 
-| test case | times ran (large is better) |  ns/op (small is better) | B/op | allocs/op |
+| test case(output to memory) | times ran (large is better) |  ns/op (small is better) | B/op | allocs/op |
 | -----------|--------|-------------|-------------|-------------|
-| **logit** | **3950809** | **917 ns/op** | **128 B/op** | **4 allocs/op** |
-| golog | 4569554 | 2631 ns/op | 712 B/op | 24 allocs/op |
-| zap | 3891336 | 3084 ns/op | 448 B/op | 16 allocs/op |
-| logrus | 2089682 | 5769 ns/op | 1633 B/op | 52 allocs/op |
+| **logit** | **3775916** | **&nbsp; 949 ns/op** | **&nbsp; 128 B/op** | **&nbsp; 4 allocs/op** |
+| zap | 1674750 | 2143 ns/op | &nbsp; 449 B/op | 16 allocs/op |
+| golog | 2223093 | 1619 ns/op | &nbsp; 713 B/op | 24 allocs/op |
+| logrus | &nbsp; 899808 | 3968 ns/op | 1634 B/op | 52 allocs/op |
 
-> Environment：R7-5800X CPU @ 3.8 GHZ，32 GB RAM
+| test case(output to file) | times ran (large is better) |  ns/op (small is better) | B/op | allocs/op |
+| -----------|--------|-------------|-------------|-------------|
+| **logit** | **3556720** | **&nbsp; 1009 ns/op** | **&nbsp; 129 B/op** | **&nbsp; 4 allocs/op** |
+| **logit-withoutBuffer** | **&nbsp; 499887** | **&nbsp; 7176 ns/op** | **&nbsp; 128 B/op** | **&nbsp; 4 allocs/op** |
+| zap | &nbsp; 409000 | &nbsp; 8580 ns/op | &nbsp; 449 B/op | 16 allocs/op |
+| golog | &nbsp; 257083 | 13884 ns/op | &nbsp; 713 B/op | 24 allocs/op |
+| logrus | &nbsp; 327198 | 10699 ns/op | 1634 B/op | 52 allocs/op |
 
-**Notice:**
+> Environment：R7-5800X CPU@3.8GHZ，32GB RAM，512GB SSD
 
-**1. Fetching file info will call runtime.Caller, which is expensive,**
-**and we keep this feature, and provide a switch to turn off it for high-performance.**
-
-**2. You should know that format can't reach high performance as the same as others because of reflection,**
+**Notice: You should know that format can't reach high performance as the same as others because of reflection,**
 **however, their performances are not as bad as we think:**
 
 | test case | times ran (large is better) |  ns/op (small is better) | B/op | allocs/op |
 | -----------|--------|-------------|-------------|-------------|
-| logit | 3950809 | 917 ns/op | 128 B/op | 4 allocs/op |
-| **logit-reflection** | **2984533** | **1197 ns/op** | **168 B/op** | **8 allocs/op** |
+| logit | 3775916 | &nbsp; 949 ns/op | 128 B/op | 4 allocs/op |
+| **logit-useFormatLog** | **2931703** | **1233 ns/op** | **168 B/op** | **8 allocs/op** |
 
 ### 👥 Contributing
 
