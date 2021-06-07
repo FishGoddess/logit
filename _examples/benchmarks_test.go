@@ -199,6 +199,7 @@ func BenchmarkLogitFile(b *testing.B) {
 
 	file, _ := createFileOf("Z:/" + b.Name() + ".log")
 	writer := logit.NewBufferedWriter(file)
+	defer writer.Close()
 	logger := logit.NewLogger()
 	logger.SetLevel(logit.DebugLevel)
 	logger.Encoders().SetEncoder(logit.NewTextEncoder(timeFormat))
