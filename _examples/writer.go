@@ -18,6 +18,48 @@
 
 package main
 
+import (
+	"os"
+	"time"
+
+	"github.com/FishGoddess/logit"
+)
+
 func main() {
 
+	// If you want to set output to another one, try SetWriter
+	// You should use Writers() to get all writers in logger and invoke SetWriter on it
+	// Any writer implemented io.Writer can be used here
+	logger := logit.NewLogger()
+	logger.Writers().SetWriter(os.Stdout)
+	logger.Info("SetWriter...")
+
+	// Also, all levels have its own writer
+	logger.Writers().SetDebugWriter(os.Stdout)
+	logger.Writers().SetInfoWriter(os.Stdout)
+	logger.Writers().SetWarnWriter(os.Stderr)
+	logger.Writers().SetErrorWriter(os.Stderr)
+
+	// In fact, write logs to disk is expensive in time, so we provide a special writer for you
+	// This writer uses a buffer to reduce times of writing to disk, so it has a extremely-high performance
+	// Write logs to disk is just like write logs to memory after using this writer in our benchmark
+	// Amazing, right? Try logit.NewBufferedWriter immediately!
+	writer := logit.NewBufferedWriter(os.Stdout)
+	logger.Writers().SetWriter(writer)
+	logger.Info("NewBufferedWriter...")
+	writer.Flush() // Notice that Flush() should be invoked after finishing writing or you may miss some data
+
+	// Of cause we provide a way to change the buffer size of it
+	writer = logit.NewBufferedWriter(os.Stdout)
+	logger.Writers().SetWriter(writer)
+	logger.Info("Oh! Faster! Faster!!! Yeah~~")
+	writer.Flush() // Notice that Flush() should be invoked after finishing writing or you may miss some data
+
+	// The buffered writer won't flush data automatically in default
+	// Does it puzzle you? Try AutoFlush() to get it if you want!
+	writer = logit.NewBufferedWriter(os.Stdout)
+	writer.AutoFlush(time.Second)
+	logger.Writers().SetWriter(writer)
+	logger.Info("AutoFlush...")
+	time.Sleep(2 * time.Second)
 }

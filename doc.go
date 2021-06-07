@@ -39,25 +39,25 @@ Package logit provides an easy way to use foundation for your logging operations
 	logit.Me().SetLevel(logit.DebugLevel)
 
 	// Log won't carry caller information in default
-	// So, try NeedCaller if you need
-	logit.Me().NeedCaller(true)
+	// So, try SetNeedCaller if you need
+	logit.Me().SetNeedCaller(true)
 	logit.Info("I need caller!")
 
 	// Set encoder and writer
 	// Actually, every level has own encoder and writer
 	// This way will set encoder and writer of all levels to the same one
-	logit.Me().SetEncoder(logit.NewJsonEncoder("2006-01-02 15:04:05"))
-	logit.Me().SetWriter(os.Stdout)
+	logit.Me().Encoders().SetEncoder(logit.NewJsonEncoder("2006-01-02 15:04:05"))
+	logit.Me().Writers().SetWriter(os.Stdout)
 
 	// We also provide some functions to set encoder and writer of each level
-	logit.Me().SetDebugEncoder(logit.NewJsonEncoder("2006-01-02 15:04:05"))
-	logit.Me().SetInfoEncoder(logit.NewJsonEncoder("2006-01-02 15:04:05"))
-	logit.Me().SetWarnEncoder(logit.NewJsonEncoder("2006-01-02 15:04:05"))
-	logit.Me().SetErrorEncoder(logit.NewJsonEncoder("2006-01-02 15:04:05"))
-	logit.Me().SetDebugWriter(os.Stdout)
-	logit.Me().SetInfoWriter(os.Stdout)
-	logit.Me().SetWarnWriter(os.Stdout)
-	logit.Me().SetErrorWriter(os.Stdout)
+	logit.Me().Encoders().SetDebugEncoder(logit.NewJsonEncoder("2006-01-02 15:04:05"))
+	logit.Me().Encoders().SetInfoEncoder(logit.NewJsonEncoder("2006-01-02 15:04:05"))
+	logit.Me().Encoders().SetWarnEncoder(logit.NewJsonEncoder("2006-01-02 15:04:05"))
+	logit.Me().Encoders().SetErrorEncoder(logit.NewJsonEncoder("2006-01-02 15:04:05"))
+	logit.Me().Writers().SetDebugWriter(os.Stdout)
+	logit.Me().Writers().SetInfoWriter(os.Stdout)
+	logit.Me().Writers().SetWarnWriter(os.Stdout)
+	logit.Me().Writers().SetErrorWriter(os.Stdout)
 
 2. logger
 
@@ -72,14 +72,16 @@ Package logit provides an easy way to use foundation for your logging operations
 	logger.Error("Hello, I am error!")
 
 	// Log won't carry caller information in default
-	// So, try NeedCaller if you need
-	logger.NeedCaller(true)
+	// So, try SetNeedCaller if you need
+	logger.SetNeedCaller(true)
+	logger.Debug("Hello, I have caller information!")
 
 	// Set encoder and writer
 	// Actually, every level has own encoder and writer
 	// This way will set encoder and writer of all levels to the same one
-	logger.SetEncoder(logit.NewJsonEncoder(logit.TimeFormat))
-	logger.SetWriter(os.Stdout)
+	logger.Encoders().SetEncoder(logit.NewJsonEncoder(logit.TimeFormat))
+	logger.Writers().SetErrorWriter(os.Stderr)
+	logger.Error("Oh, I am error!")
 
 	// More features can be discovered by API
 
@@ -90,51 +92,65 @@ Package logit provides an easy way to use foundation for your logging operations
 
 	// We provide some encoders, such as text and json
 	// Try TextEncoder and JsonEncoder
-	logit.Me().SetEncoder(logit.NewTextEncoder("2006-01-02 15:04:05"))
-	logit.Me().SetEncoder(logit.NewJsonEncoder("2006-01-02 15:04:05"))
+	logit.Me().Encoders().SetEncoder(logit.NewTextEncoder("2006-01-02 15:04:05"))
+	logit.Me().Encoders().SetEncoder(logit.NewJsonEncoder("2006-01-02 15:04:05"))
 
 	// In fact, encoder is an interface like "func(log *logit.Log) []byte"
 	// So you can implement your own encoder as you want
 	// All information of log is stored in log
 	// No matter what you do, return a byte slice
 	// The returned slice will be written by logger
-	logit.Me().SetEncoder(logit.NewTextEncoder("2006-01-02 15:04:05"))
+	logit.Me().Encoders().SetEncoder(&MyEncoder{name: "whatever"})
 	logit.Info("My encoder...")
 
 	// You can set encoder of each level, for example:
-	logit.Me().SetErrorEncoder(logit.NewJsonEncoder(logit.TimeFormat))
+	logit.Me().Encoders().SetErrorEncoder(logit.NewJsonEncoder(logit.TimeFormat))
 	logit.Error("Panic...")
 
 	// If you have a logger, just use it as logit.Me()
 	logger := logit.NewLogger()
-	logger.SetEncoder(logit.NewTextEncoder("2006-01-02 15:04:05"))
-	logger.SetWarnEncoder(logit.NewJsonEncoder("2006-01-02 15:04:05"))
+	logger.Encoders().SetEncoder(logit.NewTextEncoder("2006-01-02 15:04:05"))
+	logger.Encoders().SetWarnEncoder(logit.NewJsonEncoder("2006-01-02 15:04:05"))
+	logger.Info("info...")
+	logger.Warn("warn...")
 
 4. writer
 
-	// We provide a writer writing to file
-	// You should use a config instance to initialize this writer
-	// logit.DefaultConfig() returns a default config
-	// config.LogFileName is the path of this file
-	// However, it isn't the final name of log file
-	// We will add a date suffix to the name, so the final name will look like "test.log.20210328"
-	// This means every day has its own log file, and it's an automatic task
-	config := logit.DefaultConfig()
-	config.LogFileName = "Z:/test.log"
-
-	writer, err := logit.NewFileWriter(config)
-	if err != nil {
-		panic(err)
-	}
-	defer writer.Close()
-
-	// Use Write() to write something to file underlying
-	writer.Write([]byte("Something new...\n"))
-
-	// Use file writer in logger
+	// If you want to set output to another one, try SetWriter
+	// You should use Writers() to get all writers in logger and invoke SetWriter on it
+	// Any writer implemented io.Writer can be used here
 	logger := logit.NewLogger()
-	logger.SetWriter(writer)
-	logger.Info("log by file writer")
+	logger.Writers().SetWriter(os.Stdout)
+	logger.Info("SetWriter...")
+
+	// Also, all levels have its own writer
+	logger.Writers().SetDebugWriter(os.Stdout)
+	logger.Writers().SetInfoWriter(os.Stdout)
+	logger.Writers().SetWarnWriter(os.Stderr)
+	logger.Writers().SetErrorWriter(os.Stderr)
+
+	// In fact, write logs to disk is expensive in time, so we provide a special writer for you
+	// This writer uses a buffer to reduce times of writing to disk, so it has a extremely-high performance
+	// Write logs to disk is just like write logs to memory after using this writer in our benchmark
+	// Amazing, right? Try logit.NewBufferedWriter immediately!
+	writer := logit.NewBufferedWriter(os.Stdout)
+	logger.Writers().SetWriter(writer)
+	logger.Info("NewBufferedWriter...")
+	writer.Flush() // Notice that Flush() should be invoked after finishing writing or you may miss some data
+
+	// Of cause we provide a way to change the buffer size of it
+	writer = logit.NewBufferedWriter(os.Stdout)
+	logger.Writers().SetWriter(writer)
+	logger.Info("Oh! Faster! Faster!!! Yeah~~")
+	writer.Flush() // Notice that Flush() should be invoked after finishing writing or you may miss some data
+
+	// The buffered writer won't flush data automatically in default
+	// Does it puzzle you? Try AutoFlush() to get it if you want!
+	writer = logit.NewBufferedWriter(os.Stdout)
+	writer.AutoFlush(time.Second)
+	logger.Writers().SetWriter(writer)
+	logger.Info("AutoFlush...")
+	time.Sleep(2 * time.Second)
 
 */
 package logit // import "github.com/FishGoddess/logit"

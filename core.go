@@ -24,6 +24,9 @@ import (
 	"sync/atomic"
 )
 
+// core is the core of logger.
+// All important components in logger are made here.
+// Then they are linked in logger.
 type core struct {
 
 	// level is the position of log.
@@ -85,37 +88,49 @@ func (c *core) SetNeedCaller(needCaller bool) {
 	c.needCaller.Store(needCaller)
 }
 
+// Encoders returns all encoders in core.
 func (c *core) Encoders() *encoders {
 	return c.encoders
 }
 
+// Writers returns all writers in core.
 func (c *core) Writers() *writers {
 	return c.writers
 }
 
 // ============================================================================
 
+// encoders stores all encoders in core.
 type encoders struct {
+
+	// debugEncoder is the encoder for debug.
 	debugEncoder Encoder
-	infoEncoder  Encoder
-	warnEncoder  Encoder
+
+	// infoEncoder is the encoder for info.
+	infoEncoder Encoder
+
+	// warnEncoder is the encoder for warn.
+	warnEncoder Encoder
+
+	// errorEncoder is the encoder for error.
 	errorEncoder Encoder
 
 	// lock is for safe concurrency.
 	lock *sync.RWMutex
 }
 
+// newEncoders returns a new encoders holder of encoder.
 func newEncoders(encoder Encoder) *encoders {
-	result := &encoders{
+	return &encoders{
 		debugEncoder: encoder,
 		infoEncoder:  encoder,
 		warnEncoder:  encoder,
 		errorEncoder: encoder,
 		lock:         &sync.RWMutex{},
 	}
-	return result
 }
 
+// of returns the encoder of level.
 func (es *encoders) of(level Level) Encoder {
 
 	es.lock.RLock()
@@ -177,27 +192,37 @@ func (es *encoders) SetErrorEncoder(encoder Encoder) {
 
 // ============================================================================
 
+// writers stores all writers in core.
 type writers struct {
+
+	// debugWriter is the writer for debug.
 	debugWriter io.Writer
-	infoWriter  io.Writer
-	warnWriter  io.Writer
+
+	// infoWriter is the writer for info.
+	infoWriter io.Writer
+
+	// warnWriter is the writer for warn.
+	warnWriter io.Writer
+
+	// errorWriter is the writer for error.
 	errorWriter io.Writer
 
 	// lock is for safe concurrency.
 	lock *sync.RWMutex
 }
 
+// newWriters returns a new writers holder of writer.
 func newWriters(writer io.Writer) *writers {
-	result := &writers{
+	return &writers{
 		debugWriter: writer,
 		infoWriter:  writer,
 		warnWriter:  writer,
 		errorWriter: writer,
 		lock:        &sync.RWMutex{},
 	}
-	return result
 }
 
+// of returns the writer of level.
 func (ws *writers) of(level Level) io.Writer {
 
 	ws.lock.RLock()

@@ -30,6 +30,7 @@ const (
 	// callerDepth is the depth of calling stack, which is about file name and line number.
 	callerDepth = 3
 
+	// TimeFormat is the format of time.
 	TimeFormat = "2006-01-02 15:04:05"
 )
 

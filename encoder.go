@@ -82,6 +82,8 @@ func (be *basedEncoder) releaseBuffer(buffer *bytes.Buffer) {
 	be.buffers.Put(buffer)
 }
 
+func (be *basedEncoder) Encode(log *Log) []byte { return nil }
+
 // =================================== text encoder ===================================
 
 type textEncoder struct {

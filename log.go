@@ -32,10 +32,12 @@ type caller struct {
 	Line int
 }
 
+// newCaller returns a new caller holder containing default caller information.
 func newCaller() *caller {
 	return &caller{File: "unknown file", Line: -1}
 }
 
+// reset sets the caller to initial status.
 func (c *caller) reset() {
 
 	if c == nil {
@@ -63,6 +65,7 @@ type Log struct {
 	caller *caller
 }
 
+// newLog returns a log holder containing a new caller for use.
 func newLog() *Log {
 	return &Log{
 		hasCaller: false,
@@ -70,6 +73,7 @@ func newLog() *Log {
 	}
 }
 
+// setCaller sets file and line to caller inside.
 func (l *Log) setCaller(file string, line int) {
 
 	if l.caller == nil {
@@ -80,6 +84,7 @@ func (l *Log) setCaller(file string, line int) {
 	l.caller.Line = line
 }
 
+// reset sets the log to initial status.
 func (l *Log) reset() {
 	l.level = DebugLevel
 	l.msg = ""
