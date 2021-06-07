@@ -19,100 +19,31 @@
 package logit
 
 import (
-	"io/ioutil"
-	"os"
-	"path/filepath"
+	"bytes"
 	"testing"
 	"time"
 )
 
-// testChecker is for testing.
-type testChecker struct{}
+// go test -v -cover -run=^TestBufferedWriter$
+func TestBufferedWriter(t *testing.T) {
 
-// Check returns if n is odd.
-func (tc *testChecker) Check(fw *FileWriter, n int) bool {
-	return n&1 == 0
-}
-
-// prepareTestDirAndName prepares directory and name of file for testing.
-func prepareTestDirAndName(t *testing.T) (testDir string, name string) {
-
-	testDir = filepath.Join(os.TempDir(), t.Name() + "_" +time.Now().Format("20060102150405.log"))
-	err := os.Mkdir(testDir, 0644)
-	if err != nil {
-		t.Fatal(err)
-	}
-	return testDir, filepath.Join(testDir, time.Now().Format("20060102150405.log"))
-}
-
-// lengthOf returns the count of names exclude "." and "..".
-func lengthOf(names []os.FileInfo) int {
-	count := 0
-	for _, info := range names {
-		if info.Name() != "." && info.Name() != ".." {
-			count++
-		}
-	}
-	return count
-}
-
-// checkNamesLength compares the number of file in testDir with except and
-// fatal if not match.
-func checkNamesLength(t *testing.T, testDir string, except int) {
-
-	names, err := ioutil.ReadDir(testDir)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	length := lengthOf(names)
-	if length != except {
-		t.Fatalf("length %d of names is wrong", length)
-	}
-}
-
-// checkFileContent compares the content of file with except and
-// fatal if not match.
-func checkFileContent(t *testing.T, file string, except string) {
-
-	fileBytes, err := ioutil.ReadFile(file)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	if string(fileBytes) != except {
-		t.Fatalf("content %s of file is wrong", string(fileBytes))
-	}
-}
-
-// go test -v -cover -run=^TestFileWriter$
-func TestFileWriter(t *testing.T) {
-
-	testDir, name := prepareTestDirAndName(t)
-	t.Log("name of file is", name)
-
-	writer, err := NewFileWriter(name, &testChecker{})
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer func() {
-		if err := writer.Close(); err != nil {
-			t.Fatal(err)
-		}
-	}()
+	buffer := bytes.NewBuffer(make([]byte, 0, 4096))
+	writer := NewBufferedWriter(buffer)
+	writer.AutoFlush(time.Millisecond)
+	defer writer.Close()
 
 	writer.Write([]byte("abc"))
-	writer.Write([]byte("d"))
-	writer.Write([]byte("efg"))
-	checkNamesLength(t, testDir, 1)
-	checkFileContent(t, name, "abcdefg")
+	writer.Flush()
+	if buffer.String() != "abc" {
+		t.Fatalf("writing abc but found %s in buffer", buffer.String())
+	}
 
-	writer.Write([]byte("1234"))
-	checkNamesLength(t, testDir, 2)
-	checkFileContent(t, name, "1234")
-	checkFileContent(t, writer.nextName(), "abcdefg")
+	writer.Write([]byte("123"))
+	writer.Write([]byte(".!?"))
+	writer.Write([]byte("+-*/"))
+	time.Sleep(time.Second)
 
-	if _, err = writer.Write([]byte("???")); err != nil {
-		t.Fatal(err)
+	if buffer.String() != "abc123.!?+-*/" {
+		t.Fatalf("writing abc123.!?+-*/ but found %s in buffer", buffer.String())
 	}
 }

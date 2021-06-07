@@ -44,26 +44,23 @@ func main() {
 	logit.Me().SetLevel(logit.DebugLevel)
 
 	// Log won't carry caller information in default
-	// So, try NeedCaller if you need
-	logit.Me().NeedCaller(true)
+	// So, try SetNeedCaller if you need
+	logit.Me().SetNeedCaller(true)
 	logit.Info("I need caller!")
-
-	// Set format of time in log
-	logit.Me().TimeFormat("2006/01/02 15:04:05")
 
 	// Set encoder and writer
 	// Actually, every level has own encoder and writer
 	// This way will set encoder and writer of all levels to the same one
-	logit.Me().SetEncoder(logit.JsonEncoder())
-	logit.Me().SetWriter(os.Stdout)
+	logit.Me().Encoders().SetEncoder(logit.NewJsonEncoder("2006-01-02 15:04:05"))
+	logit.Me().Writers().SetWriter(os.Stdout)
 
 	// We also provide some functions to set encoder and writer of each level
-	logit.Me().SetDebugEncoder(logit.JsonEncoder())
-	logit.Me().SetInfoEncoder(logit.JsonEncoder())
-	logit.Me().SetWarnEncoder(logit.JsonEncoder())
-	logit.Me().SetErrorEncoder(logit.JsonEncoder())
-	logit.Me().SetDebugWriter(os.Stdout)
-	logit.Me().SetInfoWriter(os.Stdout)
-	logit.Me().SetWarnWriter(os.Stdout)
-	logit.Me().SetErrorWriter(os.Stdout)
+	logit.Me().Encoders().SetDebugEncoder(logit.NewJsonEncoder("2006-01-02 15:04:05"))
+	logit.Me().Encoders().SetInfoEncoder(logit.NewJsonEncoder("2006-01-02 15:04:05"))
+	logit.Me().Encoders().SetWarnEncoder(logit.NewJsonEncoder("2006-01-02 15:04:05"))
+	logit.Me().Encoders().SetErrorEncoder(logit.NewJsonEncoder("2006-01-02 15:04:05"))
+	logit.Me().Writers().SetDebugWriter(os.Stdout)
+	logit.Me().Writers().SetInfoWriter(os.Stdout)
+	logit.Me().Writers().SetWarnWriter(os.Stdout)
+	logit.Me().Writers().SetErrorWriter(os.Stdout)
 }

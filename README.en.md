@@ -1,7 +1,9 @@
 # 📝 logit
 
-[![License](_icon/license.svg)](https://www.apache.org/licenses/LICENSE-2.0.html)
 [![Go Doc](_icon/godoc.svg)](https://pkg.go.dev/github.com/FishGoddess/logit?tab=doc)
+[![License](_icon/license.svg)](https://www.apache.org/licenses/LICENSE-2.0.html)
+[![License](_icon/build.svg)](_icon/build.svg)
+[![License](_icon/coverage.svg)](_icon/coverage.svg)
 
 **logit** is a level-based and high-performance logger for [GoLang](https://golang.org) applications.
 
@@ -24,7 +26,7 @@
 
 _Check [HISTORY.md](./HISTORY.md) and [FUTURE.md](./FUTURE.md) to know about more information._
 
-> The brand-new version v0.3.x is released with a more elegant design!
+> The brand-new version v0.4.x is developing with a more elegant design!
 
 ### 🚀 Installation
 
@@ -63,28 +65,25 @@ func main() {
 	logit.Me().SetLevel(logit.DebugLevel)
 
 	// Log won't carry caller information in default
-	// So, try NeedCaller if you need
-	logit.Me().NeedCaller(true)
+	// So, try SetNeedCaller if you need
+	logit.Me().SetNeedCaller(true)
 	logit.Info("I need caller!")
-
-	// Set format of time in log
-	logit.Me().TimeFormat("2006/01/02 15:04:05")
 
 	// Set encoder and writer
 	// Actually, every level has own encoder and writer
 	// This way will set encoder and writer of all levels to the same one
-	logit.Me().SetEncoder(logit.JsonEncoder())
-	logit.Me().SetWriter(os.Stdout)
+	logit.Me().Encoders().SetEncoder(logit.NewJsonEncoder("2006-01-02 15:04:05"))
+	logit.Me().Writers().SetWriter(os.Stdout)
 
 	// We also provide some functions to set encoder and writer of each level
-	logit.Me().SetDebugEncoder(logit.JsonEncoder())
-	logit.Me().SetInfoEncoder(logit.JsonEncoder())
-	logit.Me().SetWarnEncoder(logit.JsonEncoder())
-	logit.Me().SetErrorEncoder(logit.JsonEncoder())
-	logit.Me().SetDebugWriter(os.Stdout)
-	logit.Me().SetInfoWriter(os.Stdout)
-	logit.Me().SetWarnWriter(os.Stdout)
-	logit.Me().SetErrorWriter(os.Stdout)
+	logit.Me().Encoders().SetDebugEncoder(logit.NewJsonEncoder("2006-01-02 15:04:05"))
+	logit.Me().Encoders().SetInfoEncoder(logit.NewJsonEncoder("2006-01-02 15:04:05"))
+	logit.Me().Encoders().SetWarnEncoder(logit.NewJsonEncoder("2006-01-02 15:04:05"))
+	logit.Me().Encoders().SetErrorEncoder(logit.NewJsonEncoder("2006-01-02 15:04:05"))
+	logit.Me().Writers().SetDebugWriter(os.Stdout)
+	logit.Me().Writers().SetInfoWriter(os.Stdout)
+	logit.Me().Writers().SetWarnWriter(os.Stdout)
+	logit.Me().Writers().SetErrorWriter(os.Stdout)
 }
 ```
 
@@ -98,42 +97,35 @@ _Check more examples in [_examples](./_examples)._
 ### 🔥 Benchmarks
 
 ```bash
-$ go test -v ./_examples/benchmarks_test.go -bench=. -benchtime=10s
+$ go test -v ./_examples/benchmarks_test.go -bench=. -benchtime=3s
 ```
 
 > Benchmark file：[_examples/benchmarks_test.go](./_examples/benchmarks_test.go)
 
-| test case | times ran (large is better) |  ns/op (small is better) | B/op | allocs/op |
+| test case(output to memory) | times ran (large is better) |  ns/op (small is better) | B/op | allocs/op |
 | -----------|--------|-------------|-------------|-------------|
-| **logit** | **7513623** | **1612 ns/op** | **384 B/op** | **8 allocs/op** |
-| golog | 4569554 | 2631 ns/op | 712 B/op | 24 allocs/op |
-| zap | 3891336 | 3084 ns/op | 448 B/op | 16 allocs/op |
-| logrus | 2089682 | 5769 ns/op | 1633 B/op | 52 allocs/op |
+| **logit** | **3775916** | **&nbsp; 949 ns/op** | **&nbsp; 128 B/op** | **&nbsp; 4 allocs/op** |
+| zap | 1674750 | 2143 ns/op | &nbsp; 449 B/op | 16 allocs/op |
+| golog | 2223093 | 1619 ns/op | &nbsp; 713 B/op | 24 allocs/op |
+| logrus | &nbsp; 899808 | 3968 ns/op | 1634 B/op | 52 allocs/op |
 
-> Environment：R7-4700U CPU @ 2.0 GHZ，16 GB RAM
+| test case(output to file) | times ran (large is better) |  ns/op (small is better) | B/op | allocs/op |
+| -----------|--------|-------------|-------------|-------------|
+| **logit** | **3556720** | **&nbsp; 1009 ns/op** | **&nbsp; 129 B/op** | **&nbsp; 4 allocs/op** |
+| **logit-withoutBuffer** | **&nbsp; 499887** | **&nbsp; 7176 ns/op** | **&nbsp; 128 B/op** | **&nbsp; 4 allocs/op** |
+| zap | &nbsp; 409000 | &nbsp; 8580 ns/op | &nbsp; 449 B/op | 16 allocs/op |
+| golog | &nbsp; 257083 | 13884 ns/op | &nbsp; 713 B/op | 24 allocs/op |
+| logrus | &nbsp; 327198 | 10699 ns/op | 1634 B/op | 52 allocs/op |
 
-**Notice:**
+> Environment：R7-5800X CPU@3.8GHZ，32GB RAM，512GB SSD
 
-**1. Fetching file info will call runtime.Caller, which is expensive.**
-**However, we think file info is useful in check errors,**
-**so we keep this feature, and provide a switch to turn off it for high-performance.**
-
-**2. v0.0.7 and lower versions use some functions of fmt, and these functions is expensive**
-**because of reflect (for judging the parameter v interface{}). Actually, these judgements**
-**are redundant in a logger. The more effective output is used in v0.0.8 and higher versions.**
-
-**3. After checking the benchmarks of v0.0.8 version, we found that time format takes a lots of time**
-**because of time.Time.AppendFormat. In v0.0.11 and higher versions, we use time cache mechanism to**
-**reduce the times of time format. However, is it worth to replace time format operation with concurrent competition?**
-**The answer is no, so we cancel this mechanism in v0.1.1-alpha and higher versions.**
-
-**4. You should know that format can't reach high performance as the same as others because of reflection,**
+**Notice: You should know that format can't reach high performance as the same as others because of reflection,**
 **however, their performances are not as bad as we think:**
 
 | test case | times ran (large is better) |  ns/op (small is better) | B/op | allocs/op |
 | -----------|--------|-------------|-------------|-------------|
-| logit | 7513623 | 1612 ns/op | 384 B/op | 8 allocs/op |
-| **logit-reflection** | **6042254** | **1984 ns/op** | **424 B/op** | **12 allocs/op** |
+| logit | 3775916 | &nbsp; 949 ns/op | 128 B/op | 4 allocs/op |
+| **logit-useFormatLog** | **2931703** | **1233 ns/op** | **168 B/op** | **8 allocs/op** |
 
 ### 👥 Contributing
 

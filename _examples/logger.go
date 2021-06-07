@@ -37,17 +37,16 @@ func main() {
 	logger.Error("Hello, I am error!")
 
 	// Log won't carry caller information in default
-	// So, try NeedCaller if you need
-	logger.NeedCaller(true)
-
-	// Set format of time in log
-	logger.TimeFormat("2006/01/02 15:04:05")
+	// So, try SetNeedCaller if you need
+	logger.SetNeedCaller(true)
+	logger.Debug("Hello, I have caller information!")
 
 	// Set encoder and writer
 	// Actually, every level has own encoder and writer
 	// This way will set encoder and writer of all levels to the same one
-	logger.SetEncoder(logit.JsonEncoder())
-	logger.SetWriter(os.Stdout)
+	logger.Encoders().SetEncoder(logit.NewJsonEncoder(logit.TimeFormat))
+	logger.Writers().SetErrorWriter(os.Stderr)
+	logger.Error("Oh, I am error!")
 
 	// More features can be discovered by API
 }

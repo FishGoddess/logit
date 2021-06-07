@@ -20,36 +20,40 @@ package main
 
 import "github.com/FishGoddess/logit"
 
+type MyEncoder struct {
+	name string
+}
+
+func (me *MyEncoder) Encode(log *logit.Log) []byte {
+	return []byte(me.name + ":" + log.Msg() + "\n")
+}
+
 func main() {
 
 	// Use default encoder
 	logit.Info("Default encoder is like this...")
 
 	// We provide some encoders, such as text and json
-	// Try TextEncoder() and JsonEncoder()
-	logit.Me().SetEncoder(logit.TextEncoder())
-	logit.Me().SetEncoder(logit.JsonEncoder())
+	// Try TextEncoder and JsonEncoder
+	logit.Me().Encoders().SetEncoder(logit.NewTextEncoder("2006-01-02 15:04:05"))
+	logit.Me().Encoders().SetEncoder(logit.NewJsonEncoder("2006-01-02 15:04:05"))
 
-	// In fact, encoder is a function like "func(log *logit.Log, timeFormat string) []byte"
+	// In fact, encoder is an interface like "func(log *logit.Log) []byte"
+	// So you can implement your own encoder as you want
 	// All information of log is stored in log
-	// timeFormat is a layout for formatting time
 	// No matter what you do, return a byte slice
 	// The returned slice will be written by logger
-	logit.Me().SetEncoder(func(log *logit.Log, timeFormat string) []byte {
-		logTime := log.Time().Format(timeFormat)
-		return []byte(logTime + " => " + log.Msg() + "\r\n")
-	})
+	logit.Me().Encoders().SetEncoder(&MyEncoder{name: "whatever"})
 	logit.Info("My encoder...")
 
 	// You can set encoder of each level, for example:
-	logit.Me().SetErrorEncoder(func(log *logit.Log, timeFormat string) []byte {
-		logTime := log.Time().Format(timeFormat)
-		return []byte("[Error] " + logTime + " => " + log.Msg() + "\n")
-	})
+	logit.Me().Encoders().SetErrorEncoder(logit.NewJsonEncoder(logit.TimeFormat))
 	logit.Error("Panic...")
 
 	// If you have a logger, just use it as logit.Me()
 	logger := logit.NewLogger()
-	logger.SetEncoder(logit.TextEncoder())
-	logger.SetWarnEncoder(logit.JsonEncoder())
+	logger.Encoders().SetEncoder(logit.NewTextEncoder("2006-01-02 15:04:05"))
+	logger.Encoders().SetWarnEncoder(logit.NewJsonEncoder("2006-01-02 15:04:05"))
+	logger.Info("info...")
+	logger.Warn("warn...")
 }

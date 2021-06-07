@@ -19,7 +19,7 @@
 package main
 
 import (
-	"fmt"
+	"os"
 	"time"
 
 	"github.com/FishGoddess/logit"
@@ -27,38 +27,39 @@ import (
 
 func main() {
 
-	// We provide a writer writing to file
-	// "./test.log" is the path of this file
-	writer, err := logit.NewFileWriter("Z:/test.log")
-	if err != nil {
-		panic(err)
-	}
-	defer writer.Close()
+	// If you want to set output to another one, try SetWriter
+	// You should use Writers() to get all writers in logger and invoke SetWriter on it
+	// Any writer implemented io.Writer can be used here
+	logger := logit.NewLogger()
+	logger.Writers().SetWriter(os.Stdout)
+	logger.Info("SetWriter...")
 
-	// Use Write() to write something to file underlying
-	writer.Write([]byte("Something new..."))
+	// Also, all levels have its own writer
+	logger.Writers().SetDebugWriter(os.Stdout)
+	logger.Writers().SetInfoWriter(os.Stdout)
+	logger.Writers().SetWarnWriter(os.Stderr)
+	logger.Writers().SetErrorWriter(os.Stderr)
 
-	// Also, we provide some checkers for advanced features
-	// Every writing operation will call Check() in checker
-	// If one checker's Check() returns true, then this file will roll to a new file
-	// The old file will be renamed to be like "xxx.log.0000000001"
-	// These are all checkers we provide:
-	logit.NewTimeChecker(24 * time.Hour)
-	logit.NewSizeChecker(64 * logit.MB)
-	logit.NewCountChecker(1000)
+	// In fact, write logs to disk is expensive in time, so we provide a special writer for you
+	// This writer uses a buffer to reduce times of writing to disk, so it has a extremely-high performance
+	// Write logs to disk is just like write logs to memory after using this writer in our benchmark
+	// Amazing, right? Try logit.NewBufferedWriter immediately!
+	writer := logit.NewBufferedWriter(os.Stdout)
+	logger.Writers().SetWriter(writer)
+	logger.Info("NewBufferedWriter...")
+	writer.Flush() // Notice that Flush() should be invoked after finishing writing or you may miss some data
 
-	// If you want to use one of them above, try this:
-	newWriter, err := logit.NewFileWriter("Z:/test_checker.log", logit.NewSizeChecker(128*logit.KB))
-	if err != nil {
-		panic(err)
-	}
-	defer newWriter.Close()
+	// Of cause we provide a way to change the buffer size of it
+	writer = logit.NewBufferedWriter(os.Stdout)
+	logger.Writers().SetWriter(writer)
+	logger.Info("Oh! Faster! Faster!!! Yeah~~")
+	writer.Flush() // Notice that Flush() should be invoked after finishing writing or you may miss some data
 
-	// Check how many files starting with "test_checker.log"?
-	for i := 0; i < 10000; i++ {
-		newWriter.Write([]byte(fmt.Sprintf("Something new with checker...%d\n", i)))
-	}
-
-	// Also, you can use more than one of them in a writer
-	//logit.NewFileWriter("Z:/test_checker.log", logit.NewTimeChecker(24*time.Hour), logit.NewSizeChecker(128*logit.KB))
+	// The buffered writer won't flush data automatically in default
+	// Does it puzzle you? Try AutoFlush() to get it if you want!
+	writer = logit.NewBufferedWriter(os.Stdout)
+	writer.AutoFlush(time.Second)
+	logger.Writers().SetWriter(writer)
+	logger.Info("AutoFlush...")
+	time.Sleep(2 * time.Second)
 }

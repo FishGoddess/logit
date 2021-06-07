@@ -18,7 +18,9 @@
 
 package logit
 
-import "time"
+import (
+	"time"
+)
 
 // caller stores some calling information.
 type caller struct {
@@ -28,6 +30,21 @@ type caller struct {
 
 	// Line is the line number in file.
 	Line int
+}
+
+// newCaller returns a new caller holder containing default caller information.
+func newCaller() *caller {
+	return &caller{File: "unknown file", Line: -1}
+}
+
+// reset sets the caller to initial status.
+func (c *caller) reset() {
+
+	if c == nil {
+		return
+	}
+	c.File = "unknown file"
+	c.Line = -1
 }
 
 // Log is representation of a logging message, including all information about this message.
@@ -42,8 +59,37 @@ type Log struct {
 	// time is the publishing time of this log.
 	time time.Time
 
+	hasCaller bool
+
 	// caller stores some calling information, such as file path and line number.
 	caller *caller
+}
+
+// newLog returns a log holder containing a new caller for use.
+func newLog() *Log {
+	return &Log{
+		hasCaller: false,
+		caller:    newCaller(),
+	}
+}
+
+// setCaller sets file and line to caller inside.
+func (l *Log) setCaller(file string, line int) {
+
+	if l.caller == nil {
+		l.caller = newCaller()
+	}
+	l.hasCaller = true
+	l.caller.File = file
+	l.caller.Line = line
+}
+
+// reset sets the log to initial status.
+func (l *Log) reset() {
+	l.level = DebugLevel
+	l.msg = ""
+	l.hasCaller = false
+	l.caller.reset()
 }
 
 // Msg returns the message of this log.
@@ -64,5 +110,5 @@ func (l *Log) Time() time.Time {
 // Caller returns the caller information of this log.
 // Notice that ok will be false if this log doesn't have caller information.
 func (l *Log) Caller() (caller *caller, ok bool) {
-	return l.caller, l.caller != nil
+	return l.caller, l.caller != nil && l.hasCaller
 }

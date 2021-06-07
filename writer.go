@@ -19,106 +19,135 @@
 package logit
 
 import (
+	"bytes"
 	"fmt"
-	"math"
-	"os"
+	"io"
 	"sync"
+	"time"
 )
 
 const (
-	// maxRetriedTimes is the max times which will retry after error.
-	maxRetriedTimes = 10
+	// KB is the unit in size. 1 KB = 1024 Bytes.
+	KB = 1024
+
+	// minBufferSize is the min size of buffer.
+	// A panic will happen if buffer size is smaller than it.
+	minBufferSize = 4
+
+	// defaultBufferSize is the default size of buffer.
+	// The size we want to use is 16KB, but we add more bytes to it for avoiding buffer growing up.
+	defaultBufferSize = 16*KB + minBufferSize
 )
 
-// FileWriter writes logs to one or more files.
-// We provide a powerful writer of file, which can roll to several files
-// automatically in some conditions.
-type FileWriter struct {
+// BufferedWriter is a writer having a buffer inside to reduce times of writing underlying writer.
+// You can set buffer size or use it with default buffer size. Any writer implemented io.Writer can be used by it.
+type BufferedWriter struct {
 
-	// name is the name of log file.
-	name string
+	// writer is the underlying writer to write data.
+	writer     io.Writer
 
-	// file is a pointer to the real file in os.
-	file *os.File
+	// buffer is for keeping data together and writing them one time.
+	// Data won't be wrote to underlying writer if buffer doesn't full, so you can pre-write them by Flush() if you need.
+	// Also, we provide a way to flush data automatically, see BufferedWriter.AutoFlush.
+	buffer     *bytes.Buffer
 
-	// seq is the serial number of rolling file.
-	// If name is "test.log" and seq is 1, then the file rolled will be "test.log.0000000001"
-	seq int64
+	// bufferSize is the size of buffer.
+	bufferSize int
 
-	// checkers stores all checkers will be used.
-	// If one of them say: "Time to roll!", then this file writer will start to roll.
-	// After rolling, the checkers after it will be skipped in this loop.
-	checkers []Checker
-
-	// lock is for safe-concurrency.
-	lock *sync.Mutex
+	// lock is for safe concurrency.
+	lock       *sync.Mutex
 }
 
-// NewFileWriter returns a new file writer with given name and checkers.
-func NewFileWriter(name string, checkers ...Checker) (*FileWriter, error) {
+// NewBufferedWriter returns a new buffered writer of this writer with default buffer size.
+func NewBufferedWriter(writer io.Writer) *BufferedWriter {
+	return NewBufferedWriterWithSize(writer, defaultBufferSize)
+}
 
-	file, err := os.OpenFile(name, os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0644)
+// NewBufferedWriterWithSize returns a new buffered writer of this writer with specified bufferSize.
+// Notice that bufferSize must be larger than minBufferSize or a panic will happen. See minBufferSize.
+func NewBufferedWriterWithSize(writer io.Writer, bufferSize int) *BufferedWriter {
+
+	if bufferSize <= minBufferSize {
+		panic(fmt.Errorf("logit.NewBufferedWriterWithSize got a bufferSize %d smaller than minBufferSize %d", bufferSize, minBufferSize))
+	}
+
+	return &BufferedWriter{
+		writer:     writer,
+		buffer:     bytes.NewBuffer(make([]byte, 0, bufferSize)),
+		bufferSize: bufferSize,
+		lock:       &sync.Mutex{},
+	}
+}
+
+
+// needFlush returns if bf need flush or not.
+func (bf *BufferedWriter) needFlush() bool {
+	return bf.buffer.Len() > bf.buffer.Cap()-minBufferSize // remain some bytes for avoiding buffer growing...
+}
+
+// flush writes data in buffer to underlying writer.
+func (bf *BufferedWriter) flush() (n int, err error) {
+	writen, err := bf.buffer.WriteTo(bf.writer)
+	return int(writen), err
+}
+
+// Flush writes data in buffer to underlying writer if buffer has data.
+// It's safe in concurrency.
+func (bf *BufferedWriter) Flush() (n int, err error) {
+
+	bf.lock.Lock()
+	defer bf.lock.Unlock()
+
+	if bf.buffer.Len() > 0 {
+		return bf.flush()
+	}
+	return 0, nil
+}
+
+// AutoFlush starts a goroutine to flush data automatically.
+// It returns a channel for stopping this goroutine.
+func (bf *BufferedWriter) AutoFlush(frequency time.Duration) chan<- struct{} {
+
+	ticker := time.NewTicker(frequency)
+	stopChan := make(chan struct{}, 1)
+	go func() {
+		for {
+			select {
+			case <-ticker.C:
+				bf.Flush()
+			case <-stopChan:
+				return
+			}
+		}
+	}()
+	return stopChan
+}
+
+// Write writes p to buffer and flushes data to underlying writer first if need.
+func (bf *BufferedWriter) Write(p []byte) (n int, err error) {
+
+	bf.lock.Lock()
+	defer bf.lock.Unlock()
+
+	if bf.needFlush() {
+		bf.flush() // ignore error so this p can be written to buffer which may cause buffer grows up
+	}
+	return bf.buffer.Write(p)
+}
+
+// Close flushes data and closes underlying writer if writer implements io.Closer.
+func (bf *BufferedWriter) Close() error {
+
+	bf.lock.Lock()
+	defer bf.lock.Unlock()
+
+	_, err := bf.flush()
 	if err != nil {
-		return nil, err
+		return err
 	}
 
-	return &FileWriter{
-		name:     name,
-		file:     file,
-		seq:      0,
-		checkers: checkers,
-		lock:     &sync.Mutex{},
-	}, nil
-}
-
-// nextName returns next file name of fw.
-func (fw *FileWriter) nextName() string {
-	return fmt.Sprintf("%s.%.10d", fw.name, fw.seq)
-}
-
-// roll changes fw.file to a new file and nothing happens if failed.
-func (fw *FileWriter) roll() {
-
-	if fw.seq >= math.MaxInt64 {
-		fw.seq = 0
+	if wCloser, ok := bf.writer.(io.Closer); ok {
+		return wCloser.Close()
 	}
-
-	fw.seq++
-	fw.file.Close()
-	for i := 0; i < maxRetriedTimes; i++ {
-		if os.Rename(fw.name, fw.nextName()) == nil {
-			break
-		}
-	}
-
-	for j := 0; j < maxRetriedTimes; j++ {
-		if newFile, err := os.OpenFile(fw.name, os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0644); err == nil {
-			fw.file = newFile
-			return
-		}
-	}
-}
-
-// Write writes len(p) bytes from p to file and returns an error if failed.
-// The precise count of written bytes is n.
-func (fw *FileWriter) Write(p []byte) (n int, err error) {
-
-	fw.lock.Lock()
-	defer fw.lock.Unlock()
-
-	// Check rolling condition first and replace to newFile only if roll returns nil error
-	for _, checker := range fw.checkers {
-		if checker.Check(fw, len(p)) {
-			fw.roll()
-		}
-	}
-	return fw.file.Write(p)
-}
-
-// Close closes this file writer and returns an error if failed.
-func (fw *FileWriter) Close() error {
-	fw.lock.Lock()
-	defer fw.lock.Unlock()
-	fw.checkers = nil
-	return fw.file.Close()
+	return nil
 }

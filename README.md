@@ -1,7 +1,9 @@
 # 📝 logit
 
-[![License](_icon/license.svg)](https://www.apache.org/licenses/LICENSE-2.0.html)
 [![Go Doc](_icon/godoc.svg)](https://pkg.go.dev/github.com/FishGoddess/logit?tab=doc)
+[![License](_icon/license.svg)](https://www.apache.org/licenses/LICENSE-2.0.html)
+[![License](_icon/build.svg)](_icon/build.svg)
+[![License](_icon/coverage.svg)](_icon/coverage.svg)
 
 **logit** 是一个基于级别控制的高性能日志库，可以应用于所有的 [GoLang](https://golang.org) 应用程序中。
 
@@ -24,7 +26,7 @@
 
 _历史版本的特性请查看 [HISTORY.md](./HISTORY.md)。未来版本的新特性和计划请查看 [FUTURE.md](./FUTURE.md)。_
 
-> v0.3.x 版本已经出了第一个稳定版，这是一个全新设计的版本，废除了很多冗余设计！
+> v0.4.x 版本已经在规划开发中，这是一个全新设计的版本，去掉了很多垃圾设计和功能！
 
 ### 🚀 安装方式
 
@@ -63,28 +65,25 @@ func main() {
 	logit.Me().SetLevel(logit.DebugLevel)
 
 	// Log won't carry caller information in default
-	// So, try NeedCaller if you need
-	logit.Me().NeedCaller(true)
+	// So, try SetNeedCaller if you need
+	logit.Me().SetNeedCaller(true)
 	logit.Info("I need caller!")
-
-	// Set format of time in log
-	logit.Me().TimeFormat("2006/01/02 15:04:05")
 
 	// Set encoder and writer
 	// Actually, every level has own encoder and writer
 	// This way will set encoder and writer of all levels to the same one
-	logit.Me().SetEncoder(logit.JsonEncoder())
-	logit.Me().SetWriter(os.Stdout)
+	logit.Me().Encoders().SetEncoder(logit.NewJsonEncoder("2006-01-02 15:04:05"))
+	logit.Me().Writers().SetWriter(os.Stdout)
 
 	// We also provide some functions to set encoder and writer of each level
-	logit.Me().SetDebugEncoder(logit.JsonEncoder())
-	logit.Me().SetInfoEncoder(logit.JsonEncoder())
-	logit.Me().SetWarnEncoder(logit.JsonEncoder())
-	logit.Me().SetErrorEncoder(logit.JsonEncoder())
-	logit.Me().SetDebugWriter(os.Stdout)
-	logit.Me().SetInfoWriter(os.Stdout)
-	logit.Me().SetWarnWriter(os.Stdout)
-	logit.Me().SetErrorWriter(os.Stdout)
+	logit.Me().Encoders().SetDebugEncoder(logit.NewJsonEncoder("2006-01-02 15:04:05"))
+	logit.Me().Encoders().SetInfoEncoder(logit.NewJsonEncoder("2006-01-02 15:04:05"))
+	logit.Me().Encoders().SetWarnEncoder(logit.NewJsonEncoder("2006-01-02 15:04:05"))
+	logit.Me().Encoders().SetErrorEncoder(logit.NewJsonEncoder("2006-01-02 15:04:05"))
+	logit.Me().Writers().SetDebugWriter(os.Stdout)
+	logit.Me().Writers().SetInfoWriter(os.Stdout)
+	logit.Me().Writers().SetWarnWriter(os.Stdout)
+	logit.Me().Writers().SetErrorWriter(os.Stdout)
 }
 ```
 
@@ -98,41 +97,34 @@ _更多使用案例请查看 [_examples](./_examples) 目录。_
 ### 🔥 性能测试
 
 ```bash
-$ go test -v ./_examples/benchmarks_test.go -bench=. -benchtime=10s
+$ go test -v ./_examples/benchmarks_test.go -bench=. -benchtime=3s
 ```
 
 > 测试文件：[_examples/benchmarks_test.go](./_examples/benchmarks_test.go)
 
-| 测试 | 单位时间内运行次数 (越大越好) |  每个操作消耗时间 (越小越好) | B/op (越小越好) | allocs/op (越小越好) |
+| 测试（输出到内存） | 单位时间内运行次数 (越大越好) |  每个操作消耗时间 (越小越好) | B/op (越小越好) | allocs/op (越小越好) |
 | -----------|--------|-------------|-------------|-------------|
-| **logit** | **7513623** | **1612 ns/op** | **384 B/op** | **8 allocs/op** |
-| golog | 4569554 | 2631 ns/op | 712 B/op | 24 allocs/op |
-| zap | 3891336 | 3084 ns/op | 448 B/op | 16 allocs/op |
-| logrus | 2089682 | 5769 ns/op | 1633 B/op | 52 allocs/op |
+| **logit** | **3775916** | **&nbsp; 949 ns/op** | **&nbsp; 128 B/op** | **&nbsp; 4 allocs/op** |
+| zap | 1674750 | 2143 ns/op | &nbsp; 449 B/op | 16 allocs/op |
+| golog | 2223093 | 1619 ns/op | &nbsp; 713 B/op | 24 allocs/op |
+| logrus | &nbsp; 899808 | 3968 ns/op | 1634 B/op | 52 allocs/op |
 
-> 测试环境：R7-4700U CPU @ 2.0 GHZ，16 GB RAM
+| 测试（输出到文件） | 单位时间内运行次数 (越大越好) |  每个操作消耗时间 (越小越好) | B/op (越小越好) | allocs/op (越小越好) |
+| -----------|--------|-------------|-------------|-------------|
+| **logit** | **3556720** | **&nbsp; 1009 ns/op** | **&nbsp; 129 B/op** | **&nbsp; 4 allocs/op** |
+| **logit-不使用缓冲写出器** | **&nbsp; 499887** | **&nbsp; 7176 ns/op** | **&nbsp; 128 B/op** | **&nbsp; 4 allocs/op** |
+| zap | &nbsp; 409000 | &nbsp; 8580 ns/op | &nbsp; 449 B/op | 16 allocs/op |
+| golog | &nbsp; 257083 | 13884 ns/op | &nbsp; 713 B/op | 24 allocs/op |
+| logrus | &nbsp; 327198 | 10699 ns/op | 1634 B/op | 52 allocs/op |
 
-**注意：**
+> 测试环境：R7-5800X CPU@3.8GHZ，32GB RAM，512GB SSD
 
-**1. 输出文件信息会有运行时操作（runtime.Caller 方法），非常影响性能，**
-**但是这个功能感觉还是比较实用的，尤其是在查找错误的时候，所以我们还是加了这个功能！**
-**如果你更在乎性能，那我们也提供了一个选项可以关闭文件信息的查询！**
-
-**2. v0.0.7 及以前版本的日志输出使用了 fmt 包的一些方法，经过性能检测发现这些方法存在大量使用反射的**
-**行为，主要体现在对参数 v interface{} 进行类型检测的逻辑上，而日志输出都是字符串，这一个**
-**判断是可以省略的，可以减少很多运行时操作时间！v0.0.8 版本开始使用了更有效率的输出方式！**
-
-**3. 经过对 v0.0.8 版本的性能检测，发现时间格式化操作消耗了接近一半的处理时间，**
-**主要体现在 time.Time.AppendFormat 的调用上。在 v0.0.11 版本中使用了时间缓存机制进行优化，**
-**目前存在一个疑惑就是使用并发竞争去换取时间格式化的性能消耗究竟值不值得？**
-**答案是不值得，我们在 v0.1.1-alpha 及更高版本中取消了这个时间缓存机制。**
-
-**4. 值得注意的是，格式化的性能达不到这个水平，因为还是使用了反射技术，但是性能依旧是不差的：**
+**注意：格式化的性能达不到这个水平，因为还是使用了反射技术，但是性能依旧是不差的：**
 
 | 测试 | 单位时间内运行次数 (越大越好) |  每个操作消耗时间 (越小越好) | B/op (越小越好) | allocs/op (越小越好) |
 | -----------|--------|-------------|-------------|-------------|
-| logit | 7513623 | 1612 ns/op | 384 B/op | 8 allocs/op |
-| **logit-使用反射技术** | **6042254** | **1984 ns/op** | **424 B/op** | **12 allocs/op** |
+| logit | 3775916 | &nbsp; 949 ns/op | 128 B/op | 4 allocs/op |
+| **logit-使用格式化日志** | **2931703** | **1233 ns/op** | **168 B/op** | **8 allocs/op** |
 
 ### 👥 贡献者
 

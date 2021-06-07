@@ -14,32 +14,26 @@
 //
 // Author: FishGoddess
 // Email: fishgoddess@qq.com
-// Created at 2020/03/29 22:59:14
+// Created at 2021/06/06 15:51:29
 
 package logit
 
-import "testing"
+import (
+	"os"
+	"testing"
+)
 
-// go test -v -cover -run=^TestLevelOf$
-func TestLevelOf(t *testing.T) {
+// go test -v -cover -run=^TestCore$
+func TestCore(t *testing.T) {
 
-	if level, err := levelOf("notExistedLevel"); err == nil {
-		t.Fatalf("level (%s) should not be returned", level)
+	c := newCore(NewTextEncoder(TimeFormat), os.Stdout)
+	c.SetLevel(WarnLevel)
+	if c.Level() != WarnLevel {
+		t.Fatalf("level %+v of core is wrong", c.Level())
 	}
 
-	if level, err := levelOf("info"); err != nil || level != InfoLevel {
-		t.Fatalf("returned level (%s) is wrong", level)
-	}
-}
-
-// go test -v -cover -run=^TestEncodeOf$
-func TestEncodeOf(t *testing.T) {
-
-	if _, err := encoderOf("notExistedEncoder"); err == nil {
-		t.Fatal("encoder should not be returned")
-	}
-
-	if _, err := encoderOf("text"); err != nil {
-		t.Fatal("failed to get encoder")
+	c.SetNeedCaller(true)
+	if c.NeedCaller() != true {
+		t.Fatalf("needCaller %+v of core is wrong", c.NeedCaller())
 	}
 }
