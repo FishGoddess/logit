@@ -23,6 +23,7 @@ import (
 	"os"
 	"runtime"
 	"sync"
+	"sync/atomic"
 	"time"
 )
 
@@ -41,6 +42,10 @@ type Logger struct {
 	// Some settings are set in this core, such as level of logger and need caller or not.
 	*core
 
+	// values stores all extra values of logger.
+	// Every logs logged by this logger will carry this values.
+	values *atomic.Value
+
 	// logs is a log pool caching some log instances.
 	// It is for reducing memory allocation.
 	logs *sync.Pool
@@ -57,7 +62,8 @@ func NewLogger() *Logger {
 	c.SetNeedCaller(false)
 	c.Writers().SetErrorWriter(os.Stderr)
 	return &Logger{
-		core: c,
+		core:   c,
+		values: &atomic.Value{},
 		logs: &sync.Pool{
 			New: func() interface{} {
 				return newLog()
@@ -67,13 +73,28 @@ func NewLogger() *Logger {
 	}
 }
 
+func (l *Logger) getValues() M {
+
+	m := l.values.Load()
+	if m == nil {
+		return nil
+	}
+	return m.(M)
+}
+
+func (l *Logger) WithValues(values ...M) *Logger {
+	l.values.Store(combineToM(values))
+	return l
+}
+
 // newLog returns a Log holder from object pool.
 // Notice that not every holder returned is new, as you know, that is why we use a pool.
-func (l *Logger) newLog(level Level, msg string) *Log {
+func (l *Logger) newLog(level Level, msg string, values M) *Log {
 	log := l.logs.Get().(*Log)
-	log.level = level
 	log.msg = msg
+	log.level = level
 	log.time = time.Now()
+	log.values = values
 	return log
 }
 
@@ -111,7 +132,7 @@ func (l *Logger) log(callerDepth int, level Level, msg string, params ...interfa
 		msg = fmt.Sprintf(msg, params...)
 	}
 
-	log := l.newLog(level, msg)
+	log := l.newLog(level, msg, l.getValues())
 	defer l.releaseLog(log)
 
 	if l.NeedCaller() {

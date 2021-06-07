@@ -281,3 +281,23 @@ func (ws *writers) SetErrorWriter(writer io.Writer) {
 	defer ws.lock.Unlock()
 	ws.errorWriter = writer
 }
+
+// ============================================================================
+
+// M is the key-value struct in logger.
+type M map[string]interface{}
+
+func combineToM(ms []M) M {
+
+	if len(ms) <= 0 {
+		return nil
+	}
+
+	result := M{}
+	for _, m := range ms {
+		for k, v := range m {
+			result[k] = v
+		}
+	}
+	return result
+}
