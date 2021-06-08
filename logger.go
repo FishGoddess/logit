@@ -95,7 +95,7 @@ func (l *Logger) filledWithValues(log *Log) {
 }
 
 // prepareLog prepares a Log holder for use.
-func (l *Logger) prepareLog(level Level, msg string) *Log {
+func (l *Logger) prepareLog(level Level, msg string, values ...M) *Log {
 
 	result := l.logs.Get().(*Log)
 	result.msg = msg
@@ -121,37 +121,42 @@ func (l *Logger) handleLog(log *Log) {
 
 // log handles msg by l.handlers, and level will affect the visibility of this msg.
 // Notice that callerDepth is caller sensitive.
-func (l *Logger) log(level Level, msg string, params ...interface{}) {
+func (l *Logger) log(level Level, msg string, values ...M) {
 
 	if l.Level() > level {
 		return
 	}
 
-	if len(params) > 0 {
-		msg = fmt.Sprintf(msg, params...)
-	}
-
-	log := l.prepareLog(level, msg)
+	log := l.prepareLog(level, msg, values...)
 	defer l.releaseLog(log)
 	l.handleLog(log)
 }
 
+// formatMsg formats msg with params.
+func formatMsg(msg string, params ...interface{}) string {
+
+	if len(params) > 0 {
+		msg = fmt.Sprintf(msg, params...)
+	}
+	return msg
+}
+
 // Debug will output msg as a debug message.
 func (l *Logger) Debug(msg string, params ...interface{}) {
-	l.log(DebugLevel, msg, params...)
+	l.log(DebugLevel, formatMsg(msg, params...))
 }
 
 // Info will output msg as an info message.
 func (l *Logger) Info(msg string, params ...interface{}) {
-	l.log(InfoLevel, msg, params...)
+	l.log(InfoLevel, formatMsg(msg, params...))
 }
 
 // Warn will output msg as a warn message.
 func (l *Logger) Warn(msg string, params ...interface{}) {
-	l.log(WarnLevel, msg, params...)
+	l.log(WarnLevel, formatMsg(msg, params...))
 }
 
 // Error will output msg as an error message.
 func (l *Logger) Error(msg string, params ...interface{}) {
-	l.log(ErrorLevel, msg, params...)
+	l.log(ErrorLevel, formatMsg(msg, params...))
 }

@@ -32,15 +32,15 @@ type Encoder interface {
 	Encode(log *Log) []byte
 }
 
-type basedEncoder struct {
+type BasedEncoder struct {
 	timeFormat *atomic.Value
 	buffers    *sync.Pool
 }
 
-func newBasedEncoder(timeFormat string) *basedEncoder {
+func NewBasedEncoder(timeFormat string) *BasedEncoder {
 	tf := &atomic.Value{}
 	tf.Store(timeFormat)
-	return &basedEncoder{
+	return &BasedEncoder{
 		timeFormat: tf,
 		buffers: &sync.Pool{
 			New: func() interface{} {
@@ -50,17 +50,17 @@ func newBasedEncoder(timeFormat string) *basedEncoder {
 	}
 }
 
-func (be *basedEncoder) GetTimeFormat() string {
+func (be *BasedEncoder) TimeFormat() string {
 	return be.timeFormat.Load().(string)
 }
 
-func (be *basedEncoder) SetTimeFormat(timeFormat string) {
+func (be *BasedEncoder) SetTimeFormat(timeFormat string) {
 	be.timeFormat.Store(timeFormat)
 }
 
-func (be *basedEncoder) formatTime(t time.Time, quote bool) string {
+func (be *BasedEncoder) formatTime(t time.Time, quote bool) string {
 
-	timeFormat := be.GetTimeFormat()
+	timeFormat := be.TimeFormat()
 	if timeFormat == "" {
 		return strconv.FormatInt(t.Unix(), 10)
 	}
@@ -72,31 +72,31 @@ func (be *basedEncoder) formatTime(t time.Time, quote bool) string {
 	return result
 }
 
-func (be *basedEncoder) newBuffer() *bytes.Buffer {
+func (be *BasedEncoder) newBuffer() *bytes.Buffer {
 	result := be.buffers.Get().(*bytes.Buffer)
 	result.Reset()
 	return result
 }
 
-func (be *basedEncoder) releaseBuffer(buffer *bytes.Buffer) {
+func (be *BasedEncoder) releaseBuffer(buffer *bytes.Buffer) {
 	be.buffers.Put(buffer)
 }
 
-func (be *basedEncoder) Encode(log *Log) []byte { return nil }
+func (be *BasedEncoder) Encode(log *Log) []byte { return nil }
 
 // =================================== text encoder ===================================
 
-type textEncoder struct {
-	*basedEncoder
+type TextEncoder struct {
+	*BasedEncoder
 }
 
-func NewTextEncoder(timeFormat string) Encoder {
-	return &textEncoder{
-		basedEncoder: newBasedEncoder(timeFormat),
+func NewTextEncoder(timeFormat string) *TextEncoder {
+	return &TextEncoder{
+		BasedEncoder: NewBasedEncoder(timeFormat),
 	}
 }
 
-func (te *textEncoder) Encode(log *Log) []byte {
+func (te *TextEncoder) Encode(log *Log) []byte {
 
 	buffer := te.newBuffer()
 	defer te.releaseBuffer(buffer)
@@ -119,19 +119,19 @@ func (te *textEncoder) Encode(log *Log) []byte {
 
 // =================================== json encoder ===================================
 
-type jsonEncoder struct {
-	*basedEncoder
+type JsonEncoder struct {
+	*BasedEncoder
 }
 
-func NewJsonEncoder(timeFormat string) Encoder {
-	return &jsonEncoder{
-		basedEncoder: newBasedEncoder(timeFormat),
+func NewJsonEncoder(timeFormat string) *JsonEncoder {
+	return &JsonEncoder{
+		BasedEncoder: NewBasedEncoder(timeFormat),
 	}
 }
 
 // escapeString escapes string from special characters, such as double quotes.
 // See issue: https://github.com/FishGoddess/logit/issues/1
-func (je *jsonEncoder) escapeString(s string) string {
+func (je *JsonEncoder) escapeString(s string) string {
 
 	buffer := bytes.NewBuffer(make([]byte, 0, 64))
 
@@ -157,7 +157,7 @@ func (je *jsonEncoder) escapeString(s string) string {
 	return buffer.String()
 }
 
-func (je *jsonEncoder) Encode(log *Log) []byte {
+func (je *JsonEncoder) Encode(log *Log) []byte {
 
 	buffer := je.newBuffer()
 	defer je.releaseBuffer(buffer)

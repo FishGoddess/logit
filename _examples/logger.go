@@ -14,7 +14,7 @@
 //
 // Author: FishGoddess
 // Email: fishgoddess@qq.com
-// Created at 2020/11/27 23:40:29
+// Created at 2021/06/09 00:34:42
 
 package main
 
@@ -26,27 +26,48 @@ import (
 
 func main() {
 
-	// Create a new logger and set its level to debug
-	logger := logit.NewLogger()
-	logger.SetLevel(logit.DebugLevel)
+	// Create a new logger with extra values
+	// Every log will carry these values.
+	// logit.M is a type alia of map[string]interface{}, so you can use it like map
+	logger := logit.NewLogger(logit.M{
+		"trace": 123,
+		"xxx":   "abc",
+	})
 
-	// Then, just use it like normal logger
-	logger.Debug("Hello, I am debug!")
+	// There are four levels can be logged
+	logger.Debug("Hello, I am debug!") // Ignore because default level is info
 	logger.Info("Hello, I am info!")
 	logger.Warn("Hello, I am warn!")
 	logger.Error("Hello, I am error!")
 
+	// You can format log with some parameters if you want
+	logger.Debug("Hello, I am debug %d!", 2) // Ignore because default level is info
+	logger.Info("Hello, I am info %d!", 2)
+	logger.Warn("Hello, I am warn %d!", 2)
+	logger.Error("Hello, I am error %d!", 2)
+
+	// Set level to debug
+	logger.SetLevel(logit.DebugLevel)
+	logger.Debug("Now debug logs will come up!")
+
 	// Log won't carry caller information in default
 	// So, try SetNeedCaller if you need
 	logger.SetNeedCaller(true)
-	logger.Debug("Hello, I have caller information!")
+	logger.Info("I need caller!")
 
 	// Set encoder and writer
 	// Actually, every level has own encoder and writer
 	// This way will set encoder and writer of all levels to the same one
-	logger.Encoders().SetEncoder(logit.NewJsonEncoder(logit.TimeFormat))
-	logger.Writers().SetErrorWriter(os.Stderr)
-	logger.Error("Oh, I am error!")
+	logger.Encoders().SetEncoder(logit.NewJsonEncoder("2006-01-02 15:04:05"))
+	logger.Writers().SetWriter(os.Stdout)
 
-	// More features can be discovered by API
+	// We also provide some functions to set encoder and writer of each level
+	logger.Encoders().SetDebugEncoder(logit.NewJsonEncoder("2006-01-02 15:04:05"))
+	logger.Encoders().SetInfoEncoder(logit.NewJsonEncoder("2006-01-02 15:04:05"))
+	logger.Encoders().SetWarnEncoder(logit.NewJsonEncoder("2006-01-02 15:04:05"))
+	logger.Encoders().SetErrorEncoder(logit.NewJsonEncoder("2006-01-02 15:04:05"))
+	logger.Writers().SetDebugWriter(os.Stdout)
+	logger.Writers().SetInfoWriter(os.Stdout)
+	logger.Writers().SetWarnWriter(os.Stdout)
+	logger.Writers().SetErrorWriter(os.Stdout)
 }

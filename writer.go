@@ -27,16 +27,15 @@ import (
 )
 
 const (
-	// KB is the unit in size. 1 KB = 1024 Bytes.
-	KB = 1024
+	KB = 1024      // KB is the unit KB in size. 1 KB = 1024 Bytes.
+	MB = 1024 * KB // MB is the unit MB in size. 1 MB = 1024*1024 Bytes.
 
 	// minBufferSize is the min size of buffer.
 	// A panic will happen if buffer size is smaller than it.
 	minBufferSize = 4
 
 	// defaultBufferSize is the default size of buffer.
-	// The size we want to use is 16KB, but we add more bytes to it for avoiding buffer growing up.
-	defaultBufferSize = 16*KB + minBufferSize
+	defaultBufferSize = 16 * KB
 )
 
 // BufferedWriter is a writer having a buffer inside to reduce times of writing underlying writer.
@@ -44,18 +43,18 @@ const (
 type BufferedWriter struct {
 
 	// writer is the underlying writer to write data.
-	writer     io.Writer
+	writer io.Writer
 
 	// buffer is for keeping data together and writing them one time.
 	// Data won't be wrote to underlying writer if buffer doesn't full, so you can pre-write them by Flush() if you need.
 	// Also, we provide a way to flush data automatically, see BufferedWriter.AutoFlush.
-	buffer     *bytes.Buffer
+	buffer *bytes.Buffer
 
 	// bufferSize is the size of buffer.
 	bufferSize int
 
 	// lock is for safe concurrency.
-	lock       *sync.Mutex
+	lock *sync.Mutex
 }
 
 // NewBufferedWriter returns a new buffered writer of this writer with default buffer size.
@@ -65,6 +64,7 @@ func NewBufferedWriter(writer io.Writer) *BufferedWriter {
 
 // NewBufferedWriterWithSize returns a new buffered writer of this writer with specified bufferSize.
 // Notice that bufferSize must be larger than minBufferSize or a panic will happen. See minBufferSize.
+// The size we want to use is bufferSize, but we add more bytes to it for avoiding buffer growing up.
 func NewBufferedWriterWithSize(writer io.Writer, bufferSize int) *BufferedWriter {
 
 	if bufferSize <= minBufferSize {
@@ -73,12 +73,11 @@ func NewBufferedWriterWithSize(writer io.Writer, bufferSize int) *BufferedWriter
 
 	return &BufferedWriter{
 		writer:     writer,
-		buffer:     bytes.NewBuffer(make([]byte, 0, bufferSize)),
+		buffer:     bytes.NewBuffer(make([]byte, 0, bufferSize+minBufferSize)),
 		bufferSize: bufferSize,
 		lock:       &sync.Mutex{},
 	}
 }
-
 
 // needFlush returns if bf need flush or not.
 func (bf *BufferedWriter) needFlush() bool {
