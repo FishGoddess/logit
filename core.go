@@ -287,15 +287,35 @@ func (ws *writers) SetErrorWriter(writer io.Writer) {
 // M is the key-value struct in logger.
 type M map[string]interface{}
 
-// combineToOne combines many M structs to one M struct.
-func combineToOne(ms []M) M {
+// clone returns M's clone.
+func (m M) clone(values ...M) M {
 
-	if len(ms) <= 0 {
+	if len(m) <= 0 {
 		return nil
 	}
 
 	result := M{}
-	for _, m := range ms {
+	for k, v := range m {
+		result[k] = v
+	}
+
+	for _, m := range values {
+		for k, v := range m {
+			result[k] = v
+		}
+	}
+	return result
+}
+
+// combineToOne combines many M structs to one M struct.
+func combineToOne(values ...M) M {
+
+	if len(values) <= 0 {
+		return nil
+	}
+
+	result := M{}
+	for _, m := range values {
 		for k, v := range m {
 			result[k] = v
 		}

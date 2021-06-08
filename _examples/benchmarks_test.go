@@ -71,10 +71,10 @@ func BenchmarkLogitLogger(b *testing.B) {
 	logger.Writers().SetWriter(&nopWriter{})
 
 	logTask := func() {
-		logger.Debug("debug...")
-		logger.Info("info...")
-		logger.Warn("warning...")
-		logger.Error("error...")
+		logger.DebugF("debug...")
+		logger.InfoF("info...")
+		logger.WarnF("warning...")
+		logger.ErrorF("error...")
 	}
 
 	b.ReportAllocs()
@@ -94,10 +94,10 @@ func BenchmarkLogitLoggerWithReflection(b *testing.B) {
 	logger.Writers().SetWriter(&nopWriter{})
 
 	logTask := func() {
-		logger.Debug("debug%s", "...")
-		logger.Info("info%s", "...")
-		logger.Warn("warning%s", "...")
-		logger.Error("error%s", "...")
+		logger.DebugF("debug%s", "...")
+		logger.InfoF("info%s", "...")
+		logger.WarnF("warning%s", "...")
+		logger.ErrorF("error%s", "...")
 	}
 
 	b.ReportAllocs()
@@ -122,10 +122,10 @@ func BenchmarkLogitLoggerWithReflection(b *testing.B) {
 //	defer logger.Sync()
 //
 //	logTask := func() {
-//		logger.Debug("debug...")
-//		logger.Info("info...")
-//		logger.Warn("warning...")
-//		logger.Error("error...")
+//		logger.DebugF("debug...")
+//		logger.InfoF("info...")
+//		logger.WarnF("warning...")
+//		logger.ErrorF("error...")
 //	}
 //
 //	b.ReportAllocs()
@@ -145,10 +145,10 @@ func BenchmarkLogitLoggerWithReflection(b *testing.B) {
 //	logger.SetTimeFormat(timeFormat)
 //
 //	logTask := func() {
-//		logger.Debug("debug...")
-//		logger.Info("info...")
-//		logger.Warn("warning...")
-//		logger.Error("error...")
+//		logger.DebugF("debug...")
+//		logger.InfoF("info...")
+//		logger.WarnF("warning...")
+//		logger.ErrorF("error...")
 //	}
 //
 //	b.ReportAllocs()
@@ -170,10 +170,10 @@ func BenchmarkLogitLoggerWithReflection(b *testing.B) {
 //	})
 //
 //	logTask := func() {
-//		logger.Debug("debug...")
-//		logger.Info("info...")
-//		logger.Warn("warning...")
-//		logger.Error("error...")
+//		logger.DebugF("debug...")
+//		logger.InfoF("info...")
+//		logger.WarnF("warning...")
+//		logger.ErrorF("error...")
 //	}
 //
 //	b.ReportAllocs()
@@ -206,10 +206,10 @@ func BenchmarkLogitFile(b *testing.B) {
 	logger.Writers().SetWriter(writer)
 
 	logTask := func() {
-		logger.Debug("debug...")
-		logger.Info("info...")
-		logger.Warn("warning...")
-		logger.Error("error...")
+		logger.DebugF("debug...")
+		logger.InfoF("info...")
+		logger.WarnF("warning...")
+		logger.ErrorF("error...")
 	}
 
 	b.ReportAllocs()
@@ -230,10 +230,10 @@ func BenchmarkLogitFileWithoutBuffer(b *testing.B) {
 	logger.Writers().SetWriter(file)
 
 	logTask := func() {
-		logger.Debug("debug...")
-		logger.Info("info...")
-		logger.Warn("warning...")
-		logger.Error("error...")
+		logger.DebugF("debug...")
+		logger.InfoF("info...")
+		logger.WarnF("warning...")
+		logger.ErrorF("error...")
 	}
 
 	b.ReportAllocs()
@@ -259,10 +259,10 @@ func BenchmarkLogitFileWithoutBuffer(b *testing.B) {
 //	defer logger.Sync()
 //
 //	logTask := func() {
-//		logger.Debug("debug...")
-//		logger.Info("info...")
-//		logger.Warn("warning...")
-//		logger.Error("error...")
+//		logger.DebugF("debug...")
+//		logger.InfoF("info...")
+//		logger.WarnF("warning...")
+//		logger.ErrorF("error...")
 //	}
 //
 //	b.ReportAllocs()
@@ -283,10 +283,10 @@ func BenchmarkLogitFileWithoutBuffer(b *testing.B) {
 //	logger.SetTimeFormat(timeFormat)
 //
 //	logTask := func() {
-//		logger.Debug("debug...")
-//		logger.Info("info...")
-//		logger.Warn("warning...")
-//		logger.Error("error...")
+//		logger.DebugF("debug...")
+//		logger.InfoF("info...")
+//		logger.WarnF("warning...")
+//		logger.ErrorF("error...")
 //	}
 //
 //	b.ReportAllocs()
@@ -309,10 +309,10 @@ func BenchmarkLogitFileWithoutBuffer(b *testing.B) {
 //	})
 //
 //	logTask := func() {
-//		logger.Debug("debug...")
-//		logger.Info("info...")
-//		logger.Warn("warning...")
-//		logger.Error("error...")
+//		logger.DebugF("debug...")
+//		logger.InfoF("info...")
+//		logger.WarnF("warning...")
+//		logger.ErrorF("error...")
 //	}
 //
 //	b.ReportAllocs()

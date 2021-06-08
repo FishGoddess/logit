@@ -32,7 +32,7 @@ func main() {
 	// Any writer implemented io.Writer can be used here
 	logger := logit.NewLogger()
 	logger.Writers().SetWriter(os.Stdout)
-	logger.Info("SetWriter...")
+	logger.InfoF("SetWriter...")
 
 	// Also, all levels have its own writer
 	logger.Writers().SetDebugWriter(os.Stdout)
@@ -46,13 +46,13 @@ func main() {
 	// Amazing, right? Try logit.NewBufferedWriter immediately!
 	writer := logit.NewBufferedWriter(os.Stdout)
 	logger.Writers().SetWriter(writer)
-	logger.Info("NewBufferedWriter...")
+	logger.InfoF("NewBufferedWriter...")
 	writer.Flush() // Notice that Flush() should be invoked after finishing writing or you may miss some data
 
 	// Of cause we provide a way to change the buffer size of it
 	writer = logit.NewBufferedWriter(os.Stdout)
 	logger.Writers().SetWriter(writer)
-	logger.Info("Oh! Faster! Faster!!! Yeah~~")
+	logger.InfoF("Oh! Faster! Faster!!! Yeah~~")
 	writer.Flush() // Notice that Flush() should be invoked after finishing writing or you may miss some data
 
 	// The buffered writer won't flush data automatically in default
@@ -60,6 +60,6 @@ func main() {
 	writer = logit.NewBufferedWriter(os.Stdout)
 	writer.AutoFlush(time.Second)
 	logger.Writers().SetWriter(writer)
-	logger.Info("AutoFlush...")
+	logger.InfoF("AutoFlush...")
 	time.Sleep(2 * time.Second)
 }

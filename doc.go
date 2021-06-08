@@ -22,16 +22,16 @@ Package logit provides an easy way to use foundation for your logging operations
 1. basic
 
 	// There are four levels can be logged
-	logit.Debug("Hello, I am debug!") // Ignore because default level is info
-	logit.Info("Hello, I am info!")
-	logit.Warn("Hello, I am warn!")
-	logit.Error("Hello, I am error!")
+	logit.DebugF("Hello, I am debug!") // Ignore because default level is info
+	logit.InfoF("Hello, I am info!")
+	logit.WarnF("Hello, I am warn!")
+	logit.ErrorF("Hello, I am error!")
 
 	// You can format log with some parameters if you want
-	logit.Debug("Hello, I am debug %d!", 2) // Ignore because default level is info
-	logit.Info("Hello, I am info %d!", 2)
-	logit.Warn("Hello, I am warn %d!", 2)
-	logit.Error("Hello, I am error %d!", 2)
+	logit.DebugF("Hello, I am debug %d!", 2) // Ignore because default level is info
+	logit.InfoF("Hello, I am info %d!", 2)
+	logit.WarnF("Hello, I am warn %d!", 2)
+	logit.ErrorF("Hello, I am error %d!", 2)
 
 	// logit.Me() returns a completed logger for use
 
@@ -41,7 +41,7 @@ Package logit provides an easy way to use foundation for your logging operations
 	// Log won't carry caller information in default
 	// So, try SetNeedCaller if you need
 	logit.Me().SetNeedCaller(true)
-	logit.Info("I need caller!")
+	logit.InfoF("I need caller!")
 
 	// Set encoder and writer
 	// Actually, every level has own encoder and writer
@@ -66,29 +66,29 @@ Package logit provides an easy way to use foundation for your logging operations
 	logger.SetLevel(logit.DebugLevel)
 
 	// Then, just use it like normal logger
-	logger.Debug("Hello, I am debug!")
-	logger.Info("Hello, I am info!")
-	logger.Warn("Hello, I am warn!")
-	logger.Error("Hello, I am error!")
+	logger.DebugF("Hello, I am debug!")
+	logger.InfoF("Hello, I am info!")
+	logger.WarnF("Hello, I am warn!")
+	logger.ErrorF("Hello, I am error!")
 
 	// Log won't carry caller information in default
 	// So, try SetNeedCaller if you need
 	logger.SetNeedCaller(true)
-	logger.Debug("Hello, I have caller information!")
+	logger.DebugF("Hello, I have caller information!")
 
 	// Set encoder and writer
 	// Actually, every level has own encoder and writer
 	// This way will set encoder and writer of all levels to the same one
 	logger.Encoders().SetEncoder(logit.NewJsonEncoder(logit.TimeFormat))
 	logger.Writers().SetErrorWriter(os.Stderr)
-	logger.Error("Oh, I am error!")
+	logger.ErrorF("Oh, I am error!")
 
 	// More features can be discovered by API
 
 3. encoder
 
 	// Use default encoder
-	logit.Info("Default encoder is like this...")
+	logit.InfoF("Default encoder is like this...")
 
 	// We provide some encoders, such as text and json
 	// Try TextEncoder and JsonEncoder
@@ -101,18 +101,18 @@ Package logit provides an easy way to use foundation for your logging operations
 	// No matter what you do, return a byte slice
 	// The returned slice will be written by logger
 	logit.Me().Encoders().SetEncoder(&MyEncoder{name: "whatever"})
-	logit.Info("My encoder...")
+	logit.InfoF("My encoder...")
 
 	// You can set encoder of each level, for example:
 	logit.Me().Encoders().SetErrorEncoder(logit.NewJsonEncoder(logit.TimeFormat))
-	logit.Error("Panic...")
+	logit.ErrorF("Panic...")
 
 	// If you have a logger, just use it as logit.Me()
 	logger := logit.NewLogger()
 	logger.Encoders().SetEncoder(logit.NewTextEncoder("2006-01-02 15:04:05"))
 	logger.Encoders().SetWarnEncoder(logit.NewJsonEncoder("2006-01-02 15:04:05"))
-	logger.Info("info...")
-	logger.Warn("warn...")
+	logger.InfoF("info...")
+	logger.WarnF("warn...")
 
 4. writer
 
@@ -121,7 +121,7 @@ Package logit provides an easy way to use foundation for your logging operations
 	// Any writer implemented io.Writer can be used here
 	logger := logit.NewLogger()
 	logger.Writers().SetWriter(os.Stdout)
-	logger.Info("SetWriter...")
+	logger.InfoF("SetWriter...")
 
 	// Also, all levels have its own writer
 	logger.Writers().SetDebugWriter(os.Stdout)
@@ -135,13 +135,13 @@ Package logit provides an easy way to use foundation for your logging operations
 	// Amazing, right? Try logit.NewBufferedWriter immediately!
 	writer := logit.NewBufferedWriter(os.Stdout)
 	logger.Writers().SetWriter(writer)
-	logger.Info("NewBufferedWriter...")
+	logger.InfoF("NewBufferedWriter...")
 	writer.Flush() // Notice that Flush() should be invoked after finishing writing or you may miss some data
 
 	// Of cause we provide a way to change the buffer size of it
 	writer = logit.NewBufferedWriter(os.Stdout)
 	logger.Writers().SetWriter(writer)
-	logger.Info("Oh! Faster! Faster!!! Yeah~~")
+	logger.InfoF("Oh! Faster! Faster!!! Yeah~~")
 	writer.Flush() // Notice that Flush() should be invoked after finishing writing or you may miss some data
 
 	// The buffered writer won't flush data automatically in default
@@ -149,7 +149,7 @@ Package logit provides an easy way to use foundation for your logging operations
 	writer = logit.NewBufferedWriter(os.Stdout)
 	writer.AutoFlush(time.Second)
 	logger.Writers().SetWriter(writer)
-	logger.Info("AutoFlush...")
+	logger.InfoF("AutoFlush...")
 	time.Sleep(2 * time.Second)
 
 */

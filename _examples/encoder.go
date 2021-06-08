@@ -54,6 +54,6 @@ func main() {
 	logger := logit.NewLogger()
 	logger.Encoders().SetEncoder(logit.NewTextEncoder("2006-01-02 15:04:05"))
 	logger.Encoders().SetWarnEncoder(logit.NewJsonEncoder("2006-01-02 15:04:05"))
-	logger.Info("info...")
-	logger.Warn("warn...")
+	logger.InfoF("info...")
+	logger.WarnF("warn...")
 }

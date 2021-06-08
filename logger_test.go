@@ -161,10 +161,10 @@ func TestLoggerCore(t *testing.T) {
 	logger.Encoders().SetEncoder(&testLoggerCoreEncoder{})
 	logger.Writers().SetWriter(buffer)
 
-	logger.Debug(DebugLevel.String())
-	logger.Info(InfoLevel.String())
-	logger.Warn(WarnLevel.String())
-	logger.Error(ErrorLevel.String())
+	logger.DebugF(DebugLevel.String())
+	logger.InfoF(InfoLevel.String())
+	logger.WarnF(WarnLevel.String())
+	logger.ErrorF(ErrorLevel.String())
 
 	s := buffer.String()
 	if s != DebugLevel.String()+InfoLevel.String()+WarnLevel.String()+ErrorLevel.String() {
@@ -186,10 +186,10 @@ func TestLoggerCoreParams(t *testing.T) {
 	logger.Encoders().SetEncoder(&testLoggerCoreParamsEncoder{})
 	logger.Writers().SetWriter(buffer)
 
-	logger.Debug("%sF", DebugLevel.String())
-	logger.Info("%sF", InfoLevel.String())
-	logger.Warn("%sF", WarnLevel.String())
-	logger.Error("%sF", ErrorLevel.String())
+	logger.DebugF("%sF", DebugLevel.String())
+	logger.InfoF("%sF", InfoLevel.String())
+	logger.WarnF("%sF", WarnLevel.String())
+	logger.ErrorF("%sF", ErrorLevel.String())
 
 	s := buffer.String()
 	if s != fmt.Sprintf("%sF%sF%sF%sF", DebugLevel.String(), InfoLevel.String(), WarnLevel.String(), ErrorLevel.String()) {
@@ -206,7 +206,7 @@ func TestLoggerWithCaller(t *testing.T) {
 	buffer := bytes.NewBuffer(make([]byte, 0))
 	logger.Encoders().SetEncoder(NewJsonEncoder(""))
 	logger.Writers().SetWriter(buffer)
-	logger.Info("xxx")
+	logger.InfoF("xxx")
 
 	_, file, line, ok := runtime.Caller(0)
 	if !ok {
