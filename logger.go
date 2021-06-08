@@ -160,20 +160,20 @@ func (l *Logger) logF(level Level, msg string, params ...interface{}) {
 
 // DebugF will output msg as a debug message.
 func (l *Logger) DebugF(msg string, params ...interface{}) {
-	l.logF(DebugLevel, msg, params)
+	l.logF(DebugLevel, msg, params...)
 }
 
 // InfoF will output msg as an info message.
 func (l *Logger) InfoF(msg string, params ...interface{}) {
-	l.logF(InfoLevel, msg, params)
+	l.logF(InfoLevel, msg, params...)
 }
 
 // WarnF will output msg as a warn message.
 func (l *Logger) WarnF(msg string, params ...interface{}) {
-	l.logF(WarnLevel, msg, params)
+	l.logF(WarnLevel, msg, params...)
 }
 
 // ErrorF will output msg as an error message.
 func (l *Logger) ErrorF(msg string, params ...interface{}) {
-	l.logF(ErrorLevel, msg, params)
+	l.logF(ErrorLevel, msg, params...)
 }
