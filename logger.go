@@ -62,7 +62,7 @@ func NewLogger(values ...M) *Logger {
 	c.Writers().SetErrorWriter(os.Stderr)
 	return &Logger{
 		core:   c,
-		values: combineToOne(values...),
+		values: mergeValues(values...),
 		logs: &sync.Pool{
 			New: func() interface{} {
 				return newLog()

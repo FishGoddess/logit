@@ -307,8 +307,13 @@ func (m M) clone(values ...M) M {
 	return result
 }
 
-// combineToOne combines many M structs to one M struct.
-func combineToOne(values ...M) M {
+// Get returns the value of key in M.
+func (m M) Get(key string) interface{} {
+	return m[key]
+}
+
+// mergeValues merges many M structs to one M struct.
+func mergeValues(values ...M) M {
 
 	if len(values) <= 0 {
 		return nil
