@@ -18,11 +18,6 @@
 
 package logit
 
-const (
-	// callerDepthOfGlobalLogger is the depth of calling stack, which is about file name and line number.
-	callerDepthOfGlobalLogger = 3
-)
-
 var (
 	// globalLogger is a logger for global usage.
 	globalLogger = NewLogger()
@@ -35,20 +30,20 @@ func Me() *Logger {
 
 // Debug will output msg as a debug message.
 func Debug(msg string, params ...interface{}) {
-	globalLogger.log(callerDepthOfGlobalLogger, DebugLevel, msg, params...)
+	globalLogger.log(DebugLevel, msg, params...)
 }
 
 // Info will output msg as an info message.
 func Info(msg string, params ...interface{}) {
-	globalLogger.log(callerDepthOfGlobalLogger, InfoLevel, msg, params...)
+	globalLogger.log(InfoLevel, msg, params...)
 }
 
 // Warn will output msg as a warn message.
 func Warn(msg string, params ...interface{}) {
-	globalLogger.log(callerDepthOfGlobalLogger, WarnLevel, msg, params...)
+	globalLogger.log(WarnLevel, msg, params...)
 }
 
 // Error will output msg as an error message.
 func Error(msg string, params ...interface{}) {
-	globalLogger.log(callerDepthOfGlobalLogger, ErrorLevel, msg, params...)
+	globalLogger.log(ErrorLevel, msg, params...)
 }

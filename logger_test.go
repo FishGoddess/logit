@@ -20,7 +20,9 @@ package logit
 
 import (
 	"bytes"
+	"encoding/json"
 	"fmt"
+	"runtime"
 	"testing"
 )
 
@@ -192,5 +194,39 @@ func TestLoggerCoreParams(t *testing.T) {
 	s := buffer.String()
 	if s != fmt.Sprintf("%sF%sF%sF%sF", DebugLevel.String(), InfoLevel.String(), WarnLevel.String(), ErrorLevel.String()) {
 		t.Fatalf("coreParams log %s is wrong", s)
+	}
+}
+
+// go test -v -cover -run=^TestLoggerWithCaller$
+func TestLoggerWithCaller(t *testing.T) {
+
+	logger := NewLogger()
+	logger.SetNeedCaller(true)
+
+	buffer := bytes.NewBuffer(make([]byte, 0))
+	logger.Encoders().SetEncoder(NewJsonEncoder(""))
+	logger.Writers().SetWriter(buffer)
+	logger.Info("xxx")
+
+	_, file, line, ok := runtime.Caller(0)
+	if !ok {
+		t.Fatal("get caller failed")
+	}
+	t.Logf("file: %s, ling: %d", file, line)
+
+	logStr := buffer.String()
+	log := map[string]interface{}{}
+	err := json.Unmarshal([]byte(logStr), &log)
+	if err != nil {
+		t.Fatalf("unmarshal json %s failed", logStr)
+	}
+	t.Logf("log: %+v", log)
+
+	if log["file"] != file {
+		t.Fatalf("file %s in caller is wrong, correct: %s", log["file"], file)
+	}
+
+	if int(log["line"].(float64)) != line - 2 {
+		t.Fatalf("line %d in caller is wrong, correct: %d", log["line"], line-2)
 	}
 }

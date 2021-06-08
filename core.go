@@ -287,7 +287,8 @@ func (ws *writers) SetErrorWriter(writer io.Writer) {
 // M is the key-value struct in logger.
 type M map[string]interface{}
 
-func combineToM(ms []M) M {
+// combineToOne combines many M structs to one M struct.
+func combineToOne(ms []M) M {
 
 	if len(ms) <= 0 {
 		return nil

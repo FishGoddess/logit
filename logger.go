@@ -23,13 +23,12 @@ import (
 	"os"
 	"runtime"
 	"sync"
-	"sync/atomic"
 	"time"
 )
 
 const (
 	// callerDepth is the depth of calling stack, which is about file name and line number.
-	callerDepth = 3
+	callerDepth = 4
 
 	// TimeFormat is the format of time.
 	TimeFormat = "2006-01-02 15:04:05"
@@ -44,7 +43,7 @@ type Logger struct {
 
 	// values stores all extra values of logger.
 	// Every logs logged by this logger will carry this values.
-	values *atomic.Value
+	values M
 
 	// logs is a log pool caching some log instances.
 	// It is for reducing memory allocation.
@@ -55,7 +54,7 @@ type Logger struct {
 }
 
 // NewLogger returns a new logger instance with default settings.
-func NewLogger() *Logger {
+func NewLogger(values ...M) *Logger {
 
 	c := newCore(NewTextEncoder(TimeFormat), os.Stdout)
 	c.SetLevel(InfoLevel)
@@ -63,7 +62,7 @@ func NewLogger() *Logger {
 	c.Writers().SetErrorWriter(os.Stderr)
 	return &Logger{
 		core:   c,
-		values: &atomic.Value{},
+		values: combineToOne(values),
 		logs: &sync.Pool{
 			New: func() interface{} {
 				return newLog()
@@ -73,44 +72,44 @@ func NewLogger() *Logger {
 	}
 }
 
-func (l *Logger) getValues() M {
+// filledWithCaller fills log with caller.
+// This function is too expensive because of runtime.Caller.
+// Notice that callerDepth is the depth of calling stack. See callerDepth.
+func (l *Logger) filledWithCaller(log *Log) {
 
-	m := l.values.Load()
-	if m == nil {
-		return nil
+	if !l.NeedCaller() {
+		return
 	}
-	return m.(M)
+
+	if _, file, line, ok := runtime.Caller(callerDepth); ok {
+		log.setCaller(file, line)
+	}
 }
 
-func (l *Logger) WithValues(values ...M) *Logger {
-	l.values.Store(combineToM(values))
-	return l
+// filledWithValues fills log with values.
+func (l *Logger) filledWithValues(log *Log) {
+
+	if len(l.values) > 0 {
+		log.values = l.values
+	}
 }
 
-// newLog returns a Log holder from object pool.
-// Notice that not every holder returned is new, as you know, that is why we use a pool.
-func (l *Logger) newLog(level Level, msg string, values M) *Log {
-	log := l.logs.Get().(*Log)
-	log.msg = msg
-	log.level = level
-	log.time = time.Now()
-	log.values = values
-	return log
+// prepareLog prepares a Log holder for use.
+func (l *Logger) prepareLog(level Level, msg string) *Log {
+
+	result := l.logs.Get().(*Log)
+	result.msg = msg
+	result.level = level
+	result.time = time.Now()
+	l.filledWithCaller(result)
+	l.filledWithValues(result)
+	return result
 }
 
 // releaseLog releases log to object pool so that this log can be reused next time.
 func (l *Logger) releaseLog(log *Log) {
 	log.reset()
 	l.logs.Put(log)
-}
-
-// wrapLogWithCaller wraps log with caller.
-// This function is too expensive because of runtime.Caller.
-// Notice that callerDepth is the depth of calling stack. See callerDepth.
-func wrapLogWithCaller(log *Log, callerDepth int) {
-	if _, file, line, ok := runtime.Caller(callerDepth); ok {
-		log.setCaller(file, line)
-	}
 }
 
 // handleLog handles log with encoders and writers.
@@ -122,7 +121,7 @@ func (l *Logger) handleLog(log *Log) {
 
 // log handles msg by l.handlers, and level will affect the visibility of this msg.
 // Notice that callerDepth is caller sensitive.
-func (l *Logger) log(callerDepth int, level Level, msg string, params ...interface{}) {
+func (l *Logger) log(level Level, msg string, params ...interface{}) {
 
 	if l.Level() > level {
 		return
@@ -132,31 +131,27 @@ func (l *Logger) log(callerDepth int, level Level, msg string, params ...interfa
 		msg = fmt.Sprintf(msg, params...)
 	}
 
-	log := l.newLog(level, msg, l.getValues())
+	log := l.prepareLog(level, msg)
 	defer l.releaseLog(log)
-
-	if l.NeedCaller() {
-		wrapLogWithCaller(log, callerDepth)
-	}
 	l.handleLog(log)
 }
 
 // Debug will output msg as a debug message.
 func (l *Logger) Debug(msg string, params ...interface{}) {
-	l.log(callerDepth, DebugLevel, msg, params...)
+	l.log(DebugLevel, msg, params...)
 }
 
 // Info will output msg as an info message.
 func (l *Logger) Info(msg string, params ...interface{}) {
-	l.log(callerDepth, InfoLevel, msg, params...)
+	l.log(InfoLevel, msg, params...)
 }
 
 // Warn will output msg as a warn message.
 func (l *Logger) Warn(msg string, params ...interface{}) {
-	l.log(callerDepth, WarnLevel, msg, params...)
+	l.log(WarnLevel, msg, params...)
 }
 
 // Error will output msg as an error message.
 func (l *Logger) Error(msg string, params ...interface{}) {
-	l.log(callerDepth, ErrorLevel, msg, params...)
+	l.log(ErrorLevel, msg, params...)
 }
