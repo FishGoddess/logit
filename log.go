@@ -66,7 +66,7 @@ type Log struct {
 	caller *caller
 
 	// values stores all extra values of this log.
-	values M
+	values KV
 }
 
 // newLog returns a log holder containing a new caller for use.
@@ -75,17 +75,6 @@ func newLog() *Log {
 		hasCaller: false,
 		caller:    newCaller(),
 	}
-}
-
-// setCaller sets file and line to caller inside.
-func (l *Log) setCaller(file string, line int) {
-
-	if l.caller == nil {
-		l.caller = newCaller()
-	}
-	l.hasCaller = true
-	l.caller.File = file
-	l.caller.Line = line
 }
 
 // reset sets the log to initial status.
@@ -118,7 +107,28 @@ func (l *Log) Caller() (caller *caller, ok bool) {
 	return l.caller, l.caller != nil && l.hasCaller
 }
 
+// setCaller sets file and line to caller inside.
+func (l *Log) setCaller(file string, line int) {
+
+	if l.caller == nil {
+		l.caller = newCaller()
+	}
+	l.hasCaller = true
+	l.caller.File = file
+	l.caller.Line = line
+}
+
 // Values returns the values of this log.
-func (l *Log) Values() M {
+func (l *Log) Values() KV {
 	return l.values
+}
+
+// setValues sets values to this log.
+func (l *Log) setValues(values ...KV) {
+
+	for _, m := range values {
+		for k, v := range m {
+			l.values[k] = v
+		}
+	}
 }

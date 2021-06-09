@@ -29,7 +29,13 @@ func main() {
 	// Create a new logger first
 	logger := logit.NewLogger()
 
-	// There are four levels can be logged, and you can format log with some parameters
+	// There are four levels can be logged
+	logger.Debug("Hello, I am debug!") // Ignore because default level is info
+	logger.Info("Hello, I am info!")
+	logger.Warn("Hello, I am warn!")
+	logger.Error("Hello, I am error!", logit.KV{"err": "xxx", "id": 666}) // carry some values to log
+
+	// You can format log with some parameters if you want
 	logger.DebugF("Hello, I am debug %d!", 2) // Ignore because default level is info
 	logger.InfoF("Hello, I am info %d!", 2)
 	logger.WarnF("Hello, I am warn %d!", 2)
@@ -37,12 +43,12 @@ func main() {
 
 	// Set level to debug
 	logger.SetLevel(logit.DebugLevel)
-	logger.DebugF("Now debug logs will come up!")
+	logger.Debug("Now debug logs will come up!")
 
 	// Log won't carry caller information in default
 	// So, try SetNeedCaller if you need
 	logger.SetNeedCaller(true)
-	logger.InfoF("I need caller!")
+	logger.Info("I need caller!")
 
 	// Set encoder and writer
 	// Actually, every level has own encoder and writer

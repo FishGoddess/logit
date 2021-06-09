@@ -18,42 +18,44 @@
 
 package main
 
-import "github.com/FishGoddess/logit"
+import (
+	"fmt"
+
+	"github.com/FishGoddess/logit"
+)
 
 type MyEncoder struct {
 	name string
 }
 
 func (me *MyEncoder) Encode(log *logit.Log) []byte {
-	return []byte(me.name + ":" + log.Msg() + "\n")
+	return []byte(fmt.Sprintf("%s: %s ==> %+v\n", me.name, log.Msg(), log.Values()))
 }
 
 func main() {
 
 	// Use default encoder
-	logit.Info("Default encoder is like this...")
+	logger := logit.NewLogger(logit.KV{"trace": 123})
+	logger.Info("Default encoder is like this...")
 
 	// We provide some encoders, such as text and json
 	// Try TextEncoder and JsonEncoder
-	logit.Me().Encoders().SetEncoder(logit.NewTextEncoder("2006-01-02 15:04:05"))
-	logit.Me().Encoders().SetEncoder(logit.NewJsonEncoder("2006-01-02 15:04:05"))
+	logger.Encoders().SetEncoder(logit.NewTextEncoder("2006-01-02 15:04:05"))
+	logger.Encoders().SetEncoder(logit.NewJsonEncoder("2006-01-02 15:04:05"))
 
 	// In fact, encoder is an interface like "func(log *logit.Log) []byte"
 	// So you can implement your own encoder as you want
 	// All information of log is stored in log
 	// No matter what you do, return a byte slice
 	// The returned slice will be written by logger
-	logit.Me().Encoders().SetEncoder(&MyEncoder{name: "whatever"})
-	logit.Info("My encoder...")
+	logger.Encoders().SetEncoder(&MyEncoder{name: "MyEncoder"})
+	logger.Info("see what I got!", logit.KV{
+		"id": "xxx",
+	})
 
 	// You can set encoder of each level, for example:
-	logit.Me().Encoders().SetErrorEncoder(logit.NewJsonEncoder(logit.TimeFormat))
-	logit.Error("Panic...")
-
-	// If you have a logger, just use it as logit.Me()
-	logger := logit.NewLogger()
-	logger.Encoders().SetEncoder(logit.NewTextEncoder("2006-01-02 15:04:05"))
-	logger.Encoders().SetWarnEncoder(logit.NewJsonEncoder("2006-01-02 15:04:05"))
-	logger.InfoF("info...")
-	logger.WarnF("warn...")
+	logger.Encoders().SetWarnEncoder(logit.NewJsonEncoder("2006/01/02 15:04:05"))
+	logger.Encoders().SetErrorEncoder(logit.NewJsonEncoder(logit.TimeFormat))
+	logger.Warn("warn...")
+	logger.Error("error...")
 }

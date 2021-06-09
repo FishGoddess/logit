@@ -29,16 +29,16 @@ func main() {
 	// Create a new logger with extra values
 	// Every log will carry these values.
 	// logit.M is a type alia of map[string]interface{}, so you can use it like map
-	logger := logit.NewLogger(logit.M{
+	logger := logit.NewLogger(logit.KV{
 		"trace": 123,
 		"xxx":   "abc",
 	})
 
 	// There are four levels can be logged
-	logger.DebugF("Hello, I am debug!") // Ignore because default level is info
-	logger.InfoF("Hello, I am info!")
-	logger.WarnF("Hello, I am warn!")
-	logger.ErrorF("Hello, I am error!")
+	logger.Debug("Hello, I am debug!") // Ignore because default level is info
+	logger.Info("Hello, I am info!")
+	logger.Warn("Hello, I am warn!")
+	logger.Error("Hello, I am error!", logit.KV{"err": "xxx"})
 
 	// You can format log with some parameters if you want
 	logger.DebugF("Hello, I am debug %d!", 2) // Ignore because default level is info
@@ -48,12 +48,12 @@ func main() {
 
 	// Set level to debug
 	logger.SetLevel(logit.DebugLevel)
-	logger.DebugF("Now debug logs will come up!")
+	logger.Debug("Now debug logs will come up!")
 
 	// Log won't carry caller information in default
 	// So, try SetNeedCaller if you need
 	logger.SetNeedCaller(true)
-	logger.InfoF("I need caller!")
+	logger.Info("I need caller!")
 
 	// Set encoder and writer
 	// Actually, every level has own encoder and writer

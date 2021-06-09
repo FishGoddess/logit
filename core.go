@@ -284,46 +284,33 @@ func (ws *writers) SetErrorWriter(writer io.Writer) {
 
 // ============================================================================
 
-// M is the key-value struct in logger.
-type M map[string]interface{}
+// KV is the key-value struct in logger.
+type KV map[string]interface{}
 
-// clone returns M's clone.
-func (m M) clone(values ...M) M {
+// newKV returns a new KV merged from kvs.
+func newKV(kvs ...KV) KV {
 
-	if len(m) <= 0 {
+	if len(kvs) <= 0 {
 		return nil
 	}
 
-	result := M{}
-	for k, v := range m {
-		result[k] = v
-	}
-
-	for _, m := range values {
-		for k, v := range m {
+	result := KV{}
+	for _, kv := range kvs {
+		for k, v := range kv {
 			result[k] = v
 		}
 	}
 	return result
 }
 
-// Get returns the value of key in M.
-func (m M) Get(key string) interface{} {
-	return m[key]
+// Get returns the value of key in KV.
+func (kv KV) reset() {
+	for k, _ := range kv {
+		delete(kv, k)
+	}
 }
 
-// mergeValues merges many M structs to one M struct.
-func mergeValues(values ...M) M {
-
-	if len(values) <= 0 {
-		return nil
-	}
-
-	result := M{}
-	for _, m := range values {
-		for k, v := range m {
-			result[k] = v
-		}
-	}
-	return result
+// Get returns the value of key in KV.
+func (kv KV) Get(key string) interface{} {
+	return kv[key]
 }

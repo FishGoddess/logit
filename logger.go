@@ -43,7 +43,9 @@ type Logger struct {
 
 	// values stores all extra values of logger.
 	// Every logs logged by this logger will carry this values.
-	values M
+	values KV
+
+	kvs *sync.Pool
 
 	// logs is a log pool caching some log instances.
 	// It is for reducing memory allocation.
@@ -54,7 +56,7 @@ type Logger struct {
 }
 
 // NewLogger returns a new logger instance with default settings.
-func NewLogger(values ...M) *Logger {
+func NewLogger(values ...KV) *Logger {
 
 	c := newCore(NewTextEncoder(TimeFormat), os.Stdout)
 	c.SetLevel(InfoLevel)
@@ -62,7 +64,12 @@ func NewLogger(values ...M) *Logger {
 	c.Writers().SetErrorWriter(os.Stderr)
 	return &Logger{
 		core:   c,
-		values: mergeValues(values...),
+		values: newKV(values...),
+		kvs: &sync.Pool{
+			New: func() interface{} {
+				return KV{}
+			},
+		},
 		logs: &sync.Pool{
 			New: func() interface{} {
 				return newLog()
@@ -70,6 +77,50 @@ func NewLogger(values ...M) *Logger {
 		},
 		lock: &sync.RWMutex{},
 	}
+}
+
+func (l *Logger) prepareValues(values ...KV) KV {
+
+	if len(l.values) <= 0 && len(values) <= 0 {
+		return nil
+	}
+
+	result := l.kvs.Get().(KV)
+	for k, v := range l.values {
+		result[k] = v
+	}
+
+	for _, valueKV := range values {
+		for k, v := range valueKV {
+			result[k] = v
+		}
+	}
+	return result
+}
+
+// releaseLog releases log to object pool so that this log can be reused next time.
+func (l *Logger) releaseValues(values KV) {
+	if values != nil {
+		values.reset()
+		l.kvs.Put(values)
+	}
+}
+
+// prepareLog prepares a Log holder for use.
+func (l *Logger) prepareLog(level Level, msg string, values ...KV) *Log {
+	result := l.logs.Get().(*Log)
+	result.msg = msg
+	result.level = level
+	result.time = time.Now()
+	result.values = l.prepareValues(values...)
+	return result
+}
+
+// releaseLog releases log to object pool so that this log can be reused next time.
+func (l *Logger) releaseLog(log *Log) {
+	l.releaseValues(log.values)
+	log.reset()
+	l.logs.Put(log)
 }
 
 // filledWithCaller fills log with caller.
@@ -86,22 +137,6 @@ func (l *Logger) filledWithCaller(log *Log) {
 	}
 }
 
-// prepareLog prepares a Log holder for use.
-func (l *Logger) prepareLog(level Level, msg string, values M) *Log {
-	result := l.logs.Get().(*Log)
-	result.msg = msg
-	result.level = level
-	result.time = time.Now()
-	result.values = values
-	return result
-}
-
-// releaseLog releases log to object pool so that this log can be reused next time.
-func (l *Logger) releaseLog(log *Log) {
-	log.reset()
-	l.logs.Put(log)
-}
-
 // handleLog handles log with encoders and writers.
 func (l *Logger) handleLog(log *Log) {
 	l.filledWithCaller(log)
@@ -111,51 +146,51 @@ func (l *Logger) handleLog(log *Log) {
 }
 
 // log handles msg by l.handlers, and level will affect the visibility of this msg.
-func (l *Logger) log(level Level, msg string, values ...M) {
+func (l *Logger) log(level Level, msg string, values ...KV) {
 
 	if l.Level() > level {
 		return
 	}
 
-	log := l.prepareLog(level, msg, l.values.clone(values...))
+	log := l.prepareLog(level, msg, values...)
 	defer l.releaseLog(log)
 	l.handleLog(log)
 }
 
 // Debug will output msg as a debug message.
-func (l *Logger) Debug(msg string, values ...M) {
+func (l *Logger) Debug(msg string, values ...KV) {
 	l.log(DebugLevel, msg, values...)
 }
 
 // Info will output msg as an info message.
-func (l *Logger) Info(msg string, values ...M) {
+func (l *Logger) Info(msg string, values ...KV) {
 	l.log(InfoLevel, msg, values...)
 }
 
 // Warn will output msg as a warn message.
-func (l *Logger) Warn(msg string, values ...M) {
+func (l *Logger) Warn(msg string, values ...KV) {
 	l.log(WarnLevel, msg, values...)
 }
 
 // Error will output msg as an error message.
-func (l *Logger) Error(msg string, values ...M) {
+func (l *Logger) Error(msg string, values ...KV) {
 	l.log(ErrorLevel, msg, values...)
 }
 
-// logF handles msg by l.handlers, and level will affect the visibility of this msg.
+func formatMsg(msg string, params ...interface{}) string {
+
+	if len(params) > 0 {
+		return fmt.Sprintf(msg, params...)
+	}
+	return msg
+}
+
 func (l *Logger) logF(level Level, msg string, params ...interface{}) {
 
 	if l.Level() > level {
 		return
 	}
-
-	if len(params) > 0 {
-		msg = fmt.Sprintf(msg, params...)
-	}
-
-	log := l.prepareLog(level, msg, l.values.clone())
-	defer l.releaseLog(log)
-	l.handleLog(log)
+	l.log(level, formatMsg(msg, params...), l.values)
 }
 
 // DebugF will output msg as a debug message.
