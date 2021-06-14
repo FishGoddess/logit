@@ -28,17 +28,21 @@ func main() {
 
 	// Create a new logger with extra values
 	// Every log will carry these values.
-	// logit.M is a type alia of map[string]interface{}, so you can use it like map
-	logger := logit.NewLogger(logit.KV{
-		"trace": 123,
-		"xxx":   "abc",
-	})
+	// M is a type alia of map[string]interface{}, so you can use it like map
+	// WithValues returns an option that applies values in M to logger
+	// More options can be found by searching api with prefix "With"
+	logger := logit.NewLogger(
+		logit.WithKVs(logit.M{
+			"trace": 123,
+			"xxx":   "abc",
+		}),
+	)
 
 	// There are four levels can be logged
 	logger.Debug("Hello, I am debug!") // Ignore because default level is info
 	logger.Info("Hello, I am info!")
 	logger.Warn("Hello, I am warn!")
-	logger.Error("Hello, I am error!", logit.KV{"err": "xxx"})
+	logger.Error("Hello, I am error!", logit.M{"err": "xxx"})
 
 	// You can format log with some parameters if you want
 	logger.DebugF("Hello, I am debug %d!", 2) // Ignore because default level is info

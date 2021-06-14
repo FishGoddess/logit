@@ -20,6 +20,7 @@ package logit
 
 import (
 	"bytes"
+	"fmt"
 	"strconv"
 	"sync"
 	"sync/atomic"
@@ -32,67 +33,68 @@ type Encoder interface {
 	Encode(log *Log) []byte
 }
 
-type BasedEncoder struct {
+type basedEncoder struct {
 	timeFormat *atomic.Value
 	buffers    *sync.Pool
 }
 
-func NewBasedEncoder(timeFormat string) *BasedEncoder {
+func newBasedEncoder(timeFormat string) *basedEncoder {
 	tf := &atomic.Value{}
 	tf.Store(timeFormat)
-	return &BasedEncoder{
+	return &basedEncoder{
 		timeFormat: tf,
 		buffers: &sync.Pool{
 			New: func() interface{} {
-				return bytes.NewBuffer(make([]byte, 0, 64))
+				return make([]byte, 0, 256)
 			},
 		},
 	}
 }
 
-func (be *BasedEncoder) TimeFormat() string {
+func (be *basedEncoder) TimeFormat() string {
 	return be.timeFormat.Load().(string)
 }
 
-func (be *BasedEncoder) SetTimeFormat(timeFormat string) {
+func (be *basedEncoder) SetTimeFormat(timeFormat string) {
 	be.timeFormat.Store(timeFormat)
 }
 
-func (be *BasedEncoder) formatTime(t time.Time, quote bool) string {
+func (be *basedEncoder) formatTime(t time.Time, quote bool) string {
 
 	timeFormat := be.TimeFormat()
 	if timeFormat == "" {
 		return strconv.FormatInt(t.Unix(), 10)
 	}
 
-	result := t.Format(timeFormat)
+	// TODO this should be checked for usage
+	result := string(t.AppendFormat(make([]byte, 0, 24), timeFormat))
 	if quote {
 		result = strconv.Quote(result)
 	}
 	return result
 }
 
-func (be *BasedEncoder) newBuffer() *bytes.Buffer {
-	result := be.buffers.Get().(*bytes.Buffer)
-	result.Reset()
+func (be *basedEncoder) newBuffer() []byte {
+	result := be.buffers.Get().([]byte)
+	result = result[:0]
 	return result
 }
 
-func (be *BasedEncoder) releaseBuffer(buffer *bytes.Buffer) {
+func (be *basedEncoder) releaseBuffer(buffer []byte) {
 	be.buffers.Put(buffer)
 }
 
-func (be *BasedEncoder) Encode(log *Log) []byte { return nil }
+func (be *basedEncoder) Encode(log *Log) []byte { return nil }
 
 // =================================== text encoder ===================================
 
 type TextEncoder struct {
-	*BasedEncoder
+	*basedEncoder
 }
 
 func NewTextEncoder(timeFormat string) *TextEncoder {
 	return &TextEncoder{
-		BasedEncoder: NewBasedEncoder(timeFormat),
+		basedEncoder: newBasedEncoder(timeFormat),
 	}
 }
 
@@ -101,31 +103,43 @@ func (te *TextEncoder) Encode(log *Log) []byte {
 	buffer := te.newBuffer()
 	defer te.releaseBuffer(buffer)
 
-	buffer.WriteString(te.formatTime(log.Time(), false))
-	buffer.WriteByte('\t')
-	buffer.WriteString(log.Level().String())
-	buffer.WriteByte('\t')
+	if te.TimeFormat() == "" {
+		buffer = strconv.AppendInt(buffer, log.Time().Unix(), 10)
+	} else {
+		buffer = log.Time().AppendFormat(buffer, te.TimeFormat())
+	}
+	buffer = append(buffer, '\t')
+	buffer = append(buffer, log.Level().String()...)
+	buffer = append(buffer, '\t')
 
 	// Check caller
 	if caller, ok := log.Caller(); ok {
-		buffer.WriteString(caller.File + ":" + strconv.Itoa(caller.Line))
-		buffer.WriteByte('\t')
+		buffer = append(buffer, caller.File...)
+		buffer = append(buffer, ':')
+		buffer = strconv.AppendInt(buffer, int64(caller.Line), 10)
+		buffer = append(buffer, '\t')
 	}
 
-	buffer.WriteString(log.Msg())
-	buffer.WriteString("\n")
-	return buffer.Bytes()
+	// TODO need optimization
+	for k, v := range log.KVs() {
+		buffer = append(buffer, fmt.Sprintf("%s=%+v", k, v)...)
+		buffer = append(buffer, '\t')
+	}
+
+	buffer = append(buffer, log.Msg()...)
+	buffer = append(buffer, '\n')
+	return buffer
 }
 
 // =================================== json encoder ===================================
 
 type JsonEncoder struct {
-	*BasedEncoder
+	*basedEncoder
 }
 
 func NewJsonEncoder(timeFormat string) *JsonEncoder {
 	return &JsonEncoder{
-		BasedEncoder: NewBasedEncoder(timeFormat),
+		basedEncoder: newBasedEncoder(timeFormat),
 	}
 }
 
@@ -162,19 +176,23 @@ func (je *JsonEncoder) Encode(log *Log) []byte {
 	buffer := je.newBuffer()
 	defer je.releaseBuffer(buffer)
 
-	buffer.WriteString(`{"level":"`)
-	buffer.WriteString(log.Level().String())
-	buffer.WriteString(`","time":`)
-	buffer.WriteString(je.formatTime(log.Time(), true))
+	buffer = append(buffer, `{"level":"`...)
+	buffer = append(buffer, log.Level().String()...)
+	buffer = append(buffer, `","time":`...)
+	buffer = append(buffer, je.formatTime(log.Time(), true)...)
 
 	// Check caller
 	if caller, ok := log.Caller(); ok {
-		buffer.WriteString(`,"file":"` + caller.File)
-		buffer.WriteString(`","line":` + strconv.Itoa(caller.Line))
+		buffer = append(buffer, `,"file":"`...)
+		buffer = append(buffer, caller.File...)
+		buffer = append(buffer, `","line":`...)
+		buffer = strconv.AppendInt(buffer, int64(caller.Line), 10)
 	}
 
-	buffer.WriteString(`,"msg":"`)
-	buffer.WriteString(je.escapeString(log.Msg()))
-	buffer.WriteString("\"}\n")
-	return buffer.Bytes()
+	// TODO encode kvs
+
+	buffer = append(buffer, `,"msg":"`...)
+	buffer = append(buffer, je.escapeString(log.Msg())...)
+	buffer = append(buffer, "\"}\n"...)
+	return buffer
 }

@@ -35,7 +35,7 @@ BenchmarkLogitLoggerWithFormat-16        2931703              1233 ns/op        
 
 BenchmarkZapLogger-16                    1674750              2143 ns/op             449 B/op         16 allocs/op
 
-BenchmarkGologLogger-16                  2223093              1619 ns/op             713 B/op         24 allocs/op
+BenchmarkZeroLogLogger-16                5026804               714 ns/op               0 B/op          0 allocs/op
 
 BenchmarkLogrusLogger-16                  899808              3968 ns/op            1634 B/op         52 allocs/op
 
@@ -47,7 +47,7 @@ BenchmarkLogitFileWithoutBuffer-16        499887              7176 ns/op        
 
 BenchmarkZapFile-16                       409000              8580 ns/op             449 B/op         16 allocs/op
 
-BenchmarkGologFile-16                     257083             13884 ns/op             713 B/op         24 allocs/op
+BenchmarkZeroLogFile-16                   506928              7031 ns/op               0 B/op          0 allocs/op
 
 BenchmarkLogrusFile-16                    327198             10699 ns/op            1634 B/op         52 allocs/op
 */
@@ -71,10 +71,10 @@ func BenchmarkLogitLogger(b *testing.B) {
 	logger.Writers().SetWriter(&nopWriter{})
 
 	logTask := func() {
-		logger.DebugF("debug...")
-		logger.InfoF("info...")
-		logger.WarnF("warning...")
-		logger.ErrorF("error...")
+		logger.Debug("debug...")
+		logger.Info("info...")
+		logger.Warn("warning...")
+		logger.Error("error...")
 	}
 
 	b.ReportAllocs()
@@ -136,19 +136,17 @@ func BenchmarkLogitLoggerWithReflection(b *testing.B) {
 //	}
 //}
 //
-//// go test -v ./_examples/benchmarks_test.go -bench=^BenchmarkGologLogger$ -benchtime=3s
-//func BenchmarkGologLogger(b *testing.B) {
+//// go test -v ./_examples/benchmarks_test.go -bench=^BenchmarkZeroLogLogger$ -benchtime=3s
+//func BenchmarkZeroLogLogger(b *testing.B) {
 //
-//	logger := golog.New()
-//	logger.SetOutput(&nopWriter{})
-//	logger.SetLevel("debug")
-//	logger.SetTimeFormat(timeFormat)
+//	zerolog.TimeFieldFormat = timeFormat
+//	logger := zerolog.New(&nopWriter{}).With().Timestamp().Logger()
 //
 //	logTask := func() {
-//		logger.DebugF("debug...")
-//		logger.InfoF("info...")
-//		logger.WarnF("warning...")
-//		logger.ErrorF("error...")
+//		logger.Debug().Msg("debug...")
+//		logger.Info().Msg("info...")
+//		logger.Warn().Msg("warning...")
+//		logger.Error().Msg("error...")
 //	}
 //
 //	b.ReportAllocs()
@@ -206,10 +204,10 @@ func BenchmarkLogitFile(b *testing.B) {
 	logger.Writers().SetWriter(writer)
 
 	logTask := func() {
-		logger.DebugF("debug...")
-		logger.InfoF("info...")
-		logger.WarnF("warning...")
-		logger.ErrorF("error...")
+		logger.Debug("debug...")
+		logger.Info("info...")
+		logger.Warn("warning...")
+		logger.Error("error...")
 	}
 
 	b.ReportAllocs()
@@ -230,10 +228,10 @@ func BenchmarkLogitFileWithoutBuffer(b *testing.B) {
 	logger.Writers().SetWriter(file)
 
 	logTask := func() {
-		logger.DebugF("debug...")
-		logger.InfoF("info...")
-		logger.WarnF("warning...")
-		logger.ErrorF("error...")
+		logger.Debug("debug...")
+		logger.Info("info...")
+		logger.Warn("warning...")
+		logger.Error("error...")
 	}
 
 	b.ReportAllocs()
@@ -273,20 +271,18 @@ func BenchmarkLogitFileWithoutBuffer(b *testing.B) {
 //	}
 //}
 //
-//// go test -v ./_examples/benchmarks_test.go -bench=^BenchmarkGologFile$ -benchtime=3s
-//func BenchmarkGologFile(b *testing.B) {
+//// go test -v ./_examples/benchmarks_test.go -bench=^BenchmarkZeroLogFile$ -benchtime=3s
+//func BenchmarkZeroLogFile(b *testing.B) {
 //
 //	file, _ := createFileOf("Z:/" + b.Name() + ".log")
-//	logger := golog.New()
-//	logger.SetOutput(file)
-//	logger.SetLevel("debug")
-//	logger.SetTimeFormat(timeFormat)
+//	zerolog.TimeFieldFormat = timeFormat
+//	logger := zerolog.New(file).With().Timestamp().Logger()
 //
 //	logTask := func() {
-//		logger.DebugF("debug...")
-//		logger.InfoF("info...")
-//		logger.WarnF("warning...")
-//		logger.ErrorF("error...")
+//		logger.Debug().Msg("debug...")
+//		logger.Info().Msg("info...")
+//		logger.Warn().Msg("warning...")
+//		logger.Error().Msg("error...")
 //	}
 //
 //	b.ReportAllocs()

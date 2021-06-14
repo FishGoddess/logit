@@ -33,7 +33,7 @@ func main() {
 	logger.Debug("Hello, I am debug!") // Ignore because default level is info
 	logger.Info("Hello, I am info!")
 	logger.Warn("Hello, I am warn!")
-	logger.Error("Hello, I am error!", logit.KV{"err": "xxx", "id": 666}) // carry some values to log
+	logger.Error("Hello, I am error!", logit.M{"err": "xxx", "id": 666}) // carry some kvs to log
 
 	// You can format log with some parameters if you want
 	logger.DebugF("Hello, I am debug %d!", 2) // Ignore because default level is info

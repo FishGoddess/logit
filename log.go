@@ -65,8 +65,8 @@ type Log struct {
 	// caller stores some calling information, such as file path and line number.
 	caller *caller
 
-	// values stores all extra values of this log.
-	values KV
+	// kvs stores all extra values of this log.
+	kvs M
 }
 
 // newLog returns a log holder containing a new caller for use.
@@ -83,7 +83,7 @@ func (l *Log) reset() {
 	l.level = DebugLevel
 	l.hasCaller = false
 	l.caller.reset()
-	l.values = nil
+	l.kvs = nil
 }
 
 // Msg returns the message of this log.
@@ -118,17 +118,7 @@ func (l *Log) setCaller(file string, line int) {
 	l.caller.Line = line
 }
 
-// Values returns the values of this log.
-func (l *Log) Values() KV {
-	return l.values
-}
-
-// setValues sets values to this log.
-func (l *Log) setValues(values ...KV) {
-
-	for _, m := range values {
-		for k, v := range m {
-			l.values[k] = v
-		}
-	}
+// KVs returns the kvs of this log.
+func (l *Log) KVs() M {
+	return l.kvs
 }

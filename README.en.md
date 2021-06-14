@@ -100,7 +100,7 @@ $ go test -v ./_examples/benchmarks_test.go -bench=. -benchtime=3s
 | -----------|--------|-------------|-------------|-------------|
 | **logit** | **3775916** | **&nbsp; 949 ns/op** | **&nbsp; 128 B/op** | **&nbsp; 4 allocs/op** |
 | zap | 1674750 | 2143 ns/op | &nbsp; 449 B/op | 16 allocs/op |
-| golog | 2223093 | 1619 ns/op | &nbsp; 713 B/op | 24 allocs/op |
+| zerolog | 5026804 | &nbsp; 714 ns/op | &nbsp; &nbsp; &nbsp; 0 B/op | &nbsp; 0 allocs/op |
 | logrus | &nbsp; 899808 | 3968 ns/op | 1634 B/op | 52 allocs/op |
 
 | test case(output to file) | times ran (large is better) |  ns/op (small is better) | B/op | allocs/op |
@@ -108,7 +108,7 @@ $ go test -v ./_examples/benchmarks_test.go -bench=. -benchtime=3s
 | **logit** | **3556720** | **&nbsp; 1009 ns/op** | **&nbsp; 129 B/op** | **&nbsp; 4 allocs/op** |
 | **logit-withoutBuffer** | **&nbsp; 499887** | **&nbsp; 7176 ns/op** | **&nbsp; 128 B/op** | **&nbsp; 4 allocs/op** |
 | zap | &nbsp; 409000 | &nbsp; 8580 ns/op | &nbsp; 449 B/op | 16 allocs/op |
-| golog | &nbsp; 257083 | 13884 ns/op | &nbsp; 713 B/op | 24 allocs/op |
+| zerolog | 506928 | &nbsp; 7031 ns/op | &nbsp; &nbsp; &nbsp; 0 B/op | &nbsp; 0 allocs/op |
 | logrus | &nbsp; 327198 | 10699 ns/op | 1634 B/op | 52 allocs/op |
 
 > Environment：R7-5800X CPU@3.8GHZ，32GB RAM，512GB SSD

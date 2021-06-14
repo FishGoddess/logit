@@ -29,13 +29,13 @@ type MyEncoder struct {
 }
 
 func (me *MyEncoder) Encode(log *logit.Log) []byte {
-	return []byte(fmt.Sprintf("%s: %s ==> %+v\n", me.name, log.Msg(), log.Values()))
+	return []byte(fmt.Sprintf("%s: %s ==> %+v\n", me.name, log.Msg(), log.KVs()))
 }
 
 func main() {
 
 	// Use default encoder
-	logger := logit.NewLogger(logit.KV{"trace": 123})
+	logger := logit.NewLogger(logit.WithKVs(logit.M{"trace": 123}))
 	logger.Info("Default encoder is like this...")
 
 	// We provide some encoders, such as text and json
@@ -49,7 +49,7 @@ func main() {
 	// No matter what you do, return a byte slice
 	// The returned slice will be written by logger
 	logger.Encoders().SetEncoder(&MyEncoder{name: "MyEncoder"})
-	logger.Info("see what I got!", logit.KV{
+	logger.Info("see what I got!", logit.M{
 		"id": "xxx",
 	})
 

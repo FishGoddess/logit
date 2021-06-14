@@ -71,8 +71,9 @@ func (c *core) Level() Level {
 }
 
 // SetLevel will change the level to newLevel.
-func (c *core) SetLevel(newLevel Level) {
+func (c *core) SetLevel(newLevel Level) *core {
 	c.level.Store(newLevel)
+	return c
 }
 
 // NeedCaller return needCaller of this core.
@@ -84,8 +85,9 @@ func (c *core) NeedCaller() bool {
 // If true, then every log will contain file name and line number.
 // However, you should know that this is expensive in time.
 // So be sure you really need it or keep it false.
-func (c *core) SetNeedCaller(needCaller bool) {
+func (c *core) SetNeedCaller(needCaller bool) *core {
 	c.needCaller.Store(needCaller)
+	return c
 }
 
 // Encoders returns all encoders in core.
@@ -98,7 +100,7 @@ func (c *core) Writers() *writers {
 	return c.writers
 }
 
-// ============================================================================
+// ======================================== encoders ========================================
 
 // encoders stores all encoders in core.
 type encoders struct {
@@ -153,44 +155,49 @@ func (es *encoders) of(level Level) Encoder {
 
 // SetEncoder sets encoder to new one.
 // This encoder will apply to all levels.
-func (es *encoders) SetEncoder(encoder Encoder) {
+func (es *encoders) SetEncoder(encoder Encoder) *encoders {
 	es.lock.Lock()
 	defer es.lock.Unlock()
 	es.debugEncoder = encoder
 	es.infoEncoder = encoder
 	es.warnEncoder = encoder
 	es.errorEncoder = encoder
+	return es
 }
 
 // SetDebugEncoder sets encoder of debug to new one.
-func (es *encoders) SetDebugEncoder(encoder Encoder) {
+func (es *encoders) SetDebugEncoder(encoder Encoder) *encoders {
 	es.lock.Lock()
 	defer es.lock.Unlock()
 	es.debugEncoder = encoder
+	return es
 }
 
 // SetInfoEncoder sets encoder of info to new one.
-func (es *encoders) SetInfoEncoder(encoder Encoder) {
+func (es *encoders) SetInfoEncoder(encoder Encoder) *encoders {
 	es.lock.Lock()
 	defer es.lock.Unlock()
 	es.infoEncoder = encoder
+	return es
 }
 
 // SetWarnEncoder sets encoder of warn to new one.
-func (es *encoders) SetWarnEncoder(encoder Encoder) {
+func (es *encoders) SetWarnEncoder(encoder Encoder) *encoders {
 	es.lock.Lock()
 	defer es.lock.Unlock()
 	es.warnEncoder = encoder
+	return es
 }
 
 // SetErrorEncoder sets encoder of error to new one.
-func (es *encoders) SetErrorEncoder(encoder Encoder) {
+func (es *encoders) SetErrorEncoder(encoder Encoder) *encoders {
 	es.lock.Lock()
 	defer es.lock.Unlock()
 	es.errorEncoder = encoder
+	return es
 }
 
-// ============================================================================
+// ======================================== writers ========================================
 
 // writers stores all writers in core.
 type writers struct {
@@ -245,72 +252,77 @@ func (ws *writers) of(level Level) io.Writer {
 
 // SetWriter sets writer to new one.
 // This writer will apply to all levels.
-func (ws *writers) SetWriter(writer io.Writer) {
+func (ws *writers) SetWriter(writer io.Writer) *writers {
 	ws.lock.Lock()
 	defer ws.lock.Unlock()
 	ws.debugWriter = writer
 	ws.infoWriter = writer
 	ws.warnWriter = writer
 	ws.errorWriter = writer
+	return ws
 }
 
 // SetDebugWriter sets writer of debug to new one.
-func (ws *writers) SetDebugWriter(writer io.Writer) {
+func (ws *writers) SetDebugWriter(writer io.Writer) *writers {
 	ws.lock.Lock()
 	defer ws.lock.Unlock()
 	ws.debugWriter = writer
+	return ws
 }
 
 // SetInfoWriter sets writer of info to new one.
-func (ws *writers) SetInfoWriter(writer io.Writer) {
+func (ws *writers) SetInfoWriter(writer io.Writer) *writers {
 	ws.lock.Lock()
 	defer ws.lock.Unlock()
 	ws.infoWriter = writer
+	return ws
 }
 
 // SetWarnWriter sets writer of warn to new one.
-func (ws *writers) SetWarnWriter(writer io.Writer) {
+func (ws *writers) SetWarnWriter(writer io.Writer) *writers {
 	ws.lock.Lock()
 	defer ws.lock.Unlock()
 	ws.warnWriter = writer
+	return ws
 }
 
 // SetErrorWriter sets writer of error to new one.
-func (ws *writers) SetErrorWriter(writer io.Writer) {
+func (ws *writers) SetErrorWriter(writer io.Writer) *writers {
 	ws.lock.Lock()
 	defer ws.lock.Unlock()
 	ws.errorWriter = writer
+	return ws
 }
 
 // ============================================================================
 
-// KV is the key-value struct in logger.
-type KV map[string]interface{}
+// M is the key-value struct in logger.
+type M map[string]interface{}
 
-// newKV returns a new KV merged from kvs.
-func newKV(kvs ...KV) KV {
+// newM returns a new M merged from ms.
+func newM(ms ...M) M {
 
-	if len(kvs) <= 0 {
+	if len(ms) <= 0 {
 		return nil
 	}
 
-	result := KV{}
-	for _, kv := range kvs {
-		for k, v := range kv {
+	result := M{}
+	for _, m := range ms {
+		for k, v := range m {
 			result[k] = v
 		}
 	}
 	return result
 }
 
-// Get returns the value of key in KV.
-func (kv KV) reset() {
-	for k, _ := range kv {
-		delete(kv, k)
+// Get returns the value of key in M.
+func (m M) reset() {
+	for k, _ := range m {
+		delete(m, k)
 	}
 }
 
-// Get returns the value of key in KV.
-func (kv KV) Get(key string) interface{} {
-	return kv[key]
+// Get returns the value of key in M.
+func (m M) Get(key string) interface{} {
+	return m[key]
 }
