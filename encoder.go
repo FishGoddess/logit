@@ -27,6 +27,10 @@ import (
 	"time"
 )
 
+type buffer struct {
+	buff []byte
+}
+
 // Encoder encodes a log to bytes.
 // No matter what you do, remember, return this log as bytes.
 type Encoder interface {
@@ -45,7 +49,7 @@ func newBasedEncoder(timeFormat string) *basedEncoder {
 		timeFormat: tf,
 		buffers: &sync.Pool{
 			New: func() interface{} {
-				return make([]byte, 0, 256)
+				return &buffer{buff: make([]byte, 0, 256)}
 			},
 		},
 	}
@@ -74,13 +78,13 @@ func (be *basedEncoder) formatTime(t time.Time, quote bool) string {
 	return result
 }
 
-func (be *basedEncoder) newBuffer() []byte {
-	result := be.buffers.Get().([]byte)
-	result = result[:0]
+func (be *basedEncoder) newBuffer() *buffer {
+	result := be.buffers.Get().(*buffer)
+	result.buff = result.buff[:0]
 	return result
 }
 
-func (be *basedEncoder) releaseBuffer(buffer []byte) {
+func (be *basedEncoder) releaseBuffer(buffer *buffer) {
 	be.buffers.Put(buffer)
 }
 
@@ -104,31 +108,31 @@ func (te *TextEncoder) Encode(log *Log) []byte {
 	defer te.releaseBuffer(buffer)
 
 	if te.TimeFormat() == "" {
-		buffer = strconv.AppendInt(buffer, log.Time().Unix(), 10)
+		buffer.buff = strconv.AppendInt(buffer.buff, log.Time().Unix(), 10)
 	} else {
-		buffer = log.Time().AppendFormat(buffer, te.TimeFormat())
+		buffer.buff = log.Time().AppendFormat(buffer.buff, te.TimeFormat())
 	}
-	buffer = append(buffer, '\t')
-	buffer = append(buffer, log.Level().String()...)
-	buffer = append(buffer, '\t')
+	buffer.buff = append(buffer.buff, '\t')
+	buffer.buff = append(buffer.buff, log.Level().String()...)
+	buffer.buff = append(buffer.buff, '\t')
 
 	// Check caller
 	if caller, ok := log.Caller(); ok {
-		buffer = append(buffer, caller.File...)
-		buffer = append(buffer, ':')
-		buffer = strconv.AppendInt(buffer, int64(caller.Line), 10)
-		buffer = append(buffer, '\t')
+		buffer.buff = append(buffer.buff, caller.File...)
+		buffer.buff = append(buffer.buff, ':')
+		buffer.buff = strconv.AppendInt(buffer.buff, int64(caller.Line), 10)
+		buffer.buff = append(buffer.buff, '\t')
 	}
 
 	// TODO need optimization
 	for k, v := range log.KVs() {
-		buffer = append(buffer, fmt.Sprintf("%s=%+v", k, v)...)
-		buffer = append(buffer, '\t')
+		buffer.buff = append(buffer.buff, fmt.Sprintf("%s=%+v", k, v)...)
+		buffer.buff = append(buffer.buff, '\t')
 	}
 
-	buffer = append(buffer, log.Msg()...)
-	buffer = append(buffer, '\n')
-	return buffer
+	buffer.buff = append(buffer.buff, log.Msg()...)
+	buffer.buff = append(buffer.buff, '\n')
+	return buffer.buff
 }
 
 // =================================== json encoder ===================================
@@ -176,23 +180,23 @@ func (je *JsonEncoder) Encode(log *Log) []byte {
 	buffer := je.newBuffer()
 	defer je.releaseBuffer(buffer)
 
-	buffer = append(buffer, `{"level":"`...)
-	buffer = append(buffer, log.Level().String()...)
-	buffer = append(buffer, `","time":`...)
-	buffer = append(buffer, je.formatTime(log.Time(), true)...)
+	buffer.buff = append(buffer.buff, `{"level":"`...)
+	buffer.buff = append(buffer.buff, log.Level().String()...)
+	buffer.buff = append(buffer.buff, `","time":`...)
+	buffer.buff = append(buffer.buff, je.formatTime(log.Time(), true)...)
 
 	// Check caller
 	if caller, ok := log.Caller(); ok {
-		buffer = append(buffer, `,"file":"`...)
-		buffer = append(buffer, caller.File...)
-		buffer = append(buffer, `","line":`...)
-		buffer = strconv.AppendInt(buffer, int64(caller.Line), 10)
+		buffer.buff = append(buffer.buff, `,"file":"`...)
+		buffer.buff = append(buffer.buff, caller.File...)
+		buffer.buff = append(buffer.buff, `","line":`...)
+		buffer.buff = strconv.AppendInt(buffer.buff, int64(caller.Line), 10)
 	}
 
 	// TODO encode kvs
 
-	buffer = append(buffer, `,"msg":"`...)
-	buffer = append(buffer, je.escapeString(log.Msg())...)
-	buffer = append(buffer, "\"}\n"...)
-	return buffer
+	buffer.buff = append(buffer.buff, `,"msg":"`...)
+	buffer.buff = append(buffer.buff, je.escapeString(log.Msg())...)
+	buffer.buff = append(buffer.buff, "\"}\n"...)
+	return buffer.buff
 }

@@ -144,7 +144,8 @@ func (l *Logger) handleLog(log *Log) {
 	l.filledWithCallerIfNeed(log)
 	encoder := l.Encoders().of(log.level)
 	writer := l.Writers().of(log.level)
-	writer.Write(encoder.Encode(log))
+	_ = encoder.Encode(log)
+	writer.Write(nil)
 }
 
 // ======================================== struct log ========================================
