@@ -20,7 +20,6 @@ package logit
 
 import (
 	"bytes"
-	"fmt"
 	"strconv"
 	"sync"
 	"sync/atomic"
@@ -126,7 +125,18 @@ func (te *TextEncoder) Encode(log *Log) []byte {
 
 	// TODO need optimization
 	for k, v := range log.KVs() {
-		buffer.buff = append(buffer.buff, fmt.Sprintf("%s=%+v", k, v)...)
+		//buffer.buff = append(buffer.buff, fmt.Sprintf("%s=%+v", k, v)...)
+		//buffer.buff = append(buffer.buff, '\t')
+		buffer.buff = append(buffer.buff, k...)
+		buffer.buff = append(buffer.buff, '=')
+		switch v.(type) {
+		case string:
+			buffer.buff = append(buffer.buff, v.(string)...)
+		case int:
+			buffer.buff = strconv.AppendInt(buffer.buff, int64(v.(int)), 10)
+		case float64:
+			buffer.buff = strconv.AppendFloat(buffer.buff, v.(float64), 'f', -1, 64)
+		}
 		buffer.buff = append(buffer.buff, '\t')
 	}
 
