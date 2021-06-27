@@ -18,25 +18,28 @@
 
 package appender
 
-import (
-	"time"
-)
+import "time"
 
 const (
-	nan  = `"NaN"`
-	pInf = `"+Inf"`
-	nInf = `"-Inf"`
-
+	nan       = `"NaN"`
+	pInf      = `"+Inf"`
+	nInf      = `"-Inf"`
 	lineBreak = '\n'
+
+	UnixTime = ""
 )
 
-type appender interface {
+var (
+	globalJsonAppender = &jsonAppender{}
+)
+
+type Appender interface {
 	Begin(dst []byte) []byte
 	End(dst []byte) []byte
 	AppendAny(dst []byte, key string, value interface{}) []byte
 
-	AppendByte(dst, key string, value byte) []byte
 	AppendBool(dst []byte, key string, value bool) []byte
+	AppendByte(dst []byte, key string, value byte) []byte
 	AppendInt(dst []byte, key string, value int) []byte
 	AppendInt8(dst []byte, key string, value int8) []byte
 	AppendInt16(dst []byte, key string, value int16) []byte
@@ -50,7 +53,6 @@ type appender interface {
 	AppendFloat32(dst []byte, key string, value float32) []byte
 	AppendFloat64(dst []byte, key string, value float64) []byte
 	AppendString(dst []byte, key string, value string) []byte
-	AppendDuration(dst []byte, key string, value time.Duration) []byte
 	AppendTime(dst []byte, key string, value time.Time, format string) []byte
 
 	AppendBools(dst []byte, key string, values []bool) []byte
@@ -68,6 +70,9 @@ type appender interface {
 	AppendFloat32s(dst []byte, key string, values []float32) []byte
 	AppendFloat64s(dst []byte, key string, values []float64) []byte
 	AppendStrings(dst []byte, key string, values []string) []byte
-	AppendDurations(dst []byte, key string, values []time.Duration) []byte
 	AppendTimes(dst []byte, key string, values []time.Time, format string) []byte
+}
+
+func Json() Appender {
+	return globalJsonAppender
 }

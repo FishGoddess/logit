@@ -21,80 +21,64 @@ package logit
 import (
 	"io"
 	"sync"
+	"time"
+
+	"github.com/FishGoddess/logit/appender"
 )
 
-// []byte => interface{} will cause extra memory, so we wraps []byte into a struct which can be passed by pointer.
-type buffer struct {
-	data []byte
-}
-
 type Logger struct {
-	level      Level
-	encoder    Encoder
-	writer     io.Writer
-	bufferPool *sync.Pool
+	level    Level
+	appender appender.Appender
+	writer   io.Writer
+	logPool  *sync.Pool
 }
 
-func NewLogger(level Level, encoder Encoder, writer io.Writer) *Logger {
-	return &Logger{
-		level:   level,
-		encoder: encoder,
-		writer:  writer,
-		bufferPool: &sync.Pool{
-			New: func() interface{} {
-				return &buffer{data: make([]byte, 0, 512)}
-			},
+func NewLogger(level Level, appender appender.Appender, writer io.Writer) *Logger {
+
+	logger := &Logger{
+		level:    level,
+		appender: appender,
+		writer:   writer,
+	}
+
+	logger.logPool = &sync.Pool{
+		New: func() interface{} {
+			return newLog(logger)
 		},
 	}
+	return logger
 }
 
-func (l *Logger) newBuffer() *buffer {
-	buff := l.bufferPool.Get().(*buffer)
-	buff.data = buff.data[:0]
-	return buff
+func (l *Logger) newLog() *Log {
+	log := l.logPool.Get().(*Log)
+	log.reset()
+	return log
 }
 
-func (l *Logger) freeBuffer(buff *buffer) {
-	l.bufferPool.Put(buff)
+func (l *Logger) releaseLog(log *Log) {
+	l.logPool.Put(log)
 }
 
-func (l *Logger) log(level Level, msg string, kvs []interface{}) {
+func (l *Logger) log(level Level) *Log {
 
 	if level < l.level {
-		return
+		return nil
 	}
-
-	kvsLen := len(kvs)
-	if kvsLen > 0 && kvsLen&1 != 0 {
-		kvs = append(kvs, nil)
-	}
-
-	buff := l.newBuffer()
-	defer l.freeBuffer(buff)
-
-	buff.data = l.encoder.Begin(buff.data)
-	buff.data = l.encoder.AppendString(buff.data, "level", level.String())
-	buff.data = l.encoder.AppendString(buff.data, "msg", msg)
-	for i := 0; i < kvsLen; i += 2 {
-		buff.data = l.encoder.Append(buff.data, kvs[i].(string), kvs[i+1])
-	}
-	buff.data = l.encoder.End(buff.data)
-
-	l.writer.Write(buff.data)
+	return l.newLog().Str("level", level.String()).Time("time", time.Now(), "2006-01-02 15:04:05")
 }
 
-func (l *Logger) Debug(msg string, kvs ...interface{}) {
-	l.log(DebugLevel, msg, kvs)
+func (l *Logger) Debug() *Log {
+	return l.log(DebugLevel)
 }
 
-func (l *Logger) Info(msg string, kvs ...interface{}) {
-	l.log(InfoLevel, msg, kvs)
+func (l *Logger) Info() *Log {
+	return l.log(InfoLevel)
 }
 
-func (l *Logger) Warn(msg string, kvs ...interface{}) {
-	l.log(WarnLevel, msg, kvs)
+func (l *Logger) Warn() *Log {
+	return l.log(WarnLevel)
 }
 
-func (l *Logger) Error(msg string, kvs ...interface{}) {
-	l.log(ErrorLevel, msg, kvs)
+func (l *Logger) Error() *Log {
+	return l.log(ErrorLevel)
 }

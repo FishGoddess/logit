@@ -32,10 +32,10 @@ func BenchmarkLogitLogger(b *testing.B) {
 	logger := NewLogger(DebugLevel, appender.Json(), ioutil.Discard)
 
 	task := func() {
-		logger.Debug("debug...", "trace", "xxx", "id", 123, "pi", 3.14)
-		logger.Info("info...", "trace", "xxx", "id", 123, "pi", 3.14)
-		logger.Warn("warn...", "trace", "xxx", "id", 123, "pi", 3.14)
-		logger.Error("error...", "trace", "xxx", "id", 123, "pi", 3.14)
+		logger.Debug().Str("trace", "xxx").Int("id", 123).Float64("pi", 3.14).Msg("debug...")
+		logger.Info().Str("trace", "xxx").Int("id", 123).Float64("pi", 3.14).Msg("info...")
+		logger.Warn().Str("trace", "xxx").Int("id", 123).Float64("pi", 3.14).Msg("warning...")
+		logger.Error().Str("trace", "xxx").Int("id", 123).Float64("pi", 3.14).Msg("error...")
 	}
 
 	b.ReportAllocs()
@@ -49,5 +49,7 @@ func BenchmarkLogitLogger(b *testing.B) {
 func TestNewLogger(t *testing.T) {
 
 	logger := NewLogger(DebugLevel, appender.Json(), os.Stdout)
-	logger.Info("Hello!", "trace", "xxx", "id", 123, "pi", 3.14)
+	logger.Info().Str("trace", "xxx").Int("id", 123).Float64("pi", 3.14).Msg("info...")
+	logger.Error().Str("trace", "xxx").Int("id", 123).Float64("pi", 3.14).MsgF("error...")
+	logger.Error().Str("trace", "xxx").Int("id", 123).Float64("pi", 3.14).MsgF("error with %d...", 666)
 }
