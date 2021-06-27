@@ -74,16 +74,10 @@ func (w *nopWriter) Write(p []byte) (n int, err error) {
 // go test -v ./_examples/benchmarks_test.go -bench=^BenchmarkLogitLoggerWithTextEncoder$ -benchtime=3s
 func BenchmarkLogitLoggerWithTextEncoder(b *testing.B) {
 
-	logger := logit.NewLogger()
-	logger.SetLevel(logit.DebugLevel)
-	logger.Encoders().SetEncoder(logit.NewTextEncoder(timeFormat))
-	logger.Writers().SetWriter(&nopWriter{})
+
 
 	logTask := func() {
-		logger.Debug("debug...", logit.M{"trace": "xxx", "id": 123, "pi": 3.14})
-		logger.Info("info...", logit.M{"trace": "xxx", "id": 123, "pi": 3.14})
-		logger.Warn("warning...", logit.M{"trace": "xxx", "id": 123, "pi": 3.14})
-		logger.Error("error...", logit.M{"trace": "xxx", "id": 123, "pi": 3.14})
+
 	}
 
 	b.ReportAllocs()
@@ -97,16 +91,10 @@ func BenchmarkLogitLoggerWithTextEncoder(b *testing.B) {
 // go test -v ./_examples/benchmarks_test.go -bench=^BenchmarkLogitLoggerWithJsonEncoder$ -benchtime=3s
 func BenchmarkLogitLoggerWithJsonEncoder(b *testing.B) {
 
-	logger := logit.NewLogger()
-	logger.SetLevel(logit.DebugLevel)
-	logger.Encoders().SetEncoder(logit.NewJsonEncoder(timeFormat))
-	logger.Writers().SetWriter(&nopWriter{})
+
 
 	logTask := func() {
-		logger.Debug("debug...")
-		logger.Info("info...")
-		logger.Warn("warning...")
-		logger.Error("error...")
+
 	}
 
 	b.ReportAllocs()
@@ -120,16 +108,10 @@ func BenchmarkLogitLoggerWithJsonEncoder(b *testing.B) {
 // go test -v ./_examples/benchmarks_test.go -bench=^BenchmarkLogitLoggerWithReflection$ -benchtime=3s
 func BenchmarkLogitLoggerWithReflection(b *testing.B) {
 
-	logger := logit.NewLogger()
-	logger.SetLevel(logit.DebugLevel)
-	logger.Encoders().SetEncoder(logit.NewJsonEncoder(timeFormat))
-	logger.Writers().SetWriter(&nopWriter{})
+
 
 	logTask := func() {
-		logger.DebugF("debug%s", "...")
-		logger.InfoF("info%s", "...")
-		logger.WarnF("warning%s", "...")
-		logger.ErrorF("error%s", "...")
+
 	}
 
 	b.ReportAllocs()
@@ -230,16 +212,10 @@ func BenchmarkLogitFileWithTextEncoder(b *testing.B) {
 	file, _ := createFileOf("Z:/" + b.Name() + ".log")
 	writer := logit.NewBufferedWriter(file)
 	defer writer.Close()
-	logger := logit.NewLogger()
-	logger.SetLevel(logit.DebugLevel)
-	logger.Encoders().SetEncoder(logit.NewTextEncoder(timeFormat))
-	logger.Writers().SetWriter(writer)
+
 
 	logTask := func() {
-		logger.Debug("debug...")
-		logger.Info("info...")
-		logger.Warn("warning...")
-		logger.Error("error...")
+
 	}
 
 	b.ReportAllocs()
@@ -256,16 +232,10 @@ func BenchmarkLogitFileWithJsonEncoder(b *testing.B) {
 	file, _ := createFileOf("Z:/" + b.Name() + ".log")
 	writer := logit.NewBufferedWriter(file)
 	defer writer.Close()
-	logger := logit.NewLogger()
-	logger.SetLevel(logit.DebugLevel)
-	logger.Encoders().SetEncoder(logit.NewJsonEncoder(timeFormat))
-	logger.Writers().SetWriter(writer)
+
 
 	logTask := func() {
-		logger.Debug("debug...")
-		logger.Info("info...")
-		logger.Warn("warning...")
-		logger.Error("error...")
+
 	}
 
 	b.ReportAllocs()
@@ -280,16 +250,10 @@ func BenchmarkLogitFileWithJsonEncoder(b *testing.B) {
 func BenchmarkLogitFileWithoutBuffer(b *testing.B) {
 
 	file, _ := createFileOf("Z:/" + b.Name() + ".log")
-	logger := logit.NewLogger()
-	logger.SetLevel(logit.DebugLevel)
-	logger.Encoders().SetEncoder(logit.NewJsonEncoder(timeFormat))
-	logger.Writers().SetWriter(file)
+	defer file.Close()
 
 	logTask := func() {
-		logger.Debug("debug...")
-		logger.Info("info...")
-		logger.Warn("warning...")
-		logger.Error("error...")
+
 	}
 
 	b.ReportAllocs()
