@@ -157,10 +157,10 @@ func BenchmarkLogitLoggerWithReflection(b *testing.B) {
 //	logger := zerolog.New(&nopWriter{}).With().Timestamp().Logger()
 //
 //	logTask := func() {
-//		logger.Debug().Str("trace", "xxx").Int("id", 123).Float64("pi", 3.14).Msg("debug...")
-//		logger.Info().Str("trace", "xxx").Int("id", 123).Float64("pi", 3.14).Msg("info...")
-//		logger.Warn().Str("trace", "xxx").Int("id", 123).Float64("pi", 3.14).Msg("warning...")
-//		logger.Error().Str("trace", "xxx").Int("id", 123).Float64("pi", 3.14).Msg("error...")
+//		logger.Debug().String("trace", "xxx").Int("id", 123).Float64("pi", 3.14).Msg("debug...")
+//		logger.Info().String("trace", "xxx").Int("id", 123).Float64("pi", 3.14).Msg("info...")
+//		logger.Warn().String("trace", "xxx").Int("id", 123).Float64("pi", 3.14).Msg("warning...")
+//		logger.Error().String("trace", "xxx").Int("id", 123).Float64("pi", 3.14).Msg("error...")
 //	}
 //
 //	b.ReportAllocs()
@@ -301,10 +301,10 @@ func BenchmarkLogitFileWithoutBuffer(b *testing.B) {
 //	logger := zerolog.New(file).With().Timestamp().Logger()
 //
 //	logTask := func() {
-//		logger.Debug().Str("trace", "xxx").Int("id", 123).Float64("pi", 3.14).Msg("debug...")
-//		logger.Info().Str("trace", "xxx").Int("id", 123).Float64("pi", 3.14).Msg("info...")
-//		logger.Warn().Str("trace", "xxx").Int("id", 123).Float64("pi", 3.14).Msg("warning...")
-//		logger.Error().Str("trace", "xxx").Int("id", 123).Float64("pi", 3.14).Msg("error...")
+//		logger.Debug().String("trace", "xxx").Int("id", 123).Float64("pi", 3.14).Msg("debug...")
+//		logger.Info().String("trace", "xxx").Int("id", 123).Float64("pi", 3.14).Msg("info...")
+//		logger.Warn().String("trace", "xxx").Int("id", 123).Float64("pi", 3.14).Msg("warning...")
+//		logger.Error().String("trace", "xxx").Int("id", 123).Float64("pi", 3.14).Msg("error...")
 //	}
 //
 //	b.ReportAllocs()

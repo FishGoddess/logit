@@ -40,6 +40,7 @@ type Appender interface {
 
 	AppendBool(dst []byte, key string, value bool) []byte
 	AppendByte(dst []byte, key string, value byte) []byte
+	AppendRune(dst []byte, key string, value rune) []byte
 	AppendInt(dst []byte, key string, value int) []byte
 	AppendInt8(dst []byte, key string, value int8) []byte
 	AppendInt16(dst []byte, key string, value int16) []byte
@@ -57,6 +58,7 @@ type Appender interface {
 
 	AppendBools(dst []byte, key string, values []bool) []byte
 	AppendBytes(dst []byte, key string, values []byte) []byte
+	AppendRunes(dst []byte, key string, values []rune) []byte
 	AppendInts(dst []byte, key string, values []int) []byte
 	AppendInt8s(dst []byte, key string, values []int8) []byte
 	AppendInt16s(dst []byte, key string, values []int16) []byte

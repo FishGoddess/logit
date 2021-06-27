@@ -64,7 +64,7 @@ func (l *Logger) log(level Level) *Log {
 	if level < l.level {
 		return nil
 	}
-	return l.newLog().Str("level", level.String()).Time("time", time.Now(), "2006-01-02 15:04:05")
+	return l.newLog().String("level", level.String()).Time("time", time.Now(), "2006-01-02 15:04:05")
 }
 
 func (l *Logger) Debug() *Log {
