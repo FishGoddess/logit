@@ -98,9 +98,9 @@ $ go test -v ./_examples/benchmarks_test.go -bench=. -benchtime=3s
 
 | 测试（输出到内存） | 单位时间内运行次数 (越大越好) |  每个操作消耗时间 (越小越好) | B/op (越小越好) | allocs/op (越小越好) |
 | -----------|--------|-------------|-------------|-------------|
-| **logit** | **3775916** | **&nbsp; 949 ns/op** | **&nbsp; 128 B/op** | **&nbsp; 4 allocs/op** |
+| **logit** | **3185127** | **1125 ns/op** | **&nbsp; &nbsp; &nbsp; 0 B/op** | **&nbsp; 0 allocs/op** |
 | zap | 1674750 | 2143 ns/op | &nbsp; 449 B/op | 16 allocs/op |
-| zerolog | 5026804 | &nbsp; 714 ns/op | &nbsp; &nbsp; &nbsp; 0 B/op | &nbsp; 0 allocs/op |
+| zerolog | 5026804 | &nbsp; 1201 ns/op | &nbsp; &nbsp; &nbsp; 0 B/op | &nbsp; 0 allocs/op |
 | logrus | &nbsp; 899808 | 3968 ns/op | 1634 B/op | 52 allocs/op |
 
 | 测试（输出到文件） | 单位时间内运行次数 (越大越好) |  每个操作消耗时间 (越小越好) | B/op (越小越好) | allocs/op (越小越好) |
@@ -108,7 +108,7 @@ $ go test -v ./_examples/benchmarks_test.go -bench=. -benchtime=3s
 | **logit** | **3556720** | **&nbsp; 1009 ns/op** | **&nbsp; 129 B/op** | **&nbsp; 4 allocs/op** |
 | **logit-不使用缓冲写出器** | **&nbsp; 499887** | **&nbsp; 7176 ns/op** | **&nbsp; 128 B/op** | **&nbsp; 4 allocs/op** |
 | zap | &nbsp; 409000 | &nbsp; 8580 ns/op | &nbsp; 449 B/op | 16 allocs/op |
-| zerolog | 506928 | &nbsp; 7031 ns/op | &nbsp; &nbsp; &nbsp; 0 B/op | &nbsp; 0 allocs/op |
+| zerolog | 506928 | &nbsp; 7633 ns/op | &nbsp; &nbsp; &nbsp; 0 B/op | &nbsp; 0 allocs/op |
 | logrus | &nbsp; 327198 | 10699 ns/op | 1634 B/op | 52 allocs/op |
 
 > 测试环境：R7-5800X CPU@3.8GHZ，32GB RAM，512GB SSD
