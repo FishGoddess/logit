@@ -47,55 +47,6 @@ func (ja *jsonAppender) End(dst []byte) []byte {
 	return append(dst, jsonEnd, lineBreak)
 }
 
-// The main character should be escaped is ascii less than \u0020 and \ and ".
-func (ja *jsonAppender) appendEscapedByte(dst []byte, value byte) []byte {
-
-	// ASCii < 16 needs to add \u000 to behind
-	if value < 16 {
-		return strconv.AppendInt(append(dst, '\\', 'u', '0', '0', '0'), int64(value), 16)
-	}
-
-	// ASCii in [16, 32) needs to add \u00 to behind
-	if value < 32 {
-		return strconv.AppendInt(append(dst, '\\', 'u', '0', '0'), int64(value), 16)
-	}
-
-	if value == '"' || value == '\\' {
-		return append(dst, '\\', value)
-	}
-	return append(dst, value)
-}
-
-// The main character should be escaped is ascii less than \u0020 and \ and ".
-func (ja *jsonAppender) appendEscapedRune(dst []byte, value rune) []byte {
-
-	// ASCii < 16 needs to add \u000 to behind
-	if value < 16 {
-		return strconv.AppendInt(append(dst, '\\', 'u', '0', '0', '0'), int64(value), 16)
-	}
-
-	// ASCii in [16, 32) needs to add \u00 to behind
-	if value < 32 {
-		return strconv.AppendInt(append(dst, '\\', 'u', '0', '0'), int64(value), 16)
-	}
-
-	if value < 32 || value == '"' || value == '\\' {
-		return append(dst, '\\', byte(value))
-	}
-	return append(dst, string(value)...)
-}
-
-// The main character should be escaped is ascii less than \u0020 and \ and ".
-func (ja *jsonAppender) appendEscapedString(dst []byte, value string) []byte {
-
-	//runes := []rune(value)
-	//length := len(runes)
-	//for i := 0; i < length; i++ {
-	//	dst = ja.appendEscapedRune(dst, runes[i])
-	//}
-	return append(dst, value...) // TODO 优化转义算法
-}
-
 func (ja *jsonAppender) appendKey(dst []byte, key string) []byte {
 
 	if dst[len(dst)-1] != jsonBegin {
@@ -103,7 +54,7 @@ func (ja *jsonAppender) appendKey(dst []byte, key string) []byte {
 	}
 
 	dst = append(dst, jsonStringQuotation)
-	dst = ja.appendEscapedString(dst, key)
+	dst = appendEscapedString(dst, key)
 	dst = append(dst, jsonStringQuotation)
 	return append(dst, jsonKeyValueSeparator)
 }
@@ -127,7 +78,7 @@ func (ja *jsonAppender) AppendBool(dst []byte, key string, value bool) []byte {
 func (ja *jsonAppender) AppendByte(dst []byte, key string, value byte) []byte {
 	dst = ja.appendKey(dst, key)
 	dst = append(dst, jsonStringQuotation)
-	dst = ja.appendEscapedByte(dst, value)
+	dst = appendEscapedByte(dst, value)
 	dst = append(dst, jsonStringQuotation)
 	return dst
 }
@@ -135,7 +86,7 @@ func (ja *jsonAppender) AppendByte(dst []byte, key string, value byte) []byte {
 func (ja *jsonAppender) AppendRune(dst []byte, key string, value rune) []byte {
 	dst = ja.appendKey(dst, key)
 	dst = append(dst, jsonStringQuotation)
-	dst = ja.appendEscapedRune(dst, value)
+	dst = appendEscapedRune(dst, value)
 	dst = append(dst, jsonStringQuotation)
 	return dst
 }
@@ -238,7 +189,7 @@ func (ja *jsonAppender) AppendFloat64(dst []byte, key string, value float64) []b
 func (ja *jsonAppender) AppendString(dst []byte, key string, value string) []byte {
 	dst = ja.appendKey(dst, key)
 	dst = append(dst, jsonStringQuotation)
-	dst = ja.appendEscapedString(dst, value)
+	dst = appendEscapedString(dst, value)
 	dst = append(dst, jsonStringQuotation)
 	return dst
 }
@@ -274,7 +225,7 @@ func (ja *jsonAppender) AppendBytes(dst []byte, key string, values []byte) []byt
 
 	return ja.appendArray(dst, key, len(values), func(source []byte, index int) []byte {
 		source = append(source, jsonStringQuotation)
-		source = ja.appendEscapedByte(source, values[index])
+		source = appendEscapedByte(source, values[index])
 		source = append(source, jsonStringQuotation)
 		return source
 	})
@@ -284,7 +235,7 @@ func (ja *jsonAppender) AppendRunes(dst []byte, key string, values []rune) []byt
 
 	return ja.appendArray(dst, key, len(values), func(source []byte, index int) []byte {
 		source = append(source, jsonStringQuotation)
-		source = ja.appendEscapedRune(source, values[index])
+		source = appendEscapedRune(source, values[index])
 		source = append(source, jsonStringQuotation)
 		return source
 	})
@@ -371,7 +322,7 @@ func (ja *jsonAppender) AppendFloat64s(dst []byte, key string, values []float64)
 func (ja *jsonAppender) AppendStrings(dst []byte, key string, values []string) []byte {
 	return ja.appendArray(dst, key, len(values), func(source []byte, index int) []byte {
 		source = append(source, jsonStringQuotation)
-		source = ja.appendEscapedString(source, values[index])
+		source = appendEscapedString(source, values[index])
 		source = append(source, jsonStringQuotation)
 		return source
 	})

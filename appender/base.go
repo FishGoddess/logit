@@ -18,7 +18,11 @@
 
 package appender
 
-import "time"
+import (
+	"strconv"
+	"time"
+	"unicode/utf8"
+)
 
 const (
 	nan       = `"NaN"`
@@ -73,6 +77,67 @@ type Appender interface {
 	AppendFloat64s(dst []byte, key string, values []float64) []byte
 	AppendStrings(dst []byte, key string, values []string) []byte
 	AppendTimes(dst []byte, key string, values []time.Time, format string) []byte
+}
+
+// The main character should be escaped is ascii less than \u0020 and \ and ".
+func needEscapedByte(value byte) bool {
+	return value < 32 || value == '"' || value == '\\'
+}
+
+// The main character should be escaped is ascii less than \u0020 and \ and ".
+func needEscapedRune(value rune) bool {
+	return value < utf8.RuneSelf && needEscapedByte(byte(value))
+}
+
+// The main character should be escaped is ascii less than \u0020 and \ and ".
+func appendEscapedByte(dst []byte, value byte) []byte {
+
+	// ASCii < 16 needs to add \u000 to behind
+	if value < 16 {
+		return strconv.AppendInt(append(dst, '\\', 'u', '0', '0', '0'), int64(value), 16)
+	}
+
+	// ASCii in [16, 32) needs to add \u00 to behind
+	if value < 32 {
+		return strconv.AppendInt(append(dst, '\\', 'u', '0', '0'), int64(value), 16)
+	}
+
+	if value == '"' || value == '\\' {
+		return append(dst, '\\', value)
+	}
+	return append(dst, value)
+}
+
+// The main character should be escaped is ascii less than \u0020 and \ and ".
+func appendEscapedRune(dst []byte, value rune) []byte {
+
+	if needEscapedRune(value) {
+		return appendEscapedByte(dst, byte(value))
+	}
+	return append(dst, string(value)...)
+}
+
+// The main character should be escaped is ascii less than \u0020 and \ and ".
+func appendEscapedString(dst []byte, value string) []byte {
+
+	start := 0
+	escaped := false
+	for i := 0; i < len(value); i++ {
+		// Encountered a byte that need escaping, so we appended bytes behinds it and appended it escaped
+		if needEscapedByte(value[i]) {
+			dst = append(dst, value[start:i]...)
+			dst = appendEscapedByte(dst, value[i])
+			start = i + 1
+			escaped = true
+		}
+	}
+
+	if escaped {
+		return append(dst, value[start:]...)
+	}
+
+	// There is no need for escaping, just appending like bytes
+	return append(dst, value...)
 }
 
 func Json() Appender {
