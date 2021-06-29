@@ -19,15 +19,13 @@
 package appender
 
 import (
+	"fmt"
 	"strconv"
 	"time"
 	"unicode/utf8"
 )
 
 const (
-	nan       = `"NaN"`
-	pInf      = `"+Inf"`
-	nInf      = `"-Inf"`
 	lineBreak = '\n'
 
 	UnixTime = ""
@@ -35,6 +33,7 @@ const (
 
 var (
 	globalJsonAppender = &jsonAppender{}
+	globalTextAppender = &textAppender{}
 )
 
 type Appender interface {
@@ -59,6 +58,8 @@ type Appender interface {
 	AppendFloat64(dst []byte, key string, value float64) []byte
 	AppendString(dst []byte, key string, value string) []byte
 	AppendTime(dst []byte, key string, value time.Time, format string) []byte
+	AppendError(dst []byte, key string, value error) []byte
+	AppendStringer(dst []byte, key string, value fmt.Stringer) []byte
 
 	AppendBools(dst []byte, key string, values []bool) []byte
 	AppendBytes(dst []byte, key string, values []byte) []byte
@@ -77,6 +78,8 @@ type Appender interface {
 	AppendFloat64s(dst []byte, key string, values []float64) []byte
 	AppendStrings(dst []byte, key string, values []string) []byte
 	AppendTimes(dst []byte, key string, values []time.Time, format string) []byte
+	AppendErrors(dst []byte, key string, values []error) []byte
+	AppendStringers(dst []byte, key string, values []fmt.Stringer) []byte
 }
 
 // The main character should be escaped is ascii less than \u0020 and \ and ".
@@ -124,7 +127,7 @@ func appendEscapedString(dst []byte, value string) []byte {
 	escaped := false
 	for i := 0; i < len(value); i++ {
 		// Encountered a byte that need escaping, so we appended bytes behinds it and appended it escaped
-		if needEscapedByte(value[i]) {
+		if utf8.RuneStart(value[i]) && needEscapedByte(value[i]) {
 			dst = append(dst, value[start:i]...)
 			dst = appendEscapedByte(dst, value[i])
 			start = i + 1
@@ -142,4 +145,8 @@ func appendEscapedString(dst []byte, value string) []byte {
 
 func Json() Appender {
 	return globalJsonAppender
+}
+
+func Text() Appender {
+	return globalTextAppender
 }

@@ -202,6 +202,24 @@ func (l *Log) Time(key string, value time.Time, format string) *Log {
 	return l
 }
 
+func (l *Log) Error(key string, value error) *Log {
+
+	if l == nil {
+		return nil
+	}
+	l.data = l.logger.appender.AppendError(l.data, key, value)
+	return l
+}
+
+func (l *Log) Stringer(key string, value fmt.Stringer) *Log {
+
+	if l == nil {
+		return nil
+	}
+	l.data = l.logger.appender.AppendStringer(l.data, key, value)
+	return l
+}
+
 func (l *Log) Bools(key string, value []bool) *Log {
 
 	if l == nil {
@@ -352,6 +370,24 @@ func (l *Log) Times(key string, value []time.Time, format string) *Log {
 		return nil
 	}
 	l.data = l.logger.appender.AppendTimes(l.data, key, value, format)
+	return l
+}
+
+func (l *Log) Errors(key string, value []error) *Log {
+
+	if l == nil {
+		return nil
+	}
+	l.data = l.logger.appender.AppendErrors(l.data, key, value)
+	return l
+}
+
+func (l *Log) Stringers(key string, value []fmt.Stringer) *Log {
+
+	if l == nil {
+		return nil
+	}
+	l.data = l.logger.appender.AppendStringers(l.data, key, value)
 	return l
 }
 

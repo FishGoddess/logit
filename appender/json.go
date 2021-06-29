@@ -22,6 +22,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"math"
+	"reflect"
 	"strconv"
 	"time"
 )
@@ -34,6 +35,7 @@ const (
 	jsonItemSeparator     = ','
 	jsonKeyValueSeparator = ':'
 	jsonStringQuotation   = '"'
+	jsonNull              = "null"
 )
 
 type jsonAppender struct {
@@ -143,45 +145,23 @@ func (ja *jsonAppender) AppendUint64(dst []byte, key string, value uint64) []byt
 
 func (ja *jsonAppender) AppendFloat32(dst []byte, key string, value float32) []byte {
 
-	// Standard json doesn't support NaN and Inf, so coverts them to string
-	// NaN => "NaN"
-	// +inf => "+inf"
-	// -inf => "-inf"
+	// Standard json doesn't support NaN and Inf, so append a null
 	dst = ja.appendKey(dst, key)
 
 	value64 := float64(value)
-	if math.IsNaN(value64) {
-		return append(dst, nan...)
-	}
-
-	if math.IsInf(value64, 1) {
-		return append(dst, pInf...)
-	}
-
-	if math.IsInf(value64, -1) {
-		return append(dst, nInf...)
+	if math.IsNaN(value64) || math.IsInf(value64, 0) {
+		return append(dst, jsonNull...)
 	}
 	return strconv.AppendFloat(dst, value64, 'f', -1, 64)
 }
 
 func (ja *jsonAppender) AppendFloat64(dst []byte, key string, value float64) []byte {
 
-	// Standard json doesn't support NaN and Inf, so coverts them to string
-	// NaN => "NaN"
-	// +inf => "+inf"
-	// -inf => "-inf"
+	// Standard json doesn't support NaN and Inf, so append a null
 	dst = ja.appendKey(dst, key)
 
-	if math.IsNaN(value) {
-		return append(dst, nan...)
-	}
-
-	if math.IsInf(value, 1) {
-		return append(dst, pInf...)
-	}
-
-	if math.IsInf(value, -1) {
-		return append(dst, nInf...)
+	if math.IsNaN(value) || math.IsInf(value, 0) {
+		return append(dst, jsonNull...)
 	}
 	return strconv.AppendFloat(dst, value, 'f', -1, 64)
 }
@@ -204,6 +184,23 @@ func (ja *jsonAppender) AppendTime(dst []byte, key string, value time.Time, form
 	dst = value.AppendFormat(dst, format)
 	dst = append(dst, jsonStringQuotation)
 	return dst
+}
+
+func (ja *jsonAppender) AppendError(dst []byte, key string, value error) []byte {
+
+	if value == nil {
+		return append(ja.appendKey(dst, key), jsonNull...)
+	}
+	return ja.AppendString(dst, key, value.Error())
+}
+
+func (ja *jsonAppender) AppendStringer(dst []byte, key string, value fmt.Stringer) []byte {
+
+	val := reflect.ValueOf(value)
+	if val.Kind() == reflect.Ptr && val.IsNil() {
+		return append(dst, jsonNull...)
+	}
+	return ja.AppendString(dst, key, value.String())
 }
 
 func (ja *jsonAppender) appendArray(dst []byte, key string, length int, fn func(source []byte, index int) []byte) []byte {
@@ -309,12 +306,19 @@ func (ja *jsonAppender) AppendUint64s(dst []byte, key string, values []uint64) [
 
 func (ja *jsonAppender) AppendFloat32s(dst []byte, key string, values []float32) []byte {
 	return ja.appendArray(dst, key, len(values), func(source []byte, index int) []byte {
-		return strconv.AppendFloat(source, float64(values[index]), 'f', -1, 64)
+		value64 := float64(values[index])
+		if math.IsNaN(value64) || math.IsInf(value64, 0) {
+			return append(dst, jsonNull...)
+		}
+		return strconv.AppendFloat(source, value64, 'f', -1, 64)
 	})
 }
 
 func (ja *jsonAppender) AppendFloat64s(dst []byte, key string, values []float64) []byte {
 	return ja.appendArray(dst, key, len(values), func(source []byte, index int) []byte {
+		if math.IsNaN(values[index]) || math.IsInf(values[index], 0) {
+			return append(dst, jsonNull...)
+		}
 		return strconv.AppendFloat(source, values[index], 'f', -1, 64)
 	})
 }
@@ -338,5 +342,23 @@ func (ja *jsonAppender) AppendTimes(dst []byte, key string, values []time.Time, 
 		source = values[index].AppendFormat(source, format)
 		source = append(source, jsonStringQuotation)
 		return source
+	})
+}
+
+func (ja *jsonAppender) AppendErrors(dst []byte, key string, values []error) []byte {
+	return ja.appendArray(dst, key, len(values), func(source []byte, index int) []byte {
+		if values[index] == nil {
+			return append(ja.appendKey(source, key), jsonNull...)
+		}
+		return ja.AppendString(source, key, values[index].Error())
+	})
+}
+
+func (ja *jsonAppender) AppendStringers(dst []byte, key string, values []fmt.Stringer) []byte {
+	return ja.appendArray(dst, key, len(values), func(source []byte, index int) []byte {
+		if reflect.ValueOf(values[index]).IsNil() {
+			return append(ja.appendKey(source, key), jsonNull...)
+		}
+		return ja.AppendString(source, key, values[index].String())
 	})
 }
