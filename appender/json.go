@@ -175,7 +175,6 @@ func (ja *jsonAppender) AppendString(dst []byte, key string, value string) []byt
 }
 
 func (ja *jsonAppender) AppendTime(dst []byte, key string, value time.Time, format string) []byte {
-
 	dst = ja.appendKey(dst, key)
 	if format == UnixTime {
 		return strconv.AppendInt(dst, value.Unix(), 10)
@@ -219,7 +218,6 @@ func (ja *jsonAppender) appendArray(dst []byte, key string, length int, fn func(
 }
 
 func (ja *jsonAppender) AppendBytes(dst []byte, key string, values []byte) []byte {
-
 	return ja.appendArray(dst, key, len(values), func(source []byte, index int) []byte {
 		source = append(source, jsonStringQuotation)
 		source = appendEscapedByte(source, values[index])
@@ -229,7 +227,6 @@ func (ja *jsonAppender) AppendBytes(dst []byte, key string, values []byte) []byt
 }
 
 func (ja *jsonAppender) AppendRunes(dst []byte, key string, values []rune) []byte {
-
 	return ja.appendArray(dst, key, len(values), func(source []byte, index int) []byte {
 		source = append(source, jsonStringQuotation)
 		source = appendEscapedRune(source, values[index])
@@ -348,7 +345,7 @@ func (ja *jsonAppender) AppendTimes(dst []byte, key string, values []time.Time, 
 func (ja *jsonAppender) AppendErrors(dst []byte, key string, values []error) []byte {
 	return ja.appendArray(dst, key, len(values), func(source []byte, index int) []byte {
 		if values[index] == nil {
-			return append(ja.appendKey(source, key), jsonNull...)
+			return append(source, jsonNull...)
 		}
 		return ja.AppendString(source, key, values[index].Error())
 	})
@@ -356,8 +353,9 @@ func (ja *jsonAppender) AppendErrors(dst []byte, key string, values []error) []b
 
 func (ja *jsonAppender) AppendStringers(dst []byte, key string, values []fmt.Stringer) []byte {
 	return ja.appendArray(dst, key, len(values), func(source []byte, index int) []byte {
-		if reflect.ValueOf(values[index]).IsNil() {
-			return append(ja.appendKey(source, key), jsonNull...)
+		val := reflect.ValueOf(values[index])
+		if val.Kind() == reflect.Ptr && val.IsNil() {
+			return append(source, jsonNull...)
 		}
 		return ja.AppendString(source, key, values[index].String())
 	})

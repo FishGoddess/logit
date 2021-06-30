@@ -1,11 +1,13 @@
 # 📝 logit
 
-[![Go Doc](_icon/godoc.svg)](https://pkg.go.dev/github.com/FishGoddess/logit?tab=doc)
-[![License](_icon/license.svg)](https://www.apache.org/licenses/LICENSE-2.0.html)
-[![License](_icon/build.svg)](_icon/build.svg)
-[![License](_icon/coverage.svg)](_icon/coverage.svg)
+[![Go Doc](_icons/godoc.svg)](https://pkg.go.dev/github.com/FishGoddess/logit)
+[![License](_icons/license.svg)](https://www.apache.org/licenses/LICENSE-2.0.html)
+[![License](_icons/build.svg)](_icons/build.svg)
+[![License](_icons/coverage.svg)](_icons/coverage.svg)
 
 **logit** 是一个基于级别控制的高性能日志库，可以应用于所有的 [GoLang](https://golang.org) 应用程序中。
+
+> 在看了一些优秀日志库的设计之后，我越发觉得 logit 非常烂，尤其是和 zerolog 对比之后，简直不堪入目。这让我夜不能寐，整天研究 zerolog 的源码，最后我选择了模仿 zerolog 的设计，并加上我自己的理解和设计。
 
 [Read me in English](./README.en.md)
 

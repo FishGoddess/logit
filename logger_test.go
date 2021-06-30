@@ -46,6 +46,25 @@ func BenchmarkLogitLogger(b *testing.B) {
 	}
 }
 
+// go test -v -bench=^BenchmarkLogitLoggerWithTextAppender$ -benchtime=3s
+func BenchmarkLogitLoggerWithTextAppender(b *testing.B) {
+
+	logger := NewLogger(DebugLevel, appender.Text(), ioutil.Discard)
+
+	task := func() {
+		logger.Debug().String("trace", "xxx").Int("id", 123).Float64("pi", 3.14).Msg("debug...")
+		logger.Info().String("trace", "xxx").Int("id", 123).Float64("pi", 3.14).Msg("info...")
+		logger.Warn().String("trace", "xxx").Int("id", 123).Float64("pi", 3.14).Msg("warning...")
+		logger.Error().String("trace", "xxx").Int("id", 123).Float64("pi", 3.14).Msg("error...")
+	}
+
+	b.ReportAllocs()
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		task()
+	}
+}
+
 // go test -v -cover -run=^TestNewLogger$
 func TestNewLogger(t *testing.T) {
 

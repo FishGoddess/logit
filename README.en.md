@@ -1,11 +1,13 @@
 # 📝 logit
 
-[![Go Doc](_icon/godoc.svg)](https://pkg.go.dev/github.com/FishGoddess/logit?tab=doc)
-[![License](_icon/license.svg)](https://www.apache.org/licenses/LICENSE-2.0.html)
-[![License](_icon/build.svg)](_icon/build.svg)
-[![License](_icon/coverage.svg)](_icon/coverage.svg)
+[![Go Doc](_icons/godoc.svg)](https://pkg.go.dev/github.com/FishGoddess/logit)
+[![License](_icons/license.svg)](https://www.apache.org/licenses/LICENSE-2.0.html)
+[![License](_icons/build.svg)](_icons/build.svg)
+[![License](_icons/coverage.svg)](_icons/coverage.svg)
 
 **logit** is a level-based and high-performance logger for [GoLang](https://golang.org) applications.
+
+> After reading some amazing logging lib, I found that logit is just a joke, especially comparing with zerolog. So I read the whole source code of zerolog and decided to redesign logit based on zerolog.
 
 [阅读中文版的 Read me](./README.md)
 
