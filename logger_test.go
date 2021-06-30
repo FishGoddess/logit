@@ -70,8 +70,8 @@ func TestNewLogger(t *testing.T) {
 
 	logger := NewLogger(DebugLevel, appender.Text(), os.Stdout)
 	logger.Info().String("trace", "xxx").Int("id", 123).Float64("pi", 3.14).Any("any", map[string]interface{}{"a": 1, "b": "bbb"}).Msg("info...")
-	logger.Error().Byte("b", 'a').Byte("es", '\n').Runes("words", []rune("我是中国人")).Error("err", errors.New("我是错误")).MsgF("error...")
-	logger.Error().String("trace", "xxx").Int("id", 123).Float64("pi", 3.14).MsgF("error with %d...", 666)
+	logger.Error().Byte("b", 'a').Byte("es", '\n').Runes("words", []rune("我是中国人")).Error("err", errors.New("我是错误")).Msg("error...")
+	logger.Error().String("trace", "xxx").Int("id", 123).Float64("pi", 3.14).Msg("error with %d...", 666)
 	logger.Warn().Strings("s\tb\nd\b", []string{"abc\r", "efg\n"}).Msg("\"warn\"...\r\b\t\n")
 	logger.Info().Bools("bools", []bool{true, false}).Bytes("bytes", []byte{'\b', '\t', 'a', 'b', 'c', '"', '\n'}).Int16s("int16s", []int16{123, 4567, 8901}).Float32s("float32s", []float32{3.14, 6.18}).Msg("warn...")
 }

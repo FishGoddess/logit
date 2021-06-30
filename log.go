@@ -401,19 +401,15 @@ func (l *Log) Record() {
 	l.logger.writer.Write(l.logger.appender.End(l.data))
 }
 
-func (l *Log) Msg(msg string) {
+func (l *Log) Msg(msg string, params ...interface{}) {
 
 	if l == nil {
 		return
 	}
-	l.data = l.logger.appender.AppendString(l.data, "msg", msg)
-	l.Record()
-}
-
-func (l *Log) MsgF(msg string, params ...interface{}) {
 
 	if len(params) > 0 {
 		msg = fmt.Sprintf(msg, params...)
 	}
-	l.Msg(msg)
+	l.data = l.logger.appender.AppendString(l.data, "log.msg", msg)
+	l.Record()
 }
