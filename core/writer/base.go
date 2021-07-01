@@ -66,6 +66,10 @@ func Wrapped(writer io.Writer) Writer {
 }
 
 func Buffered(writer io.Writer) Writer {
+	return BufferedWithSize(writer, bufferSize)
+}
+
+func BufferedWithSize(writer io.Writer, bufferSize int) Writer {
 	if w, ok := writer.(Writer); ok {
 		return w
 	}

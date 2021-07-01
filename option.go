@@ -79,3 +79,45 @@ func (o *options) WithBuffered(w io.Writer) Option {
 		logger.writer = writer.Buffered(w)
 	}
 }
+
+func (o *options) WithCaller() Option {
+	return func(logger *Logger) {
+		logger.needCaller = true
+	}
+}
+
+func (o *options) WithMsgKey(key string) Option {
+	return func(logger *Logger) {
+		logger.msgKey = key
+	}
+}
+
+func (o *options) WithTimeKey(key string) Option {
+	return func(logger *Logger) {
+		logger.timeKey = key
+	}
+}
+
+func (o *options) WithLevelKey(key string) Option {
+	return func(logger *Logger) {
+		logger.levelKey = key
+	}
+}
+
+func (o *options) WithFileKey(key string) Option {
+	return func(logger *Logger) {
+		logger.fileKey = key
+	}
+}
+
+func (o *options) WithLineKey(key string) Option {
+	return func(logger *Logger) {
+		logger.lineKey = key
+	}
+}
+
+func (o *options) WithTimeFormat(format string) Option {
+	return func(logger *Logger) {
+		logger.timeFormat = format
+	}
+}

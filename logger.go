@@ -26,10 +26,11 @@ import (
 
 	"github.com/FishGoddess/logit/core/appender"
 	"github.com/FishGoddess/logit/core/writer"
+	"github.com/FishGoddess/logit/lib"
 )
 
 type Logger struct {
-	level    level
+	*config
 	appender appender.Appender
 	writer   writer.Writer
 	logPool  *sync.Pool
@@ -38,7 +39,7 @@ type Logger struct {
 func NewLogger(options ...Option) *Logger {
 
 	logger := new(Logger)
-	logger.level = debugLevel
+	logger.config = newDefaultConfig()
 	logger.appender = appender.Text()
 	logger.writer = writer.Wrapped(os.Stdout)
 	logger.logPool = &sync.Pool{
@@ -68,7 +69,21 @@ func (l *Logger) log(level level) *Log {
 	if level < l.level {
 		return nil
 	}
-	return l.newLog().Time("log.time", time.Now(), "2006-01-02 15:04:05").String("log.level", level.String())
+
+	log := l.newLog()
+	if l.timeKey != "" {
+		log.Time(l.timeKey, time.Now(), l.timeFormat)
+	}
+
+	if l.levelKey != "" {
+		log.String(l.levelKey, level.String())
+	}
+
+	if l.needCaller && l.fileKey != "" && l.lineKey != "" {
+		file, line := lib.Caller(3)
+		log.String(l.fileKey, file).Int(l.lineKey, line)
+	}
+	return log
 }
 
 func (l *Logger) Debug() *Log {

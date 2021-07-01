@@ -59,7 +59,7 @@ func (l *Log) Msg(msg string, params ...interface{}) {
 	if len(params) > 0 {
 		msg = fmt.Sprintf(msg, params...)
 	}
-	l.data = l.logger.appender.AppendString(l.data, "log.msg", msg)
+	l.data = l.logger.appender.AppendString(l.data, l.logger.msgKey, msg)
 	l.Record()
 }
 
