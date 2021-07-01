@@ -32,8 +32,8 @@ const (
 )
 
 var (
-	globalJsonAppender = &jsonAppender{}
-	globalTextAppender = &textAppender{}
+	globalJsonAppender = (*jsonAppender)(nil)
+	globalTextAppender = (*textAppender)(nil)
 )
 
 type Appender interface {

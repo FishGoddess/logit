@@ -39,48 +39,6 @@ $ go get github.com/FishGoddess/logit
 ### 📖 Examples
 
 ```go
-package main
-
-import (
-	"os"
-
-	"github.com/FishGoddess/logit"
-)
-
-func main() {
-
-	// Create a new logger first
-	logger := logit.NewLogger()
-
-	// There are four levels can be logged
-	logger.Debug("Hello, I am debug!") // Ignore because default level is info
-	logger.Info("Hello, I am info!")
-	logger.Warn("Hello, I am warn!")
-	logger.Error("Hello, I am error!", logit.KV{"err": "xxx", "id": 666}) // carry some values to log
-
-	// You can format log with some parameters if you want
-	logger.DebugF("Hello, I am debug %d!", 2) // Ignore because default level is info
-	logger.InfoF("Hello, I am info %d!", 2)
-	logger.WarnF("Hello, I am warn %d!", 2)
-	logger.ErrorF("Hello, I am error %d!", 2)
-
-	// Set level to debug
-	logger.SetLevel(logit.DebugLevel)
-	logger.Debug("Now debug logs will come up!")
-
-	// Log won't carry caller information in default
-	// So, try SetNeedCaller if you need
-	logger.SetNeedCaller(true)
-	logger.Info("I need caller!")
-
-	// Set encoder and writer
-	// Actually, every level has own encoder and writer
-	// This way will set encoder and writer of all levels to the same one
-	logger.Encoders().SetEncoder(logit.NewTextEncoder("2006-01-02 15:04:05"))
-	logger.Encoders().SetErrorEncoder(logit.NewJsonEncoder("2006-01-02 15:04:05"))
-	logger.Writers().SetWriter(os.Stdout)
-	logger.Writers().SetErrorWriter(os.Stderr)
-}
 ```
 
 * [basic](./_examples/basic.go)
@@ -114,14 +72,6 @@ $ go test -v ./_examples/benchmarks_test.go -bench=. -benchtime=3s
 | logrus | &nbsp; 327198 | 10699 ns/op | 1634 B/op | 52 allocs/op |
 
 > Environment：R7-5800X CPU@3.8GHZ，32GB RAM，512GB SSD
-
-**Notice: You should know that format can't reach high performance as the same as others because of reflection,**
-**however, their performances are not as bad as we think:**
-
-| test case | times ran (large is better) |  ns/op (small is better) | B/op | allocs/op |
-| -----------|--------|-------------|-------------|-------------|
-| logit | 3775916 | &nbsp; 949 ns/op | 128 B/op | 4 allocs/op |
-| **logit-useFormatLog** | **2931703** | **1233 ns/op** | **168 B/op** | **8 allocs/op** |
 
 ### 👥 Contributing
 

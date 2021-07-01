@@ -16,7 +16,7 @@
 // Email: fishgoddess@qq.com
 // Created at 2020/12/01 00:19:00
 
-package logit
+package writer
 
 import (
 	"bytes"
@@ -28,7 +28,7 @@ import (
 func TestBufferedWriter(t *testing.T) {
 
 	buffer := bytes.NewBuffer(make([]byte, 0, 4096))
-	writer := NewBufferedWriter(buffer)
+	writer := newBufferedWriter(buffer, bufferSize)
 	writer.AutoFlush(time.Millisecond)
 	defer writer.Close()
 

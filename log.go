@@ -35,9 +35,32 @@ func newLog(logger *Logger) *Log {
 	}
 }
 
-func (l *Log) reset() {
+func (l *Log) initialize() {
 	l.data = l.data[:0]
 	l.data = l.logger.appender.Begin(l.data)
+}
+
+func (l *Log) Record() {
+
+	if l == nil {
+		return
+	}
+
+	defer l.logger.releaseLog(l)
+	l.logger.writer.Write(l.logger.appender.End(l.data))
+}
+
+func (l *Log) Msg(msg string, params ...interface{}) {
+
+	if l == nil {
+		return
+	}
+
+	if len(params) > 0 {
+		msg = fmt.Sprintf(msg, params...)
+	}
+	l.data = l.logger.appender.AppendString(l.data, "log.msg", msg)
+	l.Record()
 }
 
 func (l *Log) Any(key string, value interface{}) *Log {
@@ -389,27 +412,4 @@ func (l *Log) Stringers(key string, value []fmt.Stringer) *Log {
 	}
 	l.data = l.logger.appender.AppendStringers(l.data, key, value)
 	return l
-}
-
-func (l *Log) Record() {
-
-	if l == nil {
-		return
-	}
-
-	defer l.logger.releaseLog(l)
-	l.logger.writer.Write(l.logger.appender.End(l.data))
-}
-
-func (l *Log) Msg(msg string, params ...interface{}) {
-
-	if l == nil {
-		return
-	}
-
-	if len(params) > 0 {
-		msg = fmt.Sprintf(msg, params...)
-	}
-	l.data = l.logger.appender.AppendString(l.data, "log.msg", msg)
-	l.Record()
 }

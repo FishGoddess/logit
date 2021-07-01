@@ -20,56 +20,18 @@ package logit
 
 import (
 	"errors"
-	"io/ioutil"
 	"os"
 	"testing"
 
-	"github.com/FishGoddess/logit/appender"
+	"github.com/FishGoddess/logit/core/appender"
 )
-
-// go test -v -bench=^BenchmarkLogitLogger$ -benchtime=3s
-func BenchmarkLogitLogger(b *testing.B) {
-
-	logger := NewLogger(DebugLevel, appender.Json(), ioutil.Discard)
-
-	task := func() {
-		logger.Debug().String("trace", "xxx").Int("id", 123).Float64("pi", 3.14).Msg("debug...")
-		logger.Info().String("trace", "xxx").Int("id", 123).Float64("pi", 3.14).Msg("info...")
-		logger.Warn().String("trace", "xxx").Int("id", 123).Float64("pi", 3.14).Msg("warning...")
-		logger.Error().String("trace", "xxx").Int("id", 123).Float64("pi", 3.14).Msg("error...")
-	}
-
-	b.ReportAllocs()
-	b.ResetTimer()
-	for i := 0; i < b.N; i++ {
-		task()
-	}
-}
-
-// go test -v -bench=^BenchmarkLogitLoggerWithTextAppender$ -benchtime=3s
-func BenchmarkLogitLoggerWithTextAppender(b *testing.B) {
-
-	logger := NewLogger(DebugLevel, appender.Text(), ioutil.Discard)
-
-	task := func() {
-		logger.Debug().String("trace", "xxx").Int("id", 123).Float64("pi", 3.14).Msg("debug...")
-		logger.Info().String("trace", "xxx").Int("id", 123).Float64("pi", 3.14).Msg("info...")
-		logger.Warn().String("trace", "xxx").Int("id", 123).Float64("pi", 3.14).Msg("warning...")
-		logger.Error().String("trace", "xxx").Int("id", 123).Float64("pi", 3.14).Msg("error...")
-	}
-
-	b.ReportAllocs()
-	b.ResetTimer()
-	for i := 0; i < b.N; i++ {
-		task()
-	}
-}
 
 // go test -v -cover -run=^TestNewLogger$
 func TestNewLogger(t *testing.T) {
 
-	logger := NewLogger(DebugLevel, appender.Text(), os.Stdout)
-	logger.Info().String("trace", "xxx").Int("id", 123).Float64("pi", 3.14).Any("any", map[string]interface{}{"a": 1, "b": "bbb"}).Msg("info...")
+	options := Options()
+	logger := NewLogger(options.WithDebug(), options.WithAppender(appender.Json()), options.WithWriter(os.Stdout))
+	logger.Debug().String("trace", "xxx").Int("id", 123).Float64("pi", 3.14).Any("any", map[string]interface{}{"a": 1, "b": "bbb"}).Msg("info...")
 	logger.Error().Byte("b", 'a').Byte("es", '\n').Runes("words", []rune("我是中国人")).Error("err", errors.New("我是错误")).Msg("error...")
 	logger.Error().String("trace", "xxx").Int("id", 123).Float64("pi", 3.14).Msg("error with %d...", 666)
 	logger.Warn().Strings("s\tb\nd\b", []string{"abc\r", "efg\n"}).Msg("\"warn\"...\r\b\t\n")

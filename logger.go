@@ -20,38 +20,42 @@ package logit
 
 import (
 	"io"
+	"os"
 	"sync"
 	"time"
 
-	"github.com/FishGoddess/logit/appender"
+	"github.com/FishGoddess/logit/core/appender"
+	"github.com/FishGoddess/logit/core/writer"
 )
 
 type Logger struct {
-	level    Level
+	level    level
 	appender appender.Appender
-	writer   io.Writer
+	writer   writer.Writer
 	logPool  *sync.Pool
 }
 
-func NewLogger(level Level, appender appender.Appender, writer io.Writer) *Logger {
+func NewLogger(options ...Option) *Logger {
 
-	logger := &Logger{
-		level:    level,
-		appender: appender,
-		writer:   writer,
-	}
-
+	logger := new(Logger)
+	logger.level = debugLevel
+	logger.appender = appender.Text()
+	logger.writer = writer.Wrapped(os.Stdout)
 	logger.logPool = &sync.Pool{
 		New: func() interface{} {
 			return newLog(logger)
 		},
+	}
+
+	for _, applyOption := range options {
+		applyOption(logger)
 	}
 	return logger
 }
 
 func (l *Logger) newLog() *Log {
 	log := l.logPool.Get().(*Log)
-	log.reset()
+	log.initialize()
 	return log
 }
 
@@ -59,7 +63,7 @@ func (l *Logger) releaseLog(log *Log) {
 	l.logPool.Put(log)
 }
 
-func (l *Logger) log(level Level) *Log {
+func (l *Logger) log(level level) *Log {
 
 	if level < l.level {
 		return nil
@@ -68,17 +72,32 @@ func (l *Logger) log(level Level) *Log {
 }
 
 func (l *Logger) Debug() *Log {
-	return l.log(DebugLevel)
+	return l.log(debugLevel)
 }
 
 func (l *Logger) Info() *Log {
-	return l.log(InfoLevel)
+	return l.log(infoLevel)
 }
 
 func (l *Logger) Warn() *Log {
-	return l.log(WarnLevel)
+	return l.log(warnLevel)
 }
 
 func (l *Logger) Error() *Log {
-	return l.log(ErrorLevel)
+	return l.log(errorLevel)
+}
+
+func (l *Logger) Flush() (n int, err error) {
+	if flusher, ok := l.writer.(writer.Flusher); ok {
+		return flusher.Flush()
+	}
+	return 0, nil
+}
+
+func (l *Logger) Close() error {
+	if closer, ok := l.writer.(io.Closer); ok {
+		return closer.Close()
+	}
+	l.level = offLevel
+	return nil
 }
