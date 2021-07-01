@@ -1,4 +1,4 @@
-// Copyright 2020 Ye Zi Jie. All Rights Reserved.
+// Copyright 2021 Ye Zi Jie. All Rights Reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -14,111 +14,402 @@
 //
 // Author: FishGoddess
 // Email: fishgoddess@qq.com
-// Created at 2020/03/25 22:01:26
+// Created at 2021/06/27 23:54:11
 
 package logit
 
 import (
+	"fmt"
 	"time"
 )
 
-// caller stores some calling information.
-type caller struct {
-
-	// File is the file path of this log.
-	File string
-
-	// Line is the line number in file.
-	Line int
+type Log struct {
+	logger *Logger
+	data   []byte
 }
 
-// newCaller returns a new caller holder containing default caller information.
-func newCaller() *caller {
-	return &caller{File: "unknown file", Line: -1}
+func newLog(logger *Logger) *Log {
+	return &Log{
+		logger: logger,
+		data:   make([]byte, 0, 512),
+	}
 }
 
-// reset sets the caller to initial status.
-func (c *caller) reset() {
+func (l *Log) initialize() {
+	l.data = l.data[:0]
+	l.data = l.logger.appender.Begin(l.data)
+}
 
-	if c == nil {
+func (l *Log) Record() {
+
+	if l == nil {
 		return
 	}
-	c.File = "unknown file"
-	c.Line = -1
+
+	defer l.logger.releaseLog(l)
+	l.logger.writer.Write(l.logger.appender.End(l.data))
 }
 
-// Log is representation of a logging message, including all information about this message.
-type Log struct {
+func (l *Log) Msg(msg string, params ...interface{}) {
 
-	// msg is the message of this log.
-	msg string
-
-	// level is the level of this log.
-	level Level
-
-	// time is the publishing time of this log.
-	time time.Time
-
-	// hasCaller is a flag of log having caller or not.
-	hasCaller bool
-
-	// caller stores some calling information, such as file path and line number.
-	caller *caller
-
-	// kvs stores all extra values of this log.
-	kvs M
-}
-
-// newLog returns a log holder containing a new caller for use.
-func newLog() *Log {
-	return &Log{
-		hasCaller: false,
-		caller:    newCaller(),
+	if l == nil {
+		return
 	}
-}
 
-// reset sets the log to initial status.
-func (l *Log) reset() {
-	l.msg = ""
-	l.level = DebugLevel
-	l.hasCaller = false
-	l.caller.reset()
-	l.kvs = nil
-}
-
-// Msg returns the message of this log.
-func (l *Log) Msg() string {
-	return l.msg
-}
-
-// Level returns the level of this log.
-func (l *Log) Level() Level {
-	return l.level
-}
-
-// Time returns the publishing time of this log.
-func (l *Log) Time() time.Time {
-	return l.time
-}
-
-// Caller returns the caller information of this log.
-// Notice that ok will be false if this log doesn't have caller information.
-func (l *Log) Caller() (caller *caller, ok bool) {
-	return l.caller, l.caller != nil && l.hasCaller
-}
-
-// setCaller sets file and line to caller inside.
-func (l *Log) setCaller(file string, line int) {
-
-	if l.caller == nil {
-		l.caller = newCaller()
+	if len(params) > 0 {
+		msg = fmt.Sprintf(msg, params...)
 	}
-	l.hasCaller = true
-	l.caller.File = file
-	l.caller.Line = line
+	l.data = l.logger.appender.AppendString(l.data, "log.msg", msg)
+	l.Record()
 }
 
-// KVs returns the kvs of this log.
-func (l *Log) KVs() M {
-	return l.kvs
+func (l *Log) Any(key string, value interface{}) *Log {
+
+	if l == nil {
+		return nil
+	}
+	l.data = l.logger.appender.AppendAny(l.data, key, value)
+	return l
+}
+
+func (l *Log) Bool(key string, value bool) *Log {
+
+	if l == nil {
+		return nil
+	}
+	l.data = l.logger.appender.AppendBool(l.data, key, value)
+	return l
+}
+
+func (l *Log) Byte(key string, value byte) *Log {
+
+	if l == nil {
+		return nil
+	}
+	l.data = l.logger.appender.AppendByte(l.data, key, value)
+	return l
+}
+
+func (l *Log) Rune(key string, value rune) *Log {
+
+	if l == nil {
+		return nil
+	}
+	l.data = l.logger.appender.AppendRune(l.data, key, value)
+	return l
+}
+
+func (l *Log) Int(key string, value int) *Log {
+
+	if l == nil {
+		return nil
+	}
+	l.data = l.logger.appender.AppendInt(l.data, key, value)
+	return l
+}
+
+func (l *Log) Int8(key string, value int8) *Log {
+
+	if l == nil {
+		return nil
+	}
+	l.data = l.logger.appender.AppendInt8(l.data, key, value)
+	return l
+}
+
+func (l *Log) Int16(key string, value int16) *Log {
+
+	if l == nil {
+		return nil
+	}
+	l.data = l.logger.appender.AppendInt16(l.data, key, value)
+	return l
+}
+
+func (l *Log) Int32(key string, value int32) *Log {
+
+	if l == nil {
+		return nil
+	}
+	l.data = l.logger.appender.AppendInt32(l.data, key, value)
+	return l
+}
+
+func (l *Log) Int64(key string, value int64) *Log {
+
+	if l == nil {
+		return nil
+	}
+	l.data = l.logger.appender.AppendInt64(l.data, key, value)
+	return l
+}
+
+func (l *Log) Uint(key string, value uint) *Log {
+
+	if l == nil {
+		return nil
+	}
+	l.data = l.logger.appender.AppendUint(l.data, key, value)
+	return l
+}
+
+func (l *Log) Uint8(key string, value uint8) *Log {
+
+	if l == nil {
+		return nil
+	}
+	l.data = l.logger.appender.AppendUint8(l.data, key, value)
+	return l
+}
+
+func (l *Log) Uint16(key string, value uint16) *Log {
+
+	if l == nil {
+		return nil
+	}
+	l.data = l.logger.appender.AppendUint16(l.data, key, value)
+	return l
+}
+
+func (l *Log) Uint32(key string, value uint32) *Log {
+
+	if l == nil {
+		return nil
+	}
+	l.data = l.logger.appender.AppendUint32(l.data, key, value)
+	return l
+}
+
+func (l *Log) Uint64(key string, value uint64) *Log {
+
+	if l == nil {
+		return nil
+	}
+	l.data = l.logger.appender.AppendUint64(l.data, key, value)
+	return l
+}
+
+func (l *Log) Float32(key string, value float32) *Log {
+
+	if l == nil {
+		return nil
+	}
+	l.data = l.logger.appender.AppendFloat32(l.data, key, value)
+	return l
+}
+
+func (l *Log) Float64(key string, value float64) *Log {
+
+	if l == nil {
+		return nil
+	}
+	l.data = l.logger.appender.AppendFloat64(l.data, key, value)
+	return l
+}
+
+func (l *Log) String(key string, value string) *Log {
+
+	if l == nil {
+		return nil
+	}
+	l.data = l.logger.appender.AppendString(l.data, key, value)
+	return l
+}
+
+func (l *Log) Time(key string, value time.Time, format string) *Log {
+
+	if l == nil {
+		return nil
+	}
+	l.data = l.logger.appender.AppendTime(l.data, key, value, format)
+	return l
+}
+
+func (l *Log) Error(key string, value error) *Log {
+
+	if l == nil {
+		return nil
+	}
+	l.data = l.logger.appender.AppendError(l.data, key, value)
+	return l
+}
+
+func (l *Log) Stringer(key string, value fmt.Stringer) *Log {
+
+	if l == nil {
+		return nil
+	}
+	l.data = l.logger.appender.AppendStringer(l.data, key, value)
+	return l
+}
+
+func (l *Log) Bools(key string, value []bool) *Log {
+
+	if l == nil {
+		return nil
+	}
+	l.data = l.logger.appender.AppendBools(l.data, key, value)
+	return l
+}
+
+func (l *Log) Bytes(key string, value []byte) *Log {
+
+	if l == nil {
+		return nil
+	}
+	l.data = l.logger.appender.AppendBytes(l.data, key, value)
+	return l
+}
+
+func (l *Log) Runes(key string, value []rune) *Log {
+
+	if l == nil {
+		return nil
+	}
+	l.data = l.logger.appender.AppendRunes(l.data, key, value)
+	return l
+}
+
+func (l *Log) Ints(key string, value []int) *Log {
+
+	if l == nil {
+		return nil
+	}
+	l.data = l.logger.appender.AppendInts(l.data, key, value)
+	return l
+}
+
+func (l *Log) Int8s(key string, value []int8) *Log {
+
+	if l == nil {
+		return nil
+	}
+	l.data = l.logger.appender.AppendInt8s(l.data, key, value)
+	return l
+}
+
+func (l *Log) Int16s(key string, value []int16) *Log {
+
+	if l == nil {
+		return nil
+	}
+	l.data = l.logger.appender.AppendInt16s(l.data, key, value)
+	return l
+}
+
+func (l *Log) Int32s(key string, value []int32) *Log {
+
+	if l == nil {
+		return nil
+	}
+	l.data = l.logger.appender.AppendInt32s(l.data, key, value)
+	return l
+}
+
+func (l *Log) Int64s(key string, value []int64) *Log {
+
+	if l == nil {
+		return nil
+	}
+	l.data = l.logger.appender.AppendInt64s(l.data, key, value)
+	return l
+}
+
+func (l *Log) Uints(key string, value []uint) *Log {
+
+	if l == nil {
+		return nil
+	}
+	l.data = l.logger.appender.AppendUints(l.data, key, value)
+	return l
+}
+
+func (l *Log) Uint8s(key string, value []uint8) *Log {
+
+	if l == nil {
+		return nil
+	}
+	l.data = l.logger.appender.AppendUint8s(l.data, key, value)
+	return l
+}
+
+func (l *Log) Uint16s(key string, value []uint16) *Log {
+
+	if l == nil {
+		return nil
+	}
+	l.data = l.logger.appender.AppendUint16s(l.data, key, value)
+	return l
+}
+
+func (l *Log) Uint32s(key string, value []uint32) *Log {
+
+	if l == nil {
+		return nil
+	}
+	l.data = l.logger.appender.AppendUint32s(l.data, key, value)
+	return l
+}
+
+func (l *Log) Uint64s(key string, value []uint64) *Log {
+
+	if l == nil {
+		return nil
+	}
+	l.data = l.logger.appender.AppendUint64s(l.data, key, value)
+	return l
+}
+
+func (l *Log) Float32s(key string, value []float32) *Log {
+
+	if l == nil {
+		return nil
+	}
+	l.data = l.logger.appender.AppendFloat32s(l.data, key, value)
+	return l
+}
+
+func (l *Log) Float64s(key string, value []float64) *Log {
+
+	if l == nil {
+		return nil
+	}
+	l.data = l.logger.appender.AppendFloat64s(l.data, key, value)
+	return l
+}
+
+func (l *Log) Strings(key string, value []string) *Log {
+
+	if l == nil {
+		return nil
+	}
+	l.data = l.logger.appender.AppendStrings(l.data, key, value)
+	return l
+}
+
+func (l *Log) Times(key string, value []time.Time, format string) *Log {
+
+	if l == nil {
+		return nil
+	}
+	l.data = l.logger.appender.AppendTimes(l.data, key, value, format)
+	return l
+}
+
+func (l *Log) Errors(key string, value []error) *Log {
+
+	if l == nil {
+		return nil
+	}
+	l.data = l.logger.appender.AppendErrors(l.data, key, value)
+	return l
+}
+
+func (l *Log) Stringers(key string, value []fmt.Stringer) *Log {
+
+	if l == nil {
+		return nil
+	}
+	l.data = l.logger.appender.AppendStringers(l.data, key, value)
+	return l
 }

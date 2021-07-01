@@ -1,4 +1,4 @@
-// Copyright 2020 Ye Zi Jie. All Rights Reserved.
+// Copyright 2021 Ye Zi Jie. All Rights Reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
 //
 // Author: FishGoddess
 // Email: fishgoddess@qq.com
-// Created at 2020/03/01 14:18:33
+// Created at 2021/06/27 16:38:31
 
 package logit
 
@@ -23,31 +23,31 @@ import (
 )
 
 const (
-	DebugLevel Level = iota
-	InfoLevel
-	WarnLevel
-	ErrorLevel
+	debugLevel level = iota
+	infoLevel
+	warnLevel
+	errorLevel
 
-	// OffLevel is for turning off the logger.
-	OffLevel = math.MaxUint8
+	// offLevel is for turning off the logger.
+	offLevel = math.MaxUint8
 )
 
 var (
 	// levels store all names of levels provided.
-	levels = map[Level]string{
-		DebugLevel: "debug",
-		InfoLevel:  "info",
-		WarnLevel:  "warn",
-		ErrorLevel: "error",
-		OffLevel:   "off",
+	levels = map[level]string{
+		debugLevel: "debug",
+		infoLevel:  "info",
+		warnLevel:  "warn",
+		errorLevel: "error",
+		offLevel:   "off",
 	}
 )
 
-// Level is position of one log.
-type Level uint8
+// level is position of one log.
+type level uint8
 
 // String returns the name of ll.
 // This method will be called when using printing operations like fmt.Println.
-func (ll Level) String() string {
+func (ll level) String() string {
 	return levels[ll]
 }
