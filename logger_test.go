@@ -31,13 +31,15 @@ func TestNewLogger(t *testing.T) {
 
 	options := Options()
 	logger := NewLogger(
-		options.WithDebug(),
+		options.WithDebugLevel(),
 		options.WithAppender(appender.Json()),
 		options.WithWriter(os.Stdout),
+		//options.WithPid(),
 		//options.WithCaller(),
 		//options.WithMsgKey("message"),
 		//options.WithTimeKey("when"),
 		//options.WithLevelKey("level"),
+		//options.WithPidKey("pid"),
 		//options.WithFileKey("file"),
 		//options.WithLineKey("line"),
 		//options.WithTimeFormat("060102"),

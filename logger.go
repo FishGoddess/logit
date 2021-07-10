@@ -80,6 +80,10 @@ func (l *Logger) log(level level, msg string, params ...interface{}) *Log {
 		log.String(l.levelKey, level.String())
 	}
 
+	if l.needPid && l.pidKey != "" {
+		log.Int(l.pidKey, lib.Pid())
+	}
+
 	if l.needCaller && l.fileKey != "" && l.lineKey != "" {
 		file, line := lib.Caller(3)
 		log.String(l.fileKey, file).Int(l.lineKey, line)

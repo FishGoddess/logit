@@ -38,25 +38,25 @@ func Options() *options {
 	return globalOptions
 }
 
-func (o *options) WithDebug() Option {
+func (o *options) WithDebugLevel() Option {
 	return func(logger *Logger) {
 		logger.level = debugLevel
 	}
 }
 
-func (o *options) WithInfo() Option {
+func (o *options) WithInfoLevel() Option {
 	return func(logger *Logger) {
 		logger.level = infoLevel
 	}
 }
 
-func (o *options) WithWarn() Option {
+func (o *options) WithWarnLevel() Option {
 	return func(logger *Logger) {
 		logger.level = warnLevel
 	}
 }
 
-func (o *options) WithError() Option {
+func (o *options) WithErrorLevel() Option {
 	return func(logger *Logger) {
 		logger.level = errorLevel
 	}
@@ -77,6 +77,12 @@ func (o *options) WithWriter(w io.Writer) Option {
 func (o *options) WithBuffered(w io.Writer) Option {
 	return func(logger *Logger) {
 		logger.writer = writer.Buffered(w)
+	}
+}
+
+func (o *options) WithPid() Option {
+	return func(logger *Logger) {
+		logger.needPid = true
 	}
 }
 
@@ -101,6 +107,12 @@ func (o *options) WithTimeKey(key string) Option {
 func (o *options) WithLevelKey(key string) Option {
 	return func(logger *Logger) {
 		logger.levelKey = key
+	}
+}
+
+func (o *options) WithPidKey(key string) Option {
+	return func(logger *Logger) {
+		logger.pidKey = key
 	}
 }
 

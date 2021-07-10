@@ -20,10 +20,12 @@ package logit
 
 type config struct {
 	level      level
+	needPid    bool
 	needCaller bool
 	msgKey     string
 	timeKey    string
 	levelKey   string
+	pidKey     string
 	fileKey    string
 	lineKey    string
 	timeFormat string
@@ -32,10 +34,12 @@ type config struct {
 func newDefaultConfig() *config {
 	return &config{
 		level:      debugLevel,
+		needPid:    false,
 		needCaller: false,
 		msgKey:     "log.msg",
 		timeKey:    "log.time",
 		levelKey:   "log.level",
+		pidKey:     "log.pid",
 		fileKey:    "log.file",
 		lineKey:    "log.line",
 		timeFormat: "2006-01-02 15:04:05",

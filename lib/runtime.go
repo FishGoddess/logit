@@ -18,7 +18,18 @@
 
 package lib
 
-import "runtime"
+import (
+	"os"
+	"runtime"
+)
+
+var (
+	pid = os.Getpid()
+)
+
+func Pid() int {
+	return pid
+}
 
 func Caller(depth int) (file string, line int) {
 

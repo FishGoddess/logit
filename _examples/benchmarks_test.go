@@ -27,8 +27,6 @@ import (
 
 	"github.com/FishGoddess/logit"
 	"github.com/FishGoddess/logit/core/appender"
-	"github.com/FishGoddess/logit/core/writer"
-
 	//"github.com/rs/zerolog"
 	//"github.com/sirupsen/logrus"
 	//"go.uber.org/zap"
@@ -74,9 +72,10 @@ func BenchmarkLogitLoggerWithTextEncoder(b *testing.B) {
 
 	options := logit.Options()
 	logger := logit.NewLogger(
-		options.WithDebug(),
+		options.WithDebugLevel(),
 		options.WithAppender(appender.Text()),
 		options.WithWriter(ioutil.Discard),
+		options.WithTimeFormat(timeFormat),
 	)
 
 	logTask := func() {
@@ -99,9 +98,10 @@ func BenchmarkLogitLoggerWithJsonEncoder(b *testing.B) {
 
 	options := logit.Options()
 	logger := logit.NewLogger(
-		options.WithDebug(),
+		options.WithDebugLevel(),
 		options.WithAppender(appender.Json()),
 		options.WithWriter(ioutil.Discard),
+		options.WithTimeFormat(timeFormat),
 	)
 
 	logTask := func() {
@@ -207,14 +207,14 @@ func createFileOf(filePath string) (*os.File, error) {
 func BenchmarkLogitFileWithTextEncoder(b *testing.B) {
 
 	file, _ := createFileOf("Z:/" + b.Name() + ".log")
-	w := writer.Buffered(file)
-	defer w.Close()
+	defer file.Close()
 
 	options := logit.Options()
 	logger := logit.NewLogger(
-		options.WithDebug(),
+		options.WithDebugLevel(),
 		options.WithAppender(appender.Text()),
-		options.WithWriter(w),
+		options.WithBuffered(file),
+		options.WithTimeFormat(timeFormat),
 	)
 
 	logTask := func() {
@@ -236,14 +236,14 @@ func BenchmarkLogitFileWithTextEncoder(b *testing.B) {
 func BenchmarkLogitFileWithJsonEncoder(b *testing.B) {
 
 	file, _ := createFileOf("Z:/" + b.Name() + ".log")
-	w := writer.Buffered(file)
-	defer w.Close()
+	defer file.Close()
 
 	options := logit.Options()
 	logger := logit.NewLogger(
-		options.WithDebug(),
+		options.WithDebugLevel(),
 		options.WithAppender(appender.Json()),
-		options.WithWriter(w),
+		options.WithBuffered(file),
+		options.WithTimeFormat(timeFormat),
 	)
 
 	logTask := func() {
@@ -269,9 +269,10 @@ func BenchmarkLogitFileWithoutBuffer(b *testing.B) {
 
 	options := logit.Options()
 	logger := logit.NewLogger(
-		options.WithDebug(),
+		options.WithDebugLevel(),
 		options.WithAppender(appender.Text()),
 		options.WithWriter(file),
+		options.WithTimeFormat(timeFormat),
 	)
 
 	logTask := func() {
