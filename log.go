@@ -40,7 +40,7 @@ func (l *Log) initialize() {
 	l.data = l.logger.appender.Begin(l.data)
 }
 
-func (l *Log) Record() {
+func (l *Log) End() {
 
 	if l == nil {
 		return
@@ -48,19 +48,6 @@ func (l *Log) Record() {
 
 	defer l.logger.releaseLog(l)
 	l.logger.writer.Write(l.logger.appender.End(l.data))
-}
-
-func (l *Log) Msg(msg string, params ...interface{}) {
-
-	if l == nil {
-		return
-	}
-
-	if len(params) > 0 {
-		msg = fmt.Sprintf(msg, params...)
-	}
-	l.data = l.logger.appender.AppendString(l.data, l.logger.msgKey, msg)
-	l.Record()
 }
 
 func (l *Log) Any(key string, value interface{}) *Log {

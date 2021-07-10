@@ -80,10 +80,10 @@ func BenchmarkLogitLoggerWithTextEncoder(b *testing.B) {
 	)
 
 	logTask := func() {
-		logger.Debug().String("trace", "xxx").Int("id", 123).Float64("pi", 3.14).Msg("debug...")
-		logger.Info().String("trace", "xxx").Int("id", 123).Float64("pi", 3.14).Msg("info...")
-		logger.Warn().String("trace", "xxx").Int("id", 123).Float64("pi", 3.14).Msg("warning...")
-		logger.Error().String("trace", "xxx").Int("id", 123).Float64("pi", 3.14).Msg("error...")
+		logger.Debug("debug...").String("trace", "xxx").Int("id", 123).Float64("pi", 3.14).End()
+		logger.Info("info...").String("trace", "xxx").Int("id", 123).Float64("pi", 3.14).End()
+		logger.Warn("warning...").String("trace", "xxx").Int("id", 123).Float64("pi", 3.14).End()
+		logger.Error("error...").String("trace", "xxx").Int("id", 123).Float64("pi", 3.14).End()
 	}
 
 	b.ReportAllocs()
@@ -105,10 +105,10 @@ func BenchmarkLogitLoggerWithJsonEncoder(b *testing.B) {
 	)
 
 	logTask := func() {
-		logger.Debug().String("trace", "xxx").Int("id", 123).Float64("pi", 3.14).Msg("debug...")
-		logger.Info().String("trace", "xxx").Int("id", 123).Float64("pi", 3.14).Msg("info...")
-		logger.Warn().String("trace", "xxx").Int("id", 123).Float64("pi", 3.14).Msg("warning...")
-		logger.Error().String("trace", "xxx").Int("id", 123).Float64("pi", 3.14).Msg("error...")
+		logger.Debug("debug...").String("trace", "xxx").Int("id", 123).Float64("pi", 3.14).End()
+		logger.Info("info...").String("trace", "xxx").Int("id", 123).Float64("pi", 3.14).End()
+		logger.Warn("warning...").String("trace", "xxx").Int("id", 123).Float64("pi", 3.14).End()
+		logger.Error("error...").String("trace", "xxx").Int("id", 123).Float64("pi", 3.14).End()
 	}
 
 	b.ReportAllocs()
@@ -218,10 +218,10 @@ func BenchmarkLogitFileWithTextEncoder(b *testing.B) {
 	)
 
 	logTask := func() {
-		logger.Debug().String("trace", "xxx").Int("id", 123).Float64("pi", 3.14).Msg("debug...")
-		logger.Info().String("trace", "xxx").Int("id", 123).Float64("pi", 3.14).Msg("info...")
-		logger.Warn().String("trace", "xxx").Int("id", 123).Float64("pi", 3.14).Msg("warning...")
-		logger.Error().String("trace", "xxx").Int("id", 123).Float64("pi", 3.14).Msg("error...")
+		logger.Debug("debug...").String("trace", "xxx").Int("id", 123).Float64("pi", 3.14).End()
+		logger.Info("info...").String("trace", "xxx").Int("id", 123).Float64("pi", 3.14).End()
+		logger.Warn("warning...").String("trace", "xxx").Int("id", 123).Float64("pi", 3.14).End()
+		logger.Error("error...").String("trace", "xxx").Int("id", 123).Float64("pi", 3.14).End()
 	}
 
 	b.ReportAllocs()
@@ -247,10 +247,10 @@ func BenchmarkLogitFileWithJsonEncoder(b *testing.B) {
 	)
 
 	logTask := func() {
-		logger.Debug().String("trace", "xxx").Int("id", 123).Float64("pi", 3.14).Msg("debug...")
-		logger.Info().String("trace", "xxx").Int("id", 123).Float64("pi", 3.14).Msg("info...")
-		logger.Warn().String("trace", "xxx").Int("id", 123).Float64("pi", 3.14).Msg("warning...")
-		logger.Error().String("trace", "xxx").Int("id", 123).Float64("pi", 3.14).Msg("error...")
+		logger.Debug("debug...").String("trace", "xxx").Int("id", 123).Float64("pi", 3.14).End()
+		logger.Info("info...").String("trace", "xxx").Int("id", 123).Float64("pi", 3.14).End()
+		logger.Warn("warning...").String("trace", "xxx").Int("id", 123).Float64("pi", 3.14).End()
+		logger.Error("error...").String("trace", "xxx").Int("id", 123).Float64("pi", 3.14).End()
 	}
 
 	b.ReportAllocs()
@@ -275,10 +275,10 @@ func BenchmarkLogitFileWithoutBuffer(b *testing.B) {
 	)
 
 	logTask := func() {
-		logger.Debug().String("trace", "xxx").Int("id", 123).Float64("pi", 3.14).Msg("debug...")
-		logger.Info().String("trace", "xxx").Int("id", 123).Float64("pi", 3.14).Msg("info...")
-		logger.Warn().String("trace", "xxx").Int("id", 123).Float64("pi", 3.14).Msg("warning...")
-		logger.Error().String("trace", "xxx").Int("id", 123).Float64("pi", 3.14).Msg("error...")
+		logger.Debug("debug...").String("trace", "xxx").Int("id", 123).Float64("pi", 3.14).End()
+		logger.Info("info...").String("trace", "xxx").Int("id", 123).Float64("pi", 3.14).End()
+		logger.Warn("warning...").String("trace", "xxx").Int("id", 123).Float64("pi", 3.14).End()
+		logger.Error("error...").String("trace", "xxx").Int("id", 123).Float64("pi", 3.14).End()
 	}
 
 	b.ReportAllocs()

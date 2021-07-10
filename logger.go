@@ -19,6 +19,7 @@
 package logit
 
 import (
+	"fmt"
 	"io"
 	"os"
 	"sync"
@@ -54,7 +55,7 @@ func NewLogger(options ...Option) *Logger {
 	return logger
 }
 
-func (l *Logger) newLog() *Log {
+func (l *Logger) getLogFromPool() *Log {
 	log := l.logPool.Get().(*Log)
 	log.initialize()
 	return log
@@ -64,13 +65,13 @@ func (l *Logger) releaseLog(log *Log) {
 	l.logPool.Put(log)
 }
 
-func (l *Logger) log(level level) *Log {
+func (l *Logger) log(level level, msg string, params ...interface{}) *Log {
 
 	if level < l.level {
 		return nil
 	}
 
-	log := l.newLog()
+	log := l.getLogFromPool()
 	if l.timeKey != "" {
 		log.Time(l.timeKey, time.Now(), l.timeFormat)
 	}
@@ -83,23 +84,28 @@ func (l *Logger) log(level level) *Log {
 		file, line := lib.Caller(3)
 		log.String(l.fileKey, file).Int(l.lineKey, line)
 	}
+
+	if len(params) > 0 {
+		msg = fmt.Sprintf(msg, params...)
+	}
+	log.String(l.msgKey, msg)
 	return log
 }
 
-func (l *Logger) Debug() *Log {
-	return l.log(debugLevel)
+func (l *Logger) Debug(msg string, params ...interface{}) *Log {
+	return l.log(debugLevel, msg, params...)
 }
 
-func (l *Logger) Info() *Log {
-	return l.log(infoLevel)
+func (l *Logger) Info(msg string, params ...interface{}) *Log {
+	return l.log(infoLevel, msg, params...)
 }
 
-func (l *Logger) Warn() *Log {
-	return l.log(warnLevel)
+func (l *Logger) Warn(msg string, params ...interface{}) *Log {
+	return l.log(warnLevel, msg, params...)
 }
 
-func (l *Logger) Error() *Log {
-	return l.log(errorLevel)
+func (l *Logger) Error(msg string, params ...interface{}) *Log {
+	return l.log(errorLevel, msg, params...)
 }
 
 func (l *Logger) Flush() (n int, err error) {
