@@ -23,13 +23,11 @@ import (
 )
 
 const (
-	debugLevel level = iota
-	infoLevel
-	warnLevel
-	errorLevel
-
-	// offLevel is for turning off the logger.
-	offLevel = math.MaxUint8
+	debugLevel level = iota          // For debug.
+	infoLevel                        // For info.
+	warnLevel                        // For Warn.
+	errorLevel                       // For error.
+	offLevel   level = math.MaxUint8 // For turning off the logger.
 )
 
 var (
@@ -43,11 +41,11 @@ var (
 	}
 )
 
-// level is position of one log.
+// level is the position of logs.
 type level uint8
 
-// String returns the name of ll.
+// String returns the name of level.
 // This method will be called when using printing operations like fmt.Println.
-func (ll level) String() string {
-	return levels[ll]
+func (l level) String() string {
+	return levels[l]
 }

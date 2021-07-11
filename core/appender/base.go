@@ -138,10 +138,10 @@ func appendEscapedString(dst []byte, value string) []byte {
 	return append(dst, value...)
 }
 
-func Json() Appender {
-	return (*jsonAppender)(nil)
-}
-
 func Text() Appender {
 	return (*textAppender)(nil)
+}
+
+func Json() Appender {
+	return (*jsonAppender)(nil)
 }

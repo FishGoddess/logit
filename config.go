@@ -18,19 +18,21 @@
 
 package logit
 
+// config stores all configurations used in Logger.
 type config struct {
-	level      level
-	needPid    bool
-	needCaller bool
-	msgKey     string
-	timeKey    string
-	levelKey   string
-	pidKey     string
-	fileKey    string
-	lineKey    string
-	timeFormat string
+	level      level  // The level of a logger.
+	needPid    bool   // Logs will carry pid if needPid is true.
+	needCaller bool   // Logs will carry caller information if needCaller is true.
+	msgKey     string // The key of message in a log.
+	timeKey    string // The key of time in a log.
+	levelKey   string // The key of level in a log.
+	pidKey     string // The key of pid in a log.
+	fileKey    string // The key of caller's file in a log.
+	lineKey    string // The key of caller's line in a log.
+	timeFormat string // The format of time in a log.
 }
 
+// newDefaultConfig returns a default config.
 func newDefaultConfig() *config {
 	return &config{
 		level:      debugLevel,

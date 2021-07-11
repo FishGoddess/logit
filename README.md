@@ -51,25 +51,25 @@ _更多使用案例请查看 [_examples](./_examples) 目录。_
 ### 🔥 性能测试
 
 ```bash
-$ go test -v ./_examples/benchmarks_test.go -bench=. -benchtime=3s
+$ go test -v ./_examples/benchmarks_test.go -bench=. -benchtime=1s
 ```
 
 > 测试文件：[_examples/benchmarks_test.go](./_examples/benchmarks_test.go)
 
 | 测试（输出到内存） | 单位时间内运行次数 (越大越好) |  每个操作消耗时间 (越小越好) | B/op (越小越好) | allocs/op (越小越好) |
 | -----------|--------|-------------|-------------|-------------|
-| **logit** | **3185127** | **1125 ns/op** | **&nbsp; &nbsp; &nbsp; 0 B/op** | **&nbsp; 0 allocs/op** |
-| zap | 1674750 | 2143 ns/op | &nbsp; 449 B/op | 16 allocs/op |
-| zerolog | 5026804 | &nbsp; 1201 ns/op | &nbsp; &nbsp; &nbsp; 0 B/op | &nbsp; 0 allocs/op |
-| logrus | &nbsp; 899808 | 3968 ns/op | 1634 B/op | 52 allocs/op |
+| **logit** | **856915** | **&nbsp; 1385 ns/op** | **&nbsp; &nbsp; &nbsp; 0 B/op** | **&nbsp; &nbsp; 0 allocs/op** |
+| zerolog | 922863 | &nbsp; 1244 ns/op | &nbsp; &nbsp; &nbsp; 0 B/op | &nbsp; &nbsp; 0 allocs/op |
+| zap | 413701 | &nbsp; 2824 ns/op | &nbsp; 897 B/op | &nbsp; &nbsp; 8 allocs/op |
+| logrus | 105238 | 11474 ns/op | 7411 B/op | 128 allocs/op |
 
 | 测试（输出到文件） | 单位时间内运行次数 (越大越好) |  每个操作消耗时间 (越小越好) | B/op (越小越好) | allocs/op (越小越好) |
 | -----------|--------|-------------|-------------|-------------|
-| **logit** | **3556720** | **&nbsp; 1009 ns/op** | **&nbsp; 129 B/op** | **&nbsp; 4 allocs/op** |
-| **logit-不使用缓冲写出器** | **&nbsp; 499887** | **&nbsp; 7176 ns/op** | **&nbsp; 128 B/op** | **&nbsp; 4 allocs/op** |
-| zap | &nbsp; 409000 | &nbsp; 8580 ns/op | &nbsp; 449 B/op | 16 allocs/op |
-| zerolog | 506928 | &nbsp; 7633 ns/op | &nbsp; &nbsp; &nbsp; 0 B/op | &nbsp; 0 allocs/op |
-| logrus | &nbsp; 327198 | 10699 ns/op | 1634 B/op | 52 allocs/op |
+| **logit** | **521606** | **&nbsp; 1927 ns/op** | **1036 B/op** | **&nbsp; &nbsp; 0 allocs/op** |
+| **logit-不使用缓冲写出器** | **149965** | **&nbsp; 7704 ns/op** | **&nbsp; &nbsp; &nbsp; 0 B/op** | **&nbsp; &nbsp; 0 allocs/op** |
+| zerolog | 159962 | &nbsp; 7472 ns/op | &nbsp; &nbsp; &nbsp; 0 B/op | &nbsp; &nbsp; 0 allocs/op |
+| zap | 130405 | &nbsp; 9137 ns/op | &nbsp; 897 B/op | &nbsp; &nbsp; 8 allocs/op |
+| logrus | &nbsp; 65202 | 18439 ns/op | 7410 B/op | 128 allocs/op |
 
 > 测试环境：R7-5800X CPU@3.8GHZ，32GB RAM，512GB SSD
 

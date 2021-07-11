@@ -17,3 +17,27 @@
 // Created at 2021/07/11 14:02:38
 
 package logit
+
+import "testing"
+
+// go test -v -cover -run=^TestNewDefaultConfig$
+func TestNewDefaultConfig(t *testing.T) {
+
+	defaultConfig := newDefaultConfig()
+	cfg := &config{
+		level:      debugLevel,
+		needPid:    false,
+		needCaller: false,
+		msgKey:     "log.msg",
+		timeKey:    "log.time",
+		levelKey:   "log.level",
+		pidKey:     "log.pid",
+		fileKey:    "log.file",
+		lineKey:    "log.line",
+		timeFormat: "2006-01-02 15:04:05",
+	}
+
+	if *defaultConfig != *cfg {
+		t.Fatalf("default config %+v is wrong", defaultConfig)
+	}
+}
