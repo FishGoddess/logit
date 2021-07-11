@@ -118,9 +118,10 @@ func (l *Logger) Flush() (n int, err error) {
 }
 
 func (l *Logger) Close() error {
+	l.Flush()
+	l.level = offLevel
 	if closer, ok := l.writer.(io.Closer); ok {
 		return closer.Close()
 	}
-	l.level = offLevel
 	return nil
 }

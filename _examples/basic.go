@@ -14,12 +14,17 @@
 //
 // Author: FishGoddess
 // Email: fishgoddess@qq.com
-// Created at 2020/02/29 15:41:09
+// Created at 2021/07/11 22:53:20
 
-/*
-Package logit provides an easy way to use foundation for your logging operations.
+package main
 
-1. basic:
+import (
+	"os"
+
+	"github.com/FishGoddess/logit"
+)
+
+func main() {
 
 	// Create a new logger for use
 	// Default level is debug, so all logs will be logged
@@ -53,10 +58,4 @@ Package logit provides an easy way to use foundation for your logging operations
 	options.WithWriter(os.Stderr)                 // Change logger's writer to os.Stderr
 	options.WithBuffered(os.Stderr)               // Change logger's writer to os.Stderr with buffer
 	options.WithTimeFormat("2006-01-02 15:04:05") // Change the format of time (Only the log's time will apply it)
-*/
-package logit // import "github.com/FishGoddess/logit"
-
-const (
-	// Version is the version string representation of logit.
-	Version = "v0.4.2-alpha"
-)
+}

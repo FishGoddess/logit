@@ -15,10 +15,9 @@
 
 ### 🥇 功能特性
 
-* 独特的日志输出模块设计，使用 encoder 和 writer 装载特定的模块，实现扩展功能
-* 支持日志级别控制，一共有四个日志级别，分别是 debug，info，warn 和 error
-* 支持开启或者关闭日志功能，线上环境可以关闭或调高日志级别
-* 支持记录日志到文件中，并且可以自定义日志文件名
+* 独特的日志输出模块设计，使用 appender 和 writer 装载特定的模块，实现扩展功能
+* 支持日志级别控制，一共有五个日志级别，分别是 debug，info，warn，error 和 off
+* 自带缓冲写出器，并且可以自定义日志文件名
 * 支持按照时间间隔进行自动分割日志文件，比如每一天分割一个日志文件
 * 支持按照文件大小进行自动分割日志文件，比如每 64 MB 分割一个日志文件
 * 支持按照日志记录次数进行自动分割日志文件，比如每记录 1000 条日志分割一个日志文件
@@ -33,18 +32,58 @@ _历史版本的特性请查看 [HISTORY.md](./HISTORY.md)。未来版本的新�
 ### 🚀 安装方式
 
 ```bash
-$ go get github.com/FishGoddess/logit
+$ go get -u github.com/FishGoddess/logit
 ```
 
 ### 📖 参考案例
 
 ```go
+package main
+
+import (
+	"os"
+
+	"github.com/FishGoddess/logit"
+)
+
+func main() {
+
+	// Create a new logger for use
+	// Default level is debug, so all logs will be logged
+	// Invoke Close() isn't necessary in all situations
+	// If logger's writer has buffer or something like that, it's better to invoke Close() for flushing buffer or something else
+	logger := logit.NewLogger()
+	//defer logger.Close()
+
+	// Then, you can log anything you want
+	// Remember, logs will be ignored if their level is smaller than logger's level
+	// End() will do some finishing work, so this invocation is necessary
+	logger.Debug("This is a debug message").End()
+	logger.Info("This is a info message").End()
+	logger.Warn("This is a warn message").End()
+	logger.Error("This is a error message").End()
+
+	// As you know, we provide some levels: debug, info, warn, error, off
+	// The lowest is debug and the highest is off
+	// If you want to change the level of your logger, do it at creating
+	logger = logit.NewLogger(logit.Options().WithWarnLevel())
+	logger.Debug("This is a debug message, but ignored").End()
+	logger.Info("This is a info message, but ignored").End()
+	logger.Warn("This is a warn message, not ignored").End()
+	logger.Error("This is a error message, not ignored").End()
+
+	// You may notice logit.Options() which returns an options list
+	// Here is some of them:
+	options := logit.Options()
+	options.WithCaller()                          // Let logs carry caller information
+	options.WithLevelKey("lvl")                   // Change logger's level key to "lvl"
+	options.WithWriter(os.Stderr)                 // Change logger's writer to os.Stderr
+	options.WithBuffered(os.Stderr)               // Change logger's writer to os.Stderr with buffer
+	options.WithTimeFormat("2006-01-02 15:04:05") // Change the format of time (Only the log's time will apply it)
+}
 ```
 
 * [basic](./_examples/basic.go)
-* [logger](./_examples/logger.go)
-* [encoder](./_examples/encoder.go)
-* [writer](./_examples/writer.go)
 
 _更多使用案例请查看 [_examples](./_examples) 目录。_
 
@@ -66,7 +105,7 @@ $ go test -v ./_examples/benchmarks_test.go -bench=. -benchtime=1s
 | 测试（输出到文件） | 单位时间内运行次数 (越大越好) |  每个操作消耗时间 (越小越好) | B/op (越小越好) | allocs/op (越小越好) |
 | -----------|--------|-------------|-------------|-------------|
 | **logit** | **521606** | **&nbsp; 1927 ns/op** | **1036 B/op** | **&nbsp; &nbsp; 0 allocs/op** |
-| **logit-不使用缓冲写出器** | **149965** | **&nbsp; 7704 ns/op** | **&nbsp; &nbsp; &nbsp; 0 B/op** | **&nbsp; &nbsp; 0 allocs/op** |
+| **logit-不缓冲** | **149965** | **&nbsp; 7704 ns/op** | **&nbsp; &nbsp; &nbsp; 0 B/op** | **&nbsp; &nbsp; 0 allocs/op** |
 | zerolog | 159962 | &nbsp; 7472 ns/op | &nbsp; &nbsp; &nbsp; 0 B/op | &nbsp; &nbsp; 0 allocs/op |
 | zap | 130405 | &nbsp; 9137 ns/op | &nbsp; 897 B/op | &nbsp; &nbsp; 8 allocs/op |
 | logrus | &nbsp; 65202 | 18439 ns/op | 7410 B/op | 128 allocs/op |

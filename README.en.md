@@ -7,7 +7,7 @@
 
 **logit** is a level-based and high-performance logger for [GoLang](https://golang.org) applications.
 
-> After reading some amazing logging lib, I found that logit is just a joke, especially comparing with zerolog. So I read the whole source code of zerolog and decided to redesign logit based on zerolog.
+> After reading some amazing logging lib, I found that logit is just a joke, especially comparing with zerolog, so I decided to redesign logit.
 
 [阅读中文版的 Read me](./README.md)
 
@@ -33,25 +33,65 @@ _Check [HISTORY.md](./HISTORY.md) and [FUTURE.md](./FUTURE.md) to know about mor
 ### 🚀 Installation
 
 ```bash
-$ go get github.com/FishGoddess/logit
+$ go get -u github.com/FishGoddess/logit
 ```
 
 ### 📖 Examples
 
 ```go
+package main
+
+import (
+	"os"
+
+	"github.com/FishGoddess/logit"
+)
+
+func main() {
+
+	// Create a new logger for use
+	// Default level is debug, so all logs will be logged
+	// Invoke Close() isn't necessary in all situations
+	// If logger's writer has buffer or something like that, it's better to invoke Close() for flushing buffer or something else
+	logger := logit.NewLogger()
+	//defer logger.Close()
+
+	// Then, you can log anything you want
+	// Remember, logs will be ignored if their level is smaller than logger's level
+	// End() will do some finishing work, so this invocation is necessary
+	logger.Debug("This is a debug message").End()
+	logger.Info("This is a info message").End()
+	logger.Warn("This is a warn message").End()
+	logger.Error("This is a error message").End()
+
+	// As you know, we provide some levels: debug, info, warn, error, off
+	// The lowest is debug and the highest is off
+	// If you want to change the level of your logger, do it at creating
+	logger = logit.NewLogger(logit.Options().WithWarnLevel())
+	logger.Debug("This is a debug message, but ignored").End()
+	logger.Info("This is a info message, but ignored").End()
+	logger.Warn("This is a warn message, not ignored").End()
+	logger.Error("This is a error message, not ignored").End()
+
+	// You may notice logit.Options() which returns an options list
+	// Here is some of them:
+	options := logit.Options()
+	options.WithCaller()                          // Let logs carry caller information
+	options.WithLevelKey("lvl")                   // Change logger's level key to "lvl"
+	options.WithWriter(os.Stderr)                 // Change logger's writer to os.Stderr
+	options.WithBuffered(os.Stderr)               // Change logger's writer to os.Stderr with buffer
+	options.WithTimeFormat("2006-01-02 15:04:05") // Change the format of time (Only the log's time will apply it)
+}
 ```
 
 * [basic](./_examples/basic.go)
-* [logger](./_examples/logger.go)
-* [encoder](./_examples/encoder.go)
-* [writer](./_examples/writer.go)
 
 _Check more examples in [_examples](./_examples)._
 
 ### 🔥 Benchmarks
 
 ```bash
-$ go test -v ./_examples/benchmarks_test.go -bench=. -benchtime=3s
+$ go test -v ./_examples/benchmarks_test.go -bench=. -benchtime=1s
 ```
 
 > Benchmark file：[_examples/benchmarks_test.go](./_examples/benchmarks_test.go)
@@ -66,7 +106,7 @@ $ go test -v ./_examples/benchmarks_test.go -bench=. -benchtime=3s
 | test case(output to file) | times ran (large is better) |  ns/op (small is better) | B/op | allocs/op |
 | -----------|--------|-------------|-------------|-------------|
 | **logit** | **521606** | **&nbsp; 1927 ns/op** | **1036 B/op** | **&nbsp; &nbsp; 0 allocs/op** |
-| **logit-withoutBuffer** | **149965** | **&nbsp; 7704 ns/op** | **&nbsp; &nbsp; &nbsp; 0 B/op** | **&nbsp; &nbsp; 0 allocs/op** |
+| **logit-notBuffer** | **149965** | **&nbsp; 7704 ns/op** | **&nbsp; &nbsp; &nbsp; 0 B/op** | **&nbsp; &nbsp; 0 allocs/op** |
 | zerolog | 159962 | &nbsp; 7472 ns/op | &nbsp; &nbsp; &nbsp; 0 B/op | &nbsp; &nbsp; 0 allocs/op |
 | zap | 130405 | &nbsp; 9137 ns/op | &nbsp; 897 B/op | &nbsp; &nbsp; 8 allocs/op |
 | logrus | &nbsp; 65202 | 18439 ns/op | 7410 B/op | 128 allocs/op |
