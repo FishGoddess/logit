@@ -35,9 +35,10 @@ func newLog(logger *Logger) *Log {
 	}
 }
 
-func (l *Log) initialize() {
+func (l *Log) begin() *Log {
 	l.data = l.data[:0]
 	l.data = l.logger.appender.Begin(l.data)
+	return l
 }
 
 func (l *Log) End() {

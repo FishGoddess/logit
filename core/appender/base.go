@@ -31,11 +31,6 @@ const (
 	UnixTime = ""
 )
 
-var (
-	globalJsonAppender = (*jsonAppender)(nil)
-	globalTextAppender = (*textAppender)(nil)
-)
-
 type Appender interface {
 	Begin(dst []byte) []byte
 	End(dst []byte) []byte
@@ -144,9 +139,9 @@ func appendEscapedString(dst []byte, value string) []byte {
 }
 
 func Json() Appender {
-	return globalJsonAppender
+	return (*jsonAppender)(nil)
 }
 
 func Text() Appender {
-	return globalTextAppender
+	return (*textAppender)(nil)
 }

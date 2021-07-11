@@ -25,17 +25,12 @@ import (
 	"github.com/FishGoddess/logit/core/writer"
 )
 
-var (
-	globalOptions = (*options)(nil)
-)
-
 type Option func(logger *Logger)
 
-type options struct {
-}
+type options struct{}
 
 func Options() *options {
-	return globalOptions
+	return (*options)(nil)
 }
 
 func (o *options) WithDebugLevel() Option {

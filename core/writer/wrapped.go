@@ -14,42 +14,34 @@
 //
 // Author: FishGoddess
 // Email: fishgoddess@qq.com
-// Created at 2021/07/01 23:40:06
+// Created at 2021/07/11 13:55:35
 
 package writer
 
 import "io"
 
-const (
-	KB = 1024      // KB is the unit KB in size. 1 KB = 1024 Bytes.
-	MB = 1024 * KB // MB is the unit MB in size. 1 MB = 1024*1024 Bytes.
-
-	bufferSize = 16 * KB
-)
-
-type Flusher interface {
-	Flush() (n int, err error)
+type wrappedWriter struct {
+	writer io.Writer
 }
 
-type Writer interface {
-	Flusher
-	io.WriteCloser
+func newWrappedWriter(writer io.Writer) *wrappedWriter {
+	return &wrappedWriter{writer: writer}
 }
 
-func Wrapped(writer io.Writer) Writer {
-	if w, ok := writer.(Writer); ok {
-		return w
+func (ww *wrappedWriter) Flush() (n int, err error) {
+	if flusher, ok := ww.writer.(Flusher); ok {
+		return flusher.Flush()
 	}
-	return newWrappedWriter(writer)
+	return 0, nil
 }
 
-func BufferedWithSize(writer io.Writer, bufferSize int) Writer {
-	if w, ok := writer.(Writer); ok {
-		return w
+func (ww *wrappedWriter) Write(p []byte) (n int, err error) {
+	return ww.writer.Write(p)
+}
+
+func (ww *wrappedWriter) Close() error {
+	if closer, ok := ww.writer.(io.Closer); ok {
+		return closer.Close()
 	}
-	return newBufferedWriter(writer, bufferSize)
-}
-
-func Buffered(writer io.Writer) Writer {
-	return BufferedWithSize(writer, bufferSize)
+	return nil
 }

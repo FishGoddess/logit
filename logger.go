@@ -55,10 +55,8 @@ func NewLogger(options ...Option) *Logger {
 	return logger
 }
 
-func (l *Logger) getLogFromPool() *Log {
-	log := l.logPool.Get().(*Log)
-	log.initialize()
-	return log
+func (l *Logger) getLog() *Log {
+	return l.logPool.Get().(*Log)
 }
 
 func (l *Logger) releaseLog(log *Log) {
@@ -71,7 +69,7 @@ func (l *Logger) log(level level, msg string, params ...interface{}) *Log {
 		return nil
 	}
 
-	log := l.getLogFromPool()
+	log := l.getLog().begin()
 	if l.timeKey != "" {
 		log.Time(l.timeKey, time.Now(), l.timeFormat)
 	}
