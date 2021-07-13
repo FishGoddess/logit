@@ -18,6 +18,29 @@
 
 package main
 
+import (
+	"github.com/FishGoddess/logit"
+	"github.com/FishGoddess/logit/core/appender"
+)
+
 func main() {
-	// TODO updating...
+
+	// We provide some ways to change the form of logs
+	// Actually, appender is an interface with some common methods, see appender.Appender
+	appender.Text()
+	appender.Json()
+
+	// Set appender to the one you want to use when creating a logger
+	// Default appender is appender.Text()
+	logger := logit.NewLogger()
+	logger.Info("appender.Text()").End()
+
+	// You can switch appender to the other one, such appender.Json()
+	logger = logit.NewLogger(logit.Options().WithAppender(appender.Json()))
+	logger.Info("appender.Json()").End()
+
+	// Appender is an interface so you can implement your own appender
+	// However, we don't recommend you to do that
+	// This interface may change in every version, so you will pay lots of extra attention to it
+	// So you should implement it only if you really need to do
 }

@@ -7,7 +7,7 @@
 
 **logit** 是一个基于级别控制的高性能日志库，可以应用于所有的 [GoLang](https://golang.org) 应用程序中。
 
-> 在看了一些优秀日志库的设计之后，我越发觉得 logit 非常烂，尤其是和 zerolog 对比之后，简直不堪入目。这让我夜不能寐，整天研究 zerolog 的源码，最后我选择了模仿 zerolog 的设计，并加上我自己的理解和设计。
+> 在看了一些优秀日志库的设计之后，我越发觉得 logit 非常烂，尤其是和 zerolog 对比之后，简直不堪入目。这让我夜不能寐，最后在小黑屋中完成了新的设计方案。
 
 [Read me in English](./README.en.md)
 
@@ -62,6 +62,7 @@ func main() {
 	logger.Info("This is a info message").End()
 	logger.Warn("This is a warn message").End()
 	logger.Error("This is a error message").End()
+	logger.Error("This is a %s message, with format", "error").End() // Format with params
 
 	// As you know, we provide some levels: debug, info, warn, error, off
 	// The lowest is debug and the highest is off

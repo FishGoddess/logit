@@ -20,6 +20,7 @@ package logit
 
 import (
 	"io"
+	"time"
 
 	"github.com/FishGoddess/logit/core/appender"
 	"github.com/FishGoddess/logit/core/writer"
@@ -145,5 +146,25 @@ func (o *options) WithLineKey(key string) Option {
 func (o *options) WithTimeFormat(format string) Option {
 	return func(logger *Logger) {
 		logger.timeFormat = format
+	}
+}
+
+// WithAutoFlush returns an option which do flush automatically at fixed frequency.
+func (o *options) WithAutoFlush(frequency time.Duration) Option {
+	return func(logger *Logger) {
+		ticker := time.NewTicker(frequency)
+		go func() {
+			select {
+			case <-ticker.C:
+				logger.Flush()
+			}
+		}()
+	}
+}
+
+// WithAutoClose returns an option which do close automatically at some signal happened.
+func (o *options) WithAutoClose() Option {
+	return func(logger *Logger) {
+		// TODO 监听特定的信号，当信号发生时执行 logger.Close()
 	}
 }

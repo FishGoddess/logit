@@ -35,6 +35,7 @@ Package logit provides an easy way to use foundation for your logging operations
 	logger.Info("This is a info message").End()
 	logger.Warn("This is a warn message").End()
 	logger.Error("This is a error message").End()
+	logger.Error("This is a %s message, with format", "error").End() // Format with params
 
 	// As you know, we provide some levels: debug, info, warn, error, off
 	// The lowest is debug and the highest is off
@@ -53,6 +54,107 @@ Package logit provides an easy way to use foundation for your logging operations
 	options.WithWriter(os.Stderr)                 // Change logger's writer to os.Stderr
 	options.WithBuffered(os.Stderr)               // Change logger's writer to os.Stderr with buffer
 	options.WithTimeFormat("2006-01-02 15:04:05") // Change the format of time (Only the log's time will apply it)
+
+2. options:
+
+	// We provide some options for you
+	options := logit.Options()
+	options.WithDebugLevel()
+	options.WithInfoLevel()
+	options.WithWarnLevel()
+	options.WithErrorLevel()
+	options.WithAppender(appender.Text())
+	options.WithWriter(os.Stderr)
+	options.WithBuffered(os.Stderr)
+	options.WithPid()
+	options.WithCaller()
+	options.WithMsgKey("msg")
+	options.WithTimeKey("time")
+	options.WithLevelKey("level")
+	options.WithPidKey("pid")
+	options.WithFileKey("file")
+	options.WithLineKey("line")
+	options.WithTimeFormat(appender.UnixTime) // UnixTime means time will be logged as unix time, an int64 number
+
+	// Remember, these options is only used for creating a logger
+	logger := logit.NewLogger(
+		options.WithPid(),
+		options.WithBuffered(os.Stdout),
+		options.WithTimeFormat("2006/01/02 15:04:05"),
+		// ...
+	)
+	defer logger.Close()
+	logger.Info("check options").End()
+
+	// You can use many options at the same time, but some of them is exclusive
+	// So only the last one in order will take effect if you use them at the same time
+	logit.NewLogger(
+		options.WithDebugLevel(),
+		options.WithInfoLevel(),
+		options.WithWarnLevel(),
+		options.WithErrorLevel(), // The level of logger is error
+	)
+
+	// You can customize an option for your logger
+	// Actually, Option is just a function like func(logger *Logger)
+	// So you can do what you want in creating a logger
+	autoFlushOption := func(logger *logit.Logger) {
+		go func() {
+			select {
+			case <-time.Tick(time.Second):
+				logger.Flush()
+			}
+		}()
+	}
+	logit.NewLogger(autoFlushOption)
+
+3. appender:
+
+	// We provide some ways to change the form of logs
+	// Actually, appender is an interface with some common methods, see appender.Appender
+	appender.Text()
+	appender.Json()
+
+	// Set appender to the one you want to use when creating a logger
+	// Default appender is appender.Text()
+	logger := logit.NewLogger()
+	logger.Info("appender.Text()").End()
+
+	// You can switch appender to the other one, such appender.Json()
+	logger = logit.NewLogger(logit.Options().WithAppender(appender.Json()))
+	logger.Info("appender.Json()").End()
+
+	// Appender is an interface so you can implement your own appender
+	// However, we don't recommend you to do that
+	// This interface may change in every version, so you will pay lots of extra attention to it
+	// So you should implement it only if you really need to do
+
+4. writer:
+
+	// As you know, writer in logit is customized, not io.Writer
+	// The reason why we create a new Writer interface is we want a flushable writer
+	// Then, we notice a flushable writer also need a close method to flush all data in buffer when closing
+	// So, a new Writer is born:
+	//
+	//     type Writer interface {
+	//	       Flusher
+	//	       io.WriteCloser
+	//     }
+	//
+	// In package writer, we provide some writers for you
+	writer.Wrapped(os.Stdout)  // Wrap io.Writer to writer.Writer
+	writer.Buffered(os.Stderr) // Wrap io.Writer to writer.Writer with buffer, which needs invoking Flush() or Close()
+
+	// Use them with options like appender
+	logger := logit.NewLogger(logit.Options().WithWriter(os.Stdout))
+	logger.Info("WithWriter").End()
+
+	// WithBuffered uses a Writer with buffer, which is good for io
+	logger = logit.NewLogger(logit.Options().WithBuffered(os.Stdout))
+	defer logger.Close() // Flush data and close writer
+
+	logger.Info("WithBuffered").End()
+	logger.Flush() // Remember flushing data or flushing by Close()
 */
 package logit // import "github.com/FishGoddess/logit"
 

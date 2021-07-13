@@ -63,6 +63,7 @@ func main() {
 	logger.Info("This is a info message").End()
 	logger.Warn("This is a warn message").End()
 	logger.Error("This is a error message").End()
+	logger.Error("This is a %s message, with format", "error").End() // Format with params
 
 	// As you know, we provide some levels: debug, info, warn, error, off
 	// The lowest is debug and the highest is off

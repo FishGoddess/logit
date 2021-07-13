@@ -18,6 +18,37 @@
 
 package main
 
+import (
+	"os"
+
+	"github.com/FishGoddess/logit"
+	"github.com/FishGoddess/logit/core/writer"
+)
+
 func main() {
-	// TODO updating...
+
+	// As you know, writer in logit is customized, not io.Writer
+	// The reason why we create a new Writer interface is we want a flushable writer
+	// Then, we notice a flushable writer also need a close method to flush all data in buffer when closing
+	// So, a new Writer is born:
+	//
+	//     type Writer interface {
+	//	       Flusher
+	//	       io.WriteCloser
+	//     }
+	//
+	// In package writer, we provide some writers for you
+	writer.Wrapped(os.Stdout)  // Wrap io.Writer to writer.Writer
+	writer.Buffered(os.Stderr) // Wrap io.Writer to writer.Writer with buffer, which needs invoking Flush() or Close()
+
+	// Use them with options like appender
+	logger := logit.NewLogger(logit.Options().WithWriter(os.Stdout))
+	logger.Info("WithWriter").End()
+
+	// WithBuffered uses a Writer with buffer, which is good for io
+	logger = logit.NewLogger(logit.Options().WithBuffered(os.Stdout))
+	defer logger.Close() // Flush data and close writer
+
+	logger.Info("WithBuffered").End()
+	logger.Flush() // Remember flushing data or flushing by Close()
 }
