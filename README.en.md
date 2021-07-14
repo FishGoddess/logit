@@ -1,28 +1,26 @@
 # 📝 logit
 
-[![Go Doc](_icon/godoc.svg)](https://pkg.go.dev/github.com/FishGoddess/logit?tab=doc)
-[![License](_icon/license.svg)](https://www.apache.org/licenses/LICENSE-2.0.html)
-[![License](_icon/build.svg)](_icon/build.svg)
-[![License](_icon/coverage.svg)](_icon/coverage.svg)
+[![Go Doc](_icons/godoc.svg)](https://pkg.go.dev/github.com/FishGoddess/logit)
+[![License](_icons/license.svg)](https://www.apache.org/licenses/LICENSE-2.0.html)
+[![License](_icons/build.svg)](_icons/build.svg)
+[![License](_icons/coverage.svg)](_icons/coverage.svg)
 
-**logit** is a level-based and high-performance logger for [GoLang](https://golang.org) applications.
+**logit** is a level-based and high-performance structured logger for [GoLang](https://golang.org) applications.
+
+> After reading some amazing logging lib, I found that logit is just a joke, especially comparing with zerolog, so I decided to redesign logit.
 
 [阅读中文版的 Read me](./README.md)
 
-[Introduction Video on BiliBili](https://www.bilibili.com/video/BV14t4y1y7rF)
+~~[Introduction Video on BiliBili](https://www.bilibili.com/video/BV14t4y1y7rF)~~
 
 ### 🥇 Features
 
-* Modularization design, easy to extend your logger with encoders and writers
-* Level-based logging, and there are four levels to use
-* Enable or disable Logger, you can disable or switch to a higher level in your production environment
-* Log file supports, and you can customer the name of your log file
-* Time rolling supports, such as one day one log file
-* File size rolling supports, such as one 64 MB one log file
-* Count rolling supports, such as 1000 logging operations one log file
-* High-performance supports, by avoiding to call runtime.Caller
-* Time format supports, you can format time in your way
-* Log as Json string supports, by using provided JsonLoggerHandler
+* Modularization design, easy to extend your logger with appender and writer
+* Level-based logging, and there are five levels to use: debug, info, warn, error, off
+* Key-Value structured log supports, also supporting format
+* Support logging as Text/Json string, by using provided appender
+* Asynchronous write back supports, providing high-performance buffered writer to avoid IO accessing
+* Provide global optimized settings, let some settings feet your business
 
 _Check [HISTORY.md](./HISTORY.md) and [FUTURE.md](./FUTURE.md) to know about more information._
 
@@ -31,7 +29,7 @@ _Check [HISTORY.md](./HISTORY.md) and [FUTURE.md](./FUTURE.md) to know about mor
 ### 🚀 Installation
 
 ```bash
-$ go get github.com/FishGoddess/logit
+$ go get -u github.com/FishGoddess/logit
 ```
 
 ### 📖 Examples
@@ -47,85 +45,74 @@ import (
 
 func main() {
 
-	// There are four levels can be logged
-	logit.Debug("Hello, I am debug!") // Ignore because default level is info
-	logit.Info("Hello, I am info!")
-	logit.Warn("Hello, I am warn!")
-	logit.Error("Hello, I am error!")
+	// Create a new logger for use
+	// Default level is debug, so all logs will be logged
+	// Invoke Close() isn't necessary in all situations
+	// If logger's writer has buffer or something like that, it's better to invoke Close() for flushing buffer or something else
+	logger := logit.NewLogger()
+	//defer logger.Close()
 
-	// You can format log with some parameters if you want
-	logit.Debug("Hello, I am debug %d!", 2) // Ignore because default level is info
-	logit.Info("Hello, I am info %d!", 2)
-	logit.Warn("Hello, I am warn %d!", 2)
-	logit.Error("Hello, I am error %d!", 2)
+	// Then, you can log anything you want
+	// Remember, logs will be ignored if their level is smaller than logger's level
+	// End() will do some finishing work, so this invocation is necessary
+	logger.Debug("This is a debug message").End()
+	logger.Info("This is a info message").End()
+	logger.Warn("This is a warn message").End()
+	logger.Error("This is a error message").End()
+	logger.Error("This is a %s message, with format", "error").End() // Format with params
 
-	// logit.Me() returns a completed logger for use
+	// As you know, we provide some levels: debug, info, warn, error, off
+	// The lowest is debug and the highest is off
+	// If you want to change the level of your logger, do it at creating
+	logger = logit.NewLogger(logit.Options().WithWarnLevel())
+	logger.Debug("This is a debug message, but ignored").End()
+	logger.Info("This is a info message, but ignored").End()
+	logger.Warn("This is a warn message, not ignored").End()
+	logger.Error("This is a error message, not ignored").End()
 
-	// Set level to debug
-	logit.Me().SetLevel(logit.DebugLevel)
-
-	// Log won't carry caller information in default
-	// So, try SetNeedCaller if you need
-	logit.Me().SetNeedCaller(true)
-	logit.Info("I need caller!")
-
-	// Set encoder and writer
-	// Actually, every level has own encoder and writer
-	// This way will set encoder and writer of all levels to the same one
-	logit.Me().Encoders().SetEncoder(logit.NewJsonEncoder("2006-01-02 15:04:05"))
-	logit.Me().Writers().SetWriter(os.Stdout)
-
-	// We also provide some functions to set encoder and writer of each level
-	logit.Me().Encoders().SetDebugEncoder(logit.NewJsonEncoder("2006-01-02 15:04:05"))
-	logit.Me().Encoders().SetInfoEncoder(logit.NewJsonEncoder("2006-01-02 15:04:05"))
-	logit.Me().Encoders().SetWarnEncoder(logit.NewJsonEncoder("2006-01-02 15:04:05"))
-	logit.Me().Encoders().SetErrorEncoder(logit.NewJsonEncoder("2006-01-02 15:04:05"))
-	logit.Me().Writers().SetDebugWriter(os.Stdout)
-	logit.Me().Writers().SetInfoWriter(os.Stdout)
-	logit.Me().Writers().SetWarnWriter(os.Stdout)
-	logit.Me().Writers().SetErrorWriter(os.Stdout)
+	// You may notice logit.Options() which returns an options list
+	// Here is some of them:
+	options := logit.Options()
+	options.WithCaller()                          // Let logs carry caller information
+	options.WithLevelKey("lvl")                   // Change logger's level key to "lvl"
+	options.WithWriter(os.Stderr)                 // Change logger's writer to os.Stderr
+	options.WithBuffered(os.Stderr)               // Change logger's writer to os.Stderr with buffer
+	options.WithTimeFormat("2006-01-02 15:04:05") // Change the format of time (Only the log's time will apply it)
 }
 ```
 
 * [basic](./_examples/basic.go)
-* [logger](./_examples/logger.go)
-* [encoder](./_examples/encoder.go)
+* [options](./_examples/options.go)
+* [appender](./_examples/appender.go)
 * [writer](./_examples/writer.go)
+* [global](./_examples/global.go)
 
-_Check more examples in [_examples](./_examples)._
+_All examples can be found in [_examples](./_examples)._
 
 ### 🔥 Benchmarks
 
 ```bash
-$ go test -v ./_examples/benchmarks_test.go -bench=. -benchtime=3s
+$ go test -v ./_examples/benchmarks_test.go -bench=. -benchtime=1s
 ```
 
 > Benchmark file：[_examples/benchmarks_test.go](./_examples/benchmarks_test.go)
 
 | test case(output to memory) | times ran (large is better) |  ns/op (small is better) | B/op | allocs/op |
 | -----------|--------|-------------|-------------|-------------|
-| **logit** | **3775916** | **&nbsp; 949 ns/op** | **&nbsp; 128 B/op** | **&nbsp; 4 allocs/op** |
-| zap | 1674750 | 2143 ns/op | &nbsp; 449 B/op | 16 allocs/op |
-| golog | 2223093 | 1619 ns/op | &nbsp; 713 B/op | 24 allocs/op |
-| logrus | &nbsp; 899808 | 3968 ns/op | 1634 B/op | 52 allocs/op |
+| **logit** | **856915** | **&nbsp; 1385 ns/op** | **&nbsp; &nbsp; &nbsp; 0 B/op** | **&nbsp; &nbsp; 0 allocs/op** |
+| zerolog | 922863 | &nbsp; 1244 ns/op | &nbsp; &nbsp; &nbsp; 0 B/op | &nbsp; &nbsp; 0 allocs/op |
+| zap | 413701 | &nbsp; 2824 ns/op | &nbsp; 897 B/op | &nbsp; &nbsp; 8 allocs/op |
+| logrus | 105238 | 11474 ns/op | 7411 B/op | 128 allocs/op |
 
 | test case(output to file) | times ran (large is better) |  ns/op (small is better) | B/op | allocs/op |
 | -----------|--------|-------------|-------------|-------------|
-| **logit** | **3556720** | **&nbsp; 1009 ns/op** | **&nbsp; 129 B/op** | **&nbsp; 4 allocs/op** |
-| **logit-withoutBuffer** | **&nbsp; 499887** | **&nbsp; 7176 ns/op** | **&nbsp; 128 B/op** | **&nbsp; 4 allocs/op** |
-| zap | &nbsp; 409000 | &nbsp; 8580 ns/op | &nbsp; 449 B/op | 16 allocs/op |
-| golog | &nbsp; 257083 | 13884 ns/op | &nbsp; 713 B/op | 24 allocs/op |
-| logrus | &nbsp; 327198 | 10699 ns/op | 1634 B/op | 52 allocs/op |
+| **logit** | **599868** | **&nbsp; 1807 ns/op** | **&nbsp; 901 B/op** | **&nbsp; &nbsp; 0 allocs/op** |
+| **logit-notBuffer** | **149965** | **&nbsp; 7704 ns/op** | **&nbsp; &nbsp; &nbsp; 0 B/op** | **&nbsp; &nbsp; 0 allocs/op** |
+| zerolog | 159962 | &nbsp; 7472 ns/op | &nbsp; &nbsp; &nbsp; 0 B/op | &nbsp; &nbsp; 0 allocs/op |
+| zap | 130405 | &nbsp; 9137 ns/op | &nbsp; 897 B/op | &nbsp; &nbsp; 8 allocs/op |
+| logrus | &nbsp; 65202 | 18439 ns/op | 7410 B/op | 128 allocs/op |
 
 > Environment：R7-5800X CPU@3.8GHZ，32GB RAM，512GB SSD
-
-**Notice: You should know that format can't reach high performance as the same as others because of reflection,**
-**however, their performances are not as bad as we think:**
-
-| test case | times ran (large is better) |  ns/op (small is better) | B/op | allocs/op |
-| -----------|--------|-------------|-------------|-------------|
-| logit | 3775916 | &nbsp; 949 ns/op | 128 B/op | 4 allocs/op |
-| **logit-useFormatLog** | **2931703** | **1233 ns/op** | **168 B/op** | **8 allocs/op** |
 
 ### 👥 Contributing
 

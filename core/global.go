@@ -14,26 +14,16 @@
 //
 // Author: FishGoddess
 // Email: fishgoddess@qq.com
-// Created at 2021/07/11 14:03:28
+// Created at 2021/07/14 23:31:47
 
-package logit
+package core
 
-import "testing"
+var (
+	// LogMallocSize is the pre-malloc size of a new Log data.
+	// If your logs are extremely long, such as 4000 bytes, you can set it to 4096 to avoid re-malloc.
+	LogMallocSize = 512 // 512 Bytes
 
-// go test -v -cover -run=^TestLevelString$
-func TestLevelString(t *testing.T) {
-
-	levels := map[level]string{
-		debugLevel: "debug",
-		infoLevel:  "info",
-		warnLevel:  "warn",
-		errorLevel: "error",
-		offLevel:   "off",
-	}
-
-	for lvl, name := range levels {
-		if lvl.String() != name {
-			t.Fatalf("level's name %s is wrong", lvl.String())
-		}
-	}
-}
+	// WriterBufferedSize is the default size of buffered writer.
+	// If your logs are extremely long, such as 16KB, you can set it to 2048 to avoid re-malloc.
+	WriterBufferedSize = 16 * 1024 // 16 KB
+)

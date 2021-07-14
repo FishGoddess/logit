@@ -14,26 +14,6 @@
 //
 // Author: FishGoddess
 // Email: fishgoddess@qq.com
-// Created at 2021/07/11 14:03:28
+// Created at 2021/07/11 14:08:07
 
-package logit
-
-import "testing"
-
-// go test -v -cover -run=^TestLevelString$
-func TestLevelString(t *testing.T) {
-
-	levels := map[level]string{
-		debugLevel: "debug",
-		infoLevel:  "info",
-		warnLevel:  "warn",
-		errorLevel: "error",
-		offLevel:   "off",
-	}
-
-	for lvl, name := range levels {
-		if lvl.String() != name {
-			t.Fatalf("level's name %s is wrong", lvl.String())
-		}
-	}
-}
+package appender

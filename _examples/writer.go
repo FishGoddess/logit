@@ -1,4 +1,4 @@
-// Copyright 2020 Ye Zi Jie. All Rights Reserved.
+// Copyright 2021 Ye Zi Jie. All Rights Reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -14,52 +14,41 @@
 //
 // Author: FishGoddess
 // Email: fishgoddess@qq.com
-// Created at 2020/12/13 21:08:30
+// Created at 2021/07/11 23:33:04
 
 package main
 
 import (
 	"os"
-	"time"
 
 	"github.com/FishGoddess/logit"
+	"github.com/FishGoddess/logit/core/writer"
 )
 
 func main() {
 
-	// If you want to set output to another one, try SetWriter
-	// You should use Writers() to get all writers in logger and invoke SetWriter on it
-	// Any writer implemented io.Writer can be used here
-	logger := logit.NewLogger()
-	logger.Writers().SetWriter(os.Stdout)
-	logger.Info("SetWriter...")
+	// As you know, writer in logit is customized, not io.Writer
+	// The reason why we create a new Writer interface is we want a flushable writer
+	// Then, we notice a flushable writer also need a close method to flush all data in buffer when closing
+	// So, a new Writer is born:
+	//
+	//     type Writer interface {
+	//	       Flusher
+	//	       io.WriteCloser
+	//     }
+	//
+	// In package writer, we provide some writers for you
+	writer.Wrapped(os.Stdout)  // Wrap io.Writer to writer.Writer
+	writer.Buffered(os.Stderr) // Wrap io.Writer to writer.Writer with buffer, which needs invoking Flush() or Close()
 
-	// Also, all levels have its own writer
-	logger.Writers().SetDebugWriter(os.Stdout)
-	logger.Writers().SetInfoWriter(os.Stdout)
-	logger.Writers().SetWarnWriter(os.Stderr)
-	logger.Writers().SetErrorWriter(os.Stderr)
+	// Use them with options like appender
+	logger := logit.NewLogger(logit.Options().WithWriter(os.Stdout))
+	logger.Info("WithWriter").End()
 
-	// In fact, write logs to disk is expensive in time, so we provide a special writer for you
-	// This writer uses a buffer to reduce times of writing to disk, so it has a extremely-high performance
-	// Write logs to disk is just like write logs to memory after using this writer in our benchmark
-	// Amazing, right? Try logit.NewBufferedWriter immediately!
-	writer := logit.NewBufferedWriter(os.Stdout)
-	logger.Writers().SetWriter(writer)
-	logger.Info("NewBufferedWriter...")
-	writer.Flush() // Notice that Flush() should be invoked after finishing writing or you may miss some data
+	// WithBuffered uses a Writer with buffer, which is good for io
+	logger = logit.NewLogger(logit.Options().WithBuffered(os.Stdout))
+	defer logger.Close() // Flush data and close writer
 
-	// Of cause we provide a way to change the buffer size of it
-	writer = logit.NewBufferedWriter(os.Stdout)
-	logger.Writers().SetWriter(writer)
-	logger.Info("Oh! Faster! Faster!!! Yeah~~")
-	writer.Flush() // Notice that Flush() should be invoked after finishing writing or you may miss some data
-
-	// The buffered writer won't flush data automatically in default
-	// Does it puzzle you? Try AutoFlush() to get it if you want!
-	writer = logit.NewBufferedWriter(os.Stdout)
-	writer.AutoFlush(time.Second)
-	logger.Writers().SetWriter(writer)
-	logger.Info("AutoFlush...")
-	time.Sleep(2 * time.Second)
+	logger.Info("WithBuffered").End()
+	logger.Flush() // Remember flushing data or flushing by Close()
 }

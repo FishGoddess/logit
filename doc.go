@@ -1,4 +1,4 @@
-// Copyright 2020 Ye Zi Jie. All Rights Reserved.
+// Copyright 2021 Ye Zi Jie. All Rights Reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -19,143 +19,168 @@
 /*
 Package logit provides an easy way to use foundation for your logging operations.
 
-1. basic
+1. basic:
 
-	// There are four levels can be logged
-	logit.Debug("Hello, I am debug!") // Ignore because default level is info
-	logit.Info("Hello, I am info!")
-	logit.Warn("Hello, I am warn!")
-	logit.Error("Hello, I am error!")
-
-	// You can format log with some parameters if you want
-	logit.Debug("Hello, I am debug %d!", 2) // Ignore because default level is info
-	logit.Info("Hello, I am info %d!", 2)
-	logit.Warn("Hello, I am warn %d!", 2)
-	logit.Error("Hello, I am error %d!", 2)
-
-	// logit.Me() returns a completed logger for use
-
-	// Set level to debug
-	logit.Me().SetLevel(logit.DebugLevel)
-
-	// Log won't carry caller information in default
-	// So, try SetNeedCaller if you need
-	logit.Me().SetNeedCaller(true)
-	logit.Info("I need caller!")
-
-	// Set encoder and writer
-	// Actually, every level has own encoder and writer
-	// This way will set encoder and writer of all levels to the same one
-	logit.Me().Encoders().SetEncoder(logit.NewJsonEncoder("2006-01-02 15:04:05"))
-	logit.Me().Writers().SetWriter(os.Stdout)
-
-	// We also provide some functions to set encoder and writer of each level
-	logit.Me().Encoders().SetDebugEncoder(logit.NewJsonEncoder("2006-01-02 15:04:05"))
-	logit.Me().Encoders().SetInfoEncoder(logit.NewJsonEncoder("2006-01-02 15:04:05"))
-	logit.Me().Encoders().SetWarnEncoder(logit.NewJsonEncoder("2006-01-02 15:04:05"))
-	logit.Me().Encoders().SetErrorEncoder(logit.NewJsonEncoder("2006-01-02 15:04:05"))
-	logit.Me().Writers().SetDebugWriter(os.Stdout)
-	logit.Me().Writers().SetInfoWriter(os.Stdout)
-	logit.Me().Writers().SetWarnWriter(os.Stdout)
-	logit.Me().Writers().SetErrorWriter(os.Stdout)
-
-2. logger
-
-	// Create a new logger and set its level to debug
+	// Create a new logger for use
+	// Default level is debug, so all logs will be logged
+	// Invoke Close() isn't necessary in all situations
+	// If logger's writer has buffer or something like that, it's better to invoke Close() for flushing buffer or something else
 	logger := logit.NewLogger()
-	logger.SetLevel(logit.DebugLevel)
+	//defer logger.Close()
 
-	// Then, just use it like normal logger
-	logger.Debug("Hello, I am debug!")
-	logger.Info("Hello, I am info!")
-	logger.Warn("Hello, I am warn!")
-	logger.Error("Hello, I am error!")
+	// Then, you can log anything you want
+	// Remember, logs will be ignored if their level is smaller than logger's level
+	// End() will do some finishing work, so this invocation is necessary
+	logger.Debug("This is a debug message").End()
+	logger.Info("This is a info message").End()
+	logger.Warn("This is a warn message").End()
+	logger.Error("This is a error message").End()
+	logger.Error("This is a %s message, with format", "error").End() // Format with params
 
-	// Log won't carry caller information in default
-	// So, try SetNeedCaller if you need
-	logger.SetNeedCaller(true)
-	logger.Debug("Hello, I have caller information!")
+	// As you know, we provide some levels: debug, info, warn, error, off
+	// The lowest is debug and the highest is off
+	// If you want to change the level of your logger, do it at creating
+	logger = logit.NewLogger(logit.Options().WithWarnLevel())
+	logger.Debug("This is a debug message, but ignored").End()
+	logger.Info("This is a info message, but ignored").End()
+	logger.Warn("This is a warn message, not ignored").End()
+	logger.Error("This is a error message, not ignored").End()
 
-	// Set encoder and writer
-	// Actually, every level has own encoder and writer
-	// This way will set encoder and writer of all levels to the same one
-	logger.Encoders().SetEncoder(logit.NewJsonEncoder(logit.TimeFormat))
-	logger.Writers().SetErrorWriter(os.Stderr)
-	logger.Error("Oh, I am error!")
+	// You may notice logit.Options() which returns an options list
+	// Here is some of them:
+	options := logit.Options()
+	options.WithCaller()                          // Let logs carry caller information
+	options.WithLevelKey("lvl")                   // Change logger's level key to "lvl"
+	options.WithWriter(os.Stderr)                 // Change logger's writer to os.Stderr
+	options.WithBuffered(os.Stderr)               // Change logger's writer to os.Stderr with buffer
+	options.WithTimeFormat("2006-01-02 15:04:05") // Change the format of time (Only the log's time will apply it)
 
-	// More features can be discovered by API
+2. options:
 
-3. encoder
+	// We provide some options for you
+	options := logit.Options()
+	options.WithDebugLevel()
+	options.WithInfoLevel()
+	options.WithWarnLevel()
+	options.WithErrorLevel()
+	options.WithAppender(appender.Text())
+	options.WithWriter(os.Stderr)
+	options.WithBuffered(os.Stderr)
+	options.WithPid()
+	options.WithCaller()
+	options.WithMsgKey("msg")
+	options.WithTimeKey("time")
+	options.WithLevelKey("level")
+	options.WithPidKey("pid")
+	options.WithFileKey("file")
+	options.WithLineKey("line")
+	options.WithTimeFormat(appender.UnixTime) // UnixTime means time will be logged as unix time, an int64 number
 
-	// Use default encoder
-	logit.Info("Default encoder is like this...")
+	// Remember, these options is only used for creating a logger
+	logger := logit.NewLogger(
+		options.WithPid(),
+		options.WithBuffered(os.Stdout),
+		options.WithTimeFormat("2006/01/02 15:04:05"),
+		// ...
+	)
+	defer logger.Close()
+	logger.Info("check options").End()
 
-	// We provide some encoders, such as text and json
-	// Try TextEncoder and JsonEncoder
-	logit.Me().Encoders().SetEncoder(logit.NewTextEncoder("2006-01-02 15:04:05"))
-	logit.Me().Encoders().SetEncoder(logit.NewJsonEncoder("2006-01-02 15:04:05"))
+	// You can use many options at the same time, but some of them is exclusive
+	// So only the last one in order will take effect if you use them at the same time
+	logit.NewLogger(
+		options.WithDebugLevel(),
+		options.WithInfoLevel(),
+		options.WithWarnLevel(),
+		options.WithErrorLevel(), // The level of logger is error
+	)
 
-	// In fact, encoder is an interface like "func(log *logit.Log) []byte"
-	// So you can implement your own encoder as you want
-	// All information of log is stored in log
-	// No matter what you do, return a byte slice
-	// The returned slice will be written by logger
-	logit.Me().Encoders().SetEncoder(&MyEncoder{name: "whatever"})
-	logit.Info("My encoder...")
+	// You can customize an option for your logger
+	// Actually, Option is just a function like func(logger *Logger)
+	// So you can do what you want in creating a logger
+	autoFlushOption := func(logger *logit.Logger) {
+		go func() {
+			select {
+			case <-time.Tick(time.Second):
+				logger.Flush()
+			}
+		}()
+	}
+	logit.NewLogger(autoFlushOption)
 
-	// You can set encoder of each level, for example:
-	logit.Me().Encoders().SetErrorEncoder(logit.NewJsonEncoder(logit.TimeFormat))
-	logit.Error("Panic...")
+3. appender:
 
-	// If you have a logger, just use it as logit.Me()
+	// We provide some ways to change the form of logs
+	// Actually, appender is an interface with some common methods, see appender.Appender
+	appender.Text()
+	appender.Json()
+
+	// Set appender to the one you want to use when creating a logger
+	// Default appender is appender.Text()
 	logger := logit.NewLogger()
-	logger.Encoders().SetEncoder(logit.NewTextEncoder("2006-01-02 15:04:05"))
-	logger.Encoders().SetWarnEncoder(logit.NewJsonEncoder("2006-01-02 15:04:05"))
-	logger.Info("info...")
-	logger.Warn("warn...")
+	logger.Info("appender.Text()").End()
 
-4. writer
+	// You can switch appender to the other one, such appender.Json()
+	logger = logit.NewLogger(logit.Options().WithAppender(appender.Json()))
+	logger.Info("appender.Json()").End()
 
-	// If you want to set output to another one, try SetWriter
-	// You should use Writers() to get all writers in logger and invoke SetWriter on it
-	// Any writer implemented io.Writer can be used here
+	// Appender is an interface so you can implement your own appender
+	// However, we don't recommend you to do that
+	// This interface may change in every version, so you will pay lots of extra attention to it
+	// So you should implement it only if you really need to do
+
+4. writer:
+
+	// As you know, writer in logit is customized, not io.Writer
+	// The reason why we create a new Writer interface is we want a flushable writer
+	// Then, we notice a flushable writer also need a close method to flush all data in buffer when closing
+	// So, a new Writer is born:
+	//
+	//     type Writer interface {
+	//	       Flusher
+	//	       io.WriteCloser
+	//     }
+	//
+	// In package writer, we provide some writers for you
+	writer.Wrapped(os.Stdout)  // Wrap io.Writer to writer.Writer
+	writer.Buffered(os.Stderr) // Wrap io.Writer to writer.Writer with buffer, which needs invoking Flush() or Close()
+
+	// Use them with options like appender
+	logger := logit.NewLogger(logit.Options().WithWriter(os.Stdout))
+	logger.Info("WithWriter").End()
+
+	// WithBuffered uses a Writer with buffer, which is good for io
+	logger = logit.NewLogger(logit.Options().WithBuffered(os.Stdout))
+	defer logger.Close() // Flush data and close writer
+
+	logger.Info("WithBuffered").End()
+	logger.Flush() // Remember flushing data or flushing by Close()
+
+5. global:
+
+	// There are some global settings for optimizations, and you can set all of them in need
+	//
+	//     import "github.com/FishGoddess/logit/core"
+	//
+	// All global settings are stored in package core
+
+	// 1. LogMallocSize (The pre-malloc size of a new Log data)
+	// If your logs are extremely long, such as 4000 bytes, you can set it to 4096 to avoid re-malloc.
+	core.LogMallocSize = 4096 // 4096 Bytes
+
+	// 2. WriterBufferedSize (The default size of buffered writer)
+	// If your logs are extremely long, such as 16KB, you can set it to 2048 to avoid re-malloc.
+	core.WriterBufferedSize = 32 * writer.KB
+
+	// After setting global settings, just use Logger as normal
 	logger := logit.NewLogger()
-	logger.Writers().SetWriter(os.Stdout)
-	logger.Info("SetWriter...")
+	defer logger.Close()
 
-	// Also, all levels have its own writer
-	logger.Writers().SetDebugWriter(os.Stdout)
-	logger.Writers().SetInfoWriter(os.Stdout)
-	logger.Writers().SetWarnWriter(os.Stderr)
-	logger.Writers().SetErrorWriter(os.Stderr)
-
-	// In fact, write logs to disk is expensive in time, so we provide a special writer for you
-	// This writer uses a buffer to reduce times of writing to disk, so it has a extremely-high performance
-	// Write logs to disk is just like write logs to memory after using this writer in our benchmark
-	// Amazing, right? Try logit.NewBufferedWriter immediately!
-	writer := logit.NewBufferedWriter(os.Stdout)
-	logger.Writers().SetWriter(writer)
-	logger.Info("NewBufferedWriter...")
-	writer.Flush() // Notice that Flush() should be invoked after finishing writing or you may miss some data
-
-	// Of cause we provide a way to change the buffer size of it
-	writer = logit.NewBufferedWriter(os.Stdout)
-	logger.Writers().SetWriter(writer)
-	logger.Info("Oh! Faster! Faster!!! Yeah~~")
-	writer.Flush() // Notice that Flush() should be invoked after finishing writing or you may miss some data
-
-	// The buffered writer won't flush data automatically in default
-	// Does it puzzle you? Try AutoFlush() to get it if you want!
-	writer = logit.NewBufferedWriter(os.Stdout)
-	writer.AutoFlush(time.Second)
-	logger.Writers().SetWriter(writer)
-	logger.Info("AutoFlush...")
-	time.Sleep(2 * time.Second)
-
+	logger.Info("set global settings").Int("LogMallocSize", core.LogMallocSize).Int("WriterBufferedSize", core.WriterBufferedSize).End()
 */
 package logit // import "github.com/FishGoddess/logit"
 
 const (
 	// Version is the version string representation of logit.
-	Version = "v0.4.0-alpha"
+	Version = "v0.4.1-alpha"
 )

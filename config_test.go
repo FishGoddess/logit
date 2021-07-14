@@ -1,4 +1,4 @@
-// Copyright 2020 Ye Zi Jie. All Rights Reserved.
+// Copyright 2021 Ye Zi Jie. All Rights Reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -14,26 +14,30 @@
 //
 // Author: FishGoddess
 // Email: fishgoddess@qq.com
-// Created at 2021/06/06 15:51:29
+// Created at 2021/07/11 14:02:38
 
 package logit
 
-import (
-	"os"
-	"testing"
-)
+import "testing"
 
-// go test -v -cover -run=^TestCore$
-func TestCore(t *testing.T) {
+// go test -v -cover -run=^TestNewDefaultConfig$
+func TestNewDefaultConfig(t *testing.T) {
 
-	c := newCore(NewTextEncoder(TimeFormat), os.Stdout)
-	c.SetLevel(WarnLevel)
-	if c.Level() != WarnLevel {
-		t.Fatalf("level %+v of core is wrong", c.Level())
+	defaultConfig := newDefaultConfig()
+	cfg := &config{
+		level:      debugLevel,
+		needPid:    false,
+		needCaller: false,
+		msgKey:     "log.msg",
+		timeKey:    "log.time",
+		levelKey:   "log.level",
+		pidKey:     "log.pid",
+		fileKey:    "log.file",
+		lineKey:    "log.line",
+		timeFormat: "2006-01-02 15:04:05",
 	}
 
-	c.SetNeedCaller(true)
-	if c.NeedCaller() != true {
-		t.Fatalf("needCaller %+v of core is wrong", c.NeedCaller())
+	if *defaultConfig != *cfg {
+		t.Fatalf("default config %+v is wrong", defaultConfig)
 	}
 }

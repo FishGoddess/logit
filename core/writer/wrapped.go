@@ -14,26 +14,34 @@
 //
 // Author: FishGoddess
 // Email: fishgoddess@qq.com
-// Created at 2021/07/11 14:03:28
+// Created at 2021/07/11 13:55:35
 
-package logit
+package writer
 
-import "testing"
+import "io"
 
-// go test -v -cover -run=^TestLevelString$
-func TestLevelString(t *testing.T) {
+type wrappedWriter struct {
+	writer io.Writer
+}
 
-	levels := map[level]string{
-		debugLevel: "debug",
-		infoLevel:  "info",
-		warnLevel:  "warn",
-		errorLevel: "error",
-		offLevel:   "off",
+func newWrappedWriter(writer io.Writer) *wrappedWriter {
+	return &wrappedWriter{writer: writer}
+}
+
+func (ww *wrappedWriter) Flush() (n int, err error) {
+	if flusher, ok := ww.writer.(Flusher); ok {
+		return flusher.Flush()
 	}
+	return 0, nil
+}
 
-	for lvl, name := range levels {
-		if lvl.String() != name {
-			t.Fatalf("level's name %s is wrong", lvl.String())
-		}
+func (ww *wrappedWriter) Write(p []byte) (n int, err error) {
+	return ww.writer.Write(p)
+}
+
+func (ww *wrappedWriter) Close() error {
+	if closer, ok := ww.writer.(io.Closer); ok {
+		return closer.Close()
 	}
+	return nil
 }

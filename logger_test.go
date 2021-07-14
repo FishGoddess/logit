@@ -1,4 +1,4 @@
-// Copyright 2020 Ye Zi Jie. All Rights Reserved.
+// Copyright 2021 Ye Zi Jie. All Rights Reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -14,183 +14,54 @@
 //
 // Author: FishGoddess
 // Email: fishgoddess@qq.com
-// Created at 2020/02/29 16:41:41
+// Created at 2021/06/27 16:41:20
 
 package logit
 
 import (
 	"bytes"
-	"fmt"
+	"errors"
 	"testing"
+
+	"github.com/FishGoddess/logit/core/appender"
 )
 
-// go test -v -cover -run=^TestLoggerLevel$
-func TestLoggerLevel(t *testing.T) {
+// go test -v -cover -run=^TestNewLogger$
+func TestNewLogger(t *testing.T) {
 
-	logger := NewLogger()
+	options := Options()
+	buffer := bytes.NewBuffer(make([]byte, 0, 1024))
+	logger := NewLogger(
+		options.WithDebugLevel(),
+		options.WithAppender(appender.Json()),
+		options.WithWriter(buffer),
+		//options.WithPid(),
+		//options.WithCaller(),
+		//options.WithMsgKey("message"),
+		options.WithTimeKey(""),
+		//options.WithLevelKey("level"),
+		//options.WithPidKey("pid"),
+		//options.WithFileKey("file"),
+		//options.WithLineKey("line"),
+		//options.WithTimeFormat("060102"),
+	)
+	defer logger.Close()
 
-	if logger.Level() != logger.level.Load().(Level) {
-		t.Fatalf("level returned %v is wrong", logger.Level())
-	}
+	logger.Debug("debug...").String("trace", "xxx").Int("id", 123).Float64("pi", 3.14).Any("any", map[string]interface{}{"a": 1, "b": "bbb"}).End()
+	logger.Error("error...").Byte("b", 'a').Byte("es", '\n').Runes("words", []rune("我是中国人")).Error("err", errors.New("我是错误")).End()
+	logger.Error("error with %d...", 666).String("trace", "xxx").Int("id", 123).Float64("pi", 3.14).End()
+	logger.Warn("\"warn\"...\r\b\t\n").Strings("s\tb\nd\b", []string{"abc\r", "efg\n"}).End()
+	logger.Info("info...").Bools("bools", []bool{true, false}).Bytes("bytes", []byte{'\b', '\t', 'a', 'b', 'c', '"', '\n'}).Int16s("int16s", []int16{123, 4567, 8901}).Float32s("float32s", []float32{3.14, 6.18}).End()
 
-	logger.SetLevel(InfoLevel)
-	if logger.level.Load().(Level) != InfoLevel {
-		t.Fatalf("level set %+v is wrong", logger.level.Load().(Level))
-	}
-}
+	logs := `{"log.level":"debug","log.msg":"debug...","trace":"xxx","id":123,"pi":3.14,"any":{"a":1,"b":"bbb"}}
+{"log.level":"error","log.msg":"error...","b":"a","es":"\u000a","words":["我","是","中","国","人"],"err":"我是错误"}
+{"log.level":"error","log.msg":"error with 666...","trace":"xxx","id":123,"pi":3.14}
+{"log.level":"warn","log.msg":"\"warn\"...\u000d\u0008\u0009\u000a","s\u0009b\u000ad\u0008":["abc\u000d","efg\u000a"]}
+{"log.level":"info","log.msg":"info...","bools":[true,false],"bytes":["\u0008","\u0009","a","b","c","\"","\u000a"],"int16s":[123,4567,8901],"float32s":[3.140000104904175,6.179999828338623]}
+`
 
-// go test -v -cover -run=^TestLoggerNeedCaller$
-func TestLoggerNeedCaller(t *testing.T) {
-
-	logger := NewLogger()
-
-	logger.SetNeedCaller(true)
-	if logger.needCaller.Load().(bool) != true {
-		t.Fatalf("needCaller set %+v is wrong", logger.needCaller.Load().(bool))
-	}
-}
-
-type testLoggerSetEncoder struct{}
-
-func (testLoggerSetEncoder) Encode(log *Log) []byte { return []byte("TestLoggerSetEncoder") }
-
-// go test -v -cover -run=^TestLoggerSetEncoder$
-func TestLoggerSetEncoder(t *testing.T) {
-
-	logger := NewLogger()
-	logger.Encoders().SetEncoder(&testLoggerSetEncoder{})
-
-	encoders := logger.Encoders()
-	for level, _ := range levels {
-		encoded := string(encoders.of(level).Encode(nil))
-		if encoded != "TestLoggerSetEncoder" {
-			t.Fatalf("encoded %s of level %v is wrong", encoded, level)
-		}
-	}
-}
-
-type testLoggerSetByLevelEncoder struct{}
-
-func (testLoggerSetByLevelEncoder) Encode(log *Log) []byte { return []byte(log.level.String()) }
-
-// go test -v -cover -run=^TestLoggerSetEncoderByLevel$
-func TestLoggerSetEncoderByLevel(t *testing.T) {
-
-	logger := NewLogger()
-	logger.Encoders().SetDebugEncoder(&testLoggerSetByLevelEncoder{})
-	logger.Encoders().SetInfoEncoder(&testLoggerSetByLevelEncoder{})
-	logger.Encoders().SetWarnEncoder(&testLoggerSetByLevelEncoder{})
-	logger.Encoders().SetErrorEncoder(&testLoggerSetByLevelEncoder{})
-
-	encoders := logger.encoders
-	for level, _ := range levels {
-		encoded := string(encoders.of(level).Encode(&Log{level: level}))
-		if encoded != level.String() {
-			t.Fatalf("encoded %s of level %v is wrong", encoded, level)
-		}
-	}
-}
-
-// go test -v -cover -run=^TestLoggerSetWriter$
-func TestLoggerSetWriter(t *testing.T) {
-
-	logger := NewLogger()
-
-	buffer := bytes.NewBuffer(make([]byte, 0))
-	logger.Writers().SetWriter(buffer)
-
-	writers := logger.Writers()
-	for level, _ := range levels {
-		_, err := writers.of(level).Write([]byte("1"))
-		if err != nil {
-			t.Fatal(err)
-		}
-	}
-
-	s := buffer.String()
-	if s != "11111" {
-		t.Fatalf("write %s to buffer is wrong", s)
-	}
-}
-
-// go test -v -cover -run=^TestLoggerSetWriterByLevel$
-func TestLoggerSetWriterByLevel(t *testing.T) {
-
-	logger := NewLogger()
-
-	writers := map[Level]*bytes.Buffer{
-		DebugLevel: bytes.NewBuffer(make([]byte, 0)),
-		InfoLevel:  bytes.NewBuffer(make([]byte, 0)),
-		WarnLevel:  bytes.NewBuffer(make([]byte, 0)),
-		ErrorLevel: bytes.NewBuffer(make([]byte, 0)),
-	}
-
-	logger.Writers().SetDebugWriter(writers[DebugLevel])
-	logger.Writers().SetInfoWriter(writers[InfoLevel])
-	logger.Writers().SetWarnWriter(writers[WarnLevel])
-	logger.Writers().SetErrorWriter(writers[ErrorLevel])
-
-	for level, _ := range writers {
-		_, err := logger.Writers().of(level).Write([]byte(level.String()))
-		if err != nil {
-			t.Fatal(err)
-		}
-	}
-
-	for level, writer := range writers {
-		s := writer.String()
-		if s != level.String() {
-			t.Fatalf("write %s to buffer of level %v is wrong", s, level)
-		}
-	}
-}
-
-type testLoggerCoreEncoder struct{}
-
-func (testLoggerCoreEncoder) Encode(log *Log) []byte { return []byte(log.msg) }
-
-// go test -v -cover -run=^TestLoggerCore$
-func TestLoggerCore(t *testing.T) {
-
-	logger := NewLogger()
-	logger.SetLevel(DebugLevel)
-
-	buffer := bytes.NewBuffer(make([]byte, 0))
-	logger.Encoders().SetEncoder(&testLoggerCoreEncoder{})
-	logger.Writers().SetWriter(buffer)
-
-	logger.Debug(DebugLevel.String())
-	logger.Info(InfoLevel.String())
-	logger.Warn(WarnLevel.String())
-	logger.Error(ErrorLevel.String())
-
-	s := buffer.String()
-	if s != DebugLevel.String()+InfoLevel.String()+WarnLevel.String()+ErrorLevel.String() {
-		t.Fatalf("core log %s is wrong", s)
-	}
-}
-
-type testLoggerCoreParamsEncoder struct{}
-
-func (testLoggerCoreParamsEncoder) Encode(log *Log) []byte { return []byte(log.msg) }
-
-// go test -v -cover -run=^TestLoggerCoreParams$
-func TestLoggerCoreParams(t *testing.T) {
-
-	logger := NewLogger()
-	logger.SetLevel(DebugLevel)
-
-	buffer := bytes.NewBuffer(make([]byte, 0))
-	logger.Encoders().SetEncoder(&testLoggerCoreParamsEncoder{})
-	logger.Writers().SetWriter(buffer)
-
-	logger.Debug("%sF", DebugLevel.String())
-	logger.Info("%sF", InfoLevel.String())
-	logger.Warn("%sF", WarnLevel.String())
-	logger.Error("%sF", ErrorLevel.String())
-
-	s := buffer.String()
-	if s != fmt.Sprintf("%sF%sF%sF%sF", DebugLevel.String(), InfoLevel.String(), WarnLevel.String(), ErrorLevel.String()) {
-		t.Fatalf("coreParams log %s is wrong", s)
+	output := buffer.String()
+	if output != logs {
+		t.Fatalf("logs %s is wrong with %s", output, logs)
 	}
 }

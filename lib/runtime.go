@@ -14,26 +14,29 @@
 //
 // Author: FishGoddess
 // Email: fishgoddess@qq.com
-// Created at 2021/07/11 14:03:28
+// Created at 2021/07/02 02:03:45
 
-package logit
+package lib
 
-import "testing"
+import (
+	"os"
+	"runtime"
+)
 
-// go test -v -cover -run=^TestLevelString$
-func TestLevelString(t *testing.T) {
+var (
+	pid = os.Getpid()
+)
 
-	levels := map[level]string{
-		debugLevel: "debug",
-		infoLevel:  "info",
-		warnLevel:  "warn",
-		errorLevel: "error",
-		offLevel:   "off",
+func Pid() int {
+	return pid
+}
+
+func Caller(depth int) (file string, line int) {
+
+	var ok bool
+	_, file, line, ok = runtime.Caller(depth)
+	if ok {
+		return file, line
 	}
-
-	for lvl, name := range levels {
-		if lvl.String() != name {
-			t.Fatalf("level's name %s is wrong", lvl.String())
-		}
-	}
+	return "unknown file", -1
 }

@@ -1,4 +1,4 @@
-// Copyright 2020 Ye Zi Jie. All Rights Reserved.
+// Copyright 2021 Ye Zi Jie. All Rights Reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -14,128 +14,146 @@
 //
 // Author: FishGoddess
 // Email: fishgoddess@qq.com
-// Created at 2020/02/29 15:39:02
+// Created at 2021/06/27 16:40:31
 
 package logit
 
 import (
 	"fmt"
+	"io"
 	"os"
-	"runtime"
 	"sync"
 	"time"
+
+	"github.com/FishGoddess/logit/core/appender"
+	"github.com/FishGoddess/logit/core/writer"
+	"github.com/FishGoddess/logit/lib"
 )
 
-const (
-	// callerDepth is the depth of calling stack, which is about file name and line number.
-	callerDepth = 3
-
-	// TimeFormat is the format of time.
-	TimeFormat = "2006-01-02 15:04:05"
-)
-
-// Logger is the type of logging output.
+// Logger is the core of logging operations.
 type Logger struct {
-
-	// core is the core of this logger.
-	// Some settings are set in this core, such as level of logger and need caller or not.
-	*core
-
-	// logs is a log pool caching some log instances.
-	// It is for reducing memory allocation.
-	logs *sync.Pool
-
-	// lock is for safe concurrency.
-	lock *sync.RWMutex
+	*config
+	appender appender.Appender
+	writer   writer.Writer
+	logPool  *sync.Pool
 }
 
-// NewLogger returns a new logger instance with default settings.
-func NewLogger() *Logger {
+// NewLogger returns a new Logger created with options.
+func NewLogger(options ...Option) *Logger {
 
-	c := newCore(NewTextEncoder(TimeFormat), os.Stdout)
-	c.SetLevel(InfoLevel)
-	c.SetNeedCaller(false)
-	c.Writers().SetErrorWriter(os.Stderr)
-	return &Logger{
-		core: c,
-		logs: &sync.Pool{
-			New: func() interface{} {
-				return newLog()
-			},
+	logger := new(Logger)
+	logger.config = newDefaultConfig()
+	logger.appender = appender.Text()
+	logger.writer = writer.Wrapped(os.Stdout)
+	logger.logPool = &sync.Pool{
+		New: func() interface{} {
+			return newLog(logger)
 		},
-		lock: &sync.RWMutex{},
 	}
+
+	for _, applyOption := range options {
+		applyOption(logger)
+	}
+	return logger
 }
 
-// newLog returns a Log holder from object pool.
-// Notice that not every holder returned is new, as you know, that is why we use a pool.
-func (l *Logger) newLog(level Level, msg string) *Log {
-	log := l.logs.Get().(*Log)
-	log.level = level
-	log.msg = msg
-	log.time = time.Now()
-	return log
+// getLog returns a Log instance from pool.
+// This is a better way to memory.
+func (l *Logger) getLog() *Log {
+	return l.logPool.Get().(*Log)
 }
 
-// releaseLog releases log to object pool so that this log can be reused next time.
+// releaseLog releases a Log instance to pool.
 func (l *Logger) releaseLog(log *Log) {
-	log.reset()
-	l.logs.Put(log)
+	l.logPool.Put(log)
 }
 
-// wrapLogWithCaller wraps log with caller.
-// This function is too expensive because of runtime.Caller.
-// Notice that callerDepth is the depth of calling stack. See callerDepth.
-func wrapLogWithCaller(log *Log, callerDepth int) {
-	if _, file, line, ok := runtime.Caller(callerDepth); ok {
-		log.setCaller(file, line)
+// log returns a Log instance with level and msg.
+// Check Log for more information.
+func (l *Logger) log(level level, msg string, params ...interface{}) *Log {
+
+	if level < l.level {
+		return nil
 	}
-}
 
-// handleLog handles log with encoders and writers.
-func (l *Logger) handleLog(log *Log) {
-	encoder := l.Encoders().of(log.level)
-	writer := l.Writers().of(log.level)
-	writer.Write(encoder.Encode(log))
-}
+	log := l.getLog().begin()
+	if l.timeKey != "" {
+		log.Time(l.timeKey, time.Now(), l.timeFormat)
+	}
 
-// log handles msg by l.handlers, and level will affect the visibility of this msg.
-// Notice that callerDepth is caller sensitive.
-func (l *Logger) log(callerDepth int, level Level, msg string, params ...interface{}) {
+	if l.levelKey != "" {
+		log.String(l.levelKey, level.String())
+	}
 
-	if l.Level() > level {
-		return
+	if l.needPid && l.pidKey != "" {
+		log.Int(l.pidKey, lib.Pid())
+	}
+
+	if l.needCaller && l.fileKey != "" && l.lineKey != "" {
+		file, line := lib.Caller(3)
+		log.String(l.fileKey, file).Int(l.lineKey, line)
 	}
 
 	if len(params) > 0 {
 		msg = fmt.Sprintf(msg, params...)
 	}
+	log.String(l.msgKey, msg)
+	return log
+}
 
-	log := l.newLog(level, msg)
-	defer l.releaseLog(log)
+// Debug returns a Log with debug level if debug level is enabled.
+func (l *Logger) Debug(msg string, params ...interface{}) *Log {
+	return l.log(debugLevel, msg, params...)
+}
 
-	if l.NeedCaller() {
-		wrapLogWithCaller(log, callerDepth)
+// Info returns a Log with info level if info level is enabled.
+func (l *Logger) Info(msg string, params ...interface{}) *Log {
+	return l.log(infoLevel, msg, params...)
+}
+
+// Warn returns a Log with warn level if warn level is enabled.
+func (l *Logger) Warn(msg string, params ...interface{}) *Log {
+	return l.log(warnLevel, msg, params...)
+}
+
+// Error returns a Log with error level if error level is enabled.
+func (l *Logger) Error(msg string, params ...interface{}) *Log {
+	return l.log(errorLevel, msg, params...)
+}
+
+// Flush flushes data storing in logger's writer.
+// This isn't necessary for all writers, but buffered writer needs.
+// Actually, you can use an option to flush automatically, see options.
+// Close a logger will also invoke Flush(), so you can use an option or Close() to flush instead.
+// However, you still need to flush manually if you want your logs store immediately.
+func (l *Logger) Flush() (n int, err error) {
+	if flusher, ok := l.writer.(writer.Flusher); ok {
+		return flusher.Flush()
 	}
-	l.handleLog(log)
+	return 0, nil
 }
 
-// Debug will output msg as a debug message.
-func (l *Logger) Debug(msg string, params ...interface{}) {
-	l.log(callerDepth, DebugLevel, msg, params...)
-}
+// Close closes logger and releases resources.
+// It will flush data and set level to offLevel.
+// It will invoke close() if writer is io.Closer.
+// So, it is recommended for you to invoke it habitually.
+func (l *Logger) Close() error {
 
-// Info will output msg as an info message.
-func (l *Logger) Info(msg string, params ...interface{}) {
-	l.log(callerDepth, InfoLevel, msg, params...)
-}
+	_, err := l.Flush()
+	if err != nil {
+		return err
+	}
 
-// Warn will output msg as a warn message.
-func (l *Logger) Warn(msg string, params ...interface{}) {
-	l.log(callerDepth, WarnLevel, msg, params...)
-}
+	closer, ok := l.writer.(io.Closer)
+	if !ok {
+		return nil
+	}
 
-// Error will output msg as an error message.
-func (l *Logger) Error(msg string, params ...interface{}) {
-	l.log(callerDepth, ErrorLevel, msg, params...)
+	err = closer.Close()
+	if err != nil {
+		return err
+	}
+
+	l.level = offLevel
+	return nil
 }

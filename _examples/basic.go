@@ -1,4 +1,4 @@
-// Copyright 2020 Ye Zi Jie. All Rights Reserved.
+// Copyright 2021 Ye Zi Jie. All Rights Reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
 //
 // Author: FishGoddess
 // Email: fishgoddess@qq.com
-// Created at 2020/11/27 23:39:30
+// Created at 2021/07/11 22:53:20
 
 package main
 
@@ -26,41 +26,37 @@ import (
 
 func main() {
 
-	// There are four levels can be logged
-	logit.Debug("Hello, I am debug!") // Ignore because default level is info
-	logit.Info("Hello, I am info!")
-	logit.Warn("Hello, I am warn!")
-	logit.Error("Hello, I am error!")
+	// Create a new logger for use
+	// Default level is debug, so all logs will be logged
+	// Invoke Close() isn't necessary in all situations
+	// If logger's writer has buffer or something like that, it's better to invoke Close() for flushing buffer or something else
+	logger := logit.NewLogger()
+	//defer logger.Close()
 
-	// You can format log with some parameters if you want
-	logit.Debug("Hello, I am debug %d!", 2) // Ignore because default level is info
-	logit.Info("Hello, I am info %d!", 2)
-	logit.Warn("Hello, I am warn %d!", 2)
-	logit.Error("Hello, I am error %d!", 2)
+	// Then, you can log anything you want
+	// Remember, logs will be ignored if their level is smaller than logger's level
+	// End() will do some finishing work, so this invocation is necessary
+	logger.Debug("This is a debug message").End()
+	logger.Info("This is a info message").End()
+	logger.Warn("This is a warn message").End()
+	logger.Error("This is a error message").End()
+	logger.Error("This is a %s message, with format", "error").End() // Format with params
 
-	// logit.Me() returns a completed logger for use
+	// As you know, we provide some levels: debug, info, warn, error, off
+	// The lowest is debug and the highest is off
+	// If you want to change the level of your logger, do it at creating
+	logger = logit.NewLogger(logit.Options().WithWarnLevel())
+	logger.Debug("This is a debug message, but ignored").End()
+	logger.Info("This is a info message, but ignored").End()
+	logger.Warn("This is a warn message, not ignored").End()
+	logger.Error("This is a error message, not ignored").End()
 
-	// Set level to debug
-	logit.Me().SetLevel(logit.DebugLevel)
-
-	// Log won't carry caller information in default
-	// So, try SetNeedCaller if you need
-	logit.Me().SetNeedCaller(true)
-	logit.Info("I need caller!")
-
-	// Set encoder and writer
-	// Actually, every level has own encoder and writer
-	// This way will set encoder and writer of all levels to the same one
-	logit.Me().Encoders().SetEncoder(logit.NewJsonEncoder("2006-01-02 15:04:05"))
-	logit.Me().Writers().SetWriter(os.Stdout)
-
-	// We also provide some functions to set encoder and writer of each level
-	logit.Me().Encoders().SetDebugEncoder(logit.NewJsonEncoder("2006-01-02 15:04:05"))
-	logit.Me().Encoders().SetInfoEncoder(logit.NewJsonEncoder("2006-01-02 15:04:05"))
-	logit.Me().Encoders().SetWarnEncoder(logit.NewJsonEncoder("2006-01-02 15:04:05"))
-	logit.Me().Encoders().SetErrorEncoder(logit.NewJsonEncoder("2006-01-02 15:04:05"))
-	logit.Me().Writers().SetDebugWriter(os.Stdout)
-	logit.Me().Writers().SetInfoWriter(os.Stdout)
-	logit.Me().Writers().SetWarnWriter(os.Stdout)
-	logit.Me().Writers().SetErrorWriter(os.Stdout)
+	// You may notice logit.Options() which returns an options list
+	// Here is some of them:
+	options := logit.Options()
+	options.WithCaller()                          // Let logs carry caller information
+	options.WithLevelKey("lvl")                   // Change logger's level key to "lvl"
+	options.WithWriter(os.Stderr)                 // Change logger's writer to os.Stderr
+	options.WithBuffered(os.Stderr)               // Change logger's writer to os.Stderr with buffer
+	options.WithTimeFormat("2006-01-02 15:04:05") // Change the format of time (Only the log's time will apply it)
 }

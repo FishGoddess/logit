@@ -14,26 +14,40 @@
 //
 // Author: FishGoddess
 // Email: fishgoddess@qq.com
-// Created at 2021/07/11 14:03:28
+// Created at 2021/07/13 23:35:26
 
-package logit
+package lib
 
-import "testing"
+import (
+	"os"
+	"runtime"
+	"testing"
+)
 
-// go test -v -cover -run=^TestLevelString$
-func TestLevelString(t *testing.T) {
+// go test -v -cover -run=^TestPid$
+func TestPid(t *testing.T) {
 
-	levels := map[level]string{
-		debugLevel: "debug",
-		infoLevel:  "info",
-		warnLevel:  "warn",
-		errorLevel: "error",
-		offLevel:   "off",
+	pid := Pid()
+	osPid := os.Getpid()
+	if pid != osPid {
+		t.Fatalf("pid %d is wrong with %d", pid, osPid)
+	}
+}
+
+// go test -v -cover -run=^TestCaller$
+func TestCaller(t *testing.T) {
+
+	_, f, l, ok := runtime.Caller(0)
+	if !ok {
+		t.Fatalf("runtime.Caller failed")
 	}
 
-	for lvl, name := range levels {
-		if lvl.String() != name {
-			t.Fatalf("level's name %s is wrong", lvl.String())
-		}
+	file, line := Caller(1)
+	if file != f {
+		t.Fatalf("Caller returns wrong file %s", file)
+	}
+
+	if line != l+5 {
+		t.Fatalf("Caller returns wrong line %d", line)
 	}
 }
