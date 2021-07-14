@@ -155,10 +155,32 @@ Package logit provides an easy way to use foundation for your logging operations
 
 	logger.Info("WithBuffered").End()
 	logger.Flush() // Remember flushing data or flushing by Close()
+
+5. global:
+
+	// There are some global settings for optimizations, and you can set all of them in need
+	//
+	//     import "github.com/FishGoddess/logit/core"
+	//
+	// All global settings are stored in package core
+
+	// 1. LogMallocSize (The pre-malloc size of a new Log data)
+	// If your logs are extremely long, such as 4000 bytes, you can set it to 4096 to avoid re-malloc.
+	core.LogMallocSize = 4096 // 4096 Bytes
+
+	// 2. WriterBufferedSize (The default size of buffered writer)
+	// If your logs are extremely long, such as 16KB, you can set it to 2048 to avoid re-malloc.
+	core.WriterBufferedSize = 32 * writer.KB
+
+	// After setting global settings, just use Logger as normal
+	logger := logit.NewLogger()
+	defer logger.Close()
+
+	logger.Info("set global settings").Int("LogMallocSize", core.LogMallocSize).Int("WriterBufferedSize", core.WriterBufferedSize).End()
 */
 package logit // import "github.com/FishGoddess/logit"
 
 const (
 	// Version is the version string representation of logit.
-	Version = "v0.4.2-alpha"
+	Version = "v0.4.1-alpha"
 )

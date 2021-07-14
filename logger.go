@@ -30,6 +30,7 @@ import (
 	"github.com/FishGoddess/logit/lib"
 )
 
+// Logger is the core of logging operations.
 type Logger struct {
 	*config
 	appender appender.Appender
@@ -37,6 +38,7 @@ type Logger struct {
 	logPool  *sync.Pool
 }
 
+// NewLogger returns a new Logger created with options.
 func NewLogger(options ...Option) *Logger {
 
 	logger := new(Logger)
@@ -55,14 +57,19 @@ func NewLogger(options ...Option) *Logger {
 	return logger
 }
 
+// getLog returns a Log instance from pool.
+// This is a better way to memory.
 func (l *Logger) getLog() *Log {
 	return l.logPool.Get().(*Log)
 }
 
+// releaseLog releases a Log instance to pool.
 func (l *Logger) releaseLog(log *Log) {
 	l.logPool.Put(log)
 }
 
+// log returns a Log instance with level and msg.
+// Check Log for more information.
 func (l *Logger) log(level level, msg string, params ...interface{}) *Log {
 
 	if level < l.level {
@@ -94,22 +101,31 @@ func (l *Logger) log(level level, msg string, params ...interface{}) *Log {
 	return log
 }
 
+// Debug returns a Log with debug level if debug level is enabled.
 func (l *Logger) Debug(msg string, params ...interface{}) *Log {
 	return l.log(debugLevel, msg, params...)
 }
 
+// Info returns a Log with info level if info level is enabled.
 func (l *Logger) Info(msg string, params ...interface{}) *Log {
 	return l.log(infoLevel, msg, params...)
 }
 
+// Warn returns a Log with warn level if warn level is enabled.
 func (l *Logger) Warn(msg string, params ...interface{}) *Log {
 	return l.log(warnLevel, msg, params...)
 }
 
+// Error returns a Log with error level if error level is enabled.
 func (l *Logger) Error(msg string, params ...interface{}) *Log {
 	return l.log(errorLevel, msg, params...)
 }
 
+// Flush flushes data storing in logger's writer.
+// This isn't necessary for all writers, but buffered writer needs.
+// Actually, you can use an option to flush automatically, see options.
+// Close a logger will also invoke Flush(), so you can use an option or Close() to flush instead.
+// However, you still need to flush manually if you want your logs store immediately.
 func (l *Logger) Flush() (n int, err error) {
 	if flusher, ok := l.writer.(writer.Flusher); ok {
 		return flusher.Flush()
@@ -117,11 +133,27 @@ func (l *Logger) Flush() (n int, err error) {
 	return 0, nil
 }
 
+// Close closes logger and releases resources.
+// It will flush data and set level to offLevel.
+// It will invoke close() if writer is io.Closer.
+// So, it is recommended for you to invoke it habitually.
 func (l *Logger) Close() error {
-	l.Flush()
-	l.level = offLevel
-	if closer, ok := l.writer.(io.Closer); ok {
-		return closer.Close()
+
+	_, err := l.Flush()
+	if err != nil {
+		return err
 	}
+
+	closer, ok := l.writer.(io.Closer)
+	if !ok {
+		return nil
+	}
+
+	err = closer.Close()
+	if err != nil {
+		return err
+	}
+
+	l.level = offLevel
 	return nil
 }

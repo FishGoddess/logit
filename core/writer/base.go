@@ -18,13 +18,15 @@
 
 package writer
 
-import "io"
+import (
+	"io"
+
+	"github.com/FishGoddess/logit/core"
+)
 
 const (
 	KB = 1024      // KB is the unit KB in size. 1 KB = 1024 Bytes.
 	MB = 1024 * KB // MB is the unit MB in size. 1 MB = 1024*1024 Bytes.
-
-	bufferSize = 16 * KB
 )
 
 type Flusher interface {
@@ -51,5 +53,5 @@ func BufferedWithSize(writer io.Writer, bufferSize int) Writer {
 }
 
 func Buffered(writer io.Writer) Writer {
-	return BufferedWithSize(writer, bufferSize)
+	return BufferedWithSize(writer, core.WriterBufferedSize)
 }

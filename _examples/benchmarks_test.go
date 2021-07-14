@@ -50,9 +50,9 @@ BenchmarkLogrusLogger-16                   105238             11474 ns/op       
 
 ******************************************************************************************************************
 
-BenchmarkLogitFileWithTextAppender-16     599870              1764 ns/op             900 B/op          0 allocs/op
+BenchmarkLogitFileWithTextAppender-16     631429              1816 ns/op             855 B/op          0 allocs/op
 
-BenchmarkLogitFileWithJsonAppender-16     521606              1927 ns/op            1036 B/op          0 allocs/op
+BenchmarkLogitFileWithJsonAppender-16     599868              1807 ns/op             901 B/op          0 allocs/op
 
 BenchmarkLogitFileWithoutBuffer-16        149965              7704 ns/op               0 B/op          0 allocs/op
 

@@ -5,26 +5,22 @@
 [![License](_icons/build.svg)](_icons/build.svg)
 [![License](_icons/coverage.svg)](_icons/coverage.svg)
 
-**logit** is a level-based and high-performance logger for [GoLang](https://golang.org) applications.
+**logit** is a level-based and high-performance structured logger for [GoLang](https://golang.org) applications.
 
 > After reading some amazing logging lib, I found that logit is just a joke, especially comparing with zerolog, so I decided to redesign logit.
 
 [阅读中文版的 Read me](./README.md)
 
-[Introduction Video on BiliBili](https://www.bilibili.com/video/BV14t4y1y7rF)
+~~[Introduction Video on BiliBili](https://www.bilibili.com/video/BV14t4y1y7rF)~~
 
 ### 🥇 Features
 
-* Modularization design, easy to extend your logger with encoders and writers
-* Level-based logging, and there are four levels to use
-* Enable or disable Logger, you can disable or switch to a higher level in your production environment
-* Log file supports, and you can customer the name of your log file
-* Time rolling supports, such as one day one log file
-* File size rolling supports, such as one 64 MB one log file
-* Count rolling supports, such as 1000 logging operations one log file
-* High-performance supports, by avoiding to call runtime.Caller
-* Time format supports, you can format time in your way
-* Log as Json string supports, by using provided JsonLoggerHandler
+* Modularization design, easy to extend your logger with appender and writer
+* Level-based logging, and there are five levels to use: debug, info, warn, error, off
+* Key-Value structured log supports, also supporting format
+* Support logging as Text/Json string, by using provided appender
+* Asynchronous write back supports, providing high-performance buffered writer to avoid IO accessing
+* Provide global optimized settings, let some settings feet your business
 
 _Check [HISTORY.md](./HISTORY.md) and [FUTURE.md](./FUTURE.md) to know about more information._
 
@@ -86,8 +82,12 @@ func main() {
 ```
 
 * [basic](./_examples/basic.go)
+* [options](./_examples/options.go)
+* [appender](./_examples/appender.go)
+* [writer](./_examples/writer.go)
+* [global](./_examples/global.go)
 
-_Check more examples in [_examples](./_examples)._
+_All examples can be found in [_examples](./_examples)._
 
 ### 🔥 Benchmarks
 
@@ -106,7 +106,7 @@ $ go test -v ./_examples/benchmarks_test.go -bench=. -benchtime=1s
 
 | test case(output to file) | times ran (large is better) |  ns/op (small is better) | B/op | allocs/op |
 | -----------|--------|-------------|-------------|-------------|
-| **logit** | **521606** | **&nbsp; 1927 ns/op** | **1036 B/op** | **&nbsp; &nbsp; 0 allocs/op** |
+| **logit** | **599868** | **&nbsp; 1807 ns/op** | **&nbsp; 901 B/op** | **&nbsp; &nbsp; 0 allocs/op** |
 | **logit-notBuffer** | **149965** | **&nbsp; 7704 ns/op** | **&nbsp; &nbsp; &nbsp; 0 B/op** | **&nbsp; &nbsp; 0 allocs/op** |
 | zerolog | 159962 | &nbsp; 7472 ns/op | &nbsp; &nbsp; &nbsp; 0 B/op | &nbsp; &nbsp; 0 allocs/op |
 | zap | 130405 | &nbsp; 9137 ns/op | &nbsp; 897 B/op | &nbsp; &nbsp; 8 allocs/op |

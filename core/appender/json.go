@@ -347,7 +347,10 @@ func (ja *jsonAppender) AppendErrors(dst []byte, key string, values []error) []b
 		if values[index] == nil {
 			return append(source, jsonNull...)
 		}
-		return ja.AppendString(source, key, values[index].Error())
+		source = append(source, jsonStringQuotation)
+		source = appendEscapedString(source, values[index].Error())
+		source = append(source, jsonStringQuotation)
+		return source
 	})
 }
 
@@ -357,6 +360,9 @@ func (ja *jsonAppender) AppendStringers(dst []byte, key string, values []fmt.Str
 		if val.Kind() == reflect.Ptr && val.IsNil() {
 			return append(source, jsonNull...)
 		}
-		return ja.AppendString(source, key, values[index].String())
+		source = append(source, jsonStringQuotation)
+		source = appendEscapedString(source, values[index].String())
+		source = append(source, jsonStringQuotation)
+		return source
 	})
 }
