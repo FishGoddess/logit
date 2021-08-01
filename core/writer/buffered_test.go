@@ -22,13 +22,15 @@ import (
 	"bytes"
 	"testing"
 	"time"
+
+	"github.com/FishGoddess/logit/core"
 )
 
 // go test -v -cover -run=^TestBufferedWriter$
 func TestBufferedWriter(t *testing.T) {
 
 	buffer := bytes.NewBuffer(make([]byte, 0, 4096))
-	writer := newBufferedWriter(buffer, bufferSize)
+	writer := newBufferedWriter(buffer, core.WriterBufferedSize)
 	writer.AutoFlush(time.Millisecond)
 	defer writer.Close()
 

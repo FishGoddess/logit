@@ -20,10 +20,10 @@ package core
 
 var (
 	// LogMallocSize is the pre-malloc size of a new Log data.
-	// If your logs are extremely long, such as 4000 bytes, you can set it to 4096 to avoid re-malloc.
+	// If your logs are extremely long, such as 4000 bytes/log, you can set it to 4096 to avoid re-malloc.
 	LogMallocSize = 512 // 512 Bytes
 
 	// WriterBufferedSize is the default size of buffered writer.
-	// If your logs are extremely long, such as 16KB, you can set it to 2048 to avoid re-malloc.
-	WriterBufferedSize = 16 * 1024 // 16 KB
+	// If your logs are extremely long, such as 4KB/log, you can set it to 512KB to avoid re-malloc.
+	WriterBufferedSize = 64 * 1024 // 64 KB
 )

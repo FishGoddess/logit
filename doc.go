@@ -46,6 +46,9 @@ Package logit provides an easy way to use foundation for your logging operations
 	logger.Warn("This is a warn message, not ignored").End()
 	logger.Error("This is a error message, not ignored").End()
 
+	// If you want to log with some fields, try this:
+	logger.Error("This is a structured message").Error("err", io.EOF).Int("trace", 123).End()
+
 	// You may notice logit.Options() which returns an options list
 	// Here is some of them:
 	options := logit.Options()
@@ -182,5 +185,5 @@ package logit // import "github.com/FishGoddess/logit"
 
 const (
 	// Version is the version string representation of logit.
-	Version = "v0.4.1-alpha"
+	Version = "v0.4.2-alpha"
 )

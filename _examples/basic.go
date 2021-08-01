@@ -19,6 +19,7 @@
 package main
 
 import (
+	"io"
 	"os"
 
 	"github.com/FishGoddess/logit"
@@ -50,6 +51,9 @@ func main() {
 	logger.Info("This is a info message, but ignored").End()
 	logger.Warn("This is a warn message, not ignored").End()
 	logger.Error("This is a error message, not ignored").End()
+
+	// If you want to log with some fields, try this:
+	logger.Error("This is a structured message").Error("err", io.EOF).Int("trace", 123).End()
 
 	// You may notice logit.Options() which returns an options list
 	// Here is some of them:

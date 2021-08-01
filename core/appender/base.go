@@ -26,55 +26,64 @@ import (
 )
 
 const (
+	// lineBreak is the break between lines.
 	lineBreak = '\n'
 
+	// UnixTime is a flag that keeps time in unix format.
 	UnixTime = ""
 )
 
+var (
+	_ = (*textAppender)(nil) // For check.
+	_ = (*jsonAppender)(nil) // For check.
+)
+
+// Appender is an interface of appending entries to a byte slice.
+// Although we keep it public, we don't recommend you to implement it.
 type Appender interface {
-	Begin(dst []byte) []byte
-	End(dst []byte) []byte
-	AppendAny(dst []byte, key string, value interface{}) []byte
+	Begin(dst []byte) []byte                                    // Begin appends begin character to dst.
+	End(dst []byte) []byte                                      // End appends end character to dst.
+	AppendAny(dst []byte, key string, value interface{}) []byte // AppendAny appends any entries to dst.
 
-	AppendBool(dst []byte, key string, value bool) []byte
-	AppendByte(dst []byte, key string, value byte) []byte
-	AppendRune(dst []byte, key string, value rune) []byte
-	AppendInt(dst []byte, key string, value int) []byte
-	AppendInt8(dst []byte, key string, value int8) []byte
-	AppendInt16(dst []byte, key string, value int16) []byte
-	AppendInt32(dst []byte, key string, value int32) []byte
-	AppendInt64(dst []byte, key string, value int64) []byte
-	AppendUint(dst []byte, key string, value uint) []byte
-	AppendUint8(dst []byte, key string, value uint8) []byte
-	AppendUint16(dst []byte, key string, value uint16) []byte
-	AppendUint32(dst []byte, key string, value uint32) []byte
-	AppendUint64(dst []byte, key string, value uint64) []byte
-	AppendFloat32(dst []byte, key string, value float32) []byte
-	AppendFloat64(dst []byte, key string, value float64) []byte
-	AppendString(dst []byte, key string, value string) []byte
-	AppendTime(dst []byte, key string, value time.Time, format string) []byte
-	AppendError(dst []byte, key string, value error) []byte
-	AppendStringer(dst []byte, key string, value fmt.Stringer) []byte
+	AppendBool(dst []byte, key string, value bool) []byte                     // AppendBool appends a bool entry to dst.
+	AppendByte(dst []byte, key string, value byte) []byte                     // AppendByte appends a byte entry to dst.
+	AppendRune(dst []byte, key string, value rune) []byte                     // AppendRune appends a rune entry to dst.
+	AppendInt(dst []byte, key string, value int) []byte                       // AppendInt appends an int entry to dst.
+	AppendInt8(dst []byte, key string, value int8) []byte                     // AppendInt8 appends an int8 entry to dst.
+	AppendInt16(dst []byte, key string, value int16) []byte                   // AppendInt16 appends an int16 entry to dst.
+	AppendInt32(dst []byte, key string, value int32) []byte                   // AppendInt32 appends an int32 entry to dst.
+	AppendInt64(dst []byte, key string, value int64) []byte                   // AppendInt64 appends an int64 entry to dst.
+	AppendUint(dst []byte, key string, value uint) []byte                     // AppendUint appends an uint entry to dst.
+	AppendUint8(dst []byte, key string, value uint8) []byte                   // AppendUint8 appends an uin8 entry to dst.
+	AppendUint16(dst []byte, key string, value uint16) []byte                 // AppendUint16 appends an uint16 entry to dst.
+	AppendUint32(dst []byte, key string, value uint32) []byte                 // AppendUint32 appends an uint32 entry to dst.
+	AppendUint64(dst []byte, key string, value uint64) []byte                 // AppendUint64 appends an uint64 entry to dst.
+	AppendFloat32(dst []byte, key string, value float32) []byte               // AppendFloat32 appends a float32 entry to dst.
+	AppendFloat64(dst []byte, key string, value float64) []byte               // AppendFloat64 appends a float64 entry to dst.
+	AppendString(dst []byte, key string, value string) []byte                 // AppendString appends a string entry to dst.
+	AppendTime(dst []byte, key string, value time.Time, format string) []byte // AppendTime appends a time.Time entry formatted with format to dst.
+	AppendError(dst []byte, key string, value error) []byte                   // AppendError appends an error entry to dst.
+	AppendStringer(dst []byte, key string, value fmt.Stringer) []byte         // AppendStringer appends an fmt.Stringer entry to dst.
 
-	AppendBools(dst []byte, key string, values []bool) []byte
-	AppendBytes(dst []byte, key string, values []byte) []byte
-	AppendRunes(dst []byte, key string, values []rune) []byte
-	AppendInts(dst []byte, key string, values []int) []byte
-	AppendInt8s(dst []byte, key string, values []int8) []byte
-	AppendInt16s(dst []byte, key string, values []int16) []byte
-	AppendInt32s(dst []byte, key string, values []int32) []byte
-	AppendInt64s(dst []byte, key string, values []int64) []byte
-	AppendUints(dst []byte, key string, values []uint) []byte
-	AppendUint8s(dst []byte, key string, values []uint8) []byte
-	AppendUint16s(dst []byte, key string, values []uint16) []byte
-	AppendUint32s(dst []byte, key string, values []uint32) []byte
-	AppendUint64s(dst []byte, key string, values []uint64) []byte
-	AppendFloat32s(dst []byte, key string, values []float32) []byte
-	AppendFloat64s(dst []byte, key string, values []float64) []byte
-	AppendStrings(dst []byte, key string, values []string) []byte
-	AppendTimes(dst []byte, key string, values []time.Time, format string) []byte
-	AppendErrors(dst []byte, key string, values []error) []byte
-	AppendStringers(dst []byte, key string, values []fmt.Stringer) []byte
+	AppendBools(dst []byte, key string, values []bool) []byte                     // AppendBools appends a []bool entry to dst.
+	AppendBytes(dst []byte, key string, values []byte) []byte                     // AppendBytes appends a []byte entry to dst.
+	AppendRunes(dst []byte, key string, values []rune) []byte                     // AppendRunes appends a []rune entry to dst.
+	AppendInts(dst []byte, key string, values []int) []byte                       // AppendInts appends an []int entry to dst.
+	AppendInt8s(dst []byte, key string, values []int8) []byte                     // AppendInt8s appends an []int8 entry to dst.
+	AppendInt16s(dst []byte, key string, values []int16) []byte                   // AppendInt16s appends an []int16 entry to dst.
+	AppendInt32s(dst []byte, key string, values []int32) []byte                   // AppendInt32s appends an []int32 entry to dst.
+	AppendInt64s(dst []byte, key string, values []int64) []byte                   // AppendInt64s appends an []int64 entry to dst.
+	AppendUints(dst []byte, key string, values []uint) []byte                     // AppendUints appends an []uint entry to dst.
+	AppendUint8s(dst []byte, key string, values []uint8) []byte                   // AppendUint8s appends an []uint8 entry to dst.
+	AppendUint16s(dst []byte, key string, values []uint16) []byte                 // AppendUint16s appends an []uint16 entry to dst.
+	AppendUint32s(dst []byte, key string, values []uint32) []byte                 // AppendUint32s appends an []uint32 entry to dst.
+	AppendUint64s(dst []byte, key string, values []uint64) []byte                 // AppendUint64s appends an []uint64 entry to dst.
+	AppendFloat32s(dst []byte, key string, values []float32) []byte               // AppendFloat32s appends a []float32 entry to dst.
+	AppendFloat64s(dst []byte, key string, values []float64) []byte               // AppendFloat64s appends a []float64 entry to dst.
+	AppendStrings(dst []byte, key string, values []string) []byte                 // AppendStrings appends a []string entry to dst.
+	AppendTimes(dst []byte, key string, values []time.Time, format string) []byte // AppendTimes appends a []time.Time entry formatted with format to dst.
+	AppendErrors(dst []byte, key string, values []error) []byte                   // AppendErrors appends an []error entry to dst.
+	AppendStringers(dst []byte, key string, values []fmt.Stringer) []byte         // AppendStringers appends a []fmt.Stringer entry to dst.
 }
 
 // The main character should be escaped is ascii less than \u0020 and \ and ".
@@ -138,10 +147,12 @@ func appendEscapedString(dst []byte, value string) []byte {
 	return append(dst, value...)
 }
 
+// Text returns an Text appender.
 func Text() Appender {
 	return (*textAppender)(nil)
 }
 
+// Json returns a Json appender.
 func Json() Appender {
 	return (*jsonAppender)(nil)
 }

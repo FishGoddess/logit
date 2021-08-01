@@ -96,14 +96,15 @@ func (bf *bufferedWriter) Flush() (n int, err error) {
 // It returns a channel for stopping this goroutine.
 func (bf *bufferedWriter) AutoFlush(frequency time.Duration) chan<- struct{} {
 
-	ticker := time.NewTicker(frequency)
 	stopChan := make(chan struct{}, 1)
 	go func() {
+		ticker := time.NewTicker(frequency)
 		for {
 			select {
 			case <-ticker.C:
 				bf.Flush()
 			case <-stopChan:
+				ticker.Stop()
 				return
 			}
 		}
