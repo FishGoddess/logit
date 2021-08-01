@@ -29,15 +29,18 @@ const (
 	MB = 1024 * KB // MB is the unit MB in size. 1 MB = 1024*1024 Bytes.
 )
 
+// Flusher is an interface that flushes data to somewhere.
 type Flusher interface {
 	Flush() (n int, err error)
 }
 
+// Writer is an interface which have flush, write and close functions.
 type Writer interface {
-	Flusher
-	io.WriteCloser
+	Flusher        // Flusher is an interface that flushes data to somewhere.
+	io.WriteCloser // WriteCloser is an interface that writes data to somewhere and can be closed.
 }
 
+// Wrapped wraps writer to Writer.
 func Wrapped(writer io.Writer) Writer {
 	if w, ok := writer.(Writer); ok {
 		return w
@@ -45,6 +48,7 @@ func Wrapped(writer io.Writer) Writer {
 	return newWrappedWriter(writer)
 }
 
+// BufferedWithSize wraps writer to buffered Writer with bufferSize.
 func BufferedWithSize(writer io.Writer, bufferSize int) Writer {
 	if w, ok := writer.(Writer); ok {
 		return w
@@ -52,6 +56,7 @@ func BufferedWithSize(writer io.Writer, bufferSize int) Writer {
 	return newBufferedWriter(writer, bufferSize)
 }
 
+// Buffered wraps writer to buffered Writer with default buffer size.
 func Buffered(writer io.Writer) Writer {
 	return BufferedWithSize(writer, core.WriterBufferedSize)
 }
