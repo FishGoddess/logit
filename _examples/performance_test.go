@@ -34,7 +34,7 @@ import (
 )
 
 /*
-$ go test -v ./_examples/benchmarks_test.go -bench=. -benchtime=1s
+$ go test -v ./_examples/performance_test.go -bench=. -benchtime=1s
 
 BenchmarkLogitLoggerWithTextAppender-16    922827              1352 ns/op               0 B/op          0 allocs/op
 
@@ -67,7 +67,7 @@ const (
 	timeFormat = "2006-01-02 15:04:05"
 )
 
-// go test -v ./_examples/benchmarks_test.go -bench=^BenchmarkLogitLoggerWithTextAppender$ -benchtime=1s
+// go test -v ./_examples/performance_test.go -bench=^BenchmarkLogitLoggerWithTextAppender$ -benchtime=1s
 func BenchmarkLogitLoggerWithTextAppender(b *testing.B) {
 
 	options := logit.Options()
@@ -93,7 +93,7 @@ func BenchmarkLogitLoggerWithTextAppender(b *testing.B) {
 	}
 }
 
-// go test -v ./_examples/benchmarks_test.go -bench=^BenchmarkLogitLoggerWithJsonAppender$ -benchtime=1s
+// go test -v ./_examples/performance_test.go -bench=^BenchmarkLogitLoggerWithJsonAppender$ -benchtime=1s
 func BenchmarkLogitLoggerWithJsonAppender(b *testing.B) {
 
 	options := logit.Options()
@@ -119,7 +119,7 @@ func BenchmarkLogitLoggerWithJsonAppender(b *testing.B) {
 	}
 }
 
-// go test -v ./_examples/benchmarks_test.go -bench=^BenchmarkLogitLoggerWithFormat$ -benchtime=1s
+// go test -v ./_examples/performance_test.go -bench=^BenchmarkLogitLoggerWithFormat$ -benchtime=1s
 func BenchmarkLogitLoggerWithFormat(b *testing.B) {
 
 	options := logit.Options()
@@ -145,7 +145,7 @@ func BenchmarkLogitLoggerWithFormat(b *testing.B) {
 	}
 }
 
-//// go test -v ./_examples/benchmarks_test.go -bench=^BenchmarkZeroLogLogger$ -benchtime=1s
+//// go test -v ./_examples/performance_test.go -bench=^BenchmarkZeroLogLogger$ -benchtime=1s
 //func BenchmarkZeroLogLogger(b *testing.B) {
 //
 //	zerolog.TimeFieldFormat = timeFormat
@@ -166,7 +166,7 @@ func BenchmarkLogitLoggerWithFormat(b *testing.B) {
 //	}
 //}
 //
-//// go test -v ./_examples/benchmarks_test.go -bench=^BenchmarkZapLogger$ -benchtime=1s
+//// go test -v ./_examples/performance_test.go -bench=^BenchmarkZapLogger$ -benchtime=1s
 //func BenchmarkZapLogger(b *testing.B) {
 //
 //	config := zap.NewProductionEncoderConfig()
@@ -194,7 +194,7 @@ func BenchmarkLogitLoggerWithFormat(b *testing.B) {
 //	}
 //}
 //
-//// go test -v ./_examples/benchmarks_test.go -bench=^BenchmarkLogrusLogger$ -benchtime=1s
+//// go test -v ./_examples/performance_test.go -bench=^BenchmarkLogrusLogger$ -benchtime=1s
 //func BenchmarkLogrusLogger(b *testing.B) {
 //
 //	logger := logrus.New()
@@ -229,7 +229,7 @@ func createFileOf(filePath string) (*os.File, error) {
 	return os.OpenFile(filePath, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0644)
 }
 
-// go test -v ./_examples/benchmarks_test.go -bench=^BenchmarkLogitFileWithTextAppender$ -benchtime=1s
+// go test -v ./_examples/performance_test.go -bench=^BenchmarkLogitFileWithTextAppender$ -benchtime=1s
 func BenchmarkLogitFileWithTextAppender(b *testing.B) {
 
 	file, _ := createFileOf("Z:/" + b.Name() + ".log")
@@ -259,7 +259,7 @@ func BenchmarkLogitFileWithTextAppender(b *testing.B) {
 	}
 }
 
-// go test -v ./_examples/benchmarks_test.go -bench=^BenchmarkLogitFileWithJsonAppender$ -benchtime=1s
+// go test -v ./_examples/performance_test.go -bench=^BenchmarkLogitFileWithJsonAppender$ -benchtime=1s
 func BenchmarkLogitFileWithJsonAppender(b *testing.B) {
 
 	file, _ := createFileOf("Z:/" + b.Name() + ".log")
@@ -289,7 +289,7 @@ func BenchmarkLogitFileWithJsonAppender(b *testing.B) {
 	}
 }
 
-// go test -v ./_examples/benchmarks_test.go -bench=^BenchmarkLogitFileWithoutBuffer$ -benchtime=1s
+// go test -v ./_examples/performance_test.go -bench=^BenchmarkLogitFileWithoutBuffer$ -benchtime=1s
 func BenchmarkLogitFileWithoutBuffer(b *testing.B) {
 
 	file, _ := createFileOf("Z:/" + b.Name() + ".log")
@@ -318,7 +318,7 @@ func BenchmarkLogitFileWithoutBuffer(b *testing.B) {
 	}
 }
 
-//// go test -v ./_examples/benchmarks_test.go -bench=^BenchmarkZeroLogFile$ -benchtime=1s
+//// go test -v ./_examples/performance_test.go -bench=^BenchmarkZeroLogFile$ -benchtime=1s
 //func BenchmarkZeroLogFile(b *testing.B) {
 //
 //	file, _ := createFileOf("Z:/" + b.Name() + ".log")
@@ -340,7 +340,7 @@ func BenchmarkLogitFileWithoutBuffer(b *testing.B) {
 //	}
 //}
 //
-//// go test -v ./_examples/benchmarks_test.go -bench=^BenchmarkZapFile$ -benchtime=1s
+//// go test -v ./_examples/performance_test.go -bench=^BenchmarkZapFile$ -benchtime=1s
 //func BenchmarkZapFile(b *testing.B) {
 //
 //	file, _ := createFileOf("Z:/" + b.Name() + ".log")
@@ -369,7 +369,7 @@ func BenchmarkLogitFileWithoutBuffer(b *testing.B) {
 //	}
 //}
 //
-//// go test -v ./_examples/benchmarks_test.go -bench=^BenchmarkLogrusFile$ -benchtime=1s
+//// go test -v ./_examples/performance_test.go -bench=^BenchmarkLogrusFile$ -benchtime=1s
 //func BenchmarkLogrusFile(b *testing.B) {
 //
 //	file, _ := createFileOf("Z:/" + b.Name() + ".log")
