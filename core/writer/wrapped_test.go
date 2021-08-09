@@ -17,3 +17,28 @@
 // Created at 2021/07/11 14:04:11
 
 package writer
+
+import (
+	"os"
+	"testing"
+)
+
+// go test -v -cover -run=^TestWrappedWriterClose$
+func TestWrappedWriterClose(t *testing.T) {
+
+	writer := newWrappedWriter(os.Stdout)
+	for i := 0; i < 10; i++ {
+		err := writer.Close()
+		if err != nil {
+			t.Fatal(err)
+		}
+	}
+
+	writer = newWrappedWriter(os.Stderr)
+	for i := 0; i < 10; i++ {
+		err := writer.Close()
+		if err != nil {
+			t.Fatal(err)
+		}
+	}
+}

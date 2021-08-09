@@ -35,8 +35,15 @@ func main() {
 	options.WithWarnLevel()
 	options.WithErrorLevel()
 	options.WithAppender(appender.Text())
-	options.WithWriter(os.Stderr)
-	options.WithBuffered(os.Stderr)
+	options.WithDebugAppender(appender.Text())
+	options.WithInfoAppender(appender.Text())
+	options.WithWarnAppender(appender.Text())
+	options.WithErrorAppender(appender.Text())
+	options.WithWriter(os.Stderr, false)
+	options.WithDebugWriter(os.Stderr, false)
+	options.WithInfoWriter(os.Stderr, false)
+	options.WithWarnWriter(os.Stderr, false)
+	options.WithErrorWriter(os.Stderr, false)
 	options.WithPid()
 	options.WithCaller()
 	options.WithMsgKey("msg")
@@ -50,7 +57,7 @@ func main() {
 	// Remember, these options is only used for creating a logger
 	logger := logit.NewLogger(
 		options.WithPid(),
-		options.WithBuffered(os.Stdout),
+		options.WithWriter(os.Stdout, false),
 		options.WithTimeFormat("2006/01/02 15:04:05"),
 		// ...
 	)

@@ -20,7 +20,6 @@ package logit
 
 import (
 	"fmt"
-	"io"
 	"os"
 	"sync"
 	"time"
@@ -32,22 +31,43 @@ import (
 
 // Logger is the core of logging operations.
 type Logger struct {
+
+	// config stores all configurations of logger.
 	*config
-	appender appender.Appender
-	writer   writer.Writer
-	logPool  *sync.Pool
+
+	// debugAppender, infoAppender, warnAppender, errorAppender is an appender appending entries to debug, info, warn, error logs.
+	debugAppender appender.Appender
+	infoAppender  appender.Appender
+	warnAppender  appender.Appender
+	errorAppender appender.Appender
+
+	// debugWriter, infoWriter, warnWriter, errorWriter writes debug, info, warn, error logs to somewhere.
+	debugWriter writer.Writer
+	infoWriter  writer.Writer
+	warnWriter  writer.Writer
+	errorWriter writer.Writer
+
+	// logPool is for reusing logs.
+	logPool *sync.Pool
 }
 
 // NewLogger returns a new Logger created with options.
 func NewLogger(options ...Option) *Logger {
 
-	logger := new(Logger)
-	logger.config = newDefaultConfig()
-	logger.appender = appender.Text()
-	logger.writer = writer.Wrapped(os.Stdout)
-	logger.logPool = &sync.Pool{
-		New: func() interface{} {
-			return newLog(logger)
+	logger := &Logger{
+		config:        newDefaultConfig(),
+		debugAppender: appender.Text(),
+		infoAppender:  appender.Text(),
+		warnAppender:  appender.Text(),
+		errorAppender: appender.Text(),
+		debugWriter:   writer.Wrapped(os.Stdout),
+		infoWriter:    writer.Wrapped(os.Stdout),
+		warnWriter:    writer.Wrapped(os.Stdout),
+		errorWriter:   writer.Wrapped(os.Stderr),
+		logPool: &sync.Pool{
+			New: func() interface{} {
+				return newLog()
+			},
 		},
 	}
 
@@ -57,10 +77,42 @@ func NewLogger(options ...Option) *Logger {
 	return logger
 }
 
+// appenderOf returns the appender of level.
+func (l *Logger) appenderOf(level level) appender.Appender {
+	switch level {
+	case errorLevel:
+		return l.errorAppender
+	case warnLevel:
+		return l.warnAppender
+	case infoLevel:
+		return l.infoAppender
+	default:
+		return l.debugAppender
+	}
+}
+
+// writerOf returns the writer of level.
+func (l *Logger) writerOf(level level) writer.Writer {
+	switch level {
+	case errorLevel:
+		return l.errorWriter
+	case warnLevel:
+		return l.warnWriter
+	case infoLevel:
+		return l.infoWriter
+	default:
+		return l.debugWriter
+	}
+}
+
 // getLog returns a Log instance from pool.
 // This is a better way to memory.
-func (l *Logger) getLog() *Log {
-	return l.logPool.Get().(*Log)
+func (l *Logger) getLog(level level) *Log {
+	log := l.logPool.Get().(*Log)
+	log.logger = l
+	log.appender = l.appenderOf(level)
+	log.writer = l.writerOf(level)
+	return log
 }
 
 // releaseLog releases a Log instance to pool.
@@ -76,7 +128,7 @@ func (l *Logger) log(level level, msg string, params ...interface{}) *Log {
 		return nil
 	}
 
-	log := l.getLog().begin()
+	log := l.getLog(level).begin()
 	if l.timeKey != "" {
 		log.Time(l.timeKey, time.Now(), l.timeFormat)
 	}
@@ -127,10 +179,31 @@ func (l *Logger) Error(msg string, params ...interface{}) *Log {
 // Close a logger will also invoke Flush(), so you can use an option or Close() to flush instead.
 // However, you still need to flush manually if you want your logs store immediately.
 func (l *Logger) Flush() (n int, err error) {
-	if flusher, ok := l.writer.(writer.Flusher); ok {
-		return flusher.Flush()
+
+	i, e := l.errorWriter.Flush()
+	if e != nil {
+		err = e
 	}
-	return 0, nil
+	n += i
+
+	i, e = l.warnWriter.Flush()
+	if e != nil {
+		err = e
+	}
+	n += i
+
+	i, e = l.infoWriter.Flush()
+	if e != nil {
+		err = e
+	}
+	n += i
+
+	i, e = l.debugWriter.Flush()
+	if e != nil {
+		err = e
+	}
+	n += i
+	return n, err
 }
 
 // Close closes logger and releases resources.
@@ -139,21 +212,26 @@ func (l *Logger) Flush() (n int, err error) {
 // So, it is recommended for you to invoke it habitually.
 func (l *Logger) Close() error {
 
+	l.level = offLevel
+
 	_, err := l.Flush()
 	if err != nil {
 		return err
 	}
 
-	closer, ok := l.writer.(io.Closer)
-	if !ok {
-		return nil
-	}
-
-	err = closer.Close()
+	err = l.errorWriter.Close()
 	if err != nil {
 		return err
 	}
 
-	l.level = offLevel
-	return nil
+	err = l.warnWriter.Close()
+	if err != nil {
+		return err
+	}
+
+	err = l.infoWriter.Close()
+	if err != nil {
+		return err
+	}
+	return l.debugWriter.Close()
 }

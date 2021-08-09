@@ -36,11 +36,11 @@ import (
 /*
 $ go test -v ./_examples/performance_test.go -bench=. -benchtime=1s
 
-BenchmarkLogitLoggerWithTextAppender-16    922827              1352 ns/op               0 B/op          0 allocs/op
+BenchmarkLogitLoggerWithTextAppender-16    856958              1362 ns/op               0 B/op          0 allocs/op
 
-BenchmarkLogitLoggerWithJsonAppender-16    856915              1385 ns/op               0 B/op          0 allocs/op
+BenchmarkLogitLoggerWithJsonAppender-16    799759              1373 ns/op               0 B/op          0 allocs/op
 
-BenchmarkLogitLoggerWithFormat-16          705732              1728 ns/op              40 B/op          4 allocs/op
+BenchmarkLogitLoggerWithFormat-16          666484              1740 ns/op              40 B/op          4 allocs/op
 
 BenchmarkZeroLogLogger-16                  922863              1244 ns/op               0 B/op          0 allocs/op
 
@@ -50,11 +50,11 @@ BenchmarkLogrusLogger-16                   105238             11474 ns/op       
 
 ******************************************************************************************************************
 
-BenchmarkLogitFileWithTextAppender-16     631429              1816 ns/op             855 B/op          0 allocs/op
+BenchmarkLogitFileWithTextAppender-16     631435              1751 ns/op             851 B/op          0 allocs/op
 
-BenchmarkLogitFileWithJsonAppender-16     599868              1807 ns/op             901 B/op          0 allocs/op
+BenchmarkLogitFileWithJsonAppender-16     599862              1768 ns/op             896 B/op          0 allocs/op
 
-BenchmarkLogitFileWithoutBuffer-16        149965              7704 ns/op               0 B/op          0 allocs/op
+BenchmarkLogitFileWithoutBuffer-16        148113              7773 ns/op               0 B/op          0 allocs/op
 
 BenchmarkZeroLogFile-16                   159962              7472 ns/op               0 B/op          0 allocs/op
 
@@ -74,7 +74,7 @@ func BenchmarkLogitLoggerWithTextAppender(b *testing.B) {
 	logger := logit.NewLogger(
 		options.WithDebugLevel(),
 		options.WithAppender(appender.Text()),
-		options.WithWriter(ioutil.Discard),
+		options.WithWriter(ioutil.Discard, false),
 		options.WithTimeFormat(timeFormat),
 	)
 
@@ -100,7 +100,7 @@ func BenchmarkLogitLoggerWithJsonAppender(b *testing.B) {
 	logger := logit.NewLogger(
 		options.WithDebugLevel(),
 		options.WithAppender(appender.Json()),
-		options.WithWriter(ioutil.Discard),
+		options.WithWriter(ioutil.Discard, false),
 		options.WithTimeFormat(timeFormat),
 	)
 
@@ -126,7 +126,7 @@ func BenchmarkLogitLoggerWithFormat(b *testing.B) {
 	logger := logit.NewLogger(
 		options.WithDebugLevel(),
 		options.WithAppender(appender.Text()),
-		options.WithWriter(ioutil.Discard),
+		options.WithWriter(ioutil.Discard, false),
 		options.WithTimeFormat(timeFormat),
 	)
 
@@ -239,7 +239,7 @@ func BenchmarkLogitFileWithTextAppender(b *testing.B) {
 	logger := logit.NewLogger(
 		options.WithDebugLevel(),
 		options.WithAppender(appender.Text()),
-		options.WithBuffered(file),
+		options.WithWriter(file, true),
 		options.WithTimeFormat(timeFormat),
 	)
 	defer logger.Close()
@@ -269,7 +269,7 @@ func BenchmarkLogitFileWithJsonAppender(b *testing.B) {
 	logger := logit.NewLogger(
 		options.WithDebugLevel(),
 		options.WithAppender(appender.Json()),
-		options.WithBuffered(file),
+		options.WithWriter(file, true),
 		options.WithTimeFormat(timeFormat),
 	)
 	defer logger.Close()
@@ -299,7 +299,7 @@ func BenchmarkLogitFileWithoutBuffer(b *testing.B) {
 	logger := logit.NewLogger(
 		options.WithDebugLevel(),
 		options.WithAppender(appender.Text()),
-		options.WithWriter(file),
+		options.WithWriter(file, false),
 		options.WithTimeFormat(timeFormat),
 	)
 

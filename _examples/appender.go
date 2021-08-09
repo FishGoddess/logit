@@ -39,6 +39,14 @@ func main() {
 	logger = logit.NewLogger(logit.Options().WithAppender(appender.Json()))
 	logger.Info("appender.Json()").End()
 
+	// Every level has its own appender so you can append logs in different level with different appender
+	logger = logit.NewLogger(
+		logit.Options().WithDebugAppender(appender.Text()),
+		logit.Options().WithInfoAppender(appender.Text()),
+		logit.Options().WithWarnAppender(appender.Json()),
+		logit.Options().WithErrorAppender(appender.Json()),
+	)
+
 	// Appender is an interface so you can implement your own appender
 	// However, we don't recommend you to do that
 	// This interface may change in every version, so you will pay lots of extra attention to it

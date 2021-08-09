@@ -68,21 +68,104 @@ func (o *options) WithErrorLevel() Option {
 // WithAppender returns an option which sets logger's appender to a new one.
 func (o *options) WithAppender(appender appender.Appender) Option {
 	return func(logger *Logger) {
-		logger.appender = appender
+		logger.debugAppender = appender
+		logger.infoAppender = appender
+		logger.warnAppender = appender
+		logger.errorAppender = appender
+	}
+}
+
+// WithDebugAppender returns an option which sets logger's debug appender to a new one.
+func (o *options) WithDebugAppender(appender appender.Appender) Option {
+	return func(logger *Logger) {
+		logger.debugAppender = appender
+	}
+}
+
+// WithInfoAppender returns an option which sets logger's info appender to a new one.
+func (o *options) WithInfoAppender(appender appender.Appender) Option {
+	return func(logger *Logger) {
+		logger.infoAppender = appender
+	}
+}
+
+// WithWarnAppender returns an option which sets logger's warn appender to a new one.
+func (o *options) WithWarnAppender(appender appender.Appender) Option {
+	return func(logger *Logger) {
+		logger.warnAppender = appender
+	}
+}
+
+// WithErrorAppender returns an option which sets logger's error appender to a new one.
+func (o *options) WithErrorAppender(appender appender.Appender) Option {
+	return func(logger *Logger) {
+		logger.errorAppender = appender
 	}
 }
 
 // WithWriter returns an option which sets logger's writer to a new one.
-func (o *options) WithWriter(w io.Writer) Option {
+func (o *options) WithWriter(w io.Writer, buffered bool) Option {
 	return func(logger *Logger) {
-		logger.writer = writer.Wrapped(w)
+
+		if buffered {
+			logger.debugWriter = writer.Buffered(w)
+			logger.infoWriter = writer.Buffered(w)
+			logger.warnWriter = writer.Buffered(w)
+			logger.errorWriter = writer.Buffered(w)
+		} else {
+			logger.debugWriter = writer.Wrapped(w)
+			logger.infoWriter = writer.Wrapped(w)
+			logger.warnWriter = writer.Wrapped(w)
+			logger.errorWriter = writer.Wrapped(w)
+		}
 	}
 }
 
-// WithBuffered returns an option which sets logger's writer to a new one with buffer.
-func (o *options) WithBuffered(w io.Writer) Option {
+// WithDebugWriter returns an option which sets logger's debug writer to a new one.
+func (o *options) WithDebugWriter(w io.Writer, buffered bool) Option {
 	return func(logger *Logger) {
-		logger.writer = writer.Buffered(w)
+
+		if buffered {
+			logger.debugWriter = writer.Buffered(w)
+		} else {
+			logger.debugWriter = writer.Wrapped(w)
+		}
+	}
+}
+
+// WithInfoWriter returns an option which sets logger's info writer to a new one.
+func (o *options) WithInfoWriter(w io.Writer, buffered bool) Option {
+	return func(logger *Logger) {
+
+		if buffered {
+			logger.infoWriter = writer.Buffered(w)
+		} else {
+			logger.infoWriter = writer.Wrapped(w)
+		}
+	}
+}
+
+// WithWarnWriter returns an option which sets logger's warn writer to a new one.
+func (o *options) WithWarnWriter(w io.Writer, buffered bool) Option {
+	return func(logger *Logger) {
+
+		if buffered {
+			logger.warnWriter = writer.Buffered(w)
+		} else {
+			logger.warnWriter = writer.Wrapped(w)
+		}
+	}
+}
+
+// WithErrorWriter returns an option which sets logger's error writer to a new one.
+func (o *options) WithErrorWriter(w io.Writer, buffered bool) Option {
+	return func(logger *Logger) {
+
+		if buffered {
+			logger.errorWriter = writer.Buffered(w)
+		} else {
+			logger.errorWriter = writer.Wrapped(w)
+		}
 	}
 }
 
@@ -152,8 +235,8 @@ func (o *options) WithTimeFormat(format string) Option {
 // WithAutoFlush returns an option which do flush automatically at fixed frequency.
 func (o *options) WithAutoFlush(frequency time.Duration) Option {
 	return func(logger *Logger) {
-		ticker := time.NewTicker(frequency)
 		go func() {
+			ticker := time.NewTicker(frequency)
 			select {
 			case <-ticker.C:
 				logger.Flush()
