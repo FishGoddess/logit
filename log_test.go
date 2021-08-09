@@ -33,7 +33,7 @@ import (
 func TestNewLog(t *testing.T) {
 
 	buffer := bytes.NewBuffer(make([]byte, 0, 1024))
-	logger := NewLogger(Options().WithAppender(appender.Json()), Options().WithWriter(buffer))
+	logger := NewLogger(Options().WithAppender(appender.Json()), Options().WithWriter(buffer, false))
 	defer logger.Close()
 
 	entries := map[string]interface{}{
@@ -75,7 +75,10 @@ func TestNewLog(t *testing.T) {
 	}
 	//t.Logf("entries: %+v", entries)
 
-	log := newLog(logger)
+	log := newLog()
+	log.logger = logger
+	log.appender = logger.debugAppender
+	log.writer = logger.debugWriter
 	log.begin()
 	log.Any("Any", map[int]string{1: "a", 2: "b", 3: "c"})
 	log.Bool("Bool", true)

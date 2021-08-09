@@ -23,28 +23,39 @@ import (
 	"time"
 
 	"github.com/FishGoddess/logit/core"
+	"github.com/FishGoddess/logit/core/appender"
+	"github.com/FishGoddess/logit/core/writer"
 )
 
 // Log stores data of a whole logging message.
 type Log struct {
+
+	// logger is the maker of the log.
 	logger *Logger
-	data   []byte
+
+	// appender is an appender appending entries to the log.
+	appender appender.Appender
+
+	// writer writes the log to somewhere.
+	writer writer.Writer
+
+	// data stores all entries in log.
+	data []byte
 }
 
 // newLog returns a new Log with pre-malloc memory.
 // The default pre-malloc size is better to not-long logs.
 // So if your logs are extremely long, you can set LogMallocSize to larger to avoid re-malloc.
-func newLog(logger *Logger) *Log {
+func newLog() *Log {
 	return &Log{
-		logger: logger,
-		data:   make([]byte, 0, core.LogMallocSize),
+		data: make([]byte, 0, core.LogMallocSize),
 	}
 }
 
 // begin do some initializations of l.
 func (l *Log) begin() *Log {
 	l.data = l.data[:0]
-	l.data = l.logger.appender.Begin(l.data)
+	l.data = l.appender.Begin(l.data)
 	return l
 }
 
@@ -56,7 +67,7 @@ func (l *Log) End() {
 	}
 
 	defer l.logger.releaseLog(l)
-	l.logger.writer.Write(l.logger.appender.End(l.data))
+	l.writer.Write(l.appender.End(l.data))
 }
 
 // Any adds an entry which key is string and value is interface{} type to l.
@@ -65,7 +76,7 @@ func (l *Log) Any(key string, value interface{}) *Log {
 	if l == nil {
 		return nil
 	}
-	l.data = l.logger.appender.AppendAny(l.data, key, value)
+	l.data = l.appender.AppendAny(l.data, key, value)
 	return l
 }
 
@@ -75,7 +86,7 @@ func (l *Log) Bool(key string, value bool) *Log {
 	if l == nil {
 		return nil
 	}
-	l.data = l.logger.appender.AppendBool(l.data, key, value)
+	l.data = l.appender.AppendBool(l.data, key, value)
 	return l
 }
 
@@ -85,7 +96,7 @@ func (l *Log) Byte(key string, value byte) *Log {
 	if l == nil {
 		return nil
 	}
-	l.data = l.logger.appender.AppendByte(l.data, key, value)
+	l.data = l.appender.AppendByte(l.data, key, value)
 	return l
 }
 
@@ -95,7 +106,7 @@ func (l *Log) Rune(key string, value rune) *Log {
 	if l == nil {
 		return nil
 	}
-	l.data = l.logger.appender.AppendRune(l.data, key, value)
+	l.data = l.appender.AppendRune(l.data, key, value)
 	return l
 }
 
@@ -105,7 +116,7 @@ func (l *Log) Int(key string, value int) *Log {
 	if l == nil {
 		return nil
 	}
-	l.data = l.logger.appender.AppendInt(l.data, key, value)
+	l.data = l.appender.AppendInt(l.data, key, value)
 	return l
 }
 
@@ -115,7 +126,7 @@ func (l *Log) Int8(key string, value int8) *Log {
 	if l == nil {
 		return nil
 	}
-	l.data = l.logger.appender.AppendInt8(l.data, key, value)
+	l.data = l.appender.AppendInt8(l.data, key, value)
 	return l
 }
 
@@ -125,7 +136,7 @@ func (l *Log) Int16(key string, value int16) *Log {
 	if l == nil {
 		return nil
 	}
-	l.data = l.logger.appender.AppendInt16(l.data, key, value)
+	l.data = l.appender.AppendInt16(l.data, key, value)
 	return l
 }
 
@@ -135,7 +146,7 @@ func (l *Log) Int32(key string, value int32) *Log {
 	if l == nil {
 		return nil
 	}
-	l.data = l.logger.appender.AppendInt32(l.data, key, value)
+	l.data = l.appender.AppendInt32(l.data, key, value)
 	return l
 }
 
@@ -145,7 +156,7 @@ func (l *Log) Int64(key string, value int64) *Log {
 	if l == nil {
 		return nil
 	}
-	l.data = l.logger.appender.AppendInt64(l.data, key, value)
+	l.data = l.appender.AppendInt64(l.data, key, value)
 	return l
 }
 
@@ -155,7 +166,7 @@ func (l *Log) Uint(key string, value uint) *Log {
 	if l == nil {
 		return nil
 	}
-	l.data = l.logger.appender.AppendUint(l.data, key, value)
+	l.data = l.appender.AppendUint(l.data, key, value)
 	return l
 }
 
@@ -165,7 +176,7 @@ func (l *Log) Uint8(key string, value uint8) *Log {
 	if l == nil {
 		return nil
 	}
-	l.data = l.logger.appender.AppendUint8(l.data, key, value)
+	l.data = l.appender.AppendUint8(l.data, key, value)
 	return l
 }
 
@@ -175,7 +186,7 @@ func (l *Log) Uint16(key string, value uint16) *Log {
 	if l == nil {
 		return nil
 	}
-	l.data = l.logger.appender.AppendUint16(l.data, key, value)
+	l.data = l.appender.AppendUint16(l.data, key, value)
 	return l
 }
 
@@ -185,7 +196,7 @@ func (l *Log) Uint32(key string, value uint32) *Log {
 	if l == nil {
 		return nil
 	}
-	l.data = l.logger.appender.AppendUint32(l.data, key, value)
+	l.data = l.appender.AppendUint32(l.data, key, value)
 	return l
 }
 
@@ -195,7 +206,7 @@ func (l *Log) Uint64(key string, value uint64) *Log {
 	if l == nil {
 		return nil
 	}
-	l.data = l.logger.appender.AppendUint64(l.data, key, value)
+	l.data = l.appender.AppendUint64(l.data, key, value)
 	return l
 }
 
@@ -205,7 +216,7 @@ func (l *Log) Float32(key string, value float32) *Log {
 	if l == nil {
 		return nil
 	}
-	l.data = l.logger.appender.AppendFloat32(l.data, key, value)
+	l.data = l.appender.AppendFloat32(l.data, key, value)
 	return l
 }
 
@@ -215,7 +226,7 @@ func (l *Log) Float64(key string, value float64) *Log {
 	if l == nil {
 		return nil
 	}
-	l.data = l.logger.appender.AppendFloat64(l.data, key, value)
+	l.data = l.appender.AppendFloat64(l.data, key, value)
 	return l
 }
 
@@ -225,7 +236,7 @@ func (l *Log) String(key string, value string) *Log {
 	if l == nil {
 		return nil
 	}
-	l.data = l.logger.appender.AppendString(l.data, key, value)
+	l.data = l.appender.AppendString(l.data, key, value)
 	return l
 }
 
@@ -235,7 +246,7 @@ func (l *Log) Time(key string, value time.Time, format string) *Log {
 	if l == nil {
 		return nil
 	}
-	l.data = l.logger.appender.AppendTime(l.data, key, value, format)
+	l.data = l.appender.AppendTime(l.data, key, value, format)
 	return l
 }
 
@@ -245,7 +256,7 @@ func (l *Log) Error(key string, value error) *Log {
 	if l == nil {
 		return nil
 	}
-	l.data = l.logger.appender.AppendError(l.data, key, value)
+	l.data = l.appender.AppendError(l.data, key, value)
 	return l
 }
 
@@ -255,7 +266,7 @@ func (l *Log) Stringer(key string, value fmt.Stringer) *Log {
 	if l == nil {
 		return nil
 	}
-	l.data = l.logger.appender.AppendStringer(l.data, key, value)
+	l.data = l.appender.AppendStringer(l.data, key, value)
 	return l
 }
 
@@ -265,7 +276,7 @@ func (l *Log) Bools(key string, value []bool) *Log {
 	if l == nil {
 		return nil
 	}
-	l.data = l.logger.appender.AppendBools(l.data, key, value)
+	l.data = l.appender.AppendBools(l.data, key, value)
 	return l
 }
 
@@ -275,7 +286,7 @@ func (l *Log) Bytes(key string, value []byte) *Log {
 	if l == nil {
 		return nil
 	}
-	l.data = l.logger.appender.AppendBytes(l.data, key, value)
+	l.data = l.appender.AppendBytes(l.data, key, value)
 	return l
 }
 
@@ -285,7 +296,7 @@ func (l *Log) Runes(key string, value []rune) *Log {
 	if l == nil {
 		return nil
 	}
-	l.data = l.logger.appender.AppendRunes(l.data, key, value)
+	l.data = l.appender.AppendRunes(l.data, key, value)
 	return l
 }
 
@@ -295,7 +306,7 @@ func (l *Log) Ints(key string, value []int) *Log {
 	if l == nil {
 		return nil
 	}
-	l.data = l.logger.appender.AppendInts(l.data, key, value)
+	l.data = l.appender.AppendInts(l.data, key, value)
 	return l
 }
 
@@ -305,7 +316,7 @@ func (l *Log) Int8s(key string, value []int8) *Log {
 	if l == nil {
 		return nil
 	}
-	l.data = l.logger.appender.AppendInt8s(l.data, key, value)
+	l.data = l.appender.AppendInt8s(l.data, key, value)
 	return l
 }
 
@@ -315,7 +326,7 @@ func (l *Log) Int16s(key string, value []int16) *Log {
 	if l == nil {
 		return nil
 	}
-	l.data = l.logger.appender.AppendInt16s(l.data, key, value)
+	l.data = l.appender.AppendInt16s(l.data, key, value)
 	return l
 }
 
@@ -325,7 +336,7 @@ func (l *Log) Int32s(key string, value []int32) *Log {
 	if l == nil {
 		return nil
 	}
-	l.data = l.logger.appender.AppendInt32s(l.data, key, value)
+	l.data = l.appender.AppendInt32s(l.data, key, value)
 	return l
 }
 
@@ -335,7 +346,7 @@ func (l *Log) Int64s(key string, value []int64) *Log {
 	if l == nil {
 		return nil
 	}
-	l.data = l.logger.appender.AppendInt64s(l.data, key, value)
+	l.data = l.appender.AppendInt64s(l.data, key, value)
 	return l
 }
 
@@ -345,7 +356,7 @@ func (l *Log) Uints(key string, value []uint) *Log {
 	if l == nil {
 		return nil
 	}
-	l.data = l.logger.appender.AppendUints(l.data, key, value)
+	l.data = l.appender.AppendUints(l.data, key, value)
 	return l
 }
 
@@ -355,7 +366,7 @@ func (l *Log) Uint8s(key string, value []uint8) *Log {
 	if l == nil {
 		return nil
 	}
-	l.data = l.logger.appender.AppendUint8s(l.data, key, value)
+	l.data = l.appender.AppendUint8s(l.data, key, value)
 	return l
 }
 
@@ -365,7 +376,7 @@ func (l *Log) Uint16s(key string, value []uint16) *Log {
 	if l == nil {
 		return nil
 	}
-	l.data = l.logger.appender.AppendUint16s(l.data, key, value)
+	l.data = l.appender.AppendUint16s(l.data, key, value)
 	return l
 }
 
@@ -375,7 +386,7 @@ func (l *Log) Uint32s(key string, value []uint32) *Log {
 	if l == nil {
 		return nil
 	}
-	l.data = l.logger.appender.AppendUint32s(l.data, key, value)
+	l.data = l.appender.AppendUint32s(l.data, key, value)
 	return l
 }
 
@@ -385,7 +396,7 @@ func (l *Log) Uint64s(key string, value []uint64) *Log {
 	if l == nil {
 		return nil
 	}
-	l.data = l.logger.appender.AppendUint64s(l.data, key, value)
+	l.data = l.appender.AppendUint64s(l.data, key, value)
 	return l
 }
 
@@ -395,7 +406,7 @@ func (l *Log) Float32s(key string, value []float32) *Log {
 	if l == nil {
 		return nil
 	}
-	l.data = l.logger.appender.AppendFloat32s(l.data, key, value)
+	l.data = l.appender.AppendFloat32s(l.data, key, value)
 	return l
 }
 
@@ -405,7 +416,7 @@ func (l *Log) Float64s(key string, value []float64) *Log {
 	if l == nil {
 		return nil
 	}
-	l.data = l.logger.appender.AppendFloat64s(l.data, key, value)
+	l.data = l.appender.AppendFloat64s(l.data, key, value)
 	return l
 }
 
@@ -415,7 +426,7 @@ func (l *Log) Strings(key string, value []string) *Log {
 	if l == nil {
 		return nil
 	}
-	l.data = l.logger.appender.AppendStrings(l.data, key, value)
+	l.data = l.appender.AppendStrings(l.data, key, value)
 	return l
 }
 
@@ -425,7 +436,7 @@ func (l *Log) Times(key string, value []time.Time, format string) *Log {
 	if l == nil {
 		return nil
 	}
-	l.data = l.logger.appender.AppendTimes(l.data, key, value, format)
+	l.data = l.appender.AppendTimes(l.data, key, value, format)
 	return l
 }
 
@@ -435,7 +446,7 @@ func (l *Log) Errors(key string, value []error) *Log {
 	if l == nil {
 		return nil
 	}
-	l.data = l.logger.appender.AppendErrors(l.data, key, value)
+	l.data = l.appender.AppendErrors(l.data, key, value)
 	return l
 }
 
@@ -445,6 +456,6 @@ func (l *Log) Stringers(key string, value []fmt.Stringer) *Log {
 	if l == nil {
 		return nil
 	}
-	l.data = l.logger.appender.AppendStringers(l.data, key, value)
+	l.data = l.appender.AppendStringers(l.data, key, value)
 	return l
 }

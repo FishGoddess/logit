@@ -68,33 +68,33 @@ func newBufferedWriter(writer io.Writer, bufferSize int) *bufferedWriter {
 	}
 }
 
-// needFlush returns if bf need flush or not.
-func (bf *bufferedWriter) needFlush() bool {
-	return bf.buffer.Len() > bf.buffer.Cap()-minBufferSize // remain some bytes for avoiding buffer growing...
+// needFlush returns if bw need flush or not.
+func (bw *bufferedWriter) needFlush() bool {
+	return bw.buffer.Len() > bw.buffer.Cap()-minBufferSize // remain some bytes for avoiding buffer growing...
 }
 
 // flush writes data in buffer to underlying writer.
-func (bf *bufferedWriter) flush() (n int, err error) {
-	writen, err := bf.buffer.WriteTo(bf.writer)
+func (bw *bufferedWriter) flush() (n int, err error) {
+	writen, err := bw.buffer.WriteTo(bw.writer)
 	return int(writen), err
 }
 
 // Flush writes data in buffer to underlying writer if buffer has data.
 // It's safe in concurrency.
-func (bf *bufferedWriter) Flush() (n int, err error) {
+func (bw *bufferedWriter) Flush() (n int, err error) {
 
-	bf.lock.Lock()
-	defer bf.lock.Unlock()
+	bw.lock.Lock()
+	defer bw.lock.Unlock()
 
-	if bf.buffer.Len() > 0 {
-		return bf.flush()
+	if bw.buffer.Len() > 0 {
+		return bw.flush()
 	}
 	return 0, nil
 }
 
 // AutoFlush starts a goroutine to flush data automatically.
 // It returns a channel for stopping this goroutine.
-func (bf *bufferedWriter) AutoFlush(frequency time.Duration) chan<- struct{} {
+func (bw *bufferedWriter) AutoFlush(frequency time.Duration) chan<- struct{} {
 
 	stopChan := make(chan struct{}, 1)
 	go func() {
@@ -102,7 +102,7 @@ func (bf *bufferedWriter) AutoFlush(frequency time.Duration) chan<- struct{} {
 		for {
 			select {
 			case <-ticker.C:
-				bf.Flush()
+				bw.Flush()
 			case <-stopChan:
 				ticker.Stop()
 				return
@@ -113,29 +113,29 @@ func (bf *bufferedWriter) AutoFlush(frequency time.Duration) chan<- struct{} {
 }
 
 // Write writes p to buffer and flushes data to underlying writer first if need.
-func (bf *bufferedWriter) Write(p []byte) (n int, err error) {
+func (bw *bufferedWriter) Write(p []byte) (n int, err error) {
 
-	bf.lock.Lock()
-	defer bf.lock.Unlock()
+	bw.lock.Lock()
+	defer bw.lock.Unlock()
 
-	if bf.needFlush() {
-		bf.flush() // ignore error so this p can be written to buffer which may cause buffer grows up
+	if bw.needFlush() {
+		bw.flush() // ignore error so this p can be written to buffer which may cause buffer grows up
 	}
-	return bf.buffer.Write(p)
+	return bw.buffer.Write(p)
 }
 
 // Close flushes data and closes underlying writer if writer implements io.Closer.
-func (bf *bufferedWriter) Close() error {
+func (bw *bufferedWriter) Close() error {
 
-	bf.lock.Lock()
-	defer bf.lock.Unlock()
+	bw.lock.Lock()
+	defer bw.lock.Unlock()
 
-	_, err := bf.flush()
+	_, err := bw.flush()
 	if err != nil {
 		return err
 	}
 
-	if wCloser, ok := bf.writer.(io.Closer); ok {
+	if wCloser, ok := bw.writer.(io.Closer); ok && notStdoutAndStderr(bw.writer) {
 		return wCloser.Close()
 	}
 	return nil

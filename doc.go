@@ -54,8 +54,8 @@ Package logit provides an easy way to use foundation for your logging operations
 	options := logit.Options()
 	options.WithCaller()                          // Let logs carry caller information
 	options.WithLevelKey("lvl")                   // Change logger's level key to "lvl"
-	options.WithWriter(os.Stderr)                 // Change logger's writer to os.Stderr
-	options.WithBuffered(os.Stderr)               // Change logger's writer to os.Stderr with buffer
+	options.WithWriter(os.Stderr, true)           // Change logger's writer to os.Stderr with buffer
+	options.WithErrorWriter(os.Stderr, false)     // Change logger's error writer to os.Stderr without buffer
 	options.WithTimeFormat("2006-01-02 15:04:05") // Change the format of time (Only the log's time will apply it)
 
 2. options:
@@ -67,8 +67,15 @@ Package logit provides an easy way to use foundation for your logging operations
 	options.WithWarnLevel()
 	options.WithErrorLevel()
 	options.WithAppender(appender.Text())
-	options.WithWriter(os.Stderr)
-	options.WithBuffered(os.Stderr)
+	options.WithDebugAppender(appender.Text())
+	options.WithInfoAppender(appender.Text())
+	options.WithWarnAppender(appender.Text())
+	options.WithErrorAppender(appender.Text())
+	options.WithWriter(os.Stderr, false)
+	options.WithDebugWriter(os.Stderr, false)
+	options.WithInfoWriter(os.Stderr, false)
+	options.WithWarnWriter(os.Stderr, false)
+	options.WithErrorWriter(os.Stderr, false)
 	options.WithPid()
 	options.WithCaller()
 	options.WithMsgKey("msg")
@@ -82,7 +89,7 @@ Package logit provides an easy way to use foundation for your logging operations
 	// Remember, these options is only used for creating a logger
 	logger := logit.NewLogger(
 		options.WithPid(),
-		options.WithBuffered(os.Stdout),
+		options.WithWriter(os.Stdout, false),
 		options.WithTimeFormat("2006/01/02 15:04:05"),
 		// ...
 	)
@@ -127,6 +134,14 @@ Package logit provides an easy way to use foundation for your logging operations
 	logger = logit.NewLogger(logit.Options().WithAppender(appender.Json()))
 	logger.Info("appender.Json()").End()
 
+	// Every level has its own appender so you can append logs in different level with different appender
+	logger = logit.NewLogger(
+		logit.Options().WithDebugAppender(appender.Text()),
+		logit.Options().WithInfoAppender(appender.Text()),
+		logit.Options().WithWarnAppender(appender.Json()),
+		logit.Options().WithErrorAppender(appender.Json()),
+	)
+
 	// Appender is an interface so you can implement your own appender
 	// However, we don't recommend you to do that
 	// This interface may change in every version, so you will pay lots of extra attention to it
@@ -148,16 +163,24 @@ Package logit provides an easy way to use foundation for your logging operations
 	writer.Wrapped(os.Stdout)  // Wrap io.Writer to writer.Writer
 	writer.Buffered(os.Stderr) // Wrap io.Writer to writer.Writer with buffer, which needs invoking Flush() or Close()
 
-	// Use them with options like appender
-	logger := logit.NewLogger(logit.Options().WithWriter(os.Stdout))
-	logger.Info("WithWriter").End()
+	// Use the writer without buffer
+	logger := logit.NewLogger(logit.Options().WithWriter(os.Stdout, false))
+	logger.Info("WriterWithoutBuffer").End()
 
-	// WithBuffered uses a Writer with buffer, which is good for io
-	logger = logit.NewLogger(logit.Options().WithBuffered(os.Stdout))
+	// Use the writer with buffer, which is good for io
+	logger = logit.NewLogger(logit.Options().WithWriter(os.Stdout, true))
 	defer logger.Close() // Flush data and close writer
 
-	logger.Info("WithBuffered").End()
+	logger.Info("WriterWithBuffer").End()
 	logger.Flush() // Remember flushing data or flushing by Close()
+
+	// Every level has its own appender so you can append logs in different level with different appender
+	logger = logit.NewLogger(
+		logit.Options().WithDebugWriter(os.Stdout, true),
+		logit.Options().WithInfoWriter(os.Stdout, true),
+		logit.Options().WithWarnWriter(os.Stdout, false),
+		logit.Options().WithErrorWriter(os.Stdout, false),
+	)
 
 5. global:
 
@@ -185,5 +208,5 @@ package logit // import "github.com/FishGoddess/logit"
 
 const (
 	// Version is the version string representation of logit.
-	Version = "v0.4.2-alpha"
+	Version = "v0.4.3-alpha"
 )

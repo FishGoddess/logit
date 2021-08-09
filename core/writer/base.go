@@ -20,6 +20,7 @@ package writer
 
 import (
 	"io"
+	"os"
 
 	"github.com/FishGoddess/logit/core"
 )
@@ -38,6 +39,11 @@ type Flusher interface {
 type Writer interface {
 	Flusher        // Flusher is an interface that flushes data to somewhere.
 	io.WriteCloser // WriteCloser is an interface that writes data to somewhere and can be closed.
+}
+
+// notStdoutAndStderr returns true if w isn't stdout and stderr.
+func notStdoutAndStderr(w io.Writer) bool {
+	return w != os.Stdout && w != os.Stderr
 }
 
 // Wrapped wraps writer to Writer.

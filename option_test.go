@@ -92,16 +92,164 @@ func TestOptionsWithAppender(t *testing.T) {
 	opts := Options()
 
 	logger := NewLogger()
-	logger.appender = nil
+	logger.debugAppender = nil
+	logger.infoAppender = nil
+	logger.warnAppender = nil
+	logger.errorAppender = nil
 	opts.WithAppender(appender.Text())(logger)
-	if logger.appender != appender.Text() {
-		t.Fatalf("logger's appender %s is wrong", logger.appender)
+
+	if logger.debugAppender != appender.Text() {
+		t.Fatalf("logger's debugAppender %s is wrong", logger.debugAppender)
 	}
 
-	logger.appender = nil
+	if logger.infoAppender != appender.Text() {
+		t.Fatalf("logger's infoAppender %s is wrong", logger.infoAppender)
+	}
+
+	if logger.warnAppender != appender.Text() {
+		t.Fatalf("logger's warnAppender %s is wrong", logger.warnAppender)
+	}
+
+	if logger.errorAppender != appender.Text() {
+		t.Fatalf("logger's errorAppender %s is wrong", logger.errorAppender)
+	}
+
+	logger.debugAppender = nil
+	logger.infoAppender = nil
+	logger.warnAppender = nil
+	logger.errorAppender = nil
 	opts.WithAppender(appender.Json())(logger)
-	if logger.appender != appender.Json() {
-		t.Fatalf("logger's appender %s is wrong", logger.appender)
+
+	if logger.debugAppender != appender.Json() {
+		t.Fatalf("logger's debugAppender %s is wrong", logger.debugAppender)
+	}
+
+	if logger.infoAppender != appender.Json() {
+		t.Fatalf("logger's infoAppender %s is wrong", logger.infoAppender)
+	}
+
+	if logger.warnAppender != appender.Json() {
+		t.Fatalf("logger's warnAppender %s is wrong", logger.warnAppender)
+	}
+
+	if logger.errorAppender != appender.Json() {
+		t.Fatalf("logger's errorAppender %s is wrong", logger.errorAppender)
+	}
+}
+
+// go test -v -cover -run=^TestOptionsWithDebugAppender$
+func TestOptionsWithDebugAppender(t *testing.T) {
+
+	opts := Options()
+
+	logger := NewLogger()
+	logger.debugAppender = nil
+	logger.infoAppender = nil
+	logger.warnAppender = nil
+	logger.errorAppender = nil
+	opts.WithDebugAppender(appender.Text())(logger)
+
+	if logger.debugAppender != appender.Text() {
+		t.Fatalf("logger's debugAppender %s is wrong", logger.debugAppender)
+	}
+
+	if logger.infoAppender != nil {
+		t.Fatalf("logger's infoAppender %s is wrong", logger.infoAppender)
+	}
+
+	if logger.warnAppender != nil {
+		t.Fatalf("logger's warnAppender %s is wrong", logger.warnAppender)
+	}
+
+	if logger.errorAppender != nil {
+		t.Fatalf("logger's errorAppender %s is wrong", logger.errorAppender)
+	}
+}
+
+// go test -v -cover -run=^TestOptionsWithInfoAppender$
+func TestOptionsWithInfoAppender(t *testing.T) {
+
+	opts := Options()
+
+	logger := NewLogger()
+	logger.debugAppender = nil
+	logger.infoAppender = nil
+	logger.warnAppender = nil
+	logger.errorAppender = nil
+	opts.WithInfoAppender(appender.Text())(logger)
+
+	if logger.debugAppender != nil {
+		t.Fatalf("logger's debugAppender %s is wrong", logger.debugAppender)
+	}
+
+	if logger.infoAppender != appender.Text() {
+		t.Fatalf("logger's infoAppender %s is wrong", logger.infoAppender)
+	}
+
+	if logger.warnAppender != nil {
+		t.Fatalf("logger's warnAppender %s is wrong", logger.warnAppender)
+	}
+
+	if logger.errorAppender != nil {
+		t.Fatalf("logger's errorAppender %s is wrong", logger.errorAppender)
+	}
+}
+
+// go test -v -cover -run=^TestOptionsWithWarnAppender$
+func TestOptionsWithWarnAppender(t *testing.T) {
+
+	opts := Options()
+
+	logger := NewLogger()
+	logger.debugAppender = nil
+	logger.infoAppender = nil
+	logger.warnAppender = nil
+	logger.errorAppender = nil
+	opts.WithWarnAppender(appender.Text())(logger)
+
+	if logger.debugAppender != nil {
+		t.Fatalf("logger's debugAppender %s is wrong", logger.debugAppender)
+	}
+
+	if logger.infoAppender != nil {
+		t.Fatalf("logger's infoAppender %s is wrong", logger.infoAppender)
+	}
+
+	if logger.warnAppender != appender.Text() {
+		t.Fatalf("logger's warnAppender %s is wrong", logger.warnAppender)
+	}
+
+	if logger.errorAppender != nil {
+		t.Fatalf("logger's errorAppender %s is wrong", logger.errorAppender)
+	}
+}
+
+// go test -v -cover -run=^TestOptionsWithErrorAppender$
+func TestOptionsWithErrorAppender(t *testing.T) {
+
+	opts := Options()
+
+	logger := NewLogger()
+	logger.debugAppender = nil
+	logger.infoAppender = nil
+	logger.warnAppender = nil
+	logger.errorAppender = nil
+	opts.WithErrorAppender(appender.Text())(logger)
+
+	if logger.debugAppender != nil {
+		t.Fatalf("logger's debugAppender %s is wrong", logger.debugAppender)
+	}
+
+	if logger.infoAppender != nil {
+		t.Fatalf("logger's infoAppender %s is wrong", logger.infoAppender)
+	}
+
+	if logger.warnAppender != nil {
+		t.Fatalf("logger's warnAppender %s is wrong", logger.warnAppender)
+	}
+
+	if logger.errorAppender != appender.Text() {
+		t.Fatalf("logger's errorAppender %s is wrong", logger.errorAppender)
 	}
 }
 
@@ -111,23 +259,142 @@ func TestOptionsWithWriter(t *testing.T) {
 	opts := Options()
 
 	logger := NewLogger()
-	logger.writer = nil
-	opts.WithWriter(os.Stdout)(logger)
-	if logger.writer == nil {
-		t.Fatalf("logger's writer %s is wrong", logger.writer)
+	logger.debugWriter = nil
+	logger.infoWriter = nil
+	logger.warnWriter = nil
+	logger.errorWriter = nil
+	opts.WithWriter(os.Stdout, false)(logger)
+
+	if logger.debugWriter == nil {
+		t.Fatalf("logger's debugWriter %s is wrong", logger.debugWriter)
+	}
+
+	if logger.infoWriter == nil {
+		t.Fatalf("logger's infoWriter %s is wrong", logger.infoWriter)
+	}
+
+	if logger.warnWriter == nil {
+		t.Fatalf("logger's warnWriter %s is wrong", logger.warnWriter)
+	}
+
+	if logger.errorWriter == nil {
+		t.Fatalf("logger's errorWriter %s is wrong", logger.errorWriter)
 	}
 }
 
-// go test -v -cover -run=^TestOptionsWithBuffered$
-func TestOptionsWithBuffered(t *testing.T) {
+// go test -v -cover -run=^TestOptionsWithDebugWriter$
+func TestOptionsWithDebugWriter(t *testing.T) {
 
 	opts := Options()
 
 	logger := NewLogger()
-	logger.writer = nil
-	opts.WithBuffered(os.Stdout)(logger)
-	if logger.writer == nil {
-		t.Fatalf("logger's writer %s is wrong", logger.writer)
+	logger.debugWriter = nil
+	logger.infoWriter = nil
+	logger.warnWriter = nil
+	logger.errorWriter = nil
+	opts.WithDebugWriter(os.Stdout, false)(logger)
+
+	if logger.debugWriter == nil {
+		t.Fatalf("logger's debugWriter %s is wrong", logger.debugWriter)
+	}
+
+	if logger.infoWriter != nil {
+		t.Fatalf("logger's infoWriter %s is wrong", logger.infoWriter)
+	}
+
+	if logger.warnWriter != nil {
+		t.Fatalf("logger's warnWriter %s is wrong", logger.warnWriter)
+	}
+
+	if logger.errorWriter != nil {
+		t.Fatalf("logger's errorWriter %s is wrong", logger.errorWriter)
+	}
+}
+
+// go test -v -cover -run=^TestOptionsWithInfoWriter$
+func TestOptionsWithInfoWriter(t *testing.T) {
+
+	opts := Options()
+
+	logger := NewLogger()
+	logger.debugWriter = nil
+	logger.infoWriter = nil
+	logger.warnWriter = nil
+	logger.errorWriter = nil
+	opts.WithInfoWriter(os.Stdout, false)(logger)
+
+	if logger.debugWriter != nil {
+		t.Fatalf("logger's debugWriter %s is wrong", logger.debugWriter)
+	}
+
+	if logger.infoWriter == nil {
+		t.Fatalf("logger's infoWriter %s is wrong", logger.infoWriter)
+	}
+
+	if logger.warnWriter != nil {
+		t.Fatalf("logger's warnWriter %s is wrong", logger.warnWriter)
+	}
+
+	if logger.errorWriter != nil {
+		t.Fatalf("logger's errorWriter %s is wrong", logger.errorWriter)
+	}
+}
+
+// go test -v -cover -run=^TestOptionsWithWarnWriter$
+func TestOptionsWithWarnWriter(t *testing.T) {
+
+	opts := Options()
+
+	logger := NewLogger()
+	logger.debugWriter = nil
+	logger.infoWriter = nil
+	logger.warnWriter = nil
+	logger.errorWriter = nil
+	opts.WithWarnWriter(os.Stdout, false)(logger)
+
+	if logger.debugWriter != nil {
+		t.Fatalf("logger's debugWriter %s is wrong", logger.debugWriter)
+	}
+
+	if logger.infoWriter != nil {
+		t.Fatalf("logger's infoWriter %s is wrong", logger.infoWriter)
+	}
+
+	if logger.warnWriter == nil {
+		t.Fatalf("logger's warnWriter %s is wrong", logger.warnWriter)
+	}
+
+	if logger.errorWriter != nil {
+		t.Fatalf("logger's errorWriter %s is wrong", logger.errorWriter)
+	}
+}
+
+// go test -v -cover -run=^TestOptionsWithErrorWriter$
+func TestOptionsWithErrorWriter(t *testing.T) {
+
+	opts := Options()
+
+	logger := NewLogger()
+	logger.debugWriter = nil
+	logger.infoWriter = nil
+	logger.warnWriter = nil
+	logger.errorWriter = nil
+	opts.WithErrorWriter(os.Stdout, false)(logger)
+
+	if logger.debugWriter != nil {
+		t.Fatalf("logger's debugWriter %s is wrong", logger.debugWriter)
+	}
+
+	if logger.infoWriter != nil {
+		t.Fatalf("logger's infoWriter %s is wrong", logger.infoWriter)
+	}
+
+	if logger.warnWriter != nil {
+		t.Fatalf("logger's warnWriter %s is wrong", logger.warnWriter)
+	}
+
+	if logger.errorWriter == nil {
+		t.Fatalf("logger's errorWriter %s is wrong", logger.errorWriter)
 	}
 }
 

@@ -41,14 +41,22 @@ func main() {
 	writer.Wrapped(os.Stdout)  // Wrap io.Writer to writer.Writer
 	writer.Buffered(os.Stderr) // Wrap io.Writer to writer.Writer with buffer, which needs invoking Flush() or Close()
 
-	// Use them with options like appender
-	logger := logit.NewLogger(logit.Options().WithWriter(os.Stdout))
-	logger.Info("WithWriter").End()
+	// Use the writer without buffer
+	logger := logit.NewLogger(logit.Options().WithWriter(os.Stdout, false))
+	logger.Info("WriterWithoutBuffer").End()
 
-	// WithBuffered uses a Writer with buffer, which is good for io
-	logger = logit.NewLogger(logit.Options().WithBuffered(os.Stdout))
+	// Use the writer with buffer, which is good for io
+	logger = logit.NewLogger(logit.Options().WithWriter(os.Stdout, true))
 	defer logger.Close() // Flush data and close writer
 
-	logger.Info("WithBuffered").End()
+	logger.Info("WriterWithBuffer").End()
 	logger.Flush() // Remember flushing data or flushing by Close()
+
+	// Every level has its own appender so you can append logs in different level with different appender
+	logger = logit.NewLogger(
+		logit.Options().WithDebugWriter(os.Stdout, true),
+		logit.Options().WithInfoWriter(os.Stdout, true),
+		logit.Options().WithWarnWriter(os.Stdout, false),
+		logit.Options().WithErrorWriter(os.Stdout, false),
+	)
 }

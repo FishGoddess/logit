@@ -20,6 +20,7 @@ package writer
 
 import (
 	"bytes"
+	"os"
 	"testing"
 	"time"
 
@@ -47,5 +48,25 @@ func TestBufferedWriter(t *testing.T) {
 
 	if buffer.String() != "abc123.!?+-*/" {
 		t.Fatalf("writing abc123.!?+-*/ but found %s in buffer", buffer.String())
+	}
+}
+
+// go test -v -cover -run=^TestBufferedWriterClose$
+func TestBufferedWriterClose(t *testing.T) {
+
+	writer := newBufferedWriter(os.Stdout, 4096)
+	for i := 0; i < 10; i++ {
+		err := writer.Close()
+		if err != nil {
+			t.Fatal(err)
+		}
+	}
+
+	writer = newBufferedWriter(os.Stderr, 4096)
+	for i := 0; i < 10; i++ {
+		err := writer.Close()
+		if err != nil {
+			t.Fatal(err)
+		}
 	}
 }

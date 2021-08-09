@@ -18,7 +18,9 @@
 
 package writer
 
-import "io"
+import (
+	"io"
+)
 
 // wrappedWriter is a Writer implement for wrapping normal writer.
 type wrappedWriter struct {
@@ -45,7 +47,7 @@ func (ww *wrappedWriter) Write(p []byte) (n int, err error) {
 
 // Close closes the underlying writer.
 func (ww *wrappedWriter) Close() error {
-	if closer, ok := ww.writer.(io.Closer); ok {
+	if closer, ok := ww.writer.(io.Closer); ok && notStdoutAndStderr(ww.writer){
 		return closer.Close()
 	}
 	return nil

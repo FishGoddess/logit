@@ -5,7 +5,7 @@
 [![License](_icons/build.svg)](_icons/build.svg)
 [![License](_icons/coverage.svg)](_icons/coverage.svg)
 
-**logit** 是一个基于级别控制的高性能结构化日志库，可以应用于所有的 [GoLang](https://golang.org) 应用程序中。
+**logit** 是一个基于级别控制的高性能纯结构化日志库，可以应用于所有的 [GoLang](https://golang.org) 应用程序中。
 
 > 在看了一些优秀日志库的设计之后，我越发觉得 logit 非常烂，尤其是和 zerolog 对比之后，简直不堪入目。这让我夜不能寐，最后在小黑屋中完成了新的设计方案。
 
@@ -21,10 +21,11 @@
 * 支持以 Text/Json 形式输出日志信息，方便对日志进行解析
 * 支持异步回写日志，提供高性能缓冲写出器模块，减少 IO 的访问次数
 * 提供调优使用的全局配置，对一些高级配置更贴合实际业务的需求
+* 分级别追加日志数据，分级别写出日志数据，推荐将 error 级别的日志单独处理和存储
 
 _历史版本的特性请查看 [HISTORY.md](./HISTORY.md)。未来版本的新特性和计划请查看 [FUTURE.md](./FUTURE.md)。_
 
-> v0.4.x 版本已经在规划开发中，这是一个全新设计的版本！
+> v0.4.x 版本已经在开发中，这是一个全新设计的版本！
 
 ### 🚀 安装方式
 
@@ -79,8 +80,8 @@ func main() {
 	options := logit.Options()
 	options.WithCaller()                          // Let logs carry caller information
 	options.WithLevelKey("lvl")                   // Change logger's level key to "lvl"
-	options.WithWriter(os.Stderr)                 // Change logger's writer to os.Stderr
-	options.WithBuffered(os.Stderr)               // Change logger's writer to os.Stderr with buffer
+	options.WithWriter(os.Stderr, true)           // Change logger's writer to os.Stderr with buffer
+	options.WithErrorWriter(os.Stderr, false)     // Change logger's error writer to os.Stderr without buffer
 	options.WithTimeFormat("2006-01-02 15:04:05") // Change the format of time (Only the log's time will apply it)
 }
 ```
@@ -103,15 +104,15 @@ $ go test -v ./_examples/benchmarks_test.go -bench=. -benchtime=1s
 
 | 测试（输出到内存） | 单位时间内运行次数 (越大越好) |  每个操作消耗时间 (越小越好) | B/op (越小越好) | allocs/op (越小越好) |
 | -----------|--------|-------------|-------------|-------------|
-| **logit** | **856915** | **&nbsp; 1385 ns/op** | **&nbsp; &nbsp; &nbsp; 0 B/op** | **&nbsp; &nbsp; 0 allocs/op** |
+| **logit** | **799759** | **&nbsp; 1373 ns/op** | **&nbsp; &nbsp; &nbsp; 0 B/op** | **&nbsp; &nbsp; 0 allocs/op** |
 | zerolog | 922863 | &nbsp; 1244 ns/op | &nbsp; &nbsp; &nbsp; 0 B/op | &nbsp; &nbsp; 0 allocs/op |
 | zap | 413701 | &nbsp; 2824 ns/op | &nbsp; 897 B/op | &nbsp; &nbsp; 8 allocs/op |
 | logrus | 105238 | 11474 ns/op | 7411 B/op | 128 allocs/op |
 
 | 测试（输出到文件） | 单位时间内运行次数 (越大越好) |  每个操作消耗时间 (越小越好) | B/op (越小越好) | allocs/op (越小越好) |
 | -----------|--------|-------------|-------------|-------------|
-| **logit** | **599868** | **&nbsp; 1807 ns/op** | **&nbsp; 901 B/op** | **&nbsp; &nbsp; 0 allocs/op** |
-| **logit-不缓冲** | **149965** | **&nbsp; 7704 ns/op** | **&nbsp; &nbsp; &nbsp; 0 B/op** | **&nbsp; &nbsp; 0 allocs/op** |
+| **logit** | **599862** | **&nbsp; 1768 ns/op** | **&nbsp; 901 B/op** | **&nbsp; &nbsp; 0 allocs/op** |
+| **logit-不缓冲** | **148113** | **&nbsp; 7773 ns/op** | **&nbsp; &nbsp; &nbsp; 0 B/op** | **&nbsp; &nbsp; 0 allocs/op** |
 | zerolog | 159962 | &nbsp; 7472 ns/op | &nbsp; &nbsp; &nbsp; 0 B/op | &nbsp; &nbsp; 0 allocs/op |
 | zap | 130405 | &nbsp; 9137 ns/op | &nbsp; 897 B/op | &nbsp; &nbsp; 8 allocs/op |
 | logrus | &nbsp; 65202 | 18439 ns/op | 7410 B/op | 128 allocs/op |
@@ -126,5 +127,5 @@ $ go test -v ./_examples/benchmarks_test.go -bench=. -benchtime=1s
 
 | 项目 | 作者 | 描述 | 链接 |
 | -----------|--------|-------------| ---------------- |
-| postar | avino-plan | 一个极易上手的低耦合高性能邮件服务 | [Github](https://github.com/avino-plan/postar) / [码云](https://gitee.com/avino-plan/postar) |
-| kafo | FishGoddess | 一个高性能的轻量级分布式缓存中间件 | [Github](https://github.com/FishGoddess/kafo) / [码云](https://gitee.com/FishGoddess/kafo) |
+| postar | avino-plan | 一个极易上手的低耦合通用邮件服务 | [Github](https://github.com/avino-plan/postar) / [码云](https://gitee.com/avino-plan/postar) |
+| kafo | FishGoddess | 一个简单的轻量级分布式缓存中间件 | [Github](https://github.com/FishGoddess/kafo) / [码云](https://gitee.com/FishGoddess/kafo) |

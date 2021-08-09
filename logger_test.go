@@ -34,7 +34,7 @@ func TestNewLogger(t *testing.T) {
 	logger := NewLogger(
 		options.WithDebugLevel(),
 		options.WithAppender(appender.Json()),
-		options.WithWriter(buffer),
+		options.WithWriter(buffer, false),
 		//options.WithPid(),
 		//options.WithCaller(),
 		//options.WithMsgKey("message"),
@@ -63,5 +63,28 @@ func TestNewLogger(t *testing.T) {
 	output := buffer.String()
 	if output != logs {
 		t.Fatalf("logs %s is wrong with %s", output, logs)
+	}
+}
+
+// go test -v -cover -run=^TestLoggerFlush$
+func TestLoggerFlush(t *testing.T) {
+	logger := NewLogger()
+	_, err := logger.Flush()
+	if err != nil {
+		t.Fatal(err)
+	}
+}
+
+// go test -v -cover -run=^TestLoggerClose$
+func TestLoggerClose(t *testing.T) {
+
+	logger := NewLogger()
+	err := logger.Close()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if logger.level != offLevel {
+		t.Fatalf("level of logger %+v is wrong", logger.level)
 	}
 }
