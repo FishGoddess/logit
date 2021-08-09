@@ -101,7 +101,7 @@ _All examples can be found in [_examples](./_examples)._
 $ go test -v ./_examples/benchmarks_test.go -bench=. -benchtime=1s
 ```
 
-> Benchmark file：[_examples/benchmarks_test.go](./_examples/benchmarks_test.go)
+> Benchmark file：[_examples/performance_test.go](./_examples/performance_test.go)
 
 | test case(output to memory) | times ran (large is better) |  ns/op (small is better) | B/op | allocs/op |
 | -----------|--------|-------------|-------------|-------------|

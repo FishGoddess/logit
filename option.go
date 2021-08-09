@@ -107,17 +107,16 @@ func (o *options) WithErrorAppender(appender appender.Appender) Option {
 func (o *options) WithWriter(w io.Writer, buffered bool) Option {
 	return func(logger *Logger) {
 
+		var wr writer.Writer
 		if buffered {
-			logger.debugWriter = writer.Buffered(w)
-			logger.infoWriter = writer.Buffered(w)
-			logger.warnWriter = writer.Buffered(w)
-			logger.errorWriter = writer.Buffered(w)
+			wr = writer.Buffered(w)
 		} else {
-			logger.debugWriter = writer.Wrapped(w)
-			logger.infoWriter = writer.Wrapped(w)
-			logger.warnWriter = writer.Wrapped(w)
-			logger.errorWriter = writer.Wrapped(w)
+			wr = writer.Wrapped(w)
 		}
+		logger.debugWriter = wr
+		logger.infoWriter = wr
+		logger.warnWriter = wr
+		logger.errorWriter = wr
 	}
 }
 

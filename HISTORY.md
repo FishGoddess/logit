@@ -1,5 +1,11 @@
 ## ✒ 历史版本的特性介绍 (Features in old versions)
 
+### v0.4.4-alpha
+
+> 此版本发布于 2021-08-10
+
+* 修复 WithWriter 的顺序问题
+
 ### v0.4.3-alpha
 
 > 此版本发布于 2021-08-10
