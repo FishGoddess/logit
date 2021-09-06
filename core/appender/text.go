@@ -29,7 +29,7 @@ const (
 	textArrayBegin         = '['   // textArrayBegin is the begin character of array.
 	textArrayEnd           = ']'   // textArrayEnd is the end character of array.
 	textArrayItemSeparator = ','   // textArrayItemSeparator is the character between items in array.
-	textItemSeparator      = '&'   // textItemSeparator is the character between items.
+	textItemSeparator      = '|'   // textItemSeparator is the character between items.
 	textKeyValueSeparator  = '='   // textKeyValueSeparator is the character between key and value.
 	textNil                = "nil" // textNil is the null characters of Json.
 )
