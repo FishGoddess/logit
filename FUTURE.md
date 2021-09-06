@@ -9,6 +9,12 @@
 * 按时间、文件大小自动切割日志文件
 * 重新支持配置文件
 
+### v0.4.5-alpha
+
+* 修复 Appender 接口实现类检验失效问题
+* 调整 textAppender 的字段分隔符为 |
+* 去除 signal 机制的 TODO
+
 ### v0.4.4-alpha
 
 * 修复 WithWriter 的顺序问题

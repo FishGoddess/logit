@@ -34,8 +34,8 @@ const (
 )
 
 var (
-	_ = (*textAppender)(nil) // For check.
-	_ = (*jsonAppender)(nil) // For check.
+	globalTextAppender Appender = (*textAppender)(nil) // Check and use.
+	globalJsonAppender Appender = (*jsonAppender)(nil) // Check and use.
 )
 
 // Appender is an interface of appending entries to a byte slice.
@@ -149,10 +149,10 @@ func appendEscapedString(dst []byte, value string) []byte {
 
 // Text returns an Text appender.
 func Text() Appender {
-	return (*textAppender)(nil)
+	return globalTextAppender
 }
 
 // Json returns a Json appender.
 func Json() Appender {
-	return (*jsonAppender)(nil)
+	return globalJsonAppender
 }

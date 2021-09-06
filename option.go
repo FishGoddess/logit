@@ -243,10 +243,3 @@ func (o *options) WithAutoFlush(frequency time.Duration) Option {
 		}()
 	}
 }
-
-// WithAutoClose returns an option which do close automatically at some signal happened.
-func (o *options) WithAutoClose() Option {
-	return func(logger *Logger) {
-		// TODO 监听特定的信号，当信号发生时执行 logger.Close()
-	}
-}

@@ -1,5 +1,13 @@
 ## ✒ 历史版本的特性介绍 (Features in old versions)
 
+### v0.4.5-alpha
+
+> 此版本发布于 2021-09-06
+
+* 修复 Appender 接口实现类检验失效问题
+* 调整 textAppender 的字段分隔符为 |
+* 去除 signal 机制的 TODO
+
 ### v0.4.4-alpha
 
 > 此版本发布于 2021-08-10
