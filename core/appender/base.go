@@ -99,20 +99,31 @@ func needEscapedRune(value rune) bool {
 // The main character should be escaped is ascii less than \u0020 and \ and ".
 func appendEscapedByte(dst []byte, value byte) []byte {
 
-	// ASCii < 16 needs to add \u000 to behind
-	if value < 16 {
-		return strconv.AppendInt(append(dst, '\\', 'u', '0', '0', '0'), int64(value), 16)
-	}
-
-	// ASCii in [16, 32) needs to add \u00 to behind
-	if value < 32 {
-		return strconv.AppendInt(append(dst, '\\', 'u', '0', '0'), int64(value), 16)
-	}
-
-	if value == '"' || value == '\\' {
+	switch value {
+	case '"', '\\':
 		return append(dst, '\\', value)
+	case '\b':
+		return append(dst, '\\', 'b')
+	case '\f':
+		return append(dst, '\\', 'f')
+	case '\n':
+		return append(dst, '\\', 'n')
+	case '\r':
+		return append(dst, '\\', 'r')
+	case '\t':
+		return append(dst, '\\', 't')
+	default:
+		// ASCii < 16 needs to add \u000 to behind
+		if value < 16 {
+			return strconv.AppendInt(append(dst, '\\', 'u', '0', '0', '0'), int64(value), 16)
+		}
+
+		// ASCii in [16, 32) needs to add \u00 to behind
+		if value < 32 {
+			return strconv.AppendInt(append(dst, '\\', 'u', '0', '0'), int64(value), 16)
+		}
+		return append(dst, value)
 	}
-	return append(dst, value)
 }
 
 // The main character should be escaped is ascii less than \u0020 and \ and ".

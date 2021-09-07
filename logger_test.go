@@ -54,10 +54,10 @@ func TestNewLogger(t *testing.T) {
 	logger.Info("info...").Bools("bools", []bool{true, false}).Bytes("bytes", []byte{'\b', '\t', 'a', 'b', 'c', '"', '\n'}).Int16s("int16s", []int16{123, 4567, 8901}).Float32s("float32s", []float32{3.14, 6.18}).End()
 
 	logs := `{"log.level":"debug","log.msg":"debug...","trace":"xxx","id":123,"pi":3.14,"any":{"a":1,"b":"bbb"}}
-{"log.level":"error","log.msg":"error...","b":"a","es":"\u000a","words":["我","是","中","国","人"],"err":"我是错误"}
+{"log.level":"error","log.msg":"error...","b":"a","es":"\n","words":["我","是","中","国","人"],"err":"我是错误"}
 {"log.level":"error","log.msg":"error with 666...","trace":"xxx","id":123,"pi":3.14}
-{"log.level":"warn","log.msg":"\"warn\"...\u000d\u0008\u0009\u000a","s\u0009b\u000ad\u0008":["abc\u000d","efg\u000a"]}
-{"log.level":"info","log.msg":"info...","bools":[true,false],"bytes":["\u0008","\u0009","a","b","c","\"","\u000a"],"int16s":[123,4567,8901],"float32s":[3.140000104904175,6.179999828338623]}
+{"log.level":"warn","log.msg":"\"warn\"...\r\b\t\n","s\tb\nd\b":["abc\r","efg\n"]}
+{"log.level":"info","log.msg":"info...","bools":[true,false],"bytes":["\b","\t","a","b","c","\"","\n"],"int16s":[123,4567,8901],"float32s":[3.140000104904175,6.179999828338623]}
 `
 
 	output := buffer.String()
