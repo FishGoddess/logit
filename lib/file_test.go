@@ -25,7 +25,6 @@ import (
 
 // go test -v -cover -run=^TestNewFile$
 func TestNewFile(t *testing.T) {
-
 	filePath := "Z:/" + t.Name()
 	os.Remove(filePath)
 

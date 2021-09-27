@@ -24,19 +24,19 @@ import (
 )
 
 var (
-	pid = os.Getpid()
+	pid = os.Getpid() // The pid of current process.
 )
 
+// Pid returns the pid of current process.
 func Pid() int {
 	return pid
 }
 
+// Caller returns the caller information of depth.
 func Caller(depth int) (file string, line int) {
-
-	var ok bool
-	_, file, line, ok = runtime.Caller(depth)
-	if ok {
+	if _, file, line, ok := runtime.Caller(depth); ok {
 		return file, line
 	}
+
 	return "unknown file", -1
 }

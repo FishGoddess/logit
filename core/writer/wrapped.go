@@ -37,6 +37,7 @@ func (ww *wrappedWriter) Flush() (n int, err error) {
 	if flusher, ok := ww.writer.(Flusher); ok {
 		return flusher.Flush()
 	}
+
 	return 0, nil
 }
 
@@ -50,5 +51,6 @@ func (ww *wrappedWriter) Close() error {
 	if closer, ok := ww.writer.(io.Closer); ok && notStdoutAndStderr(ww.writer){
 		return closer.Close()
 	}
+
 	return nil
 }

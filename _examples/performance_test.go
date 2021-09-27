@@ -69,8 +69,8 @@ const (
 
 // go test -v ./_examples/performance_test.go -bench=^BenchmarkLogitLoggerWithTextAppender$ -benchtime=1s
 func BenchmarkLogitLoggerWithTextAppender(b *testing.B) {
-
 	options := logit.Options()
+
 	logger := logit.NewLogger(
 		options.WithDebugLevel(),
 		options.WithAppender(appender.Text()),
@@ -95,8 +95,8 @@ func BenchmarkLogitLoggerWithTextAppender(b *testing.B) {
 
 // go test -v ./_examples/performance_test.go -bench=^BenchmarkLogitLoggerWithJsonAppender$ -benchtime=1s
 func BenchmarkLogitLoggerWithJsonAppender(b *testing.B) {
-
 	options := logit.Options()
+
 	logger := logit.NewLogger(
 		options.WithDebugLevel(),
 		options.WithAppender(appender.Json()),
@@ -121,8 +121,8 @@ func BenchmarkLogitLoggerWithJsonAppender(b *testing.B) {
 
 // go test -v ./_examples/performance_test.go -bench=^BenchmarkLogitLoggerWithFormat$ -benchtime=1s
 func BenchmarkLogitLoggerWithFormat(b *testing.B) {
-
 	options := logit.Options()
+
 	logger := logit.NewLogger(
 		options.WithDebugLevel(),
 		options.WithAppender(appender.Text()),
@@ -147,7 +147,6 @@ func BenchmarkLogitLoggerWithFormat(b *testing.B) {
 
 //// go test -v ./_examples/performance_test.go -bench=^BenchmarkZeroLogLogger$ -benchtime=1s
 //func BenchmarkZeroLogLogger(b *testing.B) {
-//
 //	zerolog.TimeFieldFormat = timeFormat
 //	logger := zerolog.New(&nopWriter{}).With().Timestamp().Logger()
 //
@@ -168,7 +167,6 @@ func BenchmarkLogitLoggerWithFormat(b *testing.B) {
 //
 //// go test -v ./_examples/performance_test.go -bench=^BenchmarkZapLogger$ -benchtime=1s
 //func BenchmarkZapLogger(b *testing.B) {
-//
 //	config := zap.NewProductionEncoderConfig()
 //	config.EncodeTime = func(t time.Time, enc zapcore.PrimitiveArrayEncoder) {
 //		enc.AppendString(t.Format(timeFormat))
@@ -196,7 +194,6 @@ func BenchmarkLogitLoggerWithFormat(b *testing.B) {
 //
 //// go test -v ./_examples/performance_test.go -bench=^BenchmarkLogrusLogger$ -benchtime=1s
 //func BenchmarkLogrusLogger(b *testing.B) {
-//
 //	logger := logrus.New()
 //	logger.SetOutput(&nopWriter{})
 //	logger.SetLevel(logrus.DebugLevel)
@@ -231,7 +228,6 @@ func createFileOf(filePath string) (*os.File, error) {
 
 // go test -v ./_examples/performance_test.go -bench=^BenchmarkLogitFileWithTextAppender$ -benchtime=1s
 func BenchmarkLogitFileWithTextAppender(b *testing.B) {
-
 	file, _ := createFileOf("Z:/" + b.Name() + ".log")
 	defer file.Close()
 
@@ -261,7 +257,6 @@ func BenchmarkLogitFileWithTextAppender(b *testing.B) {
 
 // go test -v ./_examples/performance_test.go -bench=^BenchmarkLogitFileWithJsonAppender$ -benchtime=1s
 func BenchmarkLogitFileWithJsonAppender(b *testing.B) {
-
 	file, _ := createFileOf("Z:/" + b.Name() + ".log")
 	defer file.Close()
 
@@ -291,7 +286,6 @@ func BenchmarkLogitFileWithJsonAppender(b *testing.B) {
 
 // go test -v ./_examples/performance_test.go -bench=^BenchmarkLogitFileWithoutBuffer$ -benchtime=1s
 func BenchmarkLogitFileWithoutBuffer(b *testing.B) {
-
 	file, _ := createFileOf("Z:/" + b.Name() + ".log")
 	defer file.Close()
 
@@ -320,7 +314,6 @@ func BenchmarkLogitFileWithoutBuffer(b *testing.B) {
 
 //// go test -v ./_examples/performance_test.go -bench=^BenchmarkZeroLogFile$ -benchtime=1s
 //func BenchmarkZeroLogFile(b *testing.B) {
-//
 //	file, _ := createFileOf("Z:/" + b.Name() + ".log")
 //	zerolog.TimeFieldFormat = timeFormat
 //	logger := zerolog.New(file).With().Timestamp().Logger()
@@ -342,7 +335,6 @@ func BenchmarkLogitFileWithoutBuffer(b *testing.B) {
 //
 //// go test -v ./_examples/performance_test.go -bench=^BenchmarkZapFile$ -benchtime=1s
 //func BenchmarkZapFile(b *testing.B) {
-//
 //	file, _ := createFileOf("Z:/" + b.Name() + ".log")
 //	config := zap.NewProductionEncoderConfig()
 //	config.EncodeTime = func(t time.Time, enc zapcore.PrimitiveArrayEncoder) {
@@ -371,7 +363,6 @@ func BenchmarkLogitFileWithoutBuffer(b *testing.B) {
 //
 //// go test -v ./_examples/performance_test.go -bench=^BenchmarkLogrusFile$ -benchtime=1s
 //func BenchmarkLogrusFile(b *testing.B) {
-//
 //	file, _ := createFileOf("Z:/" + b.Name() + ".log")
 //	logger := logrus.New()
 //	logger.SetOutput(file)

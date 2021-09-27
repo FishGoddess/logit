@@ -49,7 +49,6 @@ func (ta *textAppender) End(dst []byte) []byte {
 
 // appendKey appends key to dst.
 func (ta *textAppender) appendKey(dst []byte, key string) []byte {
-
 	if len(dst) > 0 {
 		dst = append(dst, textItemSeparator)
 	}
@@ -165,6 +164,7 @@ func (ta *textAppender) AppendTime(dst []byte, key string, value time.Time, form
 	if format == UnixTime {
 		return strconv.AppendInt(dst, value.Unix(), 10)
 	}
+
 	return value.AppendFormat(dst, format)
 }
 
@@ -173,31 +173,33 @@ func (ta *textAppender) AppendError(dst []byte, key string, value error) []byte 
 	if value == nil {
 		return append(ta.appendKey(dst, key), textNil...)
 	}
+
 	return ta.AppendString(dst, key, value.Error())
 }
 
 // AppendStringer appends an fmt.Stringer entry to dst.
 func (ta *textAppender) AppendStringer(dst []byte, key string, value fmt.Stringer) []byte {
-
 	val := reflect.ValueOf(value)
 	if val.Kind() == reflect.Ptr && val.IsNil() {
 		return append(dst, textNil...)
 	}
+
 	return ta.AppendString(dst, key, value.String())
 }
 
 // appendArray appends array to dst.
 func (ta *textAppender) appendArray(dst []byte, key string, length int, fn func(source []byte, index int) []byte) []byte {
-
 	dst = ta.appendKey(dst, key)
+
 	dst = append(dst, textArrayBegin)
 	for i := 0; i < length; i++ {
-
 		if dst[len(dst)-1] != textArrayBegin {
 			dst = append(dst, textArrayItemSeparator)
 		}
+
 		dst = fn(dst, i)
 	}
+
 	dst = append(dst, textArrayEnd)
 	return dst
 }
@@ -320,6 +322,7 @@ func (ta *textAppender) AppendTimes(dst []byte, key string, values []time.Time, 
 		if format == UnixTime {
 			return strconv.AppendInt(source, values[index].Unix(), 10)
 		}
+
 		return values[index].AppendFormat(source, format)
 	})
 }
@@ -330,6 +333,7 @@ func (ta *textAppender) AppendErrors(dst []byte, key string, values []error) []b
 		if values[index] == nil {
 			return append(source, textNil...)
 		}
+
 		return ta.AppendString(source, key, values[index].Error())
 	})
 }
@@ -341,6 +345,7 @@ func (ta *textAppender) AppendStringers(dst []byte, key string, values []fmt.Str
 		if val.Kind() == reflect.Ptr && val.IsNil() {
 			return append(source, textNil...)
 		}
+
 		return ta.AppendString(source, key, values[index].String())
 	})
 }

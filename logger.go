@@ -31,7 +31,6 @@ import (
 
 // Logger is the core of logging operations.
 type Logger struct {
-
 	// config stores all configurations of logger.
 	*config
 
@@ -53,7 +52,6 @@ type Logger struct {
 
 // NewLogger returns a new Logger created with options.
 func NewLogger(options ...Option) *Logger {
-
 	logger := &Logger{
 		config:        newDefaultConfig(),
 		debugAppender: appender.Text(),
@@ -74,6 +72,7 @@ func NewLogger(options ...Option) *Logger {
 	for _, applyOption := range options {
 		applyOption(logger)
 	}
+
 	return logger
 }
 
@@ -123,7 +122,6 @@ func (l *Logger) releaseLog(log *Log) {
 // log returns a Log instance with level and msg.
 // Check Log for more information.
 func (l *Logger) log(level level, msg string, params ...interface{}) *Log {
-
 	if level < l.level {
 		return nil
 	}
@@ -149,6 +147,7 @@ func (l *Logger) log(level level, msg string, params ...interface{}) *Log {
 	if len(params) > 0 {
 		msg = fmt.Sprintf(msg, params...)
 	}
+
 	log.String(l.msgKey, msg)
 	return log
 }
@@ -179,29 +178,32 @@ func (l *Logger) Error(msg string, params ...interface{}) *Log {
 // Close a logger will also invoke Flush(), so you can use an option or Close() to flush instead.
 // However, you still need to flush manually if you want your logs store immediately.
 func (l *Logger) Flush() (n int, err error) {
-
 	i, e := l.errorWriter.Flush()
 	if e != nil {
 		err = e
 	}
+
 	n += i
 
 	i, e = l.warnWriter.Flush()
 	if e != nil {
 		err = e
 	}
+
 	n += i
 
 	i, e = l.infoWriter.Flush()
 	if e != nil {
 		err = e
 	}
+
 	n += i
 
 	i, e = l.debugWriter.Flush()
 	if e != nil {
 		err = e
 	}
+
 	n += i
 	return n, err
 }
@@ -211,7 +213,6 @@ func (l *Logger) Flush() (n int, err error) {
 // It will invoke close() if writer is io.Closer.
 // So, it is recommended for you to invoke it habitually.
 func (l *Logger) Close() error {
-
 	l.level = offLevel
 
 	_, err := l.Flush()
@@ -233,5 +234,6 @@ func (l *Logger) Close() error {
 	if err != nil {
 		return err
 	}
+
 	return l.debugWriter.Close()
 }

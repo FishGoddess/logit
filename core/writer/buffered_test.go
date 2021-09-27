@@ -29,7 +29,6 @@ import (
 
 // go test -v -cover -run=^TestBufferedWriter$
 func TestBufferedWriter(t *testing.T) {
-
 	buffer := bytes.NewBuffer(make([]byte, 0, 4096))
 	writer := newBufferedWriter(buffer, core.WriterBufferedSize)
 	writer.AutoFlush(time.Millisecond)
@@ -53,7 +52,6 @@ func TestBufferedWriter(t *testing.T) {
 
 // go test -v -cover -run=^TestBufferedWriterClose$
 func TestBufferedWriterClose(t *testing.T) {
-
 	writer := newBufferedWriter(os.Stdout, 4096)
 	for i := 0; i < 10; i++ {
 		err := writer.Close()

@@ -35,7 +35,6 @@ const (
 // bufferedWriter is a writer having a buffer inside to reduce times of writing underlying writer.
 // You can set buffer size or use it with default buffer size. Any writer implemented io.Writer can be used by it.
 type bufferedWriter struct {
-
 	// writer is the underlying writer to write data.
 	writer io.Writer
 
@@ -55,7 +54,6 @@ type bufferedWriter struct {
 // Notice that bufferSize must be larger than minBufferSize or a panic will happen. See minBufferSize.
 // The size we want to use is bufferSize, but we add more bytes to it for avoiding buffer growing up.
 func newBufferedWriter(writer io.Writer, bufferSize int) *bufferedWriter {
-
 	if bufferSize <= minBufferSize {
 		panic(fmt.Errorf("logit.NewBufferedWriterWithSize got a bufferSize %d smaller than minBufferSize %d", bufferSize, minBufferSize))
 	}
@@ -82,20 +80,19 @@ func (bw *bufferedWriter) flush() (n int, err error) {
 // Flush writes data in buffer to underlying writer if buffer has data.
 // It's safe in concurrency.
 func (bw *bufferedWriter) Flush() (n int, err error) {
-
 	bw.lock.Lock()
 	defer bw.lock.Unlock()
 
 	if bw.buffer.Len() > 0 {
 		return bw.flush()
 	}
+
 	return 0, nil
 }
 
 // AutoFlush starts a goroutine to flush data automatically.
 // It returns a channel for stopping this goroutine.
 func (bw *bufferedWriter) AutoFlush(frequency time.Duration) chan<- struct{} {
-
 	stopChan := make(chan struct{}, 1)
 	go func() {
 		ticker := time.NewTicker(frequency)
@@ -109,24 +106,24 @@ func (bw *bufferedWriter) AutoFlush(frequency time.Duration) chan<- struct{} {
 			}
 		}
 	}()
+
 	return stopChan
 }
 
 // Write writes p to buffer and flushes data to underlying writer first if need.
 func (bw *bufferedWriter) Write(p []byte) (n int, err error) {
-
 	bw.lock.Lock()
 	defer bw.lock.Unlock()
 
 	if bw.needFlush() {
-		bw.flush() // ignore error so this p can be written to buffer which may cause buffer grows up
+		bw.flush() // ignore error so this p can be written to buffer which may cause buffer grows up.
 	}
+
 	return bw.buffer.Write(p)
 }
 
 // Close flushes data and closes underlying writer if writer implements io.Closer.
 func (bw *bufferedWriter) Close() error {
-
 	bw.lock.Lock()
 	defer bw.lock.Unlock()
 
@@ -138,5 +135,6 @@ func (bw *bufferedWriter) Close() error {
 	if wCloser, ok := bw.writer.(io.Closer); ok && notStdoutAndStderr(bw.writer) {
 		return wCloser.Close()
 	}
+
 	return nil
 }

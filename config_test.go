@@ -22,8 +22,8 @@ import "testing"
 
 // go test -v -cover -run=^TestNewDefaultConfig$
 func TestNewDefaultConfig(t *testing.T) {
-
 	defaultConfig := newDefaultConfig()
+
 	cfg := &config{
 		level:      debugLevel,
 		needPid:    false,

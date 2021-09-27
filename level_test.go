@@ -22,7 +22,6 @@ import "testing"
 
 // go test -v -cover -run=^TestLevelString$
 func TestLevelString(t *testing.T) {
-
 	levels := map[level]string{
 		debugLevel: "debug",
 		infoLevel:  "info",
