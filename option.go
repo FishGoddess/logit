@@ -65,6 +65,13 @@ func (o *options) WithErrorLevel() Option {
 	}
 }
 
+// WithOffLevel returns an option which sets logger to off level.
+func (o *options) WithOffLevel() Option {
+	return func(logger *Logger) {
+		logger.level = offLevel
+	}
+}
+
 // WithAppender returns an option which sets logger's appender to a new one.
 func (o *options) WithAppender(appender appender.Appender) Option {
 	return func(logger *Logger) {
@@ -106,13 +113,14 @@ func (o *options) WithErrorAppender(appender appender.Appender) Option {
 // WithWriter returns an option which sets logger's writer to a new one.
 func (o *options) WithWriter(w io.Writer, buffered bool) Option {
 	return func(logger *Logger) {
-
 		var wr writer.Writer
+
 		if buffered {
 			wr = writer.Buffered(w)
 		} else {
 			wr = writer.Wrapped(w)
 		}
+
 		logger.debugWriter = wr
 		logger.infoWriter = wr
 		logger.warnWriter = wr
@@ -123,7 +131,6 @@ func (o *options) WithWriter(w io.Writer, buffered bool) Option {
 // WithDebugWriter returns an option which sets logger's debug writer to a new one.
 func (o *options) WithDebugWriter(w io.Writer, buffered bool) Option {
 	return func(logger *Logger) {
-
 		if buffered {
 			logger.debugWriter = writer.Buffered(w)
 		} else {
@@ -135,7 +142,6 @@ func (o *options) WithDebugWriter(w io.Writer, buffered bool) Option {
 // WithInfoWriter returns an option which sets logger's info writer to a new one.
 func (o *options) WithInfoWriter(w io.Writer, buffered bool) Option {
 	return func(logger *Logger) {
-
 		if buffered {
 			logger.infoWriter = writer.Buffered(w)
 		} else {
@@ -147,7 +153,6 @@ func (o *options) WithInfoWriter(w io.Writer, buffered bool) Option {
 // WithWarnWriter returns an option which sets logger's warn writer to a new one.
 func (o *options) WithWarnWriter(w io.Writer, buffered bool) Option {
 	return func(logger *Logger) {
-
 		if buffered {
 			logger.warnWriter = writer.Buffered(w)
 		} else {
@@ -159,7 +164,6 @@ func (o *options) WithWarnWriter(w io.Writer, buffered bool) Option {
 // WithErrorWriter returns an option which sets logger's error writer to a new one.
 func (o *options) WithErrorWriter(w io.Writer, buffered bool) Option {
 	return func(logger *Logger) {
-
 		if buffered {
 			logger.errorWriter = writer.Buffered(w)
 		} else {

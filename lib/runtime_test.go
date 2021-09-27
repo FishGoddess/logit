@@ -26,9 +26,9 @@ import (
 
 // go test -v -cover -run=^TestPid$
 func TestPid(t *testing.T) {
-
 	pid := Pid()
 	osPid := os.Getpid()
+
 	if pid != osPid {
 		t.Fatalf("pid %d is wrong with %d", pid, osPid)
 	}
@@ -36,7 +36,6 @@ func TestPid(t *testing.T) {
 
 // go test -v -cover -run=^TestCaller$
 func TestCaller(t *testing.T) {
-
 	_, f, l, ok := runtime.Caller(0)
 	if !ok {
 		t.Fatalf("runtime.Caller failed")

@@ -25,7 +25,6 @@ import (
 
 // go test -v -cover -run=^TestWrappedWriterClose$
 func TestWrappedWriterClose(t *testing.T) {
-
 	writer := newWrappedWriter(os.Stdout)
 	for i := 0; i < 10; i++ {
 		err := writer.Close()

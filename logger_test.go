@@ -28,9 +28,9 @@ import (
 
 // go test -v -cover -run=^TestNewLogger$
 func TestNewLogger(t *testing.T) {
-
 	options := Options()
 	buffer := bytes.NewBuffer(make([]byte, 0, 1024))
+
 	logger := NewLogger(
 		options.WithDebugLevel(),
 		options.WithAppender(appender.Json()),
@@ -69,6 +69,7 @@ func TestNewLogger(t *testing.T) {
 // go test -v -cover -run=^TestLoggerFlush$
 func TestLoggerFlush(t *testing.T) {
 	logger := NewLogger()
+
 	_, err := logger.Flush()
 	if err != nil {
 		t.Fatal(err)
@@ -77,8 +78,8 @@ func TestLoggerFlush(t *testing.T) {
 
 // go test -v -cover -run=^TestLoggerClose$
 func TestLoggerClose(t *testing.T) {
-
 	logger := NewLogger()
+
 	err := logger.Close()
 	if err != nil {
 		t.Fatal(err)

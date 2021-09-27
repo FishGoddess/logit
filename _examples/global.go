@@ -25,12 +25,11 @@ import (
 )
 
 func main() {
-
-	// There are some global settings for optimizations, and you can set all of them in need
+	// There are some global settings for optimizations, and you can set all of them in need.
 	//
 	//     import "github.com/FishGoddess/logit/core"
 	//
-	// All global settings are stored in package core
+	// All global settings are stored in package core.
 
 	// 1. LogMallocSize (The pre-malloc size of a new Log data)
 	// If your logs are extremely long, such as 4000 bytes, you can set it to 4096 to avoid re-malloc.
@@ -40,7 +39,7 @@ func main() {
 	// If your logs are extremely long, such as 16KB, you can set it to 2048 to avoid re-malloc.
 	core.WriterBufferedSize = 32 * writer.KB
 
-	// After setting global settings, just use Logger as normal
+	// After setting global settings, just use Logger as normal.
 	logger := logit.NewLogger()
 	defer logger.Close()
 

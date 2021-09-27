@@ -27,8 +27,7 @@ import (
 )
 
 func main() {
-
-	// We provide some options for you
+	// We provide some options for you.
 	options := logit.Options()
 	options.WithDebugLevel()
 	options.WithInfoLevel()
@@ -52,9 +51,9 @@ func main() {
 	options.WithPidKey("pid")
 	options.WithFileKey("file")
 	options.WithLineKey("line")
-	options.WithTimeFormat(appender.UnixTime) // UnixTime means time will be logged as unix time, an int64 number
+	options.WithTimeFormat(appender.UnixTime) // UnixTime means time will be logged as unix time, an int64 number.
 
-	// Remember, these options is only used for creating a logger
+	// Remember, these options is only used for creating a logger.
 	logger := logit.NewLogger(
 		options.WithPid(),
 		options.WithWriter(os.Stdout, false),
@@ -64,18 +63,18 @@ func main() {
 	defer logger.Close()
 	logger.Info("check options").End()
 
-	// You can use many options at the same time, but some of them is exclusive
-	// So only the last one in order will take effect if you use them at the same time
+	// You can use many options at the same time, but some of them is exclusive.
+	// So only the last one in order will take effect if you use them at the same time.
 	logit.NewLogger(
 		options.WithDebugLevel(),
 		options.WithInfoLevel(),
 		options.WithWarnLevel(),
-		options.WithErrorLevel(), // The level of logger is error
+		options.WithErrorLevel(), // The level of logger is error.
 	)
 
-	// You can customize an option for your logger
-	// Actually, Option is just a function like func(logger *Logger)
-	// So you can do what you want in creating a logger
+	// You can customize an option for your logger.
+	// Actually, Option is just a function like func(logger *Logger).
+	// So you can do what you want in creating a logger.
 	autoFlushOption := func(logger *logit.Logger) {
 		go func() {
 			select {

@@ -98,7 +98,6 @@ func needEscapedRune(value rune) bool {
 
 // The main character should be escaped is ascii less than \u0020 and \ and ".
 func appendEscapedByte(dst []byte, value byte) []byte {
-
 	switch value {
 	case '"', '\\':
 		return append(dst, '\\', value)
@@ -113,12 +112,12 @@ func appendEscapedByte(dst []byte, value byte) []byte {
 	case '\t':
 		return append(dst, '\\', 't')
 	default:
-		// ASCii < 16 needs to add \u000 to behind
+		// ASCii < 16 needs to add \u000 to behind.
 		if value < 16 {
 			return strconv.AppendInt(append(dst, '\\', 'u', '0', '0', '0'), int64(value), 16)
 		}
 
-		// ASCii in [16, 32) needs to add \u00 to behind
+		// ASCii in [16, 32) needs to add \u00 to behind.
 		if value < 32 {
 			return strconv.AppendInt(append(dst, '\\', 'u', '0', '0'), int64(value), 16)
 		}
@@ -128,7 +127,6 @@ func appendEscapedByte(dst []byte, value byte) []byte {
 
 // The main character should be escaped is ascii less than \u0020 and \ and ".
 func appendEscapedRune(dst []byte, value rune) []byte {
-
 	if needEscapedRune(value) {
 		return appendEscapedByte(dst, byte(value))
 	}
@@ -137,11 +135,11 @@ func appendEscapedRune(dst []byte, value rune) []byte {
 
 // The main character should be escaped is ascii less than \u0020 and \ and ".
 func appendEscapedString(dst []byte, value string) []byte {
-
 	start := 0
 	escaped := false
+
 	for i := 0; i < len(value); i++ {
-		// Encountered a byte that need escaping, so we appended bytes behinds it and appended it escaped
+		// Encountered a byte that need escaping, so we appended bytes behinds it and appended it escaped.
 		if utf8.RuneStart(value[i]) && needEscapedByte(value[i]) {
 			dst = append(dst, value[start:i]...)
 			dst = appendEscapedByte(dst, value[i])
@@ -154,7 +152,7 @@ func appendEscapedString(dst []byte, value string) []byte {
 		return append(dst, value[start:]...)
 	}
 
-	// There is no need for escaping, just appending like bytes
+	// There is no need for escaping, just appending like bytes.
 	return append(dst, value...)
 }
 

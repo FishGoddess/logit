@@ -31,8 +31,8 @@ import (
 
 // go test -v -cover -run=^TestNewLog$
 func TestNewLog(t *testing.T) {
-
 	buffer := bytes.NewBuffer(make([]byte, 0, 1024))
+
 	logger := NewLogger(Options().WithAppender(appender.Json()), Options().WithWriter(buffer, false))
 	defer logger.Close()
 
@@ -73,6 +73,7 @@ func TestNewLog(t *testing.T) {
 		"Errors":    []error{io.EOF},
 		"Stringers": []fmt.Stringer{time.Second},
 	}
+
 	//t.Logf("entries: %+v", entries)
 
 	log := newLog()
@@ -125,6 +126,7 @@ func TestNewLog(t *testing.T) {
 	}
 
 	//t.Logf("outputMap: %+v", outputMap)
+
 	for k, v := range entries {
 
 		outputValue, ok := outputMap[k]
