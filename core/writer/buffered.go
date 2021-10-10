@@ -47,7 +47,7 @@ type bufferedWriter struct {
 	bufferSize int
 
 	// lock is for safe concurrency.
-	lock *sync.Mutex
+	lock sync.Mutex
 }
 
 // newBufferedWriter returns a new buffered writer of this writer with specified bufferSize.
@@ -62,7 +62,7 @@ func newBufferedWriter(writer io.Writer, bufferSize int) *bufferedWriter {
 		writer:     writer,
 		buffer:     bytes.NewBuffer(make([]byte, 0, bufferSize+minBufferSize)),
 		bufferSize: bufferSize,
-		lock:       &sync.Mutex{},
+		lock:       sync.Mutex{},
 	}
 }
 
