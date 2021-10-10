@@ -122,7 +122,7 @@ func TestNewLog(t *testing.T) {
 	output := buffer.String()
 	err := json.Unmarshal(buffer.Bytes(), &outputMap)
 	if err != nil {
-		t.Fatalf("unmarshal output %+v from Json failed", output)
+		t.Errorf("unmarshal output %+v from Json failed", output)
 	}
 
 	//t.Logf("outputMap: %+v", outputMap)
@@ -131,28 +131,28 @@ func TestNewLog(t *testing.T) {
 
 		outputValue, ok := outputMap[k]
 		if !ok {
-			t.Fatalf("outputMap missed key %s", k)
+			t.Errorf("outputMap missed key %s", k)
 		}
 
 		switch ov := outputValue.(type) {
 		case byte:
 			if ov != v.(byte) {
-				t.Fatalf("key %s: outputValue %v is wrong with %v", k, outputValue, v)
+				t.Errorf("key %s: outputValue %v is wrong with %v", k, outputValue, v)
 			}
 		case rune:
 			if ov != v.(rune) {
-				t.Fatalf("key %s: outputValue %v is wrong with %v", k, outputValue, v)
+				t.Errorf("key %s: outputValue %v is wrong with %v", k, outputValue, v)
 			}
 		case []byte:
 			for i, c := range ov {
 				if c != v.([]byte)[i] {
-					t.Fatalf("key %s: outputValue %v is wrong with %v", k, outputValue, v)
+					t.Errorf("key %s: outputValue %v is wrong with %v", k, outputValue, v)
 				}
 			}
 		case []rune:
 			for i, r := range ov {
 				if r != v.([]rune)[i] {
-					t.Fatalf("key %s: outputValue %v is wrong with %v", k, outputValue, v)
+					t.Errorf("key %s: outputValue %v is wrong with %v", k, outputValue, v)
 				}
 			}
 		}

@@ -37,7 +37,7 @@ func TestBufferedWriter(t *testing.T) {
 	writer.Write([]byte("abc"))
 	writer.Flush()
 	if buffer.String() != "abc" {
-		t.Fatalf("writing abc but found %s in buffer", buffer.String())
+		t.Errorf("writing abc but found %s in buffer", buffer.String())
 	}
 
 	writer.Write([]byte("123"))
@@ -46,7 +46,7 @@ func TestBufferedWriter(t *testing.T) {
 	time.Sleep(time.Second)
 
 	if buffer.String() != "abc123.!?+-*/" {
-		t.Fatalf("writing abc123.!?+-*/ but found %s in buffer", buffer.String())
+		t.Errorf("writing abc123.!?+-*/ but found %s in buffer", buffer.String())
 	}
 }
 
@@ -56,7 +56,7 @@ func TestBufferedWriterClose(t *testing.T) {
 	for i := 0; i < 10; i++ {
 		err := writer.Close()
 		if err != nil {
-			t.Fatal(err)
+			t.Error(err)
 		}
 	}
 
@@ -64,7 +64,7 @@ func TestBufferedWriterClose(t *testing.T) {
 	for i := 0; i < 10; i++ {
 		err := writer.Close()
 		if err != nil {
-			t.Fatal(err)
+			t.Error(err)
 		}
 	}
 }
