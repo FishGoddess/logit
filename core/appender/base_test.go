@@ -17,3 +17,50 @@
 // Created at 2021/07/11 14:07:06
 
 package appender
+
+import "testing"
+
+// go test -v -cover -run=^TestAppendEscapedByte$
+func TestAppendEscapedByte(t *testing.T) {
+	testcases := []byte{'a', '0', '\n', '\t', '\\', '\b', '\f', '\r', '"'}
+	want := "a0\\n\\t\\\\\\b\\f\\r\\\""
+
+	buffer := make([]byte, 0, 16)
+	for _, b := range testcases {
+		buffer = appendEscapedByte(buffer, b)
+	}
+
+	if string(buffer) != want {
+		t.Errorf("result %s is wrong", string(buffer))
+	}
+}
+
+// go test -v -cover -run=^TestAppendEscapedRune$
+func TestAppendEscapedRune(t *testing.T) {
+	testcases := []rune{'a', '0', '国', '\n', '\t', '\\', '\b', '\f', '\r', '"'}
+	want := "a0国\\n\\t\\\\\\b\\f\\r\\\""
+
+	buffer := make([]byte, 0, 16)
+	for _, r := range testcases {
+		buffer = appendEscapedRune(buffer, r)
+	}
+
+	if string(buffer) != want {
+		t.Errorf("result %s is wrong", string(buffer))
+	}
+}
+
+// go test -v -cover -run=^TestAppendEscapedString$
+func TestAppendEscapedString(t *testing.T) {
+	testcases := []string{"a0国\n\t\\\b\f\r\""}
+	want := "a0国\\n\\t\\\\\\b\\f\\r\\\""
+
+	buffer := make([]byte, 0, 16)
+	for _, str := range testcases {
+		buffer = appendEscapedString(buffer, str)
+	}
+
+	if string(buffer) != want {
+		t.Errorf("result %s is wrong", string(buffer))
+	}
+}

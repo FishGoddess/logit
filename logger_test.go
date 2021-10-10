@@ -62,7 +62,7 @@ func TestNewLogger(t *testing.T) {
 
 	output := buffer.String()
 	if output != logs {
-		t.Fatalf("logs %s is wrong with %s", output, logs)
+		t.Errorf("logs %s is wrong with %s", output, logs)
 	}
 }
 
@@ -72,7 +72,7 @@ func TestLoggerFlush(t *testing.T) {
 
 	_, err := logger.Flush()
 	if err != nil {
-		t.Fatal(err)
+		t.Error(err)
 	}
 }
 
@@ -82,10 +82,10 @@ func TestLoggerClose(t *testing.T) {
 
 	err := logger.Close()
 	if err != nil {
-		t.Fatal(err)
+		t.Error(err)
 	}
 
 	if logger.level != offLevel {
-		t.Fatalf("level of logger %+v is wrong", logger.level)
+		t.Errorf("level of logger %+v is wrong", logger.level)
 	}
 }

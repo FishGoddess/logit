@@ -29,7 +29,7 @@ func TestWrappedWriterClose(t *testing.T) {
 	for i := 0; i < 10; i++ {
 		err := writer.Close()
 		if err != nil {
-			t.Fatal(err)
+			t.Error(err)
 		}
 	}
 
@@ -37,7 +37,7 @@ func TestWrappedWriterClose(t *testing.T) {
 	for i := 0; i < 10; i++ {
 		err := writer.Close()
 		if err != nil {
-			t.Fatal(err)
+			t.Error(err)
 		}
 	}
 }

@@ -30,20 +30,20 @@ func TestNewFile(t *testing.T) {
 
 	file, err := NewFile(filePath)
 	if err != nil {
-		t.Fatal(err)
+		t.Error(err)
 	}
 
 	err = file.Close()
 	if err != nil {
-		t.Fatal(err)
+		t.Error(err)
 	}
 
 	stat, err := os.Stat(filePath)
 	if err != nil {
-		t.Fatal(err)
+		t.Error(err)
 	}
 
 	if stat.IsDir() {
-		t.Fatal("file is a directory, not file")
+		t.Error("file is a directory, not file")
 	}
 }

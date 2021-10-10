@@ -32,7 +32,7 @@ func TestLevelString(t *testing.T) {
 
 	for lvl, name := range levels {
 		if lvl.String() != name {
-			t.Fatalf("level's name %s is wrong", lvl.String())
+			t.Errorf("level's name %s is wrong", lvl.String())
 		}
 	}
 }

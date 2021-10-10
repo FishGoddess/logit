@@ -17,3 +17,42 @@
 // Created at 2021/07/11 14:06:21
 
 package writer
+
+import (
+	"os"
+	"testing"
+)
+
+// go test -v -cover -run=^TestWrapped$
+func TestWrapped(t *testing.T) {
+	writer := Wrapped(os.Stdout)
+
+	_, ok := writer.(*wrappedWriter)
+	if !ok {
+		t.Error("Wrapped returns a non-wrappedWriter instance")
+	}
+}
+
+// go test -v -cover -run=^TestBuffered$
+func TestBuffered(t *testing.T) {
+	writer := Buffered(os.Stdout)
+
+	_, ok := writer.(*bufferedWriter)
+	if !ok {
+		t.Error("Buffered returns a non-bufferedWriter instance")
+	}
+}
+
+// go test -v -cover -run=^TestBufferedWithSize$
+func TestBufferedWithSize(t *testing.T) {
+	writer := BufferedWithSize(os.Stdout, 1024)
+
+	bw, ok := writer.(*bufferedWriter)
+	if !ok {
+		t.Error("Buffered returns a non-bufferedWriter instance")
+	}
+
+	if bw.bufferSize != 1024 {
+		t.Errorf("bw.bufferSize %d is wrong", bw.bufferSize)
+	}
+}

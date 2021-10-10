@@ -30,7 +30,7 @@ func TestPid(t *testing.T) {
 	osPid := os.Getpid()
 
 	if pid != osPid {
-		t.Fatalf("pid %d is wrong with %d", pid, osPid)
+		t.Errorf("pid %d is wrong with %d", pid, osPid)
 	}
 }
 
@@ -38,15 +38,15 @@ func TestPid(t *testing.T) {
 func TestCaller(t *testing.T) {
 	_, f, l, ok := runtime.Caller(0)
 	if !ok {
-		t.Fatalf("runtime.Caller failed")
+		t.Errorf("runtime.Caller failed")
 	}
 
 	file, line := Caller(1)
 	if file != f {
-		t.Fatalf("Caller returns wrong file %s", file)
+		t.Errorf("Caller returns wrong file %s", file)
 	}
 
 	if line != l+5 {
-		t.Fatalf("Caller returns wrong line %d", line)
+		t.Errorf("Caller returns wrong line %d", line)
 	}
 }

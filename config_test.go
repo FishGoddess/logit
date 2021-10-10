@@ -38,6 +38,6 @@ func TestNewDefaultConfig(t *testing.T) {
 	}
 
 	if *defaultConfig != *cfg {
-		t.Fatalf("default config %+v is wrong", defaultConfig)
+		t.Errorf("default config %+v is wrong", defaultConfig)
 	}
 }
