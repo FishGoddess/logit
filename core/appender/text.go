@@ -334,7 +334,7 @@ func (ta *textAppender) AppendErrors(dst []byte, key string, values []error) []b
 			return append(source, textNil...)
 		}
 
-		return ta.AppendString(source, key, values[index].Error())
+		return appendEscapedString(source, values[index].Error())
 	})
 }
 
@@ -346,6 +346,6 @@ func (ta *textAppender) AppendStringers(dst []byte, key string, values []fmt.Str
 			return append(source, textNil...)
 		}
 
-		return ta.AppendString(source, key, values[index].String())
+		return appendEscapedString(source, values[index].String())
 	})
 }

@@ -1,5 +1,12 @@
 ## ✒ 历史版本的特性介绍 (Features in old versions)
 
+### v0.4.9-alpha
+
+> 此版本发布于 2021-10-27
+
+* 修复 TextAppender 的 AppendErrors 和 AppendStringers 追加问题
+* 完善单元测试
+
 ### v0.4.8-alpha
 
 > 此版本发布于 2021-10-10
