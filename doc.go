@@ -232,6 +232,25 @@ Package logit provides an easy way to use foundation for your logging operations
 
 	logger = logit.FromContextWithKey(ctx, businessTwoKey)
 	logger.Info("This is a message logged by logger from context with businessTwoKey").End()
+
+7. extension:
+
+	makeName := "testLoggerMaker"
+
+	// RegisterLoggerMaker registers maker to logit with given name.
+	err := logit.RegisterLoggerMaker(makeName, new(testLoggerMaker))
+	if err != nil {
+		panic(err)
+	}
+
+	// NewLoggerFromMaker creates logger from maker with given params.
+	// Panic will be invoked if params is "error" because MakeLogger in testLoggerMaker has this logic.
+	logger, err := logit.NewLoggerFromMaker(context.Background(), makeName, "xxx")
+	if err != nil {
+		panic(err)
+	}
+
+	logger.Info("I am made from logger maker!").End()
 */
 package logit // import "github.com/FishGoddess/logit"
 

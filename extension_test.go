@@ -26,7 +26,7 @@ import (
 
 type testLoggerMaker struct{}
 
-func (tlm *testLoggerMaker) makeLogger(ctx context.Context, params interface{}) (*Logger, error) {
+func (tlm *testLoggerMaker) MakeLogger(ctx context.Context, params interface{}) (*Logger, error) {
 	if params.(string) == "error" {
 		return nil, errors.New("testLoggerMaker.makeLogger returns an error")
 	}
@@ -64,7 +64,7 @@ func TestNewLoggerFromMaker(t *testing.T) {
 	maker := new(testLoggerMaker)
 	loggerMakers[makerName] = maker
 
-	_, err := maker.makeLogger(context.Background(), "")
+	_, err := maker.MakeLogger(context.Background(), "")
 	if err != nil {
 		t.Error(err)
 	}
@@ -74,7 +74,7 @@ func TestNewLoggerFromMaker(t *testing.T) {
 		t.Error(err)
 	}
 
-	_, err = maker.makeLogger(context.Background(), "error")
+	_, err = maker.MakeLogger(context.Background(), "error")
 	if err == nil {
 		t.Error("makeLogger should return an error")
 	}
