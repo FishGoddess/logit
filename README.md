@@ -97,6 +97,7 @@ func main() {
 * [writer](./_examples/writer.go)
 * [global](./_examples/global.go)
 * [context](./_examples/context.go)
+* [extension](./_examples/extension.go)
 
 _所有的使用案例都在 [_examples](./_examples) 目录。_
 

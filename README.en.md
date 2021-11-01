@@ -98,6 +98,7 @@ func main() {
 * [writer](./_examples/writer.go)
 * [global](./_examples/global.go)
 * [context](./_examples/context.go)
+* [extension](./_examples/extension.go)
 
 _All examples can be found in [_examples](./_examples)._
 
