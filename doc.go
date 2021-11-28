@@ -235,6 +235,21 @@ Package logit provides an easy way to use foundation for your logging operations
 
 7. extension:
 
+	type testLoggerMaker struct{}
+
+	func (tlm *testLoggerMaker) MakeLogger(ctx context.Context, params ...interface{}) (*logit.Logger, error) {
+		if len(params) < 1 {
+			return nil, errors.New("testLoggerMaker: len(params) < 1")
+		}
+
+		if params[0].(string) == "error" {
+			return nil, errors.New("testLoggerMaker: params[0] isn't a string")
+		}
+
+		// Customize your creation of logger here.
+		return logit.NewLogger(), nil
+	}
+
 	makeName := "testLoggerMaker"
 
 	// RegisterLoggerMaker registers maker to logit with given name.
@@ -256,5 +271,5 @@ package logit // import "github.com/FishGoddess/logit"
 
 const (
 	// Version is the version string representation of logit.
-	Version = "v0.4.10"
+	Version = "v0.4.11"
 )

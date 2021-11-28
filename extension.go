@@ -32,7 +32,7 @@ var (
 // LoggerMaker is for making a new logger.
 type LoggerMaker interface {
 	// MakeLogger makes a new logger using params and returns an error if something wrong happens.
-	MakeLogger(ctx context.Context, params interface{}) (*Logger, error)
+	MakeLogger(ctx context.Context, params ...interface{}) (*Logger, error)
 }
 
 // RegisterLoggerMaker registers logger maker with name.
@@ -55,7 +55,7 @@ func RegisterLoggerMaker(makerName string, maker LoggerMaker) error {
 
 // NewLoggerFromMaker creates logger from logger maker with params.
 // Returns an error if failed.
-func NewLoggerFromMaker(ctx context.Context, makerName string, params interface{}) (*Logger, error) {
+func NewLoggerFromMaker(ctx context.Context, makerName string, params ...interface{}) (*Logger, error) {
 	loggerMakersLock.RLock()
 	defer loggerMakersLock.RUnlock()
 
@@ -64,5 +64,5 @@ func NewLoggerFromMaker(ctx context.Context, makerName string, params interface{
 		return nil, errors.New("logit: logger maker " + makerName + " not found")
 	}
 
-	return maker.MakeLogger(ctx, params)
+	return maker.MakeLogger(ctx, params...)
 }
