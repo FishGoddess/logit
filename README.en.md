@@ -24,6 +24,9 @@ applications.
 * Provide global optimized settings, let some settings feet your business.
 * Every level has its own appender and writer, separating process error logs is recommended.
 * Context binding supports, using logger is more elegant.
+* Configuration plugins supports, ex: yaml plugin can create logger from yaml configuration file.
+
+> Configuration plugins is based on an interface, more information can be found in [Github](https://github.com/go-logit) / [Gitee](https://gitee.com/go-logit)
 
 _Check [HISTORY.md](./HISTORY.md) and [FUTURE.md](./FUTURE.md) to know about more information._
 
@@ -98,7 +101,7 @@ func main() {
 * [writer](./_examples/writer.go)
 * [global](./_examples/global.go)
 * [context](./_examples/context.go)
-* [extension](./_examples/extension.go)
+* [maker](./_examples/maker.go)
 
 _All examples can be found in [_examples](./_examples)._
 

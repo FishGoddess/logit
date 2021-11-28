@@ -233,7 +233,7 @@ Package logit provides an easy way to use foundation for your logging operations
 	logger = logit.FromContextWithKey(ctx, businessTwoKey)
 	logger.Info("This is a message logged by logger from context with businessTwoKey").End()
 
-7. extension:
+7. maker:
 
 	type testLoggerMaker struct{}
 
