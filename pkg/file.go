@@ -14,36 +14,23 @@
 //
 // Author: FishGoddess
 // Email: fishgoddess@qq.com
-// Created at 2021/08/10 02:41:27
+// Created at 2021/08/10 02:38:13
 
-package lib
+package pkg
 
-import (
-	"os"
-	"testing"
-)
+import "os"
 
-// go test -v -cover -run=^TestNewFile$
-func TestNewFile(t *testing.T) {
-	filePath := "Z:/" + t.Name()
-	os.Remove(filePath)
+// NewFile creates a new file for logging and returns an error if failed.
+func NewFile(filePath string) (*os.File, error) {
+	return os.OpenFile(filePath, os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0644)
+}
 
+// MustNewFile creates a new file for logging and panic if failed.
+func MustNewFile(filePath string) *os.File {
 	file, err := NewFile(filePath)
 	if err != nil {
-		t.Error(err)
+		panic(err)
 	}
 
-	err = file.Close()
-	if err != nil {
-		t.Error(err)
-	}
-
-	stat, err := os.Stat(filePath)
-	if err != nil {
-		t.Error(err)
-	}
-
-	if stat.IsDir() {
-		t.Error("file is a directory, not file")
-	}
+	return file
 }

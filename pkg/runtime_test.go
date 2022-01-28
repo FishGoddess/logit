@@ -14,23 +14,39 @@
 //
 // Author: FishGoddess
 // Email: fishgoddess@qq.com
-// Created at 2021/08/10 02:38:13
+// Created at 2021/07/13 23:35:26
 
-package lib
+package pkg
 
-import "os"
+import (
+	"os"
+	"runtime"
+	"testing"
+)
 
-// NewFile creates a new file for logging and returns an error if failed.
-func NewFile(filePath string) (*os.File, error) {
-	return os.OpenFile(filePath, os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0644)
+// go test -v -cover -run=^TestPid$
+func TestPid(t *testing.T) {
+	pid := Pid()
+	osPid := os.Getpid()
+
+	if pid != osPid {
+		t.Errorf("pid %d is wrong with %d", pid, osPid)
+	}
 }
 
-// MustNewFile creates a new file for logging and panic if failed.
-func MustNewFile(filePath string) *os.File {
-	file, err := NewFile(filePath)
-	if err != nil {
-		panic(err)
+// go test -v -cover -run=^TestCaller$
+func TestCaller(t *testing.T) {
+	_, f, l, ok := runtime.Caller(0)
+	if !ok {
+		t.Errorf("runtime.Caller failed")
 	}
 
-	return file
+	file, line := Caller(1)
+	if file != f {
+		t.Errorf("Caller returns wrong file %s", file)
+	}
+
+	if line != l+5 {
+		t.Errorf("Caller returns wrong line %d", line)
+	}
 }

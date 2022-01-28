@@ -24,6 +24,6 @@ var (
 	LogMallocSize = 512 // 512 Bytes
 
 	// WriterBufferedSize is the default size of buffered writer.
-	// If your logs are extremely long, such as 4KB/log, you can set it to 512KB to avoid re-malloc.
+	// If your logs are extremely long, such as 4 KB/log, you can set it to 512 KB to avoid re-malloc.
 	WriterBufferedSize = 64 * 1024 // 64 KB
 )

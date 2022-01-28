@@ -25,16 +25,17 @@ func TestNewDefaultConfig(t *testing.T) {
 	defaultConfig := newDefaultConfig()
 
 	cfg := &config{
-		level:      debugLevel,
-		needPid:    false,
-		needCaller: false,
-		msgKey:     "log.msg",
-		timeKey:    "log.time",
-		levelKey:   "log.level",
-		pidKey:     "log.pid",
-		fileKey:    "log.file",
-		lineKey:    "log.line",
-		timeFormat: "2006-01-02 15:04:05",
+		level:       debugLevel,
+		needPid:     false,
+		needCaller:  false,
+		msgKey:      "log.msg",
+		timeKey:     "log.time",
+		levelKey:    "log.level",
+		pidKey:      "log.pid",
+		fileKey:     "log.file",
+		lineKey:     "log.line",
+		timeFormat:  "2006-01-02 15:04:05",
+		callerDepth: 3,
 	}
 
 	if *defaultConfig != *cfg {
