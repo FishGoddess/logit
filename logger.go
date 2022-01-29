@@ -139,9 +139,8 @@ func (l *Logger) log(level level, msg string, params ...interface{}) *Log {
 		log.Int(l.pidKey, pkg.Pid())
 	}
 
-	if l.needCaller && l.fileKey != "" && l.lineKey != "" {
-		file, line := pkg.Caller(l.callerDepth)
-		log.String(l.fileKey, file).Int(l.lineKey, line)
+	if l.needCaller {
+		log.withCaller(4)
 	}
 
 	if len(params) > 0 {

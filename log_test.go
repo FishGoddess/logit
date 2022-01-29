@@ -22,6 +22,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"github.com/FishGoddess/logit/pkg"
 	"io"
 	"testing"
 	"time"
@@ -40,7 +41,7 @@ func TestNewLog(t *testing.T) {
 		"Any":       map[int]string{1: "a", 2: "b", 3: "c"},
 		"Bool":      true,
 		"Byte":      'x',
-		"Rune":      rune('国'),
+		"Rune":      '国',
 		"Int":       -123456,
 		"Int8":      int8(-123),
 		"Int16":     int16(-12345),
@@ -128,7 +129,6 @@ func TestNewLog(t *testing.T) {
 	//t.Logf("outputMap: %+v", outputMap)
 
 	for k, v := range entries {
-
 		outputValue, ok := outputMap[k]
 		if !ok {
 			t.Errorf("outputMap missed key %s", k)
@@ -157,5 +157,40 @@ func TestNewLog(t *testing.T) {
 			}
 		}
 
+	}
+}
+
+// go test -v -cover -run=^TestLogCaller$
+func TestLogCaller(t *testing.T) {
+	buffer := bytes.NewBuffer(make([]byte, 0, 1024))
+	logger := NewLogger(Options().WithWriter(buffer, false))
+	logger.needCaller = true
+
+	log := newLog()
+	log.logger = logger
+	log.appender = logger.debugAppender
+	log.writer = logger.debugWriter
+	log.begin()
+	log.WithCaller()
+	log.End()
+
+	str := buffer.String()
+	if str != "\n" {
+		t.Errorf("str %q != '\n'", str)
+	}
+
+	buffer.Reset()
+	logger.needCaller = false
+	log.begin()
+	log.WithCaller()
+	log.End()
+
+	file, line := pkg.Caller(1)
+	line -= 3 // Between log.WithCaller() and pkg.Caller(1) is 3
+	right := fmt.Sprintf("%s=%s|%s=%d\n", logger.fileKey, file, logger.lineKey, line)
+
+	str = buffer.String()
+	if str != right {
+		t.Errorf("str %s != right %s", str, right)
 	}
 }
