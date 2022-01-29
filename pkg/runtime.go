@@ -16,7 +16,7 @@
 // Email: fishgoddess@qq.com
 // Created at 2021/07/02 02:03:45
 
-package lib
+package pkg
 
 import (
 	"os"

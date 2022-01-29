@@ -137,3 +137,7 @@ $ go test -v ./_examples/performance_test.go -bench=. -benchtime=1s
 | -----------|--------|-------------| ---------------- |
 | postar | avino-plan | 一个极易上手的低耦合通用邮件服务 | [Github](https://github.com/avino-plan/postar) / [码云](https://gitee.com/avino-plan/postar) |
 | kafo | FishGoddess | 一个简单的轻量级分布式缓存中间件 | [Github](https://github.com/FishGoddess/kafo) / [码云](https://gitee.com/FishGoddess/kafo) |
+
+最后，我想感谢 JetBrains 公司的 **free JetBrains Open Source license(s)**，因为 `logit` 是用该计划下的 Idea / GoLand 完成开发的。
+
+<a href="https://www.jetbrains.com/?from=logit" target="_blank"><img src="./_icons/jetbrains.png" width="250"/></a>

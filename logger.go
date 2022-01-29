@@ -20,13 +20,13 @@ package logit
 
 import (
 	"fmt"
+	"github.com/FishGoddess/logit/pkg"
 	"os"
 	"sync"
 	"time"
 
 	"github.com/FishGoddess/logit/core/appender"
 	"github.com/FishGoddess/logit/core/writer"
-	"github.com/FishGoddess/logit/lib"
 )
 
 // Logger is the core of logging operations.
@@ -136,11 +136,11 @@ func (l *Logger) log(level level, msg string, params ...interface{}) *Log {
 	}
 
 	if l.needPid && l.pidKey != "" {
-		log.Int(l.pidKey, lib.Pid())
+		log.Int(l.pidKey, pkg.Pid())
 	}
 
 	if l.needCaller && l.fileKey != "" && l.lineKey != "" {
-		file, line := lib.Caller(3)
+		file, line := pkg.Caller(l.callerDepth)
 		log.String(l.fileKey, file).Int(l.lineKey, line)
 	}
 

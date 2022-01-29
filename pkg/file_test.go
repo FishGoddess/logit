@@ -14,39 +14,37 @@
 //
 // Author: FishGoddess
 // Email: fishgoddess@qq.com
-// Created at 2021/07/13 23:35:26
+// Created at 2021/08/10 02:41:27
 
-package lib
+package pkg
 
 import (
 	"os"
-	"runtime"
+	"path/filepath"
 	"testing"
 )
 
-// go test -v -cover -run=^TestPid$
-func TestPid(t *testing.T) {
-	pid := Pid()
-	osPid := os.Getpid()
+// go test -v -cover -run=^TestNewFile$
+func TestNewFile(t *testing.T) {
+	filePath := filepath.Join(t.TempDir(), t.Name())
+	os.Remove(filePath)
 
-	if pid != osPid {
-		t.Errorf("pid %d is wrong with %d", pid, osPid)
-	}
-}
-
-// go test -v -cover -run=^TestCaller$
-func TestCaller(t *testing.T) {
-	_, f, l, ok := runtime.Caller(0)
-	if !ok {
-		t.Errorf("runtime.Caller failed")
+	file, err := NewFile(filePath)
+	if err != nil {
+		t.Error(err)
 	}
 
-	file, line := Caller(1)
-	if file != f {
-		t.Errorf("Caller returns wrong file %s", file)
+	err = file.Close()
+	if err != nil {
+		t.Error(err)
 	}
 
-	if line != l+5 {
-		t.Errorf("Caller returns wrong line %d", line)
+	stat, err := os.Stat(filePath)
+	if err != nil {
+		t.Error(err)
+	}
+
+	if stat.IsDir() {
+		t.Error("file is a directory, not file")
 	}
 }

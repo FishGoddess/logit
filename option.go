@@ -247,3 +247,10 @@ func (o *options) WithAutoFlush(frequency time.Duration) Option {
 		}()
 	}
 }
+
+// WithCallerDepth returns an option which sets caller depth in logs.
+func (o *options) WithCallerDepth(callerDepth int) Option {
+	return func(logger *Logger) {
+		logger.callerDepth = callerDepth
+	}
+}
