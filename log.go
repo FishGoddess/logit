@@ -20,6 +20,7 @@ package logit
 
 import (
 	"fmt"
+	"github.com/FishGoddess/logit/pkg"
 	"time"
 
 	"github.com/FishGoddess/logit/core"
@@ -456,4 +457,30 @@ func (l *Log) Stringers(key string, value []fmt.Stringer) *Log {
 
 	l.data = l.appender.AppendStringers(l.data, key, value)
 	return l
+}
+
+// WithCaller adds two entries about caller information to l.
+func (l *Log) withCaller(depth int) *Log {
+	if l == nil {
+		return nil
+	}
+
+	file, line := pkg.Caller(depth)
+	if l.logger.fileKey != "" {
+		l.String(l.logger.fileKey, file)
+	}
+
+	if l.logger.lineKey != "" {
+		l.Int(l.logger.lineKey, line)
+	}
+
+	return l
+}
+
+// WithCaller adds two entries about caller information to l.
+func (l *Log) WithCaller() *Log {
+	if l == nil || l.logger.needCaller {
+		return l
+	}
+	return l.withCaller(3)
 }
