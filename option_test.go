@@ -516,3 +516,16 @@ func TestOptionsWithTimeFormat(t *testing.T) {
 		t.Errorf("logger's timeFormat %+v is wrong", logger.timeFormat)
 	}
 }
+
+// go test -v -cover -run=^TestOptionsWithCallerDepth$
+func TestOptionsWithCallerDepth(t *testing.T) {
+	opts := Options()
+
+	logger := NewLogger()
+	logger.callerDepth = 0
+
+	opts.WithCallerDepth(3)(logger)
+	if logger.callerDepth != 3 {
+		t.Errorf("logger's callerDepth %d is wrong", logger.callerDepth)
+	}
+}

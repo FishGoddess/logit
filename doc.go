@@ -85,6 +85,7 @@ Package logit provides an easy way to use foundation for your logging operations
 	options.WithFileKey("file")
 	options.WithLineKey("line")
 	options.WithTimeFormat(appender.UnixTime) // UnixTime means time will be logged as unix time, an int64 number.
+	options.WithCallerDepth(3)                // Set caller depth to 3 so the log will get the third depth caller.
 
 	// Remember, these options is only used for creating a logger.
 	logger := logit.NewLogger(
@@ -271,5 +272,5 @@ package logit // import "github.com/FishGoddess/logit"
 
 const (
 	// Version is the version string representation of logit.
-	Version = "v0.4.11"
+	Version = "v0.4.12-alpha"
 )

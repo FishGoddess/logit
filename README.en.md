@@ -140,3 +140,7 @@ If you find that something is not working as expected please open an _**issue**_
 | -----------|--------|-------------| ---------------- |
 | postar | avino-plan | An easy-to-use and low-coupling email service | [Github](https://github.com/avino-plan/postar) / [Gitee](https://gitee.com/avino-plan/postar) |
 | kafo | FishGoddess | An easy-to-use and distributed cache middleware | [Github](https://github.com/FishGoddess/kafo) / [Gitee](https://gitee.com/FishGoddess/kafo) |
+
+At last, I want to thank JetBrains for **free JetBrains Open Source license(s)**, because `logit` is developed with Idea / GoLand under it.
+
+<a href="https://www.jetbrains.com/?from=logit" target="_blank"><img src="./_icons/jetbrains.png" width="250"/></a>

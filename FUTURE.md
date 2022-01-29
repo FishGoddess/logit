@@ -11,7 +11,7 @@
 * [ ] 加入日志存活天数的特性
 * [ ] 加入日志存活个数的特性
 * [x] depth 放开，可以支持用户包裹
-* [ ] 兼容 log 包部分方法，比如 Print，Printf，Println
+* [ ] 兼容 log 包部分方法，比如 Print，Printf，Println（考虑中）
 * [ ] 考虑下 hook 的实现
 
 ### v0.3.x
