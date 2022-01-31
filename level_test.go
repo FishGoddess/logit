@@ -27,6 +27,7 @@ func TestLevelString(t *testing.T) {
 		infoLevel:  "info",
 		warnLevel:  "warn",
 		errorLevel: "error",
+		printLevel: "print",
 		offLevel:   "off",
 	}
 

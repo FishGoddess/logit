@@ -23,11 +23,12 @@ import (
 )
 
 const (
-	debugLevel level = iota          // For debug.
-	infoLevel                        // For info.
-	warnLevel                        // For Warn.
-	errorLevel                       // For error.
-	offLevel   level = math.MaxUint8 // For turning off the logger.
+	debugLevel level = iota              // For debug.
+	infoLevel                            // For info.
+	warnLevel                            // For Warn.
+	errorLevel                           // For error.
+	printLevel level = math.MaxUint8 - 1 // For printing.
+	offLevel   level = math.MaxUint8     // For turning off the logger.
 )
 
 var (
@@ -37,6 +38,7 @@ var (
 		infoLevel:  "info",
 		warnLevel:  "warn",
 		errorLevel: "error",
+		printLevel: "print",
 		offLevel:   "off",
 	}
 )

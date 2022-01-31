@@ -12,7 +12,7 @@
 * [ ] 加入日志存活个数的特性
 * [x] depth 放开，可以支持用户包裹
 * [x] Log 增加 Caller 方法，方便某些场景下获取调用信息
-* [ ] 兼容 log 包部分方法，比如 Print，Printf，Println（考虑中）
+* [x] 兼容 log 包部分方法，比如 Printf
 * [ ] 考虑下 hook 的实现
 
 ### v0.3.x

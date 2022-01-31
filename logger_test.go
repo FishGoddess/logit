@@ -28,9 +28,9 @@ import (
 
 // go test -v -cover -run=^TestNewLogger$
 func TestNewLogger(t *testing.T) {
-	options := Options()
 	buffer := bytes.NewBuffer(make([]byte, 0, 1024))
 
+	options := Options()
 	logger := NewLogger(
 		options.WithDebugLevel(),
 		options.WithAppender(appender.Json()),
@@ -61,6 +61,32 @@ func TestNewLogger(t *testing.T) {
 `
 
 	output := buffer.String()
+	if output != logs {
+		t.Errorf("logs %s is wrong with %s", output, logs)
+	}
+}
+
+// go test -v -cover -run=^TestLoggerPrintf$
+func TestLoggerPrintf(t *testing.T) {
+	buffer := bytes.NewBuffer(make([]byte, 0, 1024))
+
+	options := Options()
+	logger := NewLogger(
+		options.WithErrorLevel(),
+		options.WithAppender(appender.Json()),
+		options.WithWriter(buffer, false),
+		options.WithTimeKey(""),
+	)
+
+	logger.Printf("printf%d", 123)
+	logger.Print("print", 666)
+	logger.Println("println", 999)
+
+	output := buffer.String()
+	logs := `{"log.level":"print","log.msg":"printf123"}
+{"log.level":"print","log.msg":"print666"}
+{"log.level":"print","log.msg":"println 999\n"}
+`
 	if output != logs {
 		t.Errorf("logs %s is wrong with %s", output, logs)
 	}
