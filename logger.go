@@ -171,6 +171,21 @@ func (l *Logger) Error(msg string, params ...interface{}) *Log {
 	return l.log(errorLevel, msg, params...)
 }
 
+// Printf prints a log if print level is enabled.
+func (l *Logger) Printf(format string, params ...interface{}) {
+	l.log(printLevel, format, params...).End()
+}
+
+// Print prints a log if print level is enabled.
+func (l *Logger) Print(params ...interface{}) {
+	l.log(printLevel, fmt.Sprint(params...)).End()
+}
+
+// Println prints a log if print level is enabled.
+func (l *Logger) Println(params ...interface{}) {
+	l.log(printLevel, fmt.Sprintln(params...)).End()
+}
+
 // Flush flushes data storing in logger's writer.
 // This isn't necessary for all writers, but buffered writer needs.
 // Actually, you can use an option to flush automatically, see options.

@@ -52,6 +52,12 @@ func main() {
 	logger.Warn("This is a warn message, not ignored").End()
 	logger.Error("This is a error message, not ignored").End()
 
+	// Also, we provide some "old school" log method :)
+	// (Don't mistake~ I love old school~)
+	logger.Printf("This is a log %s, and it's for compatibility", "printed")
+	logger.Print("This is a log printed, and it's for compatibility", 123)
+	logger.Println("This is a log printed, and it's for compatibility", 666)
+
 	// If you want to log with some fields, try this:
 	logger.Error("This is a structured message").Error("err", io.EOF).Int("trace", 123).End()
 

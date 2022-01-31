@@ -21,7 +21,7 @@ Package logit provides an easy way to use foundation for your logging operations
 
 1. basic:
 
-	// Create a new logger for use.
+// Create a new logger for use.
 	// Default level is debug, so all logs will be logged.
 	// Invoke Close() isn't necessary in all situations.
 	// If logger's writer has buffer or something like that, it's better to invoke Close() for flushing buffer or something else.
@@ -46,6 +46,12 @@ Package logit provides an easy way to use foundation for your logging operations
 	logger.Warn("This is a warn message, not ignored").End()
 	logger.Error("This is a error message, not ignored").End()
 
+	// Also, we provide some "old school" log method :)
+	// (Don't mistake~ I love old school~)
+	logger.Printf("This is a log %s, and it's for compatibility", "printed")
+	logger.Print("This is a log printed, and it's for compatibility", 123)
+	logger.Println("This is a log printed, and it's for compatibility", 666)
+
 	// If you want to log with some fields, try this:
 	logger.Error("This is a structured message").Error("err", io.EOF).Int("trace", 123).End()
 
@@ -57,6 +63,10 @@ Package logit provides an easy way to use foundation for your logging operations
 	options.WithWriter(os.Stderr, true)           // Change logger's writer to os.Stderr with buffer.
 	options.WithErrorWriter(os.Stderr, false)     // Change logger's error writer to os.Stderr without buffer.
 	options.WithTimeFormat("2006-01-02 15:04:05") // Change the format of time (Only the log's time will apply it).
+
+	// You can bind context with logger and use it as long as you can get the context.
+	ctx := logit.NewContext(context.Background(), logger)
+	logger = logit.FromContext(ctx)
 
 2. options:
 
@@ -295,5 +305,5 @@ package logit // import "github.com/FishGoddess/logit"
 
 const (
 	// Version is the version string representation of logit.
-	Version = "v0.4.13-alpha"
+	Version = "v0.4.14-alpha"
 )
