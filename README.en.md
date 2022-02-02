@@ -1,6 +1,6 @@
 # 📝 logit
 
-[![Go Doc](_icons/godoc.svg)](https://pkg.go.dev/github.com/FishGoddess/logit)
+[![Go Doc](_icons/godoc.svg)](https://pkg.go.dev/github.com/go-logit/logit)
 [![License](_icons/license.svg)](https://www.apache.org/licenses/LICENSE-2.0.html)
 [![License](_icons/build.svg)](_icons/build.svg)
 [![License](_icons/coverage.svg)](_icons/coverage.svg)
@@ -35,7 +35,7 @@ _Check [HISTORY.md](./HISTORY.md) and [FUTURE.md](./FUTURE.md) to know about mor
 ### 🚀 Installation
 
 ```bash
-$ go get -u github.com/FishGoddess/logit
+$ go get -u github.com/go-logit/logit
 ```
 
 ### 📖 Examples
@@ -48,7 +48,7 @@ import (
 	"io"
 	"os"
 
-	"github.com/FishGoddess/logit"
+	"github.com/go-logit/logit"
 )
 
 func main() {

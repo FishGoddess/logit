@@ -200,7 +200,7 @@ Package logit provides an easy way to use foundation for your logging operations
 
 	// There are some global settings for optimizations, and you can set all of them in need.
 	//
-	//     import "github.com/FishGoddess/logit/core"
+	//     import "github.com/go-logit/logit/core"
 	//
 	// All global settings are stored in package core.
 
@@ -301,7 +301,7 @@ Package logit provides an easy way to use foundation for your logging operations
 	logger.Info("Invoke log.WithCaller() again").WithCaller().End()
 	logger.Close()
 */
-package logit // import "github.com/FishGoddess/logit"
+package logit // import "github.com/go-logit/logit"
 
 const (
 	// Version is the version string representation of logit.

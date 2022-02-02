@@ -19,7 +19,7 @@
 package main
 
 import (
-	"github.com/FishGoddess/logit"
+	"github.com/go-logit/logit"
 	"time"
 )
 

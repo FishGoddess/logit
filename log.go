@@ -20,12 +20,12 @@ package logit
 
 import (
 	"fmt"
-	"github.com/FishGoddess/logit/pkg"
+	"github.com/go-logit/logit/pkg"
 	"time"
 
-	"github.com/FishGoddess/logit/core"
-	"github.com/FishGoddess/logit/core/appender"
-	"github.com/FishGoddess/logit/core/writer"
+	"github.com/go-logit/logit/core"
+	"github.com/go-logit/logit/core/appender"
+	"github.com/go-logit/logit/core/writer"
 )
 
 // Log stores data of a whole logging message.

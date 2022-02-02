@@ -22,12 +22,12 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"github.com/FishGoddess/logit/pkg"
+	"github.com/go-logit/logit/pkg"
 	"io"
 	"testing"
 	"time"
 
-	"github.com/FishGoddess/logit/core/appender"
+	"github.com/go-logit/logit/core/appender"
 )
 
 // go test -v -cover -run=^TestNewLog$
