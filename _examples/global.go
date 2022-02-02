@@ -19,15 +19,15 @@
 package main
 
 import (
-	"github.com/FishGoddess/logit"
-	"github.com/FishGoddess/logit/core"
-	"github.com/FishGoddess/logit/core/writer"
+	"github.com/go-logit/logit"
+	"github.com/go-logit/logit/core"
+	"github.com/go-logit/logit/core/writer"
 )
 
 func main() {
 	// There are some global settings for optimizations, and you can set all of them in need.
 	//
-	//     import "github.com/FishGoddess/logit/core"
+	//     import "github.com/go-logit/logit/core"
 	//
 	// All global settings are stored in package core.
 

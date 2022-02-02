@@ -22,7 +22,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/FishGoddess/logit/core/appender"
+	"github.com/go-logit/logit/core/appender"
 )
 
 // go test -v -cover -run=^TestOptions$

@@ -24,7 +24,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/FishGoddess/logit/core"
+	"github.com/go-logit/logit/core"
 )
 
 // go test -v -cover -run=^TestBufferedWriter$

@@ -23,7 +23,7 @@ import (
 	"io"
 	"os"
 
-	"github.com/FishGoddess/logit"
+	"github.com/go-logit/logit"
 )
 
 func main() {

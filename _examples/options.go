@@ -22,8 +22,8 @@ import (
 	"os"
 	"time"
 
-	"github.com/FishGoddess/logit"
-	"github.com/FishGoddess/logit/core/appender"
+	"github.com/go-logit/logit"
+	"github.com/go-logit/logit/core/appender"
 )
 
 func main() {

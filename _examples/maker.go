@@ -22,7 +22,7 @@ import (
 	"context"
 	"errors"
 
-	"github.com/FishGoddess/logit"
+	"github.com/go-logit/logit"
 )
 
 type testLoggerMaker struct{}

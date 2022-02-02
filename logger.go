@@ -20,13 +20,13 @@ package logit
 
 import (
 	"fmt"
-	"github.com/FishGoddess/logit/pkg"
+	"github.com/go-logit/logit/pkg"
 	"os"
 	"sync"
 	"time"
 
-	"github.com/FishGoddess/logit/core/appender"
-	"github.com/FishGoddess/logit/core/writer"
+	"github.com/go-logit/logit/core/appender"
+	"github.com/go-logit/logit/core/writer"
 )
 
 // Logger is the core of logging operations.

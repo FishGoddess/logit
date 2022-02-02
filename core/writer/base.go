@@ -22,7 +22,7 @@ import (
 	"io"
 	"os"
 
-	"github.com/FishGoddess/logit/core"
+	"github.com/go-logit/logit/core"
 )
 
 const (
