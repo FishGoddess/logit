@@ -120,20 +120,20 @@ $ go test -v ./_examples/performance_test.go -bench=. -benchtime=1s
 
 > Benchmark file：[_examples/performance_test.go](./_examples/performance_test.go)
 
-| test case(output to memory) | times ran (large is better) |  ns/op (small is better) | B/op | allocs/op |
-| -----------|--------|-------------|-------------|-------------|
-| **logit** | **799759** | **&nbsp; 1373 ns/op** | **&nbsp; &nbsp; &nbsp; 0 B/op** | **&nbsp; &nbsp; 0 allocs/op** |
-| zerolog | 922863 | &nbsp; 1244 ns/op | &nbsp; &nbsp; &nbsp; 0 B/op | &nbsp; &nbsp; 0 allocs/op |
-| zap | 413701 | &nbsp; 2824 ns/op | &nbsp; 897 B/op | &nbsp; &nbsp; 8 allocs/op |
-| logrus | 105238 | 11474 ns/op | 7411 B/op | 128 allocs/op |
+| test case(output to memory) | times ran (large is better) | ns/op (small is better) | B/op                            | allocs/op                     |
+|-----------------------------|-----------------------------|-------------------------|---------------------------------|-------------------------------|
+| **logit**                   | **799759**                  | **&nbsp; 1373 ns/op**   | **&nbsp; &nbsp; &nbsp; 0 B/op** | **&nbsp; &nbsp; 0 allocs/op** |
+| zerolog                     | 922863                      | &nbsp; 1244 ns/op       | &nbsp; &nbsp; &nbsp; 0 B/op     | &nbsp; &nbsp; 0 allocs/op     |
+| zap                         | 413701                      | &nbsp; 2824 ns/op       | &nbsp; 897 B/op                 | &nbsp; &nbsp; 8 allocs/op     |
+| logrus                      | 105238                      | 11474 ns/op             | 7411 B/op                       | 128 allocs/op                 |
 
-| test case(output to file) | times ran (large is better) |  ns/op (small is better) | B/op | allocs/op |
-| -----------|--------|-------------|-------------|-------------|
-| **logit** | **599862** | **&nbsp; 1768 ns/op** | **&nbsp; 901 B/op** | **&nbsp; &nbsp; 0 allocs/op** |
-| **logit-notBuffer** | **148113** | **&nbsp; 7773 ns/op** | **&nbsp; &nbsp; &nbsp; 0 B/op** | **&nbsp; &nbsp; 0 allocs/op** |
-| zerolog | 159962 | &nbsp; 7472 ns/op | &nbsp; &nbsp; &nbsp; 0 B/op | &nbsp; &nbsp; 0 allocs/op |
-| zap | 130405 | &nbsp; 9137 ns/op | &nbsp; 897 B/op | &nbsp; &nbsp; 8 allocs/op |
-| logrus | &nbsp; 65202 | 18439 ns/op | 7410 B/op | 128 allocs/op |
+| test case(output to file) | times ran (large is better) | ns/op (small is better) | B/op                            | allocs/op                     |
+|---------------------------|-----------------------------|-------------------------|---------------------------------|-------------------------------|
+| **logit**                 | **599862**                  | **&nbsp; 1768 ns/op**   | **&nbsp; 901 B/op**             | **&nbsp; &nbsp; 0 allocs/op** |
+| **logit-notBuffer**       | **148113**                  | **&nbsp; 7773 ns/op**   | **&nbsp; &nbsp; &nbsp; 0 B/op** | **&nbsp; &nbsp; 0 allocs/op** |
+| zerolog                   | 159962                      | &nbsp; 7472 ns/op       | &nbsp; &nbsp; &nbsp; 0 B/op     | &nbsp; &nbsp; 0 allocs/op     |
+| zap                       | 130405                      | &nbsp; 9137 ns/op       | &nbsp; 897 B/op                 | &nbsp; &nbsp; 8 allocs/op     |
+| logrus                    | &nbsp; 65202                | 18439 ns/op             | 7410 B/op                       | 128 allocs/op                 |
 
 > Environment：R7-5800X CPU@3.8GHZ，32GB RAM，512GB SSD
 
@@ -143,10 +143,10 @@ If you find that something is not working as expected please open an _**issue**_
 
 ### 📦 Projects using logit
 
-| Project | Author | Description | link |
-| -----------|--------|-------------| ---------------- |
-| postar | avino-plan | An easy-to-use and low-coupling email service | [Github](https://github.com/avino-plan/postar) / [Gitee](https://gitee.com/avino-plan/postar) |
-| kafo | FishGoddess | An easy-to-use and distributed cache middleware | [Github](https://github.com/FishGoddess/kafo) / [Gitee](https://gitee.com/FishGoddess/kafo) |
+| Project | Author      | Description                                     | link                                                                                          |
+|---------|-------------|-------------------------------------------------|-----------------------------------------------------------------------------------------------|
+| postar  | avino-plan  | An easy-to-use and low-coupling email service   | [Github](https://github.com/avino-plan/postar) / [Gitee](https://gitee.com/avino-plan/postar) |
+| kafo    | FishGoddess | An easy-to-use and distributed cache middleware | [Github](https://github.com/FishGoddess/kafo) / [Gitee](https://gitee.com/FishGoddess/kafo)   |
 
 At last, I want to thank JetBrains for **free JetBrains Open Source license(s)**, because `logit` is developed with Idea / GoLand under it.
 
