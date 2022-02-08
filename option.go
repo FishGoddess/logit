@@ -79,6 +79,7 @@ func (o *options) WithAppender(appender appender.Appender) Option {
 		logger.infoAppender = appender
 		logger.warnAppender = appender
 		logger.errorAppender = appender
+		logger.printAppender = appender
 	}
 }
 
@@ -110,6 +111,13 @@ func (o *options) WithErrorAppender(appender appender.Appender) Option {
 	}
 }
 
+// WithPrintAppender returns an option which sets logger's print appender to a new one.
+func (o *options) WithPrintAppender(appender appender.Appender) Option {
+	return func(logger *Logger) {
+		logger.printAppender = appender
+	}
+}
+
 // WithWriter returns an option which sets logger's writer to a new one.
 func (o *options) WithWriter(w io.Writer, buffered bool) Option {
 	return func(logger *Logger) {
@@ -125,6 +133,7 @@ func (o *options) WithWriter(w io.Writer, buffered bool) Option {
 		logger.infoWriter = wr
 		logger.warnWriter = wr
 		logger.errorWriter = wr
+		logger.printWriter = wr
 	}
 }
 
@@ -168,6 +177,17 @@ func (o *options) WithErrorWriter(w io.Writer, buffered bool) Option {
 			logger.errorWriter = writer.Buffered(w)
 		} else {
 			logger.errorWriter = writer.Wrapped(w)
+		}
+	}
+}
+
+// WithPrintWriter returns an option which sets logger's print writer to a new one.
+func (o *options) WithPrintWriter(w io.Writer, buffered bool) Option {
+	return func(logger *Logger) {
+		if buffered {
+			logger.printWriter = writer.Buffered(w)
+		} else {
+			logger.printWriter = writer.Wrapped(w)
 		}
 	}
 }
