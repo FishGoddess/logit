@@ -147,7 +147,7 @@ func (l *Logger) log(level level, msg string, params ...interface{}) *Log {
 	}
 
 	if l.needCaller {
-		log.withCaller(4)
+		log.withCaller(l.callerDepth)
 	}
 
 	if len(params) > 0 {

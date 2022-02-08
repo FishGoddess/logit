@@ -35,7 +35,7 @@ func TestNewDefaultConfig(t *testing.T) {
 		fileKey:     "log.file",
 		lineKey:     "log.line",
 		timeFormat:  "2006-01-02 15:04:05",
-		callerDepth: 3,
+		callerDepth: 4,
 	}
 
 	if *defaultConfig != *cfg {
