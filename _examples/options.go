@@ -60,7 +60,7 @@ func main() {
 		options.WithWriter(os.Stdout, false),
 		options.WithTimeFormat("2006/01/02 15:04:05"),
 		options.WithCaller(),
-		options.WithCallerDepth(3),
+		options.WithCallerDepth(4),
 		// ...
 	)
 	defer logger.Close()
