@@ -37,8 +37,8 @@ type Flusher interface {
 
 // Writer is an interface which have flush, write and close functions.
 type Writer interface {
-	Flusher        // Flusher is an interface that flushes data to somewhere.
 	io.WriteCloser // WriteCloser is an interface that writes data to somewhere and can be closed.
+	Flusher        // Flusher is an interface that flushes data to somewhere.
 }
 
 // notStdoutAndStderr returns true if w isn't stdout and stderr.

@@ -22,10 +22,11 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"github.com/go-logit/logit/pkg"
 	"io"
 	"testing"
 	"time"
+
+	"github.com/go-logit/logit/pkg"
 
 	"github.com/go-logit/logit/core/appender"
 )
@@ -160,8 +161,8 @@ func TestNewLog(t *testing.T) {
 	}
 }
 
-// go test -v -cover -run=^TestLogCaller$
-func TestLogCaller(t *testing.T) {
+// go test -v -cover -run=^TestLogWithCaller$
+func TestLogWithCaller(t *testing.T) {
 	buffer := bytes.NewBuffer(make([]byte, 0, 1024))
 	logger := NewLogger(Options().WithWriter(buffer, false))
 	logger.needCaller = true
@@ -188,6 +189,40 @@ func TestLogCaller(t *testing.T) {
 	file, line := pkg.Caller(1)
 	line -= 3 // Between log.WithCaller() and pkg.Caller(1) is 3
 	right := fmt.Sprintf("%s=%s|%s=%d\n", logger.fileKey, file, logger.lineKey, line)
+
+	str = buffer.String()
+	if str != right {
+		t.Errorf("str %s != right %s", str, right)
+	}
+}
+
+// go test -v -cover -run=^TestLogWithPid$
+func TestLogWithPid(t *testing.T) {
+	buffer := bytes.NewBuffer(make([]byte, 0, 1024))
+	logger := NewLogger(Options().WithWriter(buffer, false))
+	logger.needPid = true
+
+	log := newLog()
+	log.logger = logger
+	log.appender = logger.debugAppender
+	log.writer = logger.debugWriter
+	log.begin()
+	log.WithPid()
+	log.End()
+
+	str := buffer.String()
+	if str != "\n" {
+		t.Errorf("str %q != '\n'", str)
+	}
+
+	buffer.Reset()
+	logger.needPid = false
+	log.begin()
+	log.WithPid()
+	log.End()
+
+	pid := pkg.Pid()
+	right := fmt.Sprintf("%s=%d\n", logger.pidKey, pid)
 
 	str = buffer.String()
 	if str != right {

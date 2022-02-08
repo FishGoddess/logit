@@ -1,5 +1,14 @@
 ## ✒ 历史版本的特性介绍 (Features in old versions)
 
+### v0.4.17
+
+> 此版本发布于 2022-02-08
+
+* 修复 Version 错误的问题
+* 修复 Printf、Print、Println 方法下 level 错误的问题
+* 加入 WithPid 方法
+* 完善 PrintLevel 相关的逻辑
+
 ### v0.4.16
 
 > 此版本发布于 2022-02-02

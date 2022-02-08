@@ -20,7 +20,6 @@ package logit
 
 import (
 	"fmt"
-	"github.com/go-logit/logit/pkg"
 	"os"
 	"sync"
 	"time"
@@ -34,17 +33,19 @@ type Logger struct {
 	// config stores all configurations of logger.
 	*config
 
-	// debugAppender, infoAppender, warnAppender, errorAppender is an appender appending entries to debug, info, warn, error logs.
+	// debugAppender, infoAppender, warnAppender, errorAppender, printAppender is an appender appending entries to debug, info, warn, error, print logs.
 	debugAppender appender.Appender
 	infoAppender  appender.Appender
 	warnAppender  appender.Appender
 	errorAppender appender.Appender
+	printAppender appender.Appender
 
-	// debugWriter, infoWriter, warnWriter, errorWriter writes debug, info, warn, error logs to somewhere.
+	// debugWriter, infoWriter, warnWriter, errorWriter, printWriter writes debug, info, warn, error, print logs to somewhere.
 	debugWriter writer.Writer
 	infoWriter  writer.Writer
 	warnWriter  writer.Writer
 	errorWriter writer.Writer
+	printWriter writer.Writer
 
 	// logPool is for reusing logs.
 	logPool *sync.Pool
@@ -58,10 +59,12 @@ func NewLogger(options ...Option) *Logger {
 		infoAppender:  appender.Text(),
 		warnAppender:  appender.Text(),
 		errorAppender: appender.Text(),
+		printAppender: appender.Text(),
 		debugWriter:   writer.Wrapped(os.Stdout),
 		infoWriter:    writer.Wrapped(os.Stdout),
-		warnWriter:    writer.Wrapped(os.Stdout),
+		warnWriter:    writer.Wrapped(os.Stderr),
 		errorWriter:   writer.Wrapped(os.Stderr),
+		printWriter:   writer.Wrapped(os.Stdout),
 		logPool: &sync.Pool{
 			New: func() interface{} {
 				return newLog()
@@ -79,6 +82,8 @@ func NewLogger(options ...Option) *Logger {
 // appenderOf returns the appender of level.
 func (l *Logger) appenderOf(level level) appender.Appender {
 	switch level {
+	case printLevel:
+		return l.printAppender
 	case errorLevel:
 		return l.errorAppender
 	case warnLevel:
@@ -93,6 +98,8 @@ func (l *Logger) appenderOf(level level) appender.Appender {
 // writerOf returns the writer of level.
 func (l *Logger) writerOf(level level) writer.Writer {
 	switch level {
+	case printLevel:
+		return l.printWriter
 	case errorLevel:
 		return l.errorWriter
 	case warnLevel:
@@ -135,8 +142,8 @@ func (l *Logger) log(level level, msg string, params ...interface{}) *Log {
 		log.String(l.levelKey, level.String())
 	}
 
-	if l.needPid && l.pidKey != "" {
-		log.Int(l.pidKey, pkg.Pid())
+	if l.needPid {
+		log.WithPid()
 	}
 
 	if l.needCaller {
@@ -147,8 +154,7 @@ func (l *Logger) log(level level, msg string, params ...interface{}) *Log {
 		msg = fmt.Sprintf(msg, params...)
 	}
 
-	log.String(l.msgKey, msg)
-	return log
+	return log.String(l.msgKey, msg)
 }
 
 // Debug returns a Log with debug level if debug level is enabled.
@@ -192,7 +198,14 @@ func (l *Logger) Println(params ...interface{}) {
 // Close a logger will also invoke Flush(), so you can use an option or Close() to flush instead.
 // However, you still need to flush manually if you want your logs store immediately.
 func (l *Logger) Flush() (n int, err error) {
-	i, e := l.errorWriter.Flush()
+	i, e := l.printWriter.Flush()
+	if e != nil {
+		err = e
+	}
+
+	n += i
+
+	i, e = l.errorWriter.Flush()
 	if e != nil {
 		err = e
 	}
@@ -230,6 +243,11 @@ func (l *Logger) Close() error {
 	l.level = offLevel
 
 	_, err := l.Flush()
+	if err != nil {
+		return err
+	}
+
+	err = l.printWriter.Close()
 	if err != nil {
 		return err
 	}

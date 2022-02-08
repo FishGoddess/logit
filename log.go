@@ -20,8 +20,9 @@ package logit
 
 import (
 	"fmt"
-	"github.com/go-logit/logit/pkg"
 	"time"
+
+	"github.com/go-logit/logit/pkg"
 
 	"github.com/go-logit/logit/core"
 	"github.com/go-logit/logit/core/appender"
@@ -456,6 +457,19 @@ func (l *Log) Stringers(key string, value []fmt.Stringer) *Log {
 	}
 
 	l.data = l.appender.AppendStringers(l.data, key, value)
+	return l
+}
+
+// WithPid adds one entry about pid information to l.
+func (l *Log) WithPid() *Log {
+	if l == nil || l.logger.needPid {
+		return l
+	}
+
+	if l.logger.pidKey != "" {
+		l.Int(l.logger.pidKey, pkg.Pid())
+	}
+
 	return l
 }
 
