@@ -498,3 +498,18 @@ func (l *Log) WithCaller() *Log {
 	}
 	return l.withCaller(3)
 }
+
+// JSON adds an entry which key is string and value is marshal to a json string to l.
+func (l *Log) JSON(key string, value interface{}) *Log {
+	if l == nil {
+		return nil
+	}
+
+	marshaled, err := core.MarshalJSON(value)
+	if err != nil {
+		l.data = l.appender.AppendError(l.data, key, err)
+	} else {
+		l.data = l.appender.AppendString(l.data, key, string(marshaled))
+	}
+	return l
+}
