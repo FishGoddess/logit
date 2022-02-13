@@ -59,6 +59,16 @@ func main() {
 	logger.Println("This is a log printed, and it's for compatibility", 666)
 
 	// If you want to log with some fields, try this:
+	user := struct {
+		ID   int64  `json:"id"`
+		Name string `json:"name"`
+		Age  int    `json:"age"`
+	}{
+		ID:   666,
+		Name: "FishGoddess",
+		Age:  3,
+	}
+	logger.Warn("This is a structured message").Any("user", user).Json("userJson", user).End()
 	logger.Error("This is a structured message").Error("err", io.EOF).Int("trace", 123).End()
 
 	// You may notice logit.Options() which returns an options list.
