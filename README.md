@@ -117,20 +117,20 @@ $ go test -v ./_examples/performance_test.go -bench=. -benchtime=1s
 
 > 测试文件：[_examples/performance_test.go](./_examples/performance_test.go)
 
-| 测试（输出到内存） | 单位时间内运行次数 (越大越好) |  每个操作消耗时间 (越小越好) | B/op (越小越好) | allocs/op (越小越好) |
-| -----------|--------|-------------|-------------|-------------|
-| **logit** | **799759** | **&nbsp; 1373 ns/op** | **&nbsp; &nbsp; &nbsp; 0 B/op** | **&nbsp; &nbsp; 0 allocs/op** |
-| zerolog | 922863 | &nbsp; 1244 ns/op | &nbsp; &nbsp; &nbsp; 0 B/op | &nbsp; &nbsp; 0 allocs/op |
-| zap | 413701 | &nbsp; 2824 ns/op | &nbsp; 897 B/op | &nbsp; &nbsp; 8 allocs/op |
-| logrus | 105238 | 11474 ns/op | 7411 B/op | 128 allocs/op |
+| 测试（输出到内存） | 单位时间内运行次数 (越大越好) | 每个操作消耗时间 (越小越好)       | B/op (越小越好)                     | allocs/op (越小越好)              |
+|-----------|------------------|-----------------------|---------------------------------|-------------------------------|
+| **logit** | **799759**       | **&nbsp; 1373 ns/op** | **&nbsp; &nbsp; &nbsp; 0 B/op** | **&nbsp; &nbsp; 0 allocs/op** |
+| zerolog   | 922863           | &nbsp; 1244 ns/op     | &nbsp; &nbsp; &nbsp; 0 B/op     | &nbsp; &nbsp; 0 allocs/op     |
+| zap       | 413701           | &nbsp; 2824 ns/op     | &nbsp; 897 B/op                 | &nbsp; &nbsp; 8 allocs/op     |
+| logrus    | 105238           | 11474 ns/op           | 7411 B/op                       | 128 allocs/op                 |
 
-| 测试（输出到文件） | 单位时间内运行次数 (越大越好) |  每个操作消耗时间 (越小越好) | B/op (越小越好) | allocs/op (越小越好) |
-| -----------|--------|-------------|-------------|-------------|
-| **logit** | **599862** | **&nbsp; 1768 ns/op** | **&nbsp; 901 B/op** | **&nbsp; &nbsp; 0 allocs/op** |
-| **logit-不缓冲** | **148113** | **&nbsp; 7773 ns/op** | **&nbsp; &nbsp; &nbsp; 0 B/op** | **&nbsp; &nbsp; 0 allocs/op** |
-| zerolog | 159962 | &nbsp; 7472 ns/op | &nbsp; &nbsp; &nbsp; 0 B/op | &nbsp; &nbsp; 0 allocs/op |
-| zap | 130405 | &nbsp; 9137 ns/op | &nbsp; 897 B/op | &nbsp; &nbsp; 8 allocs/op |
-| logrus | &nbsp; 65202 | 18439 ns/op | 7410 B/op | 128 allocs/op |
+| 测试（输出到文件）     | 单位时间内运行次数 (越大越好) | 每个操作消耗时间 (越小越好)       | B/op (越小越好)                     | allocs/op (越小越好)              |
+|---------------|------------------|-----------------------|---------------------------------|-------------------------------|
+| **logit**     | **599862**       | **&nbsp; 1768 ns/op** | **&nbsp; 901 B/op**             | **&nbsp; &nbsp; 0 allocs/op** |
+| **logit-不缓冲** | **148113**       | **&nbsp; 7773 ns/op** | **&nbsp; &nbsp; &nbsp; 0 B/op** | **&nbsp; &nbsp; 0 allocs/op** |
+| zerolog       | 159962           | &nbsp; 7472 ns/op     | &nbsp; &nbsp; &nbsp; 0 B/op     | &nbsp; &nbsp; 0 allocs/op     |
+| zap           | 130405           | &nbsp; 9137 ns/op     | &nbsp; 897 B/op                 | &nbsp; &nbsp; 8 allocs/op     |
+| logrus        | &nbsp; 65202     | 18439 ns/op           | 7410 B/op                       | 128 allocs/op                 |
 
 > 测试环境：R7-5800X CPU@3.8GHZ，32GB RAM，512GB SSD
 
@@ -140,10 +140,10 @@ $ go test -v ./_examples/performance_test.go -bench=. -benchtime=1s
 
 ### 📦 使用 logit 的项目
 
-| 项目 | 作者 | 描述 | 链接 |
-| -----------|--------|-------------| ---------------- |
-| postar | avino-plan | 一个极易上手的低耦合通用邮件服务 | [Github](https://github.com/avino-plan/postar) / [码云](https://gitee.com/avino-plan/postar) |
-| kafo | FishGoddess | 一个简单的轻量级分布式缓存中间件 | [Github](https://github.com/FishGoddess/kafo) / [码云](https://gitee.com/FishGoddess/kafo) |
+| 项目     | 作者          | 描述               | 链接                                                                                         |
+|--------|-------------|------------------|--------------------------------------------------------------------------------------------|
+| postar | avino-plan  | 一个极易上手的低耦合通用邮件服务 | [Github](https://github.com/avino-plan/postar) / [码云](https://gitee.com/avino-plan/postar) |
+| kafo   | FishGoddess | 一个简单的轻量级分布式缓存中间件 | [Github](https://github.com/FishGoddess/kafo) / [码云](https://gitee.com/FishGoddess/kafo)   |
 
 最后，我想感谢 JetBrains 公司的 **free JetBrains Open Source license(s)**，因为 `logit` 是用该计划下的 Idea / GoLand 完成开发的。
 
