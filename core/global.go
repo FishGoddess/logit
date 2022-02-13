@@ -18,6 +18,8 @@
 
 package core
 
+import "encoding/json"
+
 var (
 	// LogMallocSize is the pre-malloc size of a new Log data.
 	// If your logs are extremely long, such as 4000 bytes/log, you can set it to 4096 to avoid re-malloc.
@@ -26,4 +28,8 @@ var (
 	// WriterBufferedSize is the default size of buffered writer.
 	// If your logs are extremely long, such as 4 KB/log, you can set it to 512 KB to avoid re-malloc.
 	WriterBufferedSize = 64 * 1024 // 64 KB
+
+	// MarshalJson marshals v to json bytes.
+	// If you want to use your own way to marshal, change it to your own marshal function.
+	MarshalJson = json.Marshal
 )

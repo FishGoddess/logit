@@ -460,6 +460,22 @@ func (l *Log) Stringers(key string, value []fmt.Stringer) *Log {
 	return l
 }
 
+// Json adds an entry which key is string and value is marshaled to a json string to l.
+func (l *Log) Json(key string, value interface{}) *Log {
+	if l == nil {
+		return nil
+	}
+
+	marshaled, err := core.MarshalJson(value)
+	if err != nil {
+		l.data = l.appender.AppendError(l.data, key, err) // This should not happen...
+		return l
+	}
+
+	l.data = l.appender.AppendString(l.data, key, string(marshaled))
+	return l
+}
+
 // WithPid adds one entry about pid information to l.
 func (l *Log) WithPid() *Log {
 	if l == nil || l.logger.needPid {
