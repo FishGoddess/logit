@@ -15,6 +15,7 @@
 package logit
 
 import (
+	"context"
 	"os"
 	"testing"
 
@@ -644,5 +645,31 @@ func TestOptionsWithCallerDepth(t *testing.T) {
 	opts.WithCallerDepth(3)(logger)
 	if logger.callerDepth != 3 {
 		t.Errorf("logger's callerDepth %d is wrong", logger.callerDepth)
+	}
+}
+
+// go test -v -cover -run=^TestOptionsWithInterceptors$
+func TestOptionsWithInterceptors(t *testing.T) {
+	opts := Options()
+
+	logger := NewLogger()
+	logger.interceptors = nil
+
+	interceptors := []Interceptor{
+		func(ctx context.Context, log *Log) {},
+		func(ctx context.Context, log *Log) {},
+		func(ctx context.Context, log *Log) {},
+	}
+
+	opts.WithInterceptors(interceptors...)(logger)
+	if len(logger.interceptors) != len(interceptors) {
+		t.Errorf("len(logger.interceptors) %d != len(interceptors) %d", len(logger.interceptors), len(interceptors))
+	}
+
+	logger.interceptors = nil
+
+	opts.WithInterceptors()
+	if len(logger.interceptors) != 0 {
+		t.Errorf("len(logger.interceptors) %d != 0", len(logger.interceptors))
 	}
 }

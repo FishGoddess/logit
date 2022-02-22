@@ -21,11 +21,6 @@ import (
 // contextKey is the type of context key.
 type contextKey struct{}
 
-var (
-	// contextLogger is a non-nil but useless logger for FromContextWithKey() if missing.
-	contextLogger = NewLogger(Options().WithOffLevel())
-)
-
 // NewContextWithKey wraps context with logger of key and returns a new context.
 func NewContextWithKey(ctx context.Context, key interface{}, logger *Logger) context.Context {
 	return context.WithValue(ctx, key, logger)
@@ -37,10 +32,7 @@ func FromContextWithKey(ctx context.Context, key interface{}) *Logger {
 		return logger
 	}
 
-	if globalLogger != nil {
-		return globalLogger
-	}
-	return contextLogger
+	return globalLogger
 }
 
 // NewContext wraps context with logger and returns a new context.

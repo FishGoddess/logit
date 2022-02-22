@@ -255,37 +255,37 @@ Package logit provides an easy way to use foundation for your logging operations
 
 7. maker:
 
-	type testLoggerMaker struct{}
+	type testLoggerCreator struct{}
 
-	func (tlm *testLoggerMaker) MakeLogger(ctx context.Context, params ...interface{}) (*logit.Logger, error) {
+	func (tlm *testLoggerCreator) CreateLogger(params ...interface{}) (*logit.Logger, error) {
 		if len(params) < 1 {
-			return nil, errors.New("testLoggerMaker: len(params) < 1")
+			return nil, errors.New("testLoggerCreator: len(params) < 1")
 		}
 
 		if params[0].(string) == "error" {
-			return nil, errors.New("testLoggerMaker: params[0] isn't a string")
+			return nil, errors.New("testLoggerCreator: params[0] isn't a string")
 		}
 
 		// Customize your creation of logger here.
 		return logit.NewLogger(), nil
 	}
 
-	makeName := "testLoggerMaker"
+	name := "testLoggerCreator"
 
-	// RegisterLoggerMaker registers maker to logit with given name.
-	err := logit.RegisterLoggerMaker(makeName, new(testLoggerMaker))
+	// RegisterLoggerCreator registers creator to logit with given name.
+	err := logit.RegisterLoggerCreator(name, new(testLoggerCreator))
 	if err != nil {
 		panic(err)
 	}
 
-	// NewLoggerFromMaker creates logger from maker with given params.
-	// Panic will be invoked if params is "error" because MakeLogger in testLoggerMaker has this logic.
-	logger, err := logit.NewLoggerFromMaker(context.Background(), makeName, "xxx")
+	// NewLoggerFromCreator creates logger from creator with given params.
+	// Panic will be invoked if params is "error" because CreateLogger in testLoggerCreator has this logic.
+	logger, err := logit.NewLoggerFromCreator(name, "xxx")
 	if err != nil {
 		panic(err)
 	}
 
-	logger.Info("I am made from logger maker!").End()
+	logger.Info("I am made from logger creator!").End()
 
 8. caller:
 

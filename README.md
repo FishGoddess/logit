@@ -114,7 +114,7 @@ func main() {
 * [writer](./_examples/writer.go)
 * [global](./_examples/global.go)
 * [context](./_examples/context.go)
-* [maker](./_examples/maker.go)
+* [creator](./_examples/creator.go)
 * [caller](./_examples/caller.go)
 
 _所有的使用案例都在 [_examples](./_examples) 目录。_

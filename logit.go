@@ -17,27 +17,16 @@ package logit
 import "sync"
 
 var (
-	globalLogger *Logger
+	globalLogger = NewLogger(Options().WithInfoLevel())
 	once         sync.Once
 )
 
 // InitGlobal initializes global logger with given options.
-func InitGlobal(options ...Option) {
+func InitGlobal(newLogger func() *Logger) {
 	once.Do(func() {
-		globalLogger = NewLogger(options...)
+		globalLogger = newLogger()
 		globalLogger.callerDepth++
 	})
 }
 
-// InitGlobalFromCreator initializes global logger with given creator name.
-func InitGlobalFromCreator(name string, params ...interface{}) {
-	once.Do(func() {
-		logger, err := NewLoggerFromCreator(name, params...)
-		if err != nil {
-			panic(err)
-		}
-
-		globalLogger = logger
-		globalLogger.callerDepth++
-	})
-}
+// TODO log functions...

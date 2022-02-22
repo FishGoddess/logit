@@ -15,6 +15,7 @@
 package logit
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"sync"
@@ -23,6 +24,9 @@ import (
 	"github.com/go-logit/logit/core/appender"
 	"github.com/go-logit/logit/core/writer"
 )
+
+// Interceptor intercepts log with context.
+type Interceptor = func(ctx context.Context, log *Log)
 
 // Logger is the core of logging operations.
 type Logger struct {
@@ -42,6 +46,9 @@ type Logger struct {
 	warnWriter  writer.Writer
 	errorWriter writer.Writer
 	printWriter writer.Writer
+
+	// interceptors stores all interceptors.
+	interceptors []Interceptor
 
 	// logPool is for reusing logs.
 	logPool *sync.Pool

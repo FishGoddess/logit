@@ -270,3 +270,10 @@ func (o *options) WithCallerDepth(callerDepth int) Option {
 		logger.callerDepth = callerDepth
 	}
 }
+
+// WithInterceptors returns an option which sets interceptors to logger.
+func (o *options) WithInterceptors(interceptors ...Interceptor) Option {
+	return func(logger *Logger) {
+		logger.interceptors = append(logger.interceptors, interceptors...)
+	}
+}

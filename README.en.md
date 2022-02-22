@@ -117,7 +117,7 @@ func main() {
 * [writer](./_examples/writer.go)
 * [global](./_examples/global.go)
 * [context](./_examples/context.go)
-* [maker](./_examples/maker.go)
+* [creator](./_examples/creator.go)
 * [caller](./_examples/caller.go)
 
 _All examples can be found in [_examples](./_examples)._
