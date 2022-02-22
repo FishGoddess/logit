@@ -14,22 +14,30 @@
 
 package logit
 
-import "testing"
+import "sync"
 
-// go test -v -cover -run=^TestLevelString$
-func TestLevelString(t *testing.T) {
-	levels := map[level]string{
-		debugLevel: "debug",
-		infoLevel:  "info",
-		warnLevel:  "warn",
-		errorLevel: "error",
-		printLevel: "print",
-		offLevel:   "off",
-	}
+var (
+	globalLogger *Logger
+	once         sync.Once
+)
 
-	for lvl, name := range levels {
-		if lvl.String() != name {
-			t.Errorf("level's name %s is wrong", lvl.String())
+// InitGlobal initializes global logger with given options.
+func InitGlobal(options ...Option) {
+	once.Do(func() {
+		globalLogger = NewLogger(options...)
+		globalLogger.callerDepth++
+	})
+}
+
+// InitGlobalFromCreator initializes global logger with given creator name.
+func InitGlobalFromCreator(name string, params ...interface{}) {
+	once.Do(func() {
+		logger, err := NewLoggerFromCreator(name, params...)
+		if err != nil {
+			panic(err)
 		}
-	}
+
+		globalLogger = logger
+		globalLogger.callerDepth++
+	})
 }

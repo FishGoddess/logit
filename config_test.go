@@ -1,4 +1,4 @@
-// Copyright 2021 Ye Zi Jie. All Rights Reserved.
+// Copyright 2022 FishGoddess. All Rights Reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -11,10 +11,6 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-//
-// Author: FishGoddess
-// Email: fishgoddess@qq.com
-// Created at 2021/07/11 14:02:38
 
 package logit
 
@@ -24,7 +20,7 @@ import "testing"
 func TestNewDefaultConfig(t *testing.T) {
 	defaultConfig := newDefaultConfig()
 
-	cfg := &config{
+	cfg := config{
 		level:       debugLevel,
 		needPid:     false,
 		needCaller:  false,
@@ -38,7 +34,7 @@ func TestNewDefaultConfig(t *testing.T) {
 		callerDepth: 4,
 	}
 
-	if *defaultConfig != *cfg {
+	if defaultConfig != cfg {
 		t.Errorf("default config %+v is wrong", defaultConfig)
 	}
 }

@@ -1,4 +1,4 @@
-// Copyright 2021 Ye Zi Jie. All Rights Reserved.
+// Copyright 2022 FishGoddess. All Rights Reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -11,10 +11,6 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-//
-// Author: FishGoddess
-// Email: fishgoddess@qq.com
-// Created at 2021/06/27 16:40:31
 
 package logit
 
@@ -31,7 +27,7 @@ import (
 // Logger is the core of logging operations.
 type Logger struct {
 	// config stores all configurations of logger.
-	*config
+	config
 
 	// debugAppender, infoAppender, warnAppender, errorAppender, printAppender is an appender appending entries to debug, info, warn, error, print logs.
 	debugAppender appender.Appender
