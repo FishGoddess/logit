@@ -49,6 +49,7 @@ func main() {
 	options.WithLineKey("line")
 	options.WithTimeFormat(appender.UnixTime) // UnixTime means time will be logged as unix time, an int64 number.
 	options.WithCallerDepth(3)                // Set caller depth to 3 so the log will get the third depth caller.
+	options.WithInterceptors()
 
 	// Remember, these options is only used for creating a logger.
 	logger := logit.NewLogger(

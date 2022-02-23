@@ -69,8 +69,8 @@ func NewLoggerFromMaker(ctx context.Context, makerName string, params ...interfa
 // ======================== LoggerCreator below is the future ========================
 
 var (
-	loggerCreators     = make(map[string]LoggerCreator, 4) // loggerMakers stores all registered logger makers.
-	loggerCreatorsLock sync.RWMutex                        // loggerMakersLock is for concurrency-safe when using loggerMakers.
+	loggerCreators     = make(map[string]LoggerCreator, 4) // loggerCreators stores all registered logger creators.
+	loggerCreatorsLock sync.RWMutex                        // loggerCreatorsLock is for concurrency-safe when using loggerCreators.
 )
 
 // LoggerCreator is for creating a new logger.

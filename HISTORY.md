@@ -1,5 +1,14 @@
 ## ✒ 历史版本的特性介绍 (Features in old versions)
 
+### v0.4.20-alpha
+
+> 此版本发布于 2022-02-23
+
+* 加入日志拦截器，支持从 context 注入键值对
+* 优化 Logger 字段结构，减少多余引用变量
+* 更改 LoggerMaker 为 LoggerCreator，并废弃 LoggerMaker
+* 更改 MarshalJson 为 MarshalToJson，并废弃 MarshalJson
+
 ### v0.4.19
 
 > 此版本发布于 2022-02-13

@@ -243,7 +243,7 @@ func (l *Logger) Flush() (n int, err error) {
 // It will invoke close() if writer is io.Closer.
 // So, it is recommended for you to invoke it habitually.
 func (l *Logger) Close() error {
-	l.level = offLevel
+	l.level = offLevel // uint8 is safe-concurrent in assignment, but may cause dirty read?
 
 	_, err := l.Flush()
 	if err != nil {
