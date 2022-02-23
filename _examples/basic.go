@@ -79,4 +79,9 @@ func main() {
 	// You can bind context with logger and use it as long as you can get the context.
 	ctx := logit.NewContext(context.Background(), logger)
 	logger = logit.FromContext(ctx)
+
+	// You can initialize the global logger if you don't want to use a logger.
+	logit.InitGlobal(func() *logit.Logger {
+		return logit.NewLogger()
+	})
 }

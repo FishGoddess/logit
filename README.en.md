@@ -120,6 +120,7 @@ func main() {
 * [context](./_examples/context.go)
 * [creator](./_examples/creator.go)
 * [caller](./_examples/caller.go)
+* [interceptor](./_examples/interceptor.go)
 
 _All examples can be found in [_examples](./_examples)._
 

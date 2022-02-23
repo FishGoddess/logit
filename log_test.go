@@ -225,3 +225,13 @@ func TestLogWithCaller(t *testing.T) {
 		t.Errorf("str %s != right %s", str, right)
 	}
 }
+
+// go test -v -cover -run=^TestLogWithContext$
+func TestLogWithContext(t *testing.T) {
+
+}
+
+// go test -v -cover -run=^TestLogIntercept$
+func TestLogIntercept(t *testing.T) {
+
+}

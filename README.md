@@ -117,6 +117,7 @@ func main() {
 * [context](./_examples/context.go)
 * [creator](./_examples/creator.go)
 * [caller](./_examples/caller.go)
+* [interceptor](./_examples/interceptor.go)
 
 _所有的使用案例都在 [_examples](./_examples) 目录。_
 
