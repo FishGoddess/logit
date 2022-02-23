@@ -1,4 +1,4 @@
-// Copyright 2021 Ye Zi Jie. All Rights Reserved.
+// Copyright 2022 FishGoddess. All Rights Reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -11,14 +11,11 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-//
-// Author: FishGoddess
-// Email: fishgoddess@qq.com
-// Created at 2021/06/27 16:40:31
 
 package logit
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"sync"
@@ -28,10 +25,13 @@ import (
 	"github.com/go-logit/logit/core/writer"
 )
 
+// Interceptor intercepts log with context.
+type Interceptor = func(ctx context.Context, log *Log)
+
 // Logger is the core of logging operations.
 type Logger struct {
 	// config stores all configurations of logger.
-	*config
+	config
 
 	// debugAppender, infoAppender, warnAppender, errorAppender, printAppender is an appender appending entries to debug, info, warn, error, print logs.
 	debugAppender appender.Appender
@@ -46,6 +46,9 @@ type Logger struct {
 	warnWriter  writer.Writer
 	errorWriter writer.Writer
 	printWriter writer.Writer
+
+	// interceptors stores all interceptors.
+	interceptors []Interceptor
 
 	// logPool is for reusing logs.
 	logPool *sync.Pool
@@ -240,7 +243,7 @@ func (l *Logger) Flush() (n int, err error) {
 // It will invoke close() if writer is io.Closer.
 // So, it is recommended for you to invoke it habitually.
 func (l *Logger) Close() error {
-	l.level = offLevel
+	l.level = offLevel // uint8 is safe-concurrent in assignment, but may cause dirty read?
 
 	_, err := l.Flush()
 	if err != nil {

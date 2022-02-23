@@ -1,4 +1,4 @@
-// Copyright 2021 Ye Zi Jie. All Rights Reserved.
+// Copyright 2022 FishGoddess. All Rights Reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -11,14 +11,11 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-//
-// Author: FishGoddess
-// Email: fishgoddess@qq.com
-// Created at 2021/06/27 23:54:11
 
 package logit
 
 import (
+	"context"
 	"fmt"
 	"time"
 
@@ -30,6 +27,7 @@ import (
 )
 
 // Log stores data of a whole logging message.
+// Notice: All functions in Log is unsafe-concurrent.
 type Log struct {
 	// logger is the maker of the log.
 	logger *Logger
@@ -42,6 +40,9 @@ type Log struct {
 
 	// data stores all entries in log.
 	data []byte
+
+	// ctx is the context of this log.
+	ctx context.Context
 }
 
 // newLog returns a new Log with pre-malloc memory.
@@ -50,18 +51,23 @@ type Log struct {
 func newLog() *Log {
 	return &Log{
 		data: make([]byte, 0, core.LogMallocSize),
+		ctx:  context.Background(),
 	}
 }
 
 // begin do some initializations of l.
 func (l *Log) begin() *Log {
+	if l == nil {
+		return l
+	}
+
 	l.data = l.data[:0]
 	l.data = l.appender.Begin(l.data)
 	return l
 }
 
-// End ends a log with writing and releasing.
-func (l *Log) End() {
+// end ends a log with writing and releasing.
+func (l *Log) end() {
 	if l == nil {
 		return
 	}
@@ -466,7 +472,7 @@ func (l *Log) Json(key string, value interface{}) *Log {
 		return nil
 	}
 
-	marshaled, err := core.MarshalJson(value)
+	marshaled, err := core.MarshalToJson(value)
 	if err != nil {
 		l.data = l.appender.AppendError(l.data, key, err) // This should not happen...
 		return l
@@ -513,4 +519,40 @@ func (l *Log) WithCaller() *Log {
 		return l
 	}
 	return l.withCaller(3)
+}
+
+// WithContext sets ctx to l.
+func (l *Log) WithContext(ctx context.Context) *Log {
+	if l == nil {
+		return nil
+	}
+
+	l.ctx = ctx
+	return l
+}
+
+// Intercept intercepts l with interceptors.
+func (l *Log) Intercept(interceptors ...Interceptor) *Log {
+	if l == nil {
+		return nil
+	}
+
+	for _, interceptor := range interceptors {
+		interceptor(l.ctx, l)
+	}
+
+	return l
+}
+
+// End ends l.
+func (l *Log) End() {
+	if l == nil {
+		return
+	}
+
+	for _, interceptor := range l.logger.interceptors {
+		interceptor(l.ctx, l)
+	}
+
+	l.end()
 }

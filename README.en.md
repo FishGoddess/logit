@@ -17,7 +17,7 @@ applications.
 ### 🥇 Features
 
 * Modularization design, easy to extend your logger with appender and writer.
-* Level-based logging, and there are five levels to use: debug, info, warn, error, off.
+* Level-based logging, and there are five levels to use: debug, info, warn, error, print, off.
 * Key-Value structured log supports, also supporting format.
 * Support logging as Text/Json string, by using provided appender.
 * Asynchronous write back supports, providing high-performance buffered writer to avoid IO accessing.
@@ -25,6 +25,7 @@ applications.
 * Every level has its own appender and writer, separating process error logs is recommended.
 * Context binding supports, using logger is more elegant.
 * Configuration plugins supports, ex: yaml plugin can create logger from yaml configuration file.
+* Interceptor supports which can inject values from context.
 
 > Configuration plugins is based on an interface, more information can be found in [Github](https://github.com/go-logit) / [Gitee](https://gitee.com/go-logit)
 
@@ -117,7 +118,7 @@ func main() {
 * [writer](./_examples/writer.go)
 * [global](./_examples/global.go)
 * [context](./_examples/context.go)
-* [maker](./_examples/maker.go)
+* [creator](./_examples/creator.go)
 * [caller](./_examples/caller.go)
 
 _All examples can be found in [_examples](./_examples)._

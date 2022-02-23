@@ -1,4 +1,4 @@
-// Copyright 2021 Ye Zi Jie. All Rights Reserved.
+// Copyright 2022 FishGoddess. All Rights Reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -11,14 +11,11 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-//
-// Author: FishGoddess
-// Email: fishgoddess@qq.com
-// Created at 2021/07/11 14:00:53
 
 package logit
 
 import (
+	"context"
 	"os"
 	"testing"
 
@@ -648,5 +645,31 @@ func TestOptionsWithCallerDepth(t *testing.T) {
 	opts.WithCallerDepth(3)(logger)
 	if logger.callerDepth != 3 {
 		t.Errorf("logger's callerDepth %d is wrong", logger.callerDepth)
+	}
+}
+
+// go test -v -cover -run=^TestOptionsWithInterceptors$
+func TestOptionsWithInterceptors(t *testing.T) {
+	opts := Options()
+
+	logger := NewLogger()
+	logger.interceptors = nil
+
+	interceptors := []Interceptor{
+		func(ctx context.Context, log *Log) {},
+		func(ctx context.Context, log *Log) {},
+		func(ctx context.Context, log *Log) {},
+	}
+
+	opts.WithInterceptors(interceptors...)(logger)
+	if len(logger.interceptors) != len(interceptors) {
+		t.Errorf("len(logger.interceptors) %d != len(interceptors) %d", len(logger.interceptors), len(interceptors))
+	}
+
+	logger.interceptors = nil
+
+	opts.WithInterceptors()
+	if len(logger.interceptors) != 0 {
+		t.Errorf("len(logger.interceptors) %d != 0", len(logger.interceptors))
 	}
 }

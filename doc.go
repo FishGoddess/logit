@@ -1,4 +1,4 @@
-// Copyright 2021 Ye Zi Jie. All Rights Reserved.
+// Copyright 2022 FishGoddess. All Rights Reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -11,10 +11,6 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-//
-// Author: FishGoddess
-// Email: fishgoddess@qq.com
-// Created at 2020/02/29 15:41:09
 
 /*
 Package logit provides an easy way to use foundation for your logging operations.
@@ -257,39 +253,39 @@ Package logit provides an easy way to use foundation for your logging operations
 	logger = logit.FromContextWithKey(ctx, businessTwoKey)
 	logger.Info("This is a message logged by logger from context with businessTwoKey").End()
 
-7. maker:
+7. creator:
 
-	type testLoggerMaker struct{}
+	type testLoggerCreator struct{}
 
-	func (tlm *testLoggerMaker) MakeLogger(ctx context.Context, params ...interface{}) (*logit.Logger, error) {
+	func (tlm *testLoggerCreator) CreateLogger(params ...interface{}) (*logit.Logger, error) {
 		if len(params) < 1 {
-			return nil, errors.New("testLoggerMaker: len(params) < 1")
+			return nil, errors.New("testLoggerCreator: len(params) < 1")
 		}
 
 		if params[0].(string) == "error" {
-			return nil, errors.New("testLoggerMaker: params[0] isn't a string")
+			return nil, errors.New("testLoggerCreator: params[0] isn't a string")
 		}
 
 		// Customize your creation of logger here.
 		return logit.NewLogger(), nil
 	}
 
-	makeName := "testLoggerMaker"
+	name := "testLoggerCreator"
 
-	// RegisterLoggerMaker registers maker to logit with given name.
-	err := logit.RegisterLoggerMaker(makeName, new(testLoggerMaker))
+	// RegisterLoggerCreator registers creator to logit with given name.
+	err := logit.RegisterLoggerCreator(name, new(testLoggerCreator))
 	if err != nil {
 		panic(err)
 	}
 
-	// NewLoggerFromMaker creates logger from maker with given params.
-	// Panic will be invoked if params is "error" because MakeLogger in testLoggerMaker has this logic.
-	logger, err := logit.NewLoggerFromMaker(context.Background(), makeName, "xxx")
+	// NewLoggerFromCreator creates logger from creator with given params.
+	// Panic will be invoked if params is "error" because CreateLogger in testLoggerCreator has this logic.
+	logger, err := logit.NewLoggerFromCreator(name, "xxx")
 	if err != nil {
 		panic(err)
 	}
 
-	logger.Info("I am made from logger maker!").End()
+	logger.Info("I am made from logger creator!").End()
 
 8. caller:
 
@@ -310,10 +306,67 @@ Package logit provides an easy way to use foundation for your logging operations
 	// We won't carry caller information twice or more if logger carries caller information originally.
 	logger.Info("Invoke log.WithCaller() again").WithCaller().End()
 	logger.Close()
+
+9. interceptor:
+
+	// serverInterceptor is the global interceptor applied to all logs.
+	func serverInterceptor(ctx context.Context, log *logit.Log) {
+		log.String("server", "logit.interceptor")
+	}
+
+	// traceInterceptor is the global interceptor applied to all logs.
+	func traceInterceptor(ctx context.Context, log *logit.Log) {
+		trace, ok := ctx.Value("trace").(string)
+		if !ok {
+			trace = "unknown trace"
+		}
+
+		log.String("trace", trace)
+	}
+
+	// userInterceptor is the global interceptor applied to all logs.
+	func userInterceptor(ctx context.Context, log *logit.Log) {
+		user, ok := ctx.Value("user").(string)
+		if !ok {
+			user = "unknown user"
+		}
+
+		log.String("user", user)
+	}
+
+	// businessInterceptor is the log-level interceptor applied to one/some logs.
+	func businessInterceptor(ctx context.Context, log *logit.Log) {
+		business, ok := ctx.Value("business").(string)
+		if !ok {
+			business = "unknown business"
+		}
+
+		log.String("business", business)
+	}
+
+	// Use logit.Options().WithInterceptors to append some interceptors.
+	logger := logit.NewLogger(logit.Options().WithInterceptors(serverInterceptor, traceInterceptor, userInterceptor))
+	defer logger.Close()
+
+	// By default, context passed to interceptor is context.Background().
+	logger.Info("try interceptor - round one").End()
+
+	// You can use WithContext to change context passed to interceptor.
+	ctx := context.WithValue(context.Background(), "trace", "666")
+	ctx = context.WithValue(ctx, "user", "FishGoddess")
+	logger.Info("try interceptor - round two").WithContext(ctx).End()
+
+	// The interceptors appended to logger will apply to all logs.
+	// You can use Intercept to intercept one log rather than all logs.
+	logger.Info("try interceptor - round three").WithContext(ctx).Intercept(businessInterceptor).End()
+
+	// Notice that WithContext should be called before Intercept if you want to pass this context to Intercept.
+	ctx = context.WithValue(ctx, "business", "logger")
+	logger.Info("try interceptor - round four").WithContext(ctx).Intercept(businessInterceptor).End()
 */
 package logit // import "github.com/go-logit/logit"
 
 const (
 	// Version is the version string representation of logit.
-	Version = "v0.4.19"
+	Version = "v0.4.20-alpha"
 )

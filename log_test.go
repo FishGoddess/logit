@@ -1,4 +1,4 @@
-// Copyright 2021 Ye Zi Jie. All Rights Reserved.
+// Copyright 2022 FishGoddess. All Rights Reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -11,10 +11,6 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-//
-// Author: FishGoddess
-// Email: fishgoddess@qq.com
-// Created at 2021/07/11 14:03:47
 
 package logit
 
@@ -161,6 +157,40 @@ func TestNewLog(t *testing.T) {
 	}
 }
 
+// go test -v -cover -run=^TestLogWithPid$
+func TestLogWithPid(t *testing.T) {
+	buffer := bytes.NewBuffer(make([]byte, 0, 1024))
+	logger := NewLogger(Options().WithWriter(buffer, false))
+	logger.needPid = true
+
+	log := newLog()
+	log.logger = logger
+	log.appender = logger.debugAppender
+	log.writer = logger.debugWriter
+	log.begin()
+	log.WithPid()
+	log.End()
+
+	str := buffer.String()
+	if str != "\n" {
+		t.Errorf("str %q != '\n'", str)
+	}
+
+	buffer.Reset()
+	logger.needPid = false
+	log.begin()
+	log.WithPid()
+	log.End()
+
+	pid := pkg.Pid()
+	right := fmt.Sprintf("%s=%d\n", logger.pidKey, pid)
+
+	str = buffer.String()
+	if str != right {
+		t.Errorf("str %s != right %s", str, right)
+	}
+}
+
 // go test -v -cover -run=^TestLogWithCaller$
 func TestLogWithCaller(t *testing.T) {
 	buffer := bytes.NewBuffer(make([]byte, 0, 1024))
@@ -189,40 +219,6 @@ func TestLogWithCaller(t *testing.T) {
 	file, line := pkg.Caller(1)
 	line -= 3 // Between log.WithCaller() and pkg.Caller(1) is 3
 	right := fmt.Sprintf("%s=%s|%s=%d\n", logger.fileKey, file, logger.lineKey, line)
-
-	str = buffer.String()
-	if str != right {
-		t.Errorf("str %s != right %s", str, right)
-	}
-}
-
-// go test -v -cover -run=^TestLogWithPid$
-func TestLogWithPid(t *testing.T) {
-	buffer := bytes.NewBuffer(make([]byte, 0, 1024))
-	logger := NewLogger(Options().WithWriter(buffer, false))
-	logger.needPid = true
-
-	log := newLog()
-	log.logger = logger
-	log.appender = logger.debugAppender
-	log.writer = logger.debugWriter
-	log.begin()
-	log.WithPid()
-	log.End()
-
-	str := buffer.String()
-	if str != "\n" {
-		t.Errorf("str %q != '\n'", str)
-	}
-
-	buffer.Reset()
-	logger.needPid = false
-	log.begin()
-	log.WithPid()
-	log.End()
-
-	pid := pkg.Pid()
-	right := fmt.Sprintf("%s=%d\n", logger.pidKey, pid)
 
 	str = buffer.String()
 	if str != right {

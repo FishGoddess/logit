@@ -1,4 +1,4 @@
-// Copyright 2021 Ye Zi Jie. All Rights Reserved.
+// Copyright 2022 FishGoddess. All Rights Reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -11,10 +11,6 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-//
-// Author: FishGoddess
-// Email: fishgoddess@qq.com
-// Created at 2021/07/01 23:01:38
 
 package logit
 
@@ -272,5 +268,12 @@ func (o *options) WithAutoFlush(frequency time.Duration) Option {
 func (o *options) WithCallerDepth(callerDepth int) Option {
 	return func(logger *Logger) {
 		logger.callerDepth = callerDepth
+	}
+}
+
+// WithInterceptors returns an option which sets interceptors to logger.
+func (o *options) WithInterceptors(interceptors ...Interceptor) Option {
+	return func(logger *Logger) {
+		logger.interceptors = append(logger.interceptors, interceptors...)
 	}
 }
