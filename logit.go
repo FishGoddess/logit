@@ -14,11 +14,16 @@
 
 package logit
 
-import "sync"
+import (
+	"sync"
+)
 
 var (
+	// globalLogger is a logger for global usage.
 	globalLogger = NewLogger(Options().WithInfoLevel())
-	once         sync.Once
+
+	// once protects globalLogger from creating more than one time.
+	once sync.Once
 )
 
 // InitGlobal initializes global logger with given options.
@@ -29,4 +34,47 @@ func InitGlobal(newLogger func() *Logger) {
 	})
 }
 
-// TODO log functions...
+// Debug returns a Log with debug level if debug level is enabled.
+func Debug(msg string, params ...interface{}) *Log {
+	return globalLogger.Debug(msg, params...)
+}
+
+// Info returns a Log with info level if info level is enabled.
+func Info(msg string, params ...interface{}) *Log {
+	return globalLogger.Info(msg, params...)
+}
+
+// Warn returns a Log with warn level if warn level is enabled.
+func Warn(msg string, params ...interface{}) *Log {
+	return globalLogger.Warn(msg, params...)
+}
+
+// Error returns a Log with error level if error level is enabled.
+func Error(msg string, params ...interface{}) *Log {
+	return globalLogger.Error(msg, params...)
+}
+
+// Printf prints a log if print level is enabled.
+func Printf(format string, params ...interface{}) {
+	globalLogger.Printf(format, params...)
+}
+
+// Print prints a log if print level is enabled.
+func Print(params ...interface{}) {
+	globalLogger.Print(params...)
+}
+
+// Println prints a log if print level is enabled.
+func Println(params ...interface{}) {
+	globalLogger.Println(params...)
+}
+
+// Flush flushes data storing in global logger's writer.
+func Flush() (n int, err error) {
+	return globalLogger.Flush()
+}
+
+// Close closes global logger and releases resources.
+func Close() error {
+	return globalLogger.Close()
+}
