@@ -84,4 +84,7 @@ func main() {
 	logit.InitGlobal(func() *logit.Logger {
 		return logit.NewLogger()
 	})
+
+	logit.Info("Info from logit").End()
+	logit.Println("Println from logit")
 }

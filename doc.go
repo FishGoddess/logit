@@ -74,6 +74,14 @@ Package logit provides an easy way to use foundation for your logging operations
 	ctx := logit.NewContext(context.Background(), logger)
 	logger = logit.FromContext(ctx)
 
+	// You can initialize the global logger if you don't want to use a logger.
+	logit.InitGlobal(func() *logit.Logger {
+		return logit.NewLogger()
+	})
+
+	logit.Info("Info from logit").End()
+	logit.Println("Println from logit")
+
 2. options:
 
 	// We provide some options for you.
@@ -368,5 +376,5 @@ package logit // import "github.com/go-logit/logit"
 
 const (
 	// Version is the version string representation of logit.
-	Version = "v0.4.20-alpha"
+	Version = "v0.4.21-alpha"
 )

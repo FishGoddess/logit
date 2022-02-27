@@ -1,5 +1,12 @@
 ## ✒ 历史版本的特性介绍 (Features in old versions)
 
+### v0.4.21-alpha
+
+> 此版本发布于 2022-02-27
+
+* 废弃 LoggerMaker
+* 加入全局日志方法
+
 ### v0.4.20-alpha
 
 > 此版本发布于 2022-02-23
