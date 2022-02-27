@@ -8,7 +8,7 @@
 **logit** is a level-based, high-performance and pure-structured logger for all [GoLang](https://golang.org)
 applications.
 
-> After reading some amazing logging lib, I found that logit is just a joke, especially comparing with zerolog, so I decided to redesign logit.
+> After reading some amazing logging libs, I found that logit is just a joke, especially comparing with zerolog, so I decided to redesign logit.
 
 [阅读中文版的 Read me](./README.md)
 
