@@ -2,8 +2,8 @@
 
 [![Go Doc](_icons/godoc.svg)](https://pkg.go.dev/github.com/go-logit/logit)
 [![License](_icons/license.svg)](https://www.apache.org/licenses/LICENSE-2.0.html)
-[![License](_icons/build.svg)](_icons/build.svg)
-[![License](_icons/coverage.svg)](_icons/coverage.svg)
+[![Build](_icons/build.svg)](_icons/build.svg)
+[![Coverage](_icons/coverage.svg)](_icons/coverage.svg)
 
 **logit** 是一个基于级别控制的高性能纯结构化日志库，可以应用于所有的 [GoLang](https://golang.org) 应用程序中。
 

@@ -2,8 +2,8 @@
 
 [![Go Doc](_icons/godoc.svg)](https://pkg.go.dev/github.com/go-logit/logit)
 [![License](_icons/license.svg)](https://www.apache.org/licenses/LICENSE-2.0.html)
-[![License](_icons/build.svg)](_icons/build.svg)
-[![License](_icons/coverage.svg)](_icons/coverage.svg)
+[![Build](_icons/build.svg)](_icons/build.svg)
+[![Coverage](_icons/coverage.svg)](_icons/coverage.svg)
 
 **logit** is a level-based, high-performance and pure-structured logger for all [GoLang](https://golang.org)
 applications.
