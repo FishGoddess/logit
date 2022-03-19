@@ -2,13 +2,13 @@
 
 [![Go Doc](_icons/godoc.svg)](https://pkg.go.dev/github.com/go-logit/logit)
 [![License](_icons/license.svg)](https://www.apache.org/licenses/LICENSE-2.0.html)
-[![License](_icons/build.svg)](_icons/build.svg)
-[![License](_icons/coverage.svg)](_icons/coverage.svg)
+[![Build](_icons/build.svg)](_icons/build.svg)
+[![Coverage](_icons/coverage.svg)](_icons/coverage.svg)
 
 **logit** is a level-based, high-performance and pure-structured logger for all [GoLang](https://golang.org)
 applications.
 
-> After reading some amazing logging lib, I found that logit is just a joke, especially comparing with zerolog, so I decided to redesign logit.
+> After reading some amazing logging libs, I found that logit is just a joke, especially comparing with zerolog, so I decided to redesign logit.
 
 [阅读中文版的 Read me](./README.md)
 
