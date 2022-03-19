@@ -25,11 +25,6 @@ var (
 	// If your logs are extremely long, such as 4 KB/log, you can set it to 512 KB to avoid re-malloc.
 	WriterBufferedSize = 64 * 1024 // 64 KB
 
-	// MarshalJson marshals v to json bytes.
-	// If you want to use your own way to marshal, change it to your own marshal function.
-	// Deprecated: This is a grammar mistake and will be removed in v0.4.21, so you should notice and replace with MarshalToJson.
-	MarshalJson = json.Marshal
-
 	// MarshalToJson marshals v to json bytes.
 	// If you want to use your own way to marshal, change it to your own marshal function.
 	MarshalToJson = json.Marshal
