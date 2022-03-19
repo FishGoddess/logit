@@ -26,7 +26,7 @@ var (
 	once sync.Once
 )
 
-// InitGlobal initializes global logger with given options.
+// InitGlobal sets global logger to value returned from newLogger.
 func InitGlobal(newLogger func() *Logger) {
 	once.Do(func() {
 		globalLogger = newLogger()
