@@ -15,6 +15,8 @@
 package main
 
 import (
+	"encoding/json"
+
 	"github.com/go-logit/logit"
 	"github.com/go-logit/logit/core"
 )
@@ -28,15 +30,19 @@ func main() {
 
 	// 1. LogMallocSize (The pre-malloc size of a new Log data)
 	// If your logs are extremely long, such as 4000 bytes, you can set it to 4096 to avoid re-malloc.
-	core.LogMallocSize = 4096 // 4096 Bytes
+	core.LogMallocSize = 4 * core.MB // 4096 Bytes
 
 	// 2. WriterBufferSize (The default size of buffer writer)
 	// If your logs are extremely long, such as 16 KB, you can set it to 2048 to avoid re-malloc.
 	core.WriterBufferSize = 32 * core.KB
 
+	// 3. MarshalToJson (The marshal function which marshal interface{} to json data)
+	// Use std by default, and you can customize your marshal function.
+	core.MarshalToJson = json.Marshal
+
 	// After setting global settings, just use Logger as normal.
 	logger := logit.NewLogger()
 	defer logger.Close()
 
-	logger.Info("set global settings").Uint64("LogMallocSize", core.LogMallocSize).Uint64("WriterBufferSize", core.WriterBufferSize).End()
+	logger.Info("set global settings").Uint64("LogMallocSize", core.LogMallocSize).Uint64("WriterBufferSize", core.WriterBufferSize).Log()
 }

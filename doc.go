@@ -26,21 +26,21 @@ Package logit provides an easy way to use foundation for your logging operations
 
 	// Then, you can log anything you want.
 	// Remember, logs will be ignored if their level is smaller than logger's level.
-	// End() will do some finishing work, so this invocation is necessary.
-	logger.Debug("This is a debug message").End()
-	logger.Info("This is a info message").End()
-	logger.Warn("This is a warn message").End()
-	logger.Error("This is a error message").End()
-	logger.Error("This is a %s message, with format", "error").End() // Format with params.
+	// Log() will do some finishing work, so this invocation is necessary.
+	logger.Debug("This is a debug message").Log()
+	logger.Info("This is a info message").Log()
+	logger.Warn("This is a warn message").Log()
+	logger.Error("This is a error message").Log()
+	logger.Error("This is a %s message, with format", "error").Log() // Format with params.
 
 	// As you know, we provide some levels: debug, info, warn, error, off.
 	// The lowest is debug and the highest is off.
 	// If you want to change the level of your logger, do it at creating.
 	logger = logit.NewLogger(logit.Options().WithWarnLevel())
-	logger.Debug("This is a debug message, but ignored").End()
-	logger.Info("This is a info message, but ignored").End()
-	logger.Warn("This is a warn message, not ignored").End()
-	logger.Error("This is a error message, not ignored").End()
+	logger.Debug("This is a debug message, but ignored").Log()
+	logger.Info("This is a info message, but ignored").Log()
+	logger.Warn("This is a warn message, not ignored").Log()
+	logger.Error("This is a error message, not ignored").Log()
 
 	// Also, we provide some "old school" log method :)
 	// (Don't mistake~ I love old school~)
@@ -58,8 +58,8 @@ Package logit provides an easy way to use foundation for your logging operations
 		Name: "FishGoddess",
 		Age:  3,
 	}
-	logger.Warn("This is a structured message").Any("user", user).Json("userJson", user).End()
-	logger.Error("This is a structured message").Error("err", io.EOF).Int("trace", 123).End()
+	logger.Warn("This is a structured message").Any("user", user).Json("userJson", user).Log()
+	logger.Error("This is a structured message").Error("err", io.EOF).Int("trace", 123).Log()
 
 	// You may notice logit.Options() which returns an options list.
 	// Here is some of them:
@@ -79,7 +79,7 @@ Package logit provides an easy way to use foundation for your logging operations
 		return logit.NewLogger()
 	})
 
-	logit.Info("Info from logit").End()
+	logit.Info("Info from logit").Log()
 	logit.Println("Println from logit")
 
 2. options:
@@ -110,6 +110,7 @@ Package logit provides an easy way to use foundation for your logging operations
 	options.WithLineKey("line")
 	options.WithTimeFormat(appender.UnixTime) // UnixTime means time will be logged as unix time, an int64 number.
 	options.WithCallerDepth(3)                // Set caller depth to 3 so the log will get the third depth caller.
+	options.WithInterceptors()
 
 	// Remember, these options is only used for creating a logger.
 	logger := logit.NewLogger(
@@ -121,7 +122,7 @@ Package logit provides an easy way to use foundation for your logging operations
 		// ...
 	)
 	defer logger.Close()
-	logger.Info("check options").End()
+	logger.Info("check options").Log()
 
 	// You can use many options at the same time, but some of them is exclusive.
 	// So only the last one in order will take effect if you use them at the same time.
@@ -156,11 +157,11 @@ Package logit provides an easy way to use foundation for your logging operations
 	// Set appender to the one you want to use when creating a logger.
 	// Default appender is appender.Text().
 	logger := logit.NewLogger()
-	logger.Info("appender.Text()").End()
+	logger.Info("appender.Text()").Log()
 
 	// You can switch appender to the other one, such appender.Json().
 	logger = logit.NewLogger(logit.Options().WithAppender(appender.Json()))
-	logger.Info("appender.Json()").End()
+	logger.Info("appender.Json()").Log()
 
 	// Every level has its own appender so you can append logs in different level with different appender.
 	logger = logit.NewLogger(
@@ -188,18 +189,18 @@ Package logit provides an easy way to use foundation for your logging operations
 	//     }
 	//
 	// In package writer, we provide some writers for you.
-	writer.Wrapped(os.Stdout)  // Wrap io.Writer to writer.Writer
-	writer.Buffer(os.Stderr) // Wrap io.Writer to writer.Writer with buffer, which needs invoking Flush() or Close()
+	writer.Wrap(os.Stdout)   // Wrap io.Writer to writer.Writer.
+	writer.Buffer(os.Stderr) // Wrap io.Writer to writer.Writer with buffer, which needs invoking Flush() or Close().
 
 	// Use the writer without buffer.
 	logger := logit.NewLogger(logit.Options().WithWriter(os.Stdout, false))
-	logger.Info("WriterWithoutBuffer").End()
+	logger.Info("WriterWithoutBuffer").Log()
 
 	// Use the writer with buffer, which is good for io.
 	logger = logit.NewLogger(logit.Options().WithWriter(os.Stdout, true))
-	defer logger.Close() // Flush data and close writer
+	defer logger.Close() // Flush data and close writers.
 
-	logger.Info("WriterWithBuffer").End()
+	logger.Info("WriterWithBuffer").Log()
 	logger.Flush() // Remember flushing data or flushing by Close().
 
 	// Every level has its own appender so you can append logs in different level with different appender.
@@ -220,17 +221,21 @@ Package logit provides an easy way to use foundation for your logging operations
 
 	// 1. LogMallocSize (The pre-malloc size of a new Log data)
 	// If your logs are extremely long, such as 4000 bytes, you can set it to 4096 to avoid re-malloc.
-	core.LogMallocSize = 4096 // 4096 Bytes
+	core.LogMallocSize = 4 * core.MB // 4096 Bytes
 
-	// 2. WriterBufferSize (The default size of Buffer writer)
-	// If your logs are extremely long, such as 16KB, you can set it to 2048 to avoid re-malloc.
-	core.WriterBufferSize = 32 * writer.KB
+	// 2. WriterBufferSize (The default size of buffer writer)
+	// If your logs are extremely long, such as 16 KB, you can set it to 2048 to avoid re-malloc.
+	core.WriterBufferSize = 32 * core.KB
+
+	// 3. MarshalToJson (The marshal function which marshal interface{} to json data)
+	// Use std by default, and you can customize your marshal function.
+	core.MarshalToJson = json.Marshal
 
 	// After setting global settings, just use Logger as normal.
 	logger := logit.NewLogger()
 	defer logger.Close()
 
-	logger.Info("set global settings").Int("LogMallocSize", core.LogMallocSize).Int("WriterBufferSize", core.WriterBufferSize).End()
+	logger.Info("set global settings").Uint64("LogMallocSize", core.LogMallocSize).Uint64("WriterBufferSize", core.WriterBufferSize).Log()
 
 6. context:
 
@@ -240,7 +245,7 @@ Package logit provides an easy way to use foundation for your logging operations
 
 	// FromContext returns the logger in context.
 	logger := logit.FromContext(ctx)
-	logger.Info("This is a message logged by logger from context").End()
+	logger.Info("This is a message logged by logger from context").Log()
 
 	// Actually, you also have a chance to specify the key of logger in context.
 	// It gives you a way to discriminate different businesses in using logger.
@@ -256,10 +261,10 @@ Package logit provides an easy way to use foundation for your logging operations
 
 	// Get different logger from the same context with different key.
 	logger = logit.FromContextWithKey(ctx, businessOneKey)
-	logger.Info("This is a message logged by logger from context with businessOneKey").End()
+	logger.Info("This is a message logged by logger from context with businessOneKey").Log()
 
 	logger = logit.FromContextWithKey(ctx, businessTwoKey)
-	logger.Info("This is a message logged by logger from context with businessTwoKey").End()
+	logger.Info("This is a message logged by logger from context with businessTwoKey").Log()
 
 7. creator:
 
@@ -293,26 +298,26 @@ Package logit provides an easy way to use foundation for your logging operations
 		panic(err)
 	}
 
-	logger.Info("I am made from logger creator!").End()
+	logger.Info("I am made of logger creator!").Log()
 
 8. caller:
 
 	// Let's create a logger without caller information.
 	logger := logit.NewLogger()
-	logger.Info("I am without caller").End()
+	logger.Info("I am without caller").Log()
 
 	// We provide a way to add caller information to log even logger doesn't carry caller.
-	logger.Info("Invoke log.WithCaller()").WithCaller().End()
+	logger.Info("Invoke log.WithCaller()").WithCaller().Log()
 	logger.Close()
 
 	time.Sleep(time.Second)
 
 	// Now, let's create a logger with caller information.
 	logger = logit.NewLogger(logit.Options().WithCaller())
-	logger.Info("I am with caller").End()
+	logger.Info("I am with caller").Log()
 
 	// We won't carry caller information twice or more if logger carries caller information originally.
-	logger.Info("Invoke log.WithCaller() again").WithCaller().End()
+	logger.Info("Invoke log.WithCaller() again").WithCaller().Log()
 	logger.Close()
 
 9. interceptor:
@@ -342,35 +347,25 @@ Package logit provides an easy way to use foundation for your logging operations
 		log.String("user", user)
 	}
 
-	// businessInterceptor is the log-level interceptor applied to one/some logs.
-	func businessInterceptor(ctx context.Context, log *logit.Log) {
-		business, ok := ctx.Value("business").(string)
-		if !ok {
-			business = "unknown business"
-		}
-
-		log.String("business", business)
-	}
-
 	// Use logit.Options().WithInterceptors to append some interceptors.
 	logger := logit.NewLogger(logit.Options().WithInterceptors(serverInterceptor, traceInterceptor, userInterceptor))
 	defer logger.Close()
 
 	// By default, context passed to interceptor is context.Background().
-	logger.Info("try interceptor - round one").End()
+	logger.Info("try interceptor - round one").Log()
 
 	// You can use WithContext to change context passed to interceptor.
 	ctx := context.WithValue(context.Background(), "trace", "666")
 	ctx = context.WithValue(ctx, "user", "FishGoddess")
-	logger.Info("try interceptor - round two").WithContext(ctx).End()
+	logger.Info("try interceptor - round two").WithContext(ctx).Log()
 
 	// The interceptors appended to logger will apply to all logs.
 	// You can use Intercept to intercept one log rather than all logs.
-	logger.Info("try interceptor - round three").WithContext(ctx).Intercept(businessInterceptor).End()
+	logger.Info("try interceptor - round three").WithContext(ctx).Intercept(businessInterceptor).Log()
 
 	// Notice that WithContext should be called before Intercept if you want to pass this context to Intercept.
 	ctx = context.WithValue(ctx, "business", "logger")
-	logger.Info("try interceptor - round four").WithContext(ctx).Intercept(businessInterceptor).End()
+	logger.Info("try interceptor - round four").WithContext(ctx).Intercept(businessInterceptor).Log()
 */
 package logit // import "github.com/go-logit/logit"
 

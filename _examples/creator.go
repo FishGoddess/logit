@@ -51,5 +51,5 @@ func main() {
 		panic(err)
 	}
 
-	logger.Info("I am made from logger creator!").End()
+	logger.Info("I am made of logger creator!").Log()
 }

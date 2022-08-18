@@ -61,7 +61,7 @@ func main() {
 		// ...
 	)
 	defer logger.Close()
-	logger.Info("check options").End()
+	logger.Info("check options").Log()
 
 	// You can use many options at the same time, but some of them is exclusive.
 	// So only the last one in order will take effect if you use them at the same time.

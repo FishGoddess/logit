@@ -35,6 +35,10 @@ var (
 	// MarshalToJson marshals v to json bytes.
 	// If you want to use your own way to marshal, change it to your own marshal function.
 	MarshalToJson = json.Marshal
+
+	// CallerDepth is the depth of caller.
+	// See runtime.Caller.
+	CallerDepth = 4
 )
 
 // ByteSize is size of byte.

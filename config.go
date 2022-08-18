@@ -14,6 +14,8 @@
 
 package logit
 
+import "github.com/go-logit/logit/core"
+
 // config stores all configurations used in Logger.
 type config struct {
 	level       level  // The level of a logger.
@@ -42,6 +44,6 @@ func newDefaultConfig() config {
 		fileKey:     "log.file",
 		lineKey:     "log.line",
 		timeFormat:  "2006-01-02 15:04:05",
-		callerDepth: 4,
+		callerDepth: core.CallerDepth,
 	}
 }

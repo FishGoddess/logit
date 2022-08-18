@@ -32,21 +32,21 @@ func main() {
 
 	// Then, you can log anything you want.
 	// Remember, logs will be ignored if their level is smaller than logger's level.
-	// End() will do some finishing work, so this invocation is necessary.
-	logger.Debug("This is a debug message").End()
-	logger.Info("This is a info message").End()
-	logger.Warn("This is a warn message").End()
-	logger.Error("This is a error message").End()
-	logger.Error("This is a %s message, with format", "error").End() // Format with params.
+	// Log() will do some finishing work, so this invocation is necessary.
+	logger.Debug("This is a debug message").Log()
+	logger.Info("This is a info message").Log()
+	logger.Warn("This is a warn message").Log()
+	logger.Error("This is a error message").Log()
+	logger.Error("This is a %s message, with format", "error").Log() // Format with params.
 
 	// As you know, we provide some levels: debug, info, warn, error, off.
 	// The lowest is debug and the highest is off.
 	// If you want to change the level of your logger, do it at creating.
 	logger = logit.NewLogger(logit.Options().WithWarnLevel())
-	logger.Debug("This is a debug message, but ignored").End()
-	logger.Info("This is a info message, but ignored").End()
-	logger.Warn("This is a warn message, not ignored").End()
-	logger.Error("This is a error message, not ignored").End()
+	logger.Debug("This is a debug message, but ignored").Log()
+	logger.Info("This is a info message, but ignored").Log()
+	logger.Warn("This is a warn message, not ignored").Log()
+	logger.Error("This is a error message, not ignored").Log()
 
 	// Also, we provide some "old school" log method :)
 	// (Don't mistake~ I love old school~)
@@ -64,8 +64,8 @@ func main() {
 		Name: "FishGoddess",
 		Age:  3,
 	}
-	logger.Warn("This is a structured message").Any("user", user).Json("userJson", user).End()
-	logger.Error("This is a structured message").Error("err", io.EOF).Int("trace", 123).End()
+	logger.Warn("This is a structured message").Any("user", user).Json("userJson", user).Log()
+	logger.Error("This is a structured message").Error("err", io.EOF).Int("trace", 123).Log()
 
 	// You may notice logit.Options() which returns an options list.
 	// Here is some of them:
@@ -81,10 +81,10 @@ func main() {
 	logger = logit.FromContext(ctx)
 
 	// You can initialize the global logger if you don't want to use a logger.
-	logit.InitGlobal(func() *logit.Logger {
+	logit.SetGlobal(func() *logit.Logger {
 		return logit.NewLogger()
 	})
 
-	logit.Info("Info from logit").End()
+	logit.Info("Info from logit").Log()
 	logit.Println("Println from logit")
 }

@@ -75,15 +75,14 @@ func BenchmarkLogitLoggerWithTextAppender(b *testing.B) {
 	)
 
 	logTask := func() {
-		logger.Debug("debug...").String("trace", "xxx").Int("id", 123).Float64("pi", 3.14).End()
-		logger.Info("info...").String("trace", "xxx").Int("id", 123).Float64("pi", 3.14).End()
-		logger.Warn("warning...").String("trace", "xxx").Int("id", 123).Float64("pi", 3.14).End()
-		logger.Error("error...").String("trace", "xxx").Int("id", 123).Float64("pi", 3.14).End()
+		logger.Debug("debug...").String("trace", "xxx").Int("id", 123).Float64("pi", 3.14).Log()
+		logger.Info("info...").String("trace", "xxx").Int("id", 123).Float64("pi", 3.14).Log()
+		logger.Warn("warning...").String("trace", "xxx").Int("id", 123).Float64("pi", 3.14).Log()
+		logger.Error("error...").String("trace", "xxx").Int("id", 123).Float64("pi", 3.14).Log()
 	}
 
 	b.ReportAllocs()
 	b.StartTimer()
-
 	for i := 0; i < b.N; i++ {
 		logTask()
 	}
@@ -101,15 +100,14 @@ func BenchmarkLogitLoggerWithJsonAppender(b *testing.B) {
 	)
 
 	logTask := func() {
-		logger.Debug("debug...").String("trace", "xxx").Int("id", 123).Float64("pi", 3.14).End()
-		logger.Info("info...").String("trace", "xxx").Int("id", 123).Float64("pi", 3.14).End()
-		logger.Warn("warning...").String("trace", "xxx").Int("id", 123).Float64("pi", 3.14).End()
-		logger.Error("error...").String("trace", "xxx").Int("id", 123).Float64("pi", 3.14).End()
+		logger.Debug("debug...").String("trace", "xxx").Int("id", 123).Float64("pi", 3.14).Log()
+		logger.Info("info...").String("trace", "xxx").Int("id", 123).Float64("pi", 3.14).Log()
+		logger.Warn("warning...").String("trace", "xxx").Int("id", 123).Float64("pi", 3.14).Log()
+		logger.Error("error...").String("trace", "xxx").Int("id", 123).Float64("pi", 3.14).Log()
 	}
 
 	b.ReportAllocs()
 	b.StartTimer()
-
 	for i := 0; i < b.N; i++ {
 		logTask()
 	}
@@ -127,15 +125,14 @@ func BenchmarkLogitLoggerWithFormat(b *testing.B) {
 	)
 
 	logTask := func() {
-		logger.Debug("debug%s", "...").String("trace", "xxx").Int("id", 123).Float64("pi", 3.14).End()
-		logger.Info("info%s", "...").String("trace", "xxx").Int("id", 123).Float64("pi", 3.14).End()
-		logger.Warn("warning%s", "...").String("trace", "xxx").Int("id", 123).Float64("pi", 3.14).End()
-		logger.Error("error%s", "...").String("trace", "xxx").Int("id", 123).Float64("pi", 3.14).End()
+		logger.Debug("debug%s", "...").String("trace", "xxx").Int("id", 123).Float64("pi", 3.14).Log()
+		logger.Info("info%s", "...").String("trace", "xxx").Int("id", 123).Float64("pi", 3.14).Log()
+		logger.Warn("warning%s", "...").String("trace", "xxx").Int("id", 123).Float64("pi", 3.14).Log()
+		logger.Error("error%s", "...").String("trace", "xxx").Int("id", 123).Float64("pi", 3.14).Log()
 	}
 
 	b.ReportAllocs()
 	b.StartTimer()
-
 	for i := 0; i < b.N; i++ {
 		logTask()
 	}
@@ -155,7 +152,6 @@ func BenchmarkLogitLoggerWithFormat(b *testing.B) {
 //
 //	b.ReportAllocs()
 //	b.StartTimer()
-//
 //	for i := 0; i < b.N; i++ {
 //		logTask()
 //	}
@@ -182,7 +178,6 @@ func BenchmarkLogitLoggerWithFormat(b *testing.B) {
 //
 //	b.ReportAllocs()
 //	b.StartTimer()
-//
 //	for i := 0; i < b.N; i++ {
 //		logTask()
 //	}
@@ -206,13 +201,12 @@ func BenchmarkLogitLoggerWithFormat(b *testing.B) {
 //
 //	b.ReportAllocs()
 //	b.StartTimer()
-//
 //	for i := 0; i < b.N; i++ {
 //		logTask()
 //	}
 //}
 
-// ******************************************************
+// *******************************************************************************
 
 func createFileOf(filePath string) (*os.File, error) {
 	err := os.MkdirAll(filepath.Dir(filePath), 0644)
@@ -237,15 +231,14 @@ func BenchmarkLogitFileWithTextAppender(b *testing.B) {
 	defer logger.Close()
 
 	logTask := func() {
-		logger.Debug("debug...").String("trace", "xxx").Int("id", 123).Float64("pi", 3.14).End()
-		logger.Info("info...").String("trace", "xxx").Int("id", 123).Float64("pi", 3.14).End()
-		logger.Warn("warning...").String("trace", "xxx").Int("id", 123).Float64("pi", 3.14).End()
-		logger.Error("error...").String("trace", "xxx").Int("id", 123).Float64("pi", 3.14).End()
+		logger.Debug("debug...").String("trace", "xxx").Int("id", 123).Float64("pi", 3.14).Log()
+		logger.Info("info...").String("trace", "xxx").Int("id", 123).Float64("pi", 3.14).Log()
+		logger.Warn("warning...").String("trace", "xxx").Int("id", 123).Float64("pi", 3.14).Log()
+		logger.Error("error...").String("trace", "xxx").Int("id", 123).Float64("pi", 3.14).Log()
 	}
 
 	b.ReportAllocs()
 	b.StartTimer()
-
 	for i := 0; i < b.N; i++ {
 		logTask()
 	}
@@ -266,15 +259,14 @@ func BenchmarkLogitFileWithJsonAppender(b *testing.B) {
 	defer logger.Close()
 
 	logTask := func() {
-		logger.Debug("debug...").String("trace", "xxx").Int("id", 123).Float64("pi", 3.14).End()
-		logger.Info("info...").String("trace", "xxx").Int("id", 123).Float64("pi", 3.14).End()
-		logger.Warn("warning...").String("trace", "xxx").Int("id", 123).Float64("pi", 3.14).End()
-		logger.Error("error...").String("trace", "xxx").Int("id", 123).Float64("pi", 3.14).End()
+		logger.Debug("debug...").String("trace", "xxx").Int("id", 123).Float64("pi", 3.14).Log()
+		logger.Info("info...").String("trace", "xxx").Int("id", 123).Float64("pi", 3.14).Log()
+		logger.Warn("warning...").String("trace", "xxx").Int("id", 123).Float64("pi", 3.14).Log()
+		logger.Error("error...").String("trace", "xxx").Int("id", 123).Float64("pi", 3.14).Log()
 	}
 
 	b.ReportAllocs()
 	b.StartTimer()
-
 	for i := 0; i < b.N; i++ {
 		logTask()
 	}
@@ -294,15 +286,14 @@ func BenchmarkLogitFileWithoutBuffer(b *testing.B) {
 	)
 
 	logTask := func() {
-		logger.Debug("debug...").String("trace", "xxx").Int("id", 123).Float64("pi", 3.14).End()
-		logger.Info("info...").String("trace", "xxx").Int("id", 123).Float64("pi", 3.14).End()
-		logger.Warn("warning...").String("trace", "xxx").Int("id", 123).Float64("pi", 3.14).End()
-		logger.Error("error...").String("trace", "xxx").Int("id", 123).Float64("pi", 3.14).End()
+		logger.Debug("debug...").String("trace", "xxx").Int("id", 123).Float64("pi", 3.14).Log()
+		logger.Info("info...").String("trace", "xxx").Int("id", 123).Float64("pi", 3.14).Log()
+		logger.Warn("warning...").String("trace", "xxx").Int("id", 123).Float64("pi", 3.14).Log()
+		logger.Error("error...").String("trace", "xxx").Int("id", 123).Float64("pi", 3.14).Log()
 	}
 
 	b.ReportAllocs()
 	b.StartTimer()
-
 	for i := 0; i < b.N; i++ {
 		logTask()
 	}
@@ -323,7 +314,6 @@ func BenchmarkLogitFileWithoutBuffer(b *testing.B) {
 //
 //	b.ReportAllocs()
 //	b.StartTimer()
-//
 //	for i := 0; i < b.N; i++ {
 //		logTask()
 //	}
@@ -351,7 +341,6 @@ func BenchmarkLogitFileWithoutBuffer(b *testing.B) {
 //
 //	b.ReportAllocs()
 //	b.StartTimer()
-//
 //	for i := 0; i < b.N; i++ {
 //		logTask()
 //	}
@@ -376,7 +365,6 @@ func BenchmarkLogitFileWithoutBuffer(b *testing.B) {
 //
 //	b.ReportAllocs()
 //	b.StartTimer()
-//
 //	for i := 0; i < b.N; i++ {
 //		logTask()
 //	}

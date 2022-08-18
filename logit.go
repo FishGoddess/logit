@@ -15,23 +15,17 @@
 package logit
 
 import (
-	"sync"
+	"github.com/go-logit/logit/core"
 )
 
 var (
 	// globalLogger is a logger for global usage.
-	globalLogger = NewLogger(Options().WithInfoLevel())
-
-	// once protects globalLogger from creating more than one time.
-	once sync.Once
+	globalLogger = NewLogger(Options().WithInfoLevel(), Options().WithCallerDepth(core.CallerDepth+1))
 )
 
-// InitGlobal sets global logger to value returned from newLogger.
-func InitGlobal(newLogger func() *Logger) {
-	once.Do(func() {
-		globalLogger = newLogger()
-		globalLogger.callerDepth++
-	})
+// SetGlobal sets global logger to value returned from newLogger.
+func SetGlobal(logger *Logger) {
+	globalLogger = logger
 }
 
 // Debug returns a Log with debug level if debug level is enabled.

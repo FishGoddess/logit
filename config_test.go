@@ -14,7 +14,11 @@
 
 package logit
 
-import "testing"
+import (
+	"testing"
+
+	"github.com/go-logit/logit/core"
+)
 
 // go test -v -cover -run=^TestNewDefaultConfig$
 func TestNewDefaultConfig(t *testing.T) {
@@ -31,7 +35,7 @@ func TestNewDefaultConfig(t *testing.T) {
 		fileKey:     "log.file",
 		lineKey:     "log.line",
 		timeFormat:  "2006-01-02 15:04:05",
-		callerDepth: 4,
+		callerDepth: core.CallerDepth,
 	}
 
 	if defaultConfig != cfg {

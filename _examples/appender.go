@@ -28,11 +28,11 @@ func main() {
 	// Set appender to the one you want to use when creating a logger.
 	// Default appender is appender.Text().
 	logger := logit.NewLogger()
-	logger.Info("appender.Text()").End()
+	logger.Info("appender.Text()").Log()
 
 	// You can switch appender to the other one, such appender.Json().
 	logger = logit.NewLogger(logit.Options().WithAppender(appender.Json()))
-	logger.Info("appender.Json()").End()
+	logger.Info("appender.Json()").Log()
 
 	// Every level has its own appender so you can append logs in different level with different appender.
 	logger = logit.NewLogger(
