@@ -12,37 +12,26 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package pkg
+package runtime
 
 import (
 	"os"
 	"runtime"
-	"testing"
 )
 
-// go test -v -cover -run=^TestPid$
-func TestPid(t *testing.T) {
-	pid := Pid()
-	osPid := os.Getpid()
+var (
+	pid = os.Getpid() // The pid of current process.
+)
 
-	if pid != osPid {
-		t.Errorf("pid %d is wrong with %d", pid, osPid)
-	}
+// Pid returns the pid of current process.
+func Pid() int {
+	return pid
 }
 
-// go test -v -cover -run=^TestCaller$
-func TestCaller(t *testing.T) {
-	_, f, l, ok := runtime.Caller(0)
-	if !ok {
-		t.Errorf("runtime.Caller failed")
+// Caller returns the caller information of depth.
+func Caller(depth int) (file string, line int) {
+	if _, file, line, ok := runtime.Caller(depth); ok {
+		return file, line
 	}
-
-	file, line := Caller(1)
-	if file != f {
-		t.Errorf("Caller returns wrong file %s", file)
-	}
-
-	if line != l+5 {
-		t.Errorf("Caller returns wrong line %d", line)
-	}
+	return "unknown file", -1
 }

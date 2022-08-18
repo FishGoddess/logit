@@ -63,11 +63,11 @@ func NewLogger(options ...Option) *Logger {
 		warnAppender:  appender.Text(),
 		errorAppender: appender.Text(),
 		printAppender: appender.Text(),
-		debugWriter:   writer.Wrapped(os.Stdout),
-		infoWriter:    writer.Wrapped(os.Stdout),
-		warnWriter:    writer.Wrapped(os.Stderr),
-		errorWriter:   writer.Wrapped(os.Stderr),
-		printWriter:   writer.Wrapped(os.Stdout),
+		debugWriter:   writer.Wrap(os.Stdout),
+		infoWriter:    writer.Wrap(os.Stdout),
+		warnWriter:    writer.Wrap(os.Stderr),
+		errorWriter:   writer.Wrap(os.Stderr),
+		printWriter:   writer.Wrap(os.Stdout),
 		logPool: &sync.Pool{
 			New: func() interface{} {
 				return newLog()
@@ -78,7 +78,6 @@ func NewLogger(options ...Option) *Logger {
 	for _, applyOption := range options {
 		applyOption(logger)
 	}
-
 	return logger
 }
 
@@ -121,6 +120,8 @@ func (l *Logger) getLog(level level) *Log {
 	log.logger = l
 	log.appender = l.appenderOf(level)
 	log.writer = l.writerOf(level)
+	log.data = log.data[:0]
+	log.ctx = context.Background()
 	return log
 }
 
@@ -156,7 +157,6 @@ func (l *Logger) log(level level, msg string, params ...interface{}) *Log {
 	if len(params) > 0 {
 		msg = fmt.Sprintf(msg, params...)
 	}
-
 	return log.String(l.msgKey, msg)
 }
 
@@ -182,21 +182,21 @@ func (l *Logger) Error(msg string, params ...interface{}) *Log {
 
 // Printf prints a log if print level is enabled.
 func (l *Logger) Printf(format string, params ...interface{}) {
-	l.log(printLevel, format, params...).End()
+	l.log(printLevel, format, params...).Log()
 }
 
 // Print prints a log if print level is enabled.
 func (l *Logger) Print(params ...interface{}) {
-	l.log(printLevel, fmt.Sprint(params...)).End()
+	l.log(printLevel, fmt.Sprint(params...)).Log()
 }
 
 // Println prints a log if print level is enabled.
 func (l *Logger) Println(params ...interface{}) {
-	l.log(printLevel, fmt.Sprintln(params...)).End()
+	l.log(printLevel, fmt.Sprintln(params...)).Log()
 }
 
 // Flush flushes data storing in logger's writer.
-// This isn't necessary for all writers, but buffered writer needs.
+// This isn't necessary for all writers, but Buffer writer needs.
 // Actually, you can use an option to flush automatically, see options.
 // Close a logger will also invoke Flush(), so you can use an option or Close() to flush instead.
 // However, you still need to flush manually if you want your logs store immediately.
@@ -207,28 +207,24 @@ func (l *Logger) Flush() (n int, err error) {
 	}
 
 	n += i
-
 	i, e = l.errorWriter.Flush()
 	if e != nil {
 		err = e
 	}
 
 	n += i
-
 	i, e = l.warnWriter.Flush()
 	if e != nil {
 		err = e
 	}
 
 	n += i
-
 	i, e = l.infoWriter.Flush()
 	if e != nil {
 		err = e
 	}
 
 	n += i
-
 	i, e = l.debugWriter.Flush()
 	if e != nil {
 		err = e
@@ -269,6 +265,5 @@ func (l *Logger) Close() error {
 	if err != nil {
 		return err
 	}
-
 	return l.debugWriter.Close()
 }

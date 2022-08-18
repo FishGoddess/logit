@@ -160,7 +160,6 @@ func (ta *textAppender) AppendTime(dst []byte, key string, value time.Time, form
 	if format == UnixTime {
 		return strconv.AppendInt(dst, value.Unix(), 10)
 	}
-
 	return value.AppendFormat(dst, format)
 }
 
@@ -169,7 +168,6 @@ func (ta *textAppender) AppendError(dst []byte, key string, value error) []byte 
 	if value == nil {
 		return append(ta.appendKey(dst, key), textNil...)
 	}
-
 	return ta.AppendString(dst, key, value.Error())
 }
 
@@ -179,7 +177,6 @@ func (ta *textAppender) AppendStringer(dst []byte, key string, value fmt.Stringe
 	if val.Kind() == reflect.Ptr && val.IsNil() {
 		return append(dst, textNil...)
 	}
-
 	return ta.AppendString(dst, key, value.String())
 }
 
@@ -192,7 +189,6 @@ func (ta *textAppender) appendArray(dst []byte, key string, length int, fn func(
 		if dst[len(dst)-1] != textArrayBegin {
 			dst = append(dst, textArrayItemSeparator)
 		}
-
 		dst = fn(dst, i)
 	}
 
@@ -318,7 +314,6 @@ func (ta *textAppender) AppendTimes(dst []byte, key string, values []time.Time, 
 		if format == UnixTime {
 			return strconv.AppendInt(source, values[index].Unix(), 10)
 		}
-
 		return values[index].AppendFormat(source, format)
 	})
 }
@@ -329,7 +324,6 @@ func (ta *textAppender) AppendErrors(dst []byte, key string, values []error) []b
 		if values[index] == nil {
 			return append(source, textNil...)
 		}
-
 		return appendEscapedString(source, values[index].Error())
 	})
 }
@@ -341,7 +335,6 @@ func (ta *textAppender) AppendStringers(dst []byte, key string, values []fmt.Str
 		if val.Kind() == reflect.Ptr && val.IsNil() {
 			return append(source, textNil...)
 		}
-
 		return appendEscapedString(source, values[index].String())
 	})
 }

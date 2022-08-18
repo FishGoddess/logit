@@ -17,7 +17,6 @@ package main
 import (
 	"github.com/go-logit/logit"
 	"github.com/go-logit/logit/core"
-	"github.com/go-logit/logit/core/writer"
 )
 
 func main() {
@@ -31,13 +30,13 @@ func main() {
 	// If your logs are extremely long, such as 4000 bytes, you can set it to 4096 to avoid re-malloc.
 	core.LogMallocSize = 4096 // 4096 Bytes
 
-	// 2. WriterBufferedSize (The default size of buffered writer)
-	// If your logs are extremely long, such as 16KB, you can set it to 2048 to avoid re-malloc.
-	core.WriterBufferedSize = 32 * writer.KB
+	// 2. WriterBufferSize (The default size of buffer writer)
+	// If your logs are extremely long, such as 16 KB, you can set it to 2048 to avoid re-malloc.
+	core.WriterBufferSize = 32 * core.KB
 
 	// After setting global settings, just use Logger as normal.
 	logger := logit.NewLogger()
 	defer logger.Close()
 
-	logger.Info("set global settings").Int("LogMallocSize", core.LogMallocSize).Int("WriterBufferedSize", core.WriterBufferedSize).End()
+	logger.Info("set global settings").Uint64("LogMallocSize", core.LogMallocSize).Uint64("WriterBufferSize", core.WriterBufferSize).End()
 }

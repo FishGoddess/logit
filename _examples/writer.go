@@ -33,8 +33,8 @@ func main() {
 	//     }
 	//
 	// In package writer, we provide some writers for you.
-	writer.Wrapped(os.Stdout)  // Wrap io.Writer to writer.Writer.
-	writer.Buffered(os.Stderr) // Wrap io.Writer to writer.Writer with buffer, which needs invoking Flush() or Close().
+	writer.Wrap(os.Stdout)   // Wrap io.Writer to writer.Writer.
+	writer.Buffer(os.Stderr) // Wrap io.Writer to writer.Writer with buffer, which needs invoking Flush() or Close().
 
 	// Use the writer without buffer.
 	logger := logit.NewLogger(logit.Options().WithWriter(os.Stdout, false))

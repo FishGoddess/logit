@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package pkg
+package file
 
 import "os"
 
@@ -27,6 +27,5 @@ func MustNewFile(filePath string) *os.File {
 	if err != nil {
 		panic(err)
 	}
-
 	return file
 }

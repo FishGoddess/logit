@@ -22,7 +22,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/go-logit/logit/pkg"
+	"github.com/go-logit/logit/pkg/runtime"
 
 	"github.com/go-logit/logit/core/appender"
 )
@@ -114,7 +114,7 @@ func TestNewLog(t *testing.T) {
 	log.Times("Times", []time.Time{time.Unix(12580, 0)}, appender.UnixTime)
 	log.Errors("Errors", []error{io.EOF})
 	log.Stringers("Stringers", []fmt.Stringer{time.Second})
-	log.End()
+	log.Log()
 
 	outputMap := map[string]interface{}{}
 	output := buffer.String()
@@ -124,7 +124,6 @@ func TestNewLog(t *testing.T) {
 	}
 
 	//t.Logf("outputMap: %+v", outputMap)
-
 	for k, v := range entries {
 		outputValue, ok := outputMap[k]
 		if !ok {
@@ -169,7 +168,7 @@ func TestLogWithPid(t *testing.T) {
 	log.writer = logger.debugWriter
 	log.begin()
 	log.WithPid()
-	log.End()
+	log.Log()
 
 	str := buffer.String()
 	if str != "\n" {
@@ -180,9 +179,9 @@ func TestLogWithPid(t *testing.T) {
 	logger.needPid = false
 	log.begin()
 	log.WithPid()
-	log.End()
+	log.Log()
 
-	pid := pkg.Pid()
+	pid := runtime.Pid()
 	right := fmt.Sprintf("%s=%d\n", logger.pidKey, pid)
 
 	str = buffer.String()
@@ -203,7 +202,7 @@ func TestLogWithCaller(t *testing.T) {
 	log.writer = logger.debugWriter
 	log.begin()
 	log.WithCaller()
-	log.End()
+	log.Log()
 
 	str := buffer.String()
 	if str != "\n" {
@@ -214,9 +213,9 @@ func TestLogWithCaller(t *testing.T) {
 	logger.needCaller = false
 	log.begin()
 	log.WithCaller()
-	log.End()
+	log.Log()
 
-	file, line := pkg.Caller(1)
+	file, line := runtime.Caller(1)
 	line -= 3 // Between log.WithCaller() and pkg.Caller(1) is 3
 	right := fmt.Sprintf("%s=%s|%s=%d\n", logger.fileKey, file, logger.lineKey, line)
 

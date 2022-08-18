@@ -20,7 +20,7 @@ applications.
 * Level-based logging, and there are five levels to use: debug, info, warn, error, print, off.
 * Key-Value structured log supports, also supporting format.
 * Support logging as Text/Json string, by using provided appender.
-* Asynchronous write back supports, providing high-performance buffered writer to avoid IO accessing.
+* Asynchronous write back supports, providing high-performance Buffer writer to avoid IO accessing.
 * Provide global optimized settings, let some settings feet your business.
 * Every level has its own appender and writer, separating process error logs is recommended.
 * Context binding supports, using logger is more elegant.

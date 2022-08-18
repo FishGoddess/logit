@@ -12,27 +12,35 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package pkg
+package file
 
 import (
 	"os"
-	"runtime"
+	"path/filepath"
+	"testing"
 )
 
-var (
-	pid = os.Getpid() // The pid of current process.
-)
+// go test -v -cover -run=^TestNewFile$
+func TestNewFile(t *testing.T) {
+	filePath := filepath.Join(t.TempDir(), t.Name())
+	os.Remove(filePath)
 
-// Pid returns the pid of current process.
-func Pid() int {
-	return pid
-}
-
-// Caller returns the caller information of depth.
-func Caller(depth int) (file string, line int) {
-	if _, file, line, ok := runtime.Caller(depth); ok {
-		return file, line
+	file, err := NewFile(filePath)
+	if err != nil {
+		t.Error(err)
 	}
 
-	return "unknown file", -1
+	err = file.Close()
+	if err != nil {
+		t.Error(err)
+	}
+
+	stat, err := os.Stat(filePath)
+	if err != nil {
+		t.Error(err)
+	}
+
+	if stat.IsDir() {
+		t.Error("file is a directory, not file")
+	}
 }

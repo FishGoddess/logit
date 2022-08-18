@@ -19,7 +19,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/go-logit/logit/pkg"
+	"github.com/go-logit/logit/pkg/runtime"
 
 	"github.com/go-logit/logit/core"
 	"github.com/go-logit/logit/core/appender"
@@ -29,7 +29,7 @@ import (
 // Log stores data of a whole logging message.
 // Notice: All functions in Log is unsafe-concurrent.
 type Log struct {
-	// logger is the maker of the log.
+	// logger is the owner of the log.
 	logger *Logger
 
 	// appender is an appender appending entries to the log.
@@ -61,7 +61,6 @@ func (l *Log) begin() *Log {
 		return l
 	}
 
-	l.data = l.data[:0]
 	l.data = l.appender.Begin(l.data)
 	return l
 }
@@ -489,9 +488,8 @@ func (l *Log) WithPid() *Log {
 	}
 
 	if l.logger.pidKey != "" {
-		l.Int(l.logger.pidKey, pkg.Pid())
+		l.Int(l.logger.pidKey, runtime.Pid())
 	}
-
 	return l
 }
 
@@ -501,7 +499,7 @@ func (l *Log) withCaller(depth int) *Log {
 		return nil
 	}
 
-	file, line := pkg.Caller(depth)
+	file, line := runtime.Caller(depth)
 	if l.logger.fileKey != "" {
 		l.String(l.logger.fileKey, file)
 	}
@@ -509,7 +507,6 @@ func (l *Log) withCaller(depth int) *Log {
 	if l.logger.lineKey != "" {
 		l.Int(l.logger.lineKey, line)
 	}
-
 	return l
 }
 
@@ -540,12 +537,11 @@ func (l *Log) Intercept(interceptors ...Interceptor) *Log {
 	for _, interceptor := range interceptors {
 		interceptor(l.ctx, l)
 	}
-
 	return l
 }
 
-// End ends l.
-func (l *Log) End() {
+// Log logs l.
+func (l *Log) Log() {
 	if l == nil {
 		return
 	}
@@ -553,6 +549,5 @@ func (l *Log) End() {
 	for _, interceptor := range l.logger.interceptors {
 		interceptor(l.ctx, l)
 	}
-
 	l.end()
 }

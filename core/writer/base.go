@@ -21,11 +21,6 @@ import (
 	"github.com/go-logit/logit/core"
 )
 
-const (
-	KB = 1024      // KB is the unit KB in size. 1 KB = 1024 Bytes.
-	MB = 1024 * KB // MB is the unit MB in size. 1 MB = 1024*1024 Bytes.
-)
-
 // Flusher is an interface that flushes data to somewhere.
 type Flusher interface {
 	Flush() (n int, err error)
@@ -42,25 +37,23 @@ func notStdoutAndStderr(w io.Writer) bool {
 	return w != os.Stdout && w != os.Stderr
 }
 
-// Wrapped wraps writer to Writer.
-func Wrapped(writer io.Writer) Writer {
+// Wrap wraps io.writer to Writer.
+func Wrap(writer io.Writer) Writer {
 	if w, ok := writer.(Writer); ok {
 		return w
 	}
-
-	return newWrappedWriter(writer)
+	return newWrapWriter(writer)
 }
 
-// BufferedWithSize wraps writer to buffered Writer with bufferSize.
-func BufferedWithSize(writer io.Writer, bufferSize int) Writer {
-	if w, ok := writer.(Writer); ok {
-		return w
+// BufferWithSize wraps io.writer with buffer Writer of bufferSize.
+func BufferWithSize(writer io.Writer, bufferSize core.ByteSize) Writer {
+	if bw, ok := writer.(*bufferWriter); ok {
+		return bw
 	}
-
-	return newBufferedWriter(writer, bufferSize)
+	return newBufferWriter(writer, bufferSize)
 }
 
-// Buffered wraps writer to buffered Writer with default buffer size.
-func Buffered(writer io.Writer) Writer {
-	return BufferedWithSize(writer, core.WriterBufferedSize)
+// Buffer wraps writer to Buffer Writer with default buffer size.
+func Buffer(writer io.Writer) Writer {
+	return BufferWithSize(writer, core.WriterBufferSize)
 }

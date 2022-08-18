@@ -189,7 +189,7 @@ Package logit provides an easy way to use foundation for your logging operations
 	//
 	// In package writer, we provide some writers for you.
 	writer.Wrapped(os.Stdout)  // Wrap io.Writer to writer.Writer
-	writer.Buffered(os.Stderr) // Wrap io.Writer to writer.Writer with buffer, which needs invoking Flush() or Close()
+	writer.Buffer(os.Stderr) // Wrap io.Writer to writer.Writer with buffer, which needs invoking Flush() or Close()
 
 	// Use the writer without buffer.
 	logger := logit.NewLogger(logit.Options().WithWriter(os.Stdout, false))
@@ -222,15 +222,15 @@ Package logit provides an easy way to use foundation for your logging operations
 	// If your logs are extremely long, such as 4000 bytes, you can set it to 4096 to avoid re-malloc.
 	core.LogMallocSize = 4096 // 4096 Bytes
 
-	// 2. WriterBufferedSize (The default size of buffered writer)
+	// 2. WriterBufferSize (The default size of Buffer writer)
 	// If your logs are extremely long, such as 16KB, you can set it to 2048 to avoid re-malloc.
-	core.WriterBufferedSize = 32 * writer.KB
+	core.WriterBufferSize = 32 * writer.KB
 
 	// After setting global settings, just use Logger as normal.
 	logger := logit.NewLogger()
 	defer logger.Close()
 
-	logger.Info("set global settings").Int("LogMallocSize", core.LogMallocSize).Int("WriterBufferedSize", core.WriterBufferedSize).End()
+	logger.Info("set global settings").Int("LogMallocSize", core.LogMallocSize).Int("WriterBufferSize", core.WriterBufferSize).End()
 
 6. context:
 
@@ -376,5 +376,5 @@ package logit // import "github.com/go-logit/logit"
 
 const (
 	// Version is the version string representation of logit.
-	Version = "v0.4.22"
+	Version = "v0.5.0-alpha"
 )

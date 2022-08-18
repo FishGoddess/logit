@@ -115,14 +115,14 @@ func (o *options) WithPrintAppender(appender appender.Appender) Option {
 }
 
 // WithWriter returns an option which sets logger's writer to a new one.
-func (o *options) WithWriter(w io.Writer, buffered bool) Option {
+func (o *options) WithWriter(w io.Writer, withBuffer bool) Option {
 	return func(logger *Logger) {
 		var wr writer.Writer
 
-		if buffered {
-			wr = writer.Buffered(w)
+		if withBuffer {
+			wr = writer.Buffer(w)
 		} else {
-			wr = writer.Wrapped(w)
+			wr = writer.Wrap(w)
 		}
 
 		logger.debugWriter = wr
@@ -134,56 +134,56 @@ func (o *options) WithWriter(w io.Writer, buffered bool) Option {
 }
 
 // WithDebugWriter returns an option which sets logger's debug writer to a new one.
-func (o *options) WithDebugWriter(w io.Writer, buffered bool) Option {
+func (o *options) WithDebugWriter(w io.Writer, withBuffer bool) Option {
 	return func(logger *Logger) {
-		if buffered {
-			logger.debugWriter = writer.Buffered(w)
+		if withBuffer {
+			logger.debugWriter = writer.Buffer(w)
 		} else {
-			logger.debugWriter = writer.Wrapped(w)
+			logger.debugWriter = writer.Wrap(w)
 		}
 	}
 }
 
 // WithInfoWriter returns an option which sets logger's info writer to a new one.
-func (o *options) WithInfoWriter(w io.Writer, buffered bool) Option {
+func (o *options) WithInfoWriter(w io.Writer, withBuffer bool) Option {
 	return func(logger *Logger) {
-		if buffered {
-			logger.infoWriter = writer.Buffered(w)
+		if withBuffer {
+			logger.infoWriter = writer.Buffer(w)
 		} else {
-			logger.infoWriter = writer.Wrapped(w)
+			logger.infoWriter = writer.Wrap(w)
 		}
 	}
 }
 
 // WithWarnWriter returns an option which sets logger's warn writer to a new one.
-func (o *options) WithWarnWriter(w io.Writer, buffered bool) Option {
+func (o *options) WithWarnWriter(w io.Writer, withBuffer bool) Option {
 	return func(logger *Logger) {
-		if buffered {
-			logger.warnWriter = writer.Buffered(w)
+		if withBuffer {
+			logger.warnWriter = writer.Buffer(w)
 		} else {
-			logger.warnWriter = writer.Wrapped(w)
+			logger.warnWriter = writer.Wrap(w)
 		}
 	}
 }
 
 // WithErrorWriter returns an option which sets logger's error writer to a new one.
-func (o *options) WithErrorWriter(w io.Writer, buffered bool) Option {
+func (o *options) WithErrorWriter(w io.Writer, withBuffer bool) Option {
 	return func(logger *Logger) {
-		if buffered {
-			logger.errorWriter = writer.Buffered(w)
+		if withBuffer {
+			logger.errorWriter = writer.Buffer(w)
 		} else {
-			logger.errorWriter = writer.Wrapped(w)
+			logger.errorWriter = writer.Wrap(w)
 		}
 	}
 }
 
 // WithPrintWriter returns an option which sets logger's print writer to a new one.
-func (o *options) WithPrintWriter(w io.Writer, buffered bool) Option {
+func (o *options) WithPrintWriter(w io.Writer, withBuffer bool) Option {
 	return func(logger *Logger) {
-		if buffered {
-			logger.printWriter = writer.Buffered(w)
+		if withBuffer {
+			logger.printWriter = writer.Buffer(w)
 		} else {
-			logger.printWriter = writer.Wrapped(w)
+			logger.printWriter = writer.Wrap(w)
 		}
 	}
 }
@@ -199,6 +199,13 @@ func (o *options) WithPid() Option {
 func (o *options) WithCaller() Option {
 	return func(logger *Logger) {
 		logger.needCaller = true
+	}
+}
+
+// WithCallerDepth returns an option which sets caller depth in logs.
+func (o *options) WithCallerDepth(depth int) Option {
+	return func(logger *Logger) {
+		logger.callerDepth = depth
 	}
 }
 
@@ -251,6 +258,13 @@ func (o *options) WithTimeFormat(format string) Option {
 	}
 }
 
+// WithInterceptors returns an option which sets interceptors to logger.
+func (o *options) WithInterceptors(interceptors ...Interceptor) Option {
+	return func(logger *Logger) {
+		logger.interceptors = append(logger.interceptors, interceptors...)
+	}
+}
+
 // WithAutoFlush returns an option which do flush automatically at fixed frequency.
 func (o *options) WithAutoFlush(frequency time.Duration) Option {
 	return func(logger *Logger) {
@@ -261,19 +275,5 @@ func (o *options) WithAutoFlush(frequency time.Duration) Option {
 				logger.Flush()
 			}
 		}()
-	}
-}
-
-// WithCallerDepth returns an option which sets caller depth in logs.
-func (o *options) WithCallerDepth(callerDepth int) Option {
-	return func(logger *Logger) {
-		logger.callerDepth = callerDepth
-	}
-}
-
-// WithInterceptors returns an option which sets interceptors to logger.
-func (o *options) WithInterceptors(interceptors ...Interceptor) Option {
-	return func(logger *Logger) {
-		logger.interceptors = append(logger.interceptors, interceptors...)
 	}
 }

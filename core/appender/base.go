@@ -82,16 +82,19 @@ type Appender interface {
 	AppendStringers(dst []byte, key string, values []fmt.Stringer) []byte         // AppendStringers appends a []fmt.Stringer entry to dst.
 }
 
+// needEscapedByte returns if value need to escape.
 // The main character should be escaped is ascii less than \u0020 and \ and ".
 func needEscapedByte(value byte) bool {
 	return value < 32 || value == '"' || value == '\\'
 }
 
+// needEscapedRune returns if value need to escape.
 // The main character should be escaped is ascii less than \u0020 and \ and ".
 func needEscapedRune(value rune) bool {
 	return value < utf8.RuneSelf && needEscapedByte(byte(value))
 }
 
+// appendEscapedByte appends escaped value to dst.
 // The main character should be escaped is ascii less than \u0020 and \ and ".
 func appendEscapedByte(dst []byte, value byte) []byte {
 	switch value {
@@ -121,6 +124,7 @@ func appendEscapedByte(dst []byte, value byte) []byte {
 	}
 }
 
+// appendEscapedRune appends escaped value to dst.
 // The main character should be escaped is ascii less than \u0020 and \ and ".
 func appendEscapedRune(dst []byte, value rune) []byte {
 	if needEscapedRune(value) {
@@ -129,6 +133,7 @@ func appendEscapedRune(dst []byte, value rune) []byte {
 	return append(dst, string(value)...)
 }
 
+// appendEscapedString appends escaped value to dst.
 // The main character should be escaped is ascii less than \u0020 and \ and ".
 func appendEscapedString(dst []byte, value string) []byte {
 	start := 0
@@ -152,12 +157,12 @@ func appendEscapedString(dst []byte, value string) []byte {
 	return append(dst, value...)
 }
 
-// Text returns an Text appender.
+// Text returns the global Text appender.
 func Text() Appender {
 	return globalTextAppender
 }
 
-// Json returns a Json appender.
+// Json returns the global Json appender.
 func Json() Appender {
 	return globalJsonAppender
 }
