@@ -167,19 +167,19 @@ func (l *Logger) log(level level, msg string, params ...interface{}) *Log {
 
 	log := l.getLog(level).begin()
 	if l.timeKey != "" {
-		log.Time(l.timeKey, time.Now(), l.timeFormat)
+		log = log.Time(l.timeKey, time.Now(), l.timeFormat)
 	}
 
 	if l.levelKey != "" {
-		log.String(l.levelKey, level.String())
+		log = log.String(l.levelKey, level.String())
 	}
 
 	if l.needPid {
-		log.WithPid()
+		log = log.WithPid()
 	}
 
 	if l.needCaller {
-		log.withCaller(l.callerDepth)
+		log = log.withCaller(l.callerDepth)
 	}
 
 	if len(params) > 0 {

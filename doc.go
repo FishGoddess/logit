@@ -322,7 +322,7 @@ Package logit provides an easy way to use foundation for your logging operations
 	logger = logit.NewLogger(logit.Options().WithCaller())
 	logger.Info("I am with caller").Log()
 
-	// We won't carry caller information twice or more if logger carries caller information originally.
+	// We won't carry caller information twice or more if logger carries caller information already.
 	logger.Info("Invoke log.WithCaller() again").WithCaller().Log()
 	logger.Close()
 

@@ -215,9 +215,9 @@ func TestLogWithCaller(t *testing.T) {
 	log.WithCaller()
 	log.Log()
 
-	file, line := runtime.Caller(1)
+	file, line, function := runtime.Caller(1)
 	line -= 3 // Between log.WithCaller() and pkg.Caller(1) is 3
-	right := fmt.Sprintf("%s=%s|%s=%d\n", logger.fileKey, file, logger.lineKey, line)
+	right := fmt.Sprintf("%s=%s|%s=%d|%s=%s\n", logger.fileKey, file, logger.lineKey, line, logger.funcKey, function)
 
 	str = buffer.String()
 	if str != right {

@@ -622,6 +622,19 @@ func TestOptionsWithLineKey(t *testing.T) {
 	}
 }
 
+// go test -v -cover -run=^TestOptionsWithFuncKey$
+func TestOptionsWithFuncKey(t *testing.T) {
+	opts := Options()
+
+	logger := NewLogger()
+	logger.funcKey = ""
+
+	opts.WithFuncKey("func")(logger)
+	if logger.funcKey != "func" {
+		t.Errorf("logger's funcKey %+v is wrong", logger.funcKey)
+	}
+}
+
 // go test -v -cover -run=^TestOptionsWithTimeFormat$
 func TestOptionsWithTimeFormat(t *testing.T) {
 	opts := Options()

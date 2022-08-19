@@ -499,13 +499,17 @@ func (l *Log) withCaller(depth int) *Log {
 		return nil
 	}
 
-	file, line := runtime.Caller(depth)
+	file, line, function := runtime.Caller(depth)
 	if l.logger.fileKey != "" {
 		l.String(l.logger.fileKey, file)
 	}
 
 	if l.logger.lineKey != "" {
 		l.Int(l.logger.lineKey, line)
+	}
+
+	if l.logger.funcKey != "" {
+		l.String(l.logger.funcKey, function)
 	}
 	return l
 }

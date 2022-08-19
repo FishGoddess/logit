@@ -27,6 +27,7 @@ type config struct {
 	pidKey      string // The key of pid in a log.
 	fileKey     string // The key of caller's file in a log.
 	lineKey     string // The key of caller's line in a log.
+	funcKey     string // The key of caller's function in a log.
 	timeFormat  string // The format of time in a log.
 	callerDepth int    // The depth of caller.
 }
@@ -43,6 +44,7 @@ func newDefaultConfig() config {
 		pidKey:      "log.pid",
 		fileKey:     "log.file",
 		lineKey:     "log.line",
+		funcKey:     "log.func",
 		timeFormat:  "2006-01-02 15:04:05",
 		callerDepth: core.CallerDepth,
 	}

@@ -251,6 +251,13 @@ func (o *options) WithLineKey(key string) Option {
 	}
 }
 
+// WithFuncKey returns an option which sets logger's funcKey to a new one.
+func (o *options) WithFuncKey(key string) Option {
+	return func(logger *Logger) {
+		logger.funcKey = key
+	}
+}
+
 // WithTimeFormat returns an option which sets format of time in logs.
 func (o *options) WithTimeFormat(format string) Option {
 	return func(logger *Logger) {

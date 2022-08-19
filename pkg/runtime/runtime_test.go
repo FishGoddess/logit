@@ -32,17 +32,26 @@ func TestPid(t *testing.T) {
 
 // go test -v -cover -run=^TestCaller$
 func TestCaller(t *testing.T) {
-	_, f, l, ok := runtime.Caller(0)
+	pc, correctFile, correctLine, ok := runtime.Caller(0)
 	if !ok {
 		t.Errorf("runtime.Caller failed")
 	}
 
-	file, line := Caller(1)
-	if file != f {
+	file, line, function := Caller(1)
+	if file != correctFile {
 		t.Errorf("Caller returns wrong file %s", file)
 	}
 
-	if line != l+5 {
+	if line != correctLine+5 {
 		t.Errorf("Caller returns wrong line %d", line)
+	}
+
+	fc := runtime.FuncForPC(pc)
+	if fc == nil {
+		t.Error("runtime.FuncForPC(pc) == nil")
+	}
+
+	if function != fc.Name() {
+		t.Errorf("Caller returns wrong function %s", function)
 	}
 }

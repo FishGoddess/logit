@@ -29,9 +29,18 @@ func Pid() int {
 }
 
 // Caller returns the caller information of depth.
-func Caller(depth int) (file string, line int) {
-	if _, file, line, ok := runtime.Caller(depth); ok {
-		return file, line
+func Caller(depth int) (file string, line int, function string) {
+	var pc uintptr
+	var ok bool
+
+	pc, file, line, ok = runtime.Caller(depth)
+	if !ok {
+		return "unknown", -1, "unknown"
 	}
-	return "unknown file", -1
+
+	f := runtime.FuncForPC(pc)
+	if f != nil {
+		function = f.Name()
+	}
+	return file, line, function
 }

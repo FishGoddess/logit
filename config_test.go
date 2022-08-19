@@ -34,6 +34,7 @@ func TestNewDefaultConfig(t *testing.T) {
 		pidKey:      "log.pid",
 		fileKey:     "log.file",
 		lineKey:     "log.line",
+		funcKey:     "log.func",
 		timeFormat:  "2006-01-02 15:04:05",
 		callerDepth: core.CallerDepth,
 	}
