@@ -133,6 +133,7 @@ func main() {
 * [creator](./_examples/creator.go)
 * [caller](./_examples/caller.go)
 * [interceptor](./_examples/interceptor.go)
+* [file](./_examples/file.go)
 
 _所有的使用案例都在 [_examples](./_examples) 目录。_
 

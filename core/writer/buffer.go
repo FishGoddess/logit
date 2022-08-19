@@ -94,12 +94,13 @@ func (bw *bufferWriter) AutoFlush(frequency time.Duration) chan<- struct{} {
 
 	go func() {
 		ticker := time.NewTicker(frequency)
+		defer ticker.Stop()
+
 		for {
 			select {
 			case <-ticker.C:
 				bw.Flush()
 			case <-stopCh:
-				ticker.Stop()
 				return
 			}
 		}
