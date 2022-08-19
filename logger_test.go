@@ -43,11 +43,11 @@ func TestNewLogger(t *testing.T) {
 	)
 	defer logger.Close()
 
-	logger.Debug("debug...").String("trace", "xxx").Int("id", 123).Float64("pi", 3.14).Any("any", map[string]interface{}{"a": 1, "b": "bbb"}).End()
-	logger.Error("error...").Byte("b", 'a').Byte("es", '\n').Runes("words", []rune("我是中国人")).Error("err", errors.New("我是错误")).End()
-	logger.Error("error with %d...", 666).String("trace", "xxx").Int("id", 123).Float64("pi", 3.14).End()
-	logger.Warn("\"warn\"...\r\b\t\n").Strings("s\tb\nd\b", []string{"abc\r", "efg\n"}).End()
-	logger.Info("info...").Bools("bools", []bool{true, false}).Bytes("bytes", []byte{'\b', '\t', 'a', 'b', 'c', '"', '\n'}).Int16s("int16s", []int16{123, 4567, 8901}).Float32s("float32s", []float32{3.14, 6.18}).End()
+	logger.Debug("debug...").String("trace", "xxx").Int("id", 123).Float64("pi", 3.14).Any("any", map[string]interface{}{"a": 1, "b": "bbb"}).Log()
+	logger.Error("error...").Byte("b", 'a').Byte("es", '\n').Runes("words", []rune("我是中国人")).Error("err", errors.New("我是错误")).Log()
+	logger.Error("error with %d...", 666).String("trace", "xxx").Int("id", 123).Float64("pi", 3.14).Log()
+	logger.Warn("\"warn\"...\r\b\t\n").Strings("s\tb\nd\b", []string{"abc\r", "efg\n"}).Log()
+	logger.Info("info...").Bools("bools", []bool{true, false}).Bytes("bytes", []byte{'\b', '\t', 'a', 'b', 'c', '"', '\n'}).Int16s("int16s", []int16{123, 4567, 8901}).Float32s("float32s", []float32{3.14, 6.18}).Log()
 
 	logs := `{"log.level":"debug","log.msg":"debug...","trace":"xxx","id":123,"pi":3.14,"any":{"a":1,"b":"bbb"}}
 {"log.level":"error","log.msg":"error...","b":"a","es":"\n","words":["我","是","中","国","人"],"err":"我是错误"}
@@ -59,6 +59,20 @@ func TestNewLogger(t *testing.T) {
 	output := buffer.String()
 	if output != logs {
 		t.Errorf("logs %s is wrong with %s", output, logs)
+	}
+}
+
+// go test -v -cover -run=^TestLoggerSetToGlobal$
+func TestLoggerSetToGlobal(t *testing.T) {
+	logger := NewLogger()
+	logger.SetToGlobal()
+
+	if logger == globalLogger {
+		t.Error("logger == globalLogger")
+	}
+
+	if logger.callerDepth+1 != globalLogger.callerDepth {
+		t.Errorf("logger.callerDepth + 1 %d != globalLogger.callerDepth %d", logger.callerDepth+1, globalLogger.callerDepth)
 	}
 }
 

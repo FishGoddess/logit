@@ -73,13 +73,19 @@ Package logit provides an easy way to use foundation for your logging operations
 	// You can bind context with logger and use it as long as you can get the context.
 	ctx := logit.NewContext(context.Background(), logger)
 	logger = logit.FromContext(ctx)
+	logger.Info("Logger from context").Log()
 
-	// You can initialize the global logger if you don't want to use a logger.
-	logit.InitGlobal(func() *logit.Logger {
-		return logit.NewLogger()
-	})
-
+	// You can initialize the global logger if you don't want to use an independent logger.
+	// WithCallerDepth will set the depth of caller, and default is core.CallerDepth.
+	// Functions in global logger are wrapped so depth of caller should be increased 1.
+	// You can specify your depth if you wrap again or have something else reasons.
+	logger = logit.NewLogger(options.WithCallerDepth(core.CallerDepth + 1))
+	logit.SetGlobal(logger)
 	logit.Info("Info from logit").Log()
+
+	// We don't recommend you to call logit.SetGlobal unless you really need to call.
+	// Instead, we recommend you to call logger.SetToGlobal to set one logger to global if you need.
+	logger.SetToGlobal()
 	logit.Println("Println from logit")
 
 2. options:

@@ -24,6 +24,8 @@ var (
 )
 
 // SetGlobal sets global logger to value returned from newLogger.
+// We don't recommend you to call this function unless you really need to call.
+// Instead, we recommend you to call logger.SetToGlobal to set one logger to global if you need.
 func SetGlobal(logger *Logger) {
 	globalLogger = logger
 }

@@ -51,7 +51,7 @@ type Logger struct {
 	interceptors []Interceptor
 
 	// logPool is for reusing logs.
-	logPool *sync.Pool
+	logPool sync.Pool
 }
 
 // NewLogger returns a new Logger created with options.
@@ -68,7 +68,7 @@ func NewLogger(options ...Option) *Logger {
 		warnWriter:    writer.Wrap(os.Stderr),
 		errorWriter:   writer.Wrap(os.Stderr),
 		printWriter:   writer.Wrap(os.Stdout),
-		logPool: &sync.Pool{
+		logPool: sync.Pool{
 			New: func() interface{} {
 				return newLog()
 			},
@@ -79,6 +79,34 @@ func NewLogger(options ...Option) *Logger {
 		applyOption(logger)
 	}
 	return logger
+}
+
+// SetToGlobal clones a new logger of current logger and sets it to global.
+// Depth of caller will increase 1 due to wrapping functions.
+func (l *Logger) SetToGlobal() {
+	newLogger := &Logger{
+		config:        l.config,
+		debugAppender: l.debugAppender,
+		infoAppender:  l.infoAppender,
+		warnAppender:  l.warnAppender,
+		errorAppender: l.errorAppender,
+		printAppender: l.printAppender,
+		debugWriter:   l.debugWriter,
+		infoWriter:    l.infoWriter,
+		warnWriter:    l.warnWriter,
+		errorWriter:   l.errorWriter,
+		printWriter:   l.printWriter,
+		interceptors:  l.interceptors,
+		logPool: sync.Pool{
+			New: func() interface{} {
+				return newLog()
+			},
+		},
+	}
+
+	// Increase depth so the caller is correct.
+	newLogger.callerDepth++
+	SetGlobal(newLogger)
 }
 
 // appenderOf returns the appender of level.
