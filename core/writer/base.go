@@ -57,3 +57,16 @@ func BufferWithSize(writer io.Writer, bufferSize core.ByteSize) Writer {
 func Buffer(writer io.Writer) Writer {
 	return BufferWithSize(writer, core.WriterBufferSize)
 }
+
+// BatchWithCount wraps io.writer with batch Writer of batchCount.
+func BatchWithCount(writer io.Writer, batchCount uint) Writer {
+	if bw, ok := writer.(*batchWriter); ok {
+		return bw
+	}
+	return newBatchWriter(writer, batchCount)
+}
+
+// Batch wraps writer to Batch Writer with default batch count.
+func Batch(writer io.Writer) Writer {
+	return BatchWithCount(writer, core.WriterBatchCount)
+}

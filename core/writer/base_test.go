@@ -48,7 +48,7 @@ func TestBufferWithSize(t *testing.T) {
 		t.Error("Buffer returns a non-bufferWriter instance")
 	}
 
-	if bw.bufferSize != 1024 {
-		t.Errorf("bw.bufferSize %d is wrong", bw.bufferSize)
+	if bw.maxBufferSize != 1024 {
+		t.Errorf("bw.maxBufferSize %d is wrong", bw.maxBufferSize)
 	}
 }

@@ -25,12 +25,15 @@ const (
 
 var (
 	// LogMallocSize is the pre-malloc size of a new Log data.
-	// If your logs are extremely long, such as 4000 bytes/log, you can set it to 4096 to avoid re-malloc.
-	LogMallocSize = 512 * B // 512 Bytes
+	// If your logs are extremely long, such as 4000 bytes/log, you can set it to 4KB to avoid re-malloc.
+	LogMallocSize = 512 * B
 
 	// WriterBufferSize is the default size of buffer writer.
 	// If your logs are extremely long, such as 4 KB/log, you can set it to 512 KB to avoid re-malloc.
 	WriterBufferSize = 64 * KB
+
+	// WriterBatchCount is the default count of batch writer.
+	WriterBatchCount = uint(128)
 
 	// MarshalToJson marshals v to json bytes.
 	// If you want to use your own way to marshal, change it to your own marshal function.
