@@ -20,13 +20,13 @@ import (
 	"testing"
 )
 
-// go test -v -cover -run=^TestPid$
-func TestPid(t *testing.T) {
-	pid := Pid()
-	osPid := os.Getpid()
+// go test -v -cover -run=^TestPID$
+func TestPID(t *testing.T) {
+	pid := PID()
+	osPID := os.Getpid()
 
-	if pid != osPid {
-		t.Errorf("pid %d is wrong with %d", pid, osPid)
+	if pid != osPID {
+		t.Errorf("pid %d is wrong with %d", pid, osPID)
 	}
 }
 

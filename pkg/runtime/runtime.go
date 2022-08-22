@@ -23,8 +23,8 @@ var (
 	pid = os.Getpid() // The pid of current process.
 )
 
-// Pid returns the pid of current process.
-func Pid() int {
+// PID returns the pid of current process.
+func PID() int {
 	return pid
 }
 

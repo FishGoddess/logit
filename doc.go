@@ -66,8 +66,10 @@ Package logit provides an easy way to use foundation for your logging operations
 	options := logit.Options()
 	options.WithCaller()                          // Let logs carry caller information.
 	options.WithLevelKey("lvl")                   // Change logger's level key to "lvl".
-	options.WithWriter(os.Stderr, true)           // Change logger's writer to os.Stderr with buffer.
-	options.WithErrorWriter(os.Stderr, false)     // Change logger's error writer to os.Stderr without buffer.
+	options.WithWriter(os.Stderr)                 // Change logger's writer to os.Stderr without buffer or batch.
+	options.WithBufferWriter(os.Stderr)           // Change logger's writer to os.Stderr with buffer.
+	options.WithBatchWriter(os.Stderr)            // Change logger's writer to os.Stderr with batch.
+	options.WithErrorWriter(os.Stderr)            // Change logger's error writer to os.Stderr without buffer or batch.
 	options.WithTimeFormat("2006-01-02 15:04:05") // Change the format of time (Only the log's time will apply it).
 
 	// You can bind context with logger and use it as long as you can get the context.
@@ -106,12 +108,12 @@ Package logit provides an easy way to use foundation for your logging operations
 	options.WithInfoWriter(os.Stderr, false)
 	options.WithWarnWriter(os.Stderr, false)
 	options.WithErrorWriter(os.Stderr, false)
-	options.WithPid()
+	options.WithPID()
 	options.WithCaller()
 	options.WithMsgKey("msg")
 	options.WithTimeKey("time")
 	options.WithLevelKey("level")
-	options.WithPidKey("pid")
+	options.WithPIDKey("pid")
 	options.WithFileKey("file")
 	options.WithLineKey("line")
 	options.WithFuncKey("func")
@@ -121,7 +123,7 @@ Package logit provides an easy way to use foundation for your logging operations
 
 	// Remember, these options is only used for creating a logger.
 	logger := logit.NewLogger(
-		options.WithPid(),
+		options.WithPID(),
 		options.WithWriter(os.Stdout, false),
 		options.WithTimeFormat("2006/01/02 15:04:05"),
 		options.WithCaller(),
@@ -373,6 +375,38 @@ Package logit provides an easy way to use foundation for your logging operations
 	// Notice that WithContext should be called before Intercept if you want to pass this context to Intercept.
 	ctx = context.WithValue(ctx, "business", "logger")
 	logger.Info("try interceptor - round four").WithContext(ctx).Intercept(businessInterceptor).Log()
+
+10. file:
+
+	// Logger will log everything to console by default.
+	logger := logit.NewLogger()
+	logger.Info("I log everything to console.").Log()
+
+	// You can use WithWriter to change writer in logger.
+	logger = logit.NewLogger(logit.Options().WithWriter(os.Stdout))
+	logger.Info("I also log everything to console.").Log()
+
+	// As we know, we always log everything to file in production.
+	// So we provide a convenient way to create a file.
+	logFile := filepath.Join(os.TempDir(), "test.log")
+	fmt.Println(logFile)
+	logger = logit.NewLogger(logit.Options().WithWriter(file.MustNewFile(logFile)))
+	logger.Info("I log everything to file.").String("logFile", logFile).Log()
+	logger.Close()
+
+	// Also, as you can see, there is a parameter called withBuffer in WithWriter option.
+	// It will use a buffer writer to write logs if withBuffer is true which will bring a huge performance improvement.
+	logFile = filepath.Join(os.TempDir(), "test_buffer.log")
+	fmt.Println(logFile)
+	logger = logit.NewLogger(logit.Options().WithWriter(file.MustNewFile(logFile)))
+	logger.Info("I log everything to file with buffer.").String("logFile", logFile).Log()
+	logger.Close()
+
+	// We provide some high-performance file for you. Try these:
+	writer.BufferWithSize(os.Stdout, 128*core.KB)
+	writer.BatchWithCount(os.Stdout, 256)
+	logit.Options().WithBufferWriter(os.Stdout)
+	logit.Options().WithBatchWriter(os.Stdout)
 */
 package logit // import "github.com/go-logit/logit"
 

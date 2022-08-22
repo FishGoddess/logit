@@ -31,7 +31,7 @@ import (
 func TestNewLog(t *testing.T) {
 	buffer := bytes.NewBuffer(make([]byte, 0, 1024))
 
-	logger := NewLogger(Options().WithAppender(appender.Json()), Options().WithWriter(buffer, false))
+	logger := NewLogger(Options().WithAppender(appender.Json()), Options().WithWriter(buffer))
 	defer logger.Close()
 
 	entries := map[string]interface{}{
@@ -156,18 +156,18 @@ func TestNewLog(t *testing.T) {
 	}
 }
 
-// go test -v -cover -run=^TestLogWithPid$
-func TestLogWithPid(t *testing.T) {
+// go test -v -cover -run=^TestLogWithPID$
+func TestLogWithPID(t *testing.T) {
 	buffer := bytes.NewBuffer(make([]byte, 0, 1024))
-	logger := NewLogger(Options().WithWriter(buffer, false))
-	logger.needPid = true
+	logger := NewLogger(Options().WithWriter(buffer))
+	logger.withPID = true
 
 	log := newLog()
 	log.logger = logger
 	log.appender = logger.debugAppender
 	log.writer = logger.debugWriter
 	log.begin()
-	log.WithPid()
+	log.WithPID()
 	log.Log()
 
 	str := buffer.String()
@@ -176,12 +176,12 @@ func TestLogWithPid(t *testing.T) {
 	}
 
 	buffer.Reset()
-	logger.needPid = false
+	logger.withPID = false
 	log.begin()
-	log.WithPid()
+	log.WithPID()
 	log.Log()
 
-	pid := runtime.Pid()
+	pid := runtime.PID()
 	right := fmt.Sprintf("%s=%d\n", logger.pidKey, pid)
 
 	str = buffer.String()
@@ -193,8 +193,8 @@ func TestLogWithPid(t *testing.T) {
 // go test -v -cover -run=^TestLogWithCaller$
 func TestLogWithCaller(t *testing.T) {
 	buffer := bytes.NewBuffer(make([]byte, 0, 1024))
-	logger := NewLogger(Options().WithWriter(buffer, false))
-	logger.needCaller = true
+	logger := NewLogger(Options().WithWriter(buffer))
+	logger.withCaller = true
 
 	log := newLog()
 	log.logger = logger
@@ -210,7 +210,7 @@ func TestLogWithCaller(t *testing.T) {
 	}
 
 	buffer.Reset()
-	logger.needCaller = false
+	logger.withCaller = false
 	log.begin()
 	log.WithCaller()
 	log.Log()

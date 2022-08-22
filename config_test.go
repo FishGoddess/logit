@@ -26,8 +26,8 @@ func TestNewDefaultConfig(t *testing.T) {
 
 	cfg := config{
 		level:       debugLevel,
-		needPid:     false,
-		needCaller:  false,
+		withPID:     false,
+		withCaller:  false,
 		msgKey:      "log.msg",
 		timeKey:     "log.time",
 		levelKey:    "log.level",

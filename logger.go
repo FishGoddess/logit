@@ -174,11 +174,11 @@ func (l *Logger) log(level level, msg string, params ...interface{}) *Log {
 		log = log.String(l.levelKey, level.String())
 	}
 
-	if l.needPid {
-		log = log.WithPid()
+	if l.withPID {
+		log = log.WithPID()
 	}
 
-	if l.needCaller {
+	if l.withCaller {
 		log = log.withCaller(l.callerDepth)
 	}
 

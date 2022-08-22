@@ -30,13 +30,13 @@ func TestNewLogger(t *testing.T) {
 	logger := NewLogger(
 		options.WithDebugLevel(),
 		options.WithAppender(appender.Json()),
-		options.WithWriter(buffer, false),
-		//options.WithPid(),
+		options.WithWriter(buffer),
+		//options.WithPID(),
 		//options.WithCaller(),
 		//options.WithMsgKey("message"),
 		options.WithTimeKey(""),
 		//options.WithLevelKey("level"),
-		//options.WithPidKey("pid"),
+		//options.WithPIDKey("pid"),
 		//options.WithFileKey("file"),
 		//options.WithLineKey("line"),
 		//options.WithTimeFormat("060102"),
@@ -84,7 +84,7 @@ func TestLoggerPrintf(t *testing.T) {
 	logger := NewLogger(
 		options.WithErrorLevel(),
 		options.WithAppender(appender.Json()),
-		options.WithWriter(buffer, false),
+		options.WithWriter(buffer),
 		options.WithTimeKey(""),
 	)
 

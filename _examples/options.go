@@ -39,12 +39,12 @@ func main() {
 	options.WithInfoWriter(os.Stderr, false)
 	options.WithWarnWriter(os.Stderr, false)
 	options.WithErrorWriter(os.Stderr, false)
-	options.WithPid()
+	options.WithPID()
 	options.WithCaller()
 	options.WithMsgKey("msg")
 	options.WithTimeKey("time")
 	options.WithLevelKey("level")
-	options.WithPidKey("pid")
+	options.WithPIDKey("pid")
 	options.WithFileKey("file")
 	options.WithLineKey("line")
 	options.WithFuncKey("func")
@@ -54,7 +54,7 @@ func main() {
 
 	// Remember, these options is only used for creating a logger.
 	logger := logit.NewLogger(
-		options.WithPid(),
+		options.WithPID(),
 		options.WithWriter(os.Stdout, false),
 		options.WithTimeFormat("2006/01/02 15:04:05"),
 		options.WithCaller(),

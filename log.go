@@ -481,14 +481,14 @@ func (l *Log) Json(key string, value interface{}) *Log {
 	return l
 }
 
-// WithPid adds one entry about pid information to l.
-func (l *Log) WithPid() *Log {
-	if l == nil || l.logger.needPid {
+// WithPID adds one entry about pid information to l.
+func (l *Log) WithPID() *Log {
+	if l == nil || l.logger.withPID {
 		return l
 	}
 
 	if l.logger.pidKey != "" {
-		l.Int(l.logger.pidKey, runtime.Pid())
+		l.Int(l.logger.pidKey, runtime.PID())
 	}
 	return l
 }
@@ -516,7 +516,7 @@ func (l *Log) withCaller(depth int) *Log {
 
 // WithCaller adds two entries about caller information to l.
 func (l *Log) WithCaller() *Log {
-	if l == nil || l.logger.needCaller {
+	if l == nil || l.logger.withCaller {
 		return l
 	}
 	return l.withCaller(3)

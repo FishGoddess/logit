@@ -100,8 +100,10 @@ func main() {
 	options := logit.Options()
 	options.WithCaller()                          // Let logs carry caller information.
 	options.WithLevelKey("lvl")                   // Change logger's level key to "lvl".
-	options.WithWriter(os.Stderr, true)           // Change logger's writer to os.Stderr with buffer.
-	options.WithErrorWriter(os.Stderr, false)     // Change logger's error writer to os.Stderr without buffer.
+	options.WithWriter(os.Stderr)                 // Change logger's writer to os.Stderr without buffer or batch.
+	options.WithBufferWriter(os.Stderr)           // Change logger's writer to os.Stderr with buffer.
+	options.WithBatchWriter(os.Stderr)            // Change logger's writer to os.Stderr with batch.
+	options.WithErrorWriter(os.Stderr)            // Change logger's error writer to os.Stderr without buffer or batch.
 	options.WithTimeFormat("2006-01-02 15:04:05") // Change the format of time (Only the log's time will apply it).
 
 	// You can bind context with logger and use it as long as you can get the context.
