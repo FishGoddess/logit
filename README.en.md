@@ -8,8 +8,6 @@
 **logit** is a level-based, high-performance and pure-structured logger for all [GoLang](https://golang.org)
 applications.
 
-> After reading some amazing logging libs, I found that logit is just a joke, especially comparing with zerolog, so I decided to redesign logit.
-
 [阅读中文版的 Read me](./README.md)
 
 ~~[Introduction Video on BiliBili](https://www.bilibili.com/video/BV14t4y1y7rF)~~
@@ -30,8 +28,6 @@ applications.
 > Configuration plugins is based on an interface, more information can be found in [Github](https://github.com/go-logit) / [Gitee](https://gitee.com/go-logit)
 
 _Check [HISTORY.md](./HISTORY.md) and [FUTURE.md](./FUTURE.md) to know about more information._
-
-> The brand-new version v0.4.x is developing with a more elegant design!
 
 ### 🚀 Installation
 

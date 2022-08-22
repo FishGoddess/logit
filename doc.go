@@ -103,11 +103,13 @@ Package logit provides an easy way to use foundation for your logging operations
 	options.WithInfoAppender(appender.Text())
 	options.WithWarnAppender(appender.Text())
 	options.WithErrorAppender(appender.Text())
-	options.WithWriter(os.Stderr, false)
-	options.WithDebugWriter(os.Stderr, false)
-	options.WithInfoWriter(os.Stderr, false)
-	options.WithWarnWriter(os.Stderr, false)
-	options.WithErrorWriter(os.Stderr, false)
+	options.WithWriter(os.Stderr)
+	options.WithBufferWriter(os.Stdout)
+	options.WithBatchWriter(os.Stdout)
+	options.WithDebugWriter(os.Stderr)
+	options.WithInfoWriter(os.Stderr)
+	options.WithWarnWriter(os.Stderr)
+	options.WithErrorWriter(os.Stderr)
 	options.WithPID()
 	options.WithCaller()
 	options.WithMsgKey("msg")
@@ -124,7 +126,7 @@ Package logit provides an easy way to use foundation for your logging operations
 	// Remember, these options is only used for creating a logger.
 	logger := logit.NewLogger(
 		options.WithPID(),
-		options.WithWriter(os.Stdout, false),
+		options.WithWriter(os.Stdout),
 		options.WithTimeFormat("2006/01/02 15:04:05"),
 		options.WithCaller(),
 		options.WithCallerDepth(4),
@@ -202,23 +204,59 @@ Package logit provides an easy way to use foundation for your logging operations
 	writer.Buffer(os.Stderr) // Wrap io.Writer to writer.Writer with buffer, which needs invoking Flush() or Close().
 
 	// Use the writer without buffer.
-	logger := logit.NewLogger(logit.Options().WithWriter(os.Stdout, false))
+	logger := logit.NewLogger(logit.Options().WithWriter(os.Stdout))
 	logger.Info("WriterWithoutBuffer").Log()
 
 	// Use the writer with buffer, which is good for io.
-	logger = logit.NewLogger(logit.Options().WithWriter(os.Stdout, true))
-	defer logger.Close() // Flush data and close writers.
-
+	logger = logit.NewLogger(logit.Options().WithBufferWriter(os.Stdout))
 	logger.Info("WriterWithBuffer").Log()
 	logger.Flush() // Remember flushing data or flushing by Close().
+	logger.Close()
+
+	// Use the writer with batch, which is also good for io.
+	logger = logit.NewLogger(logit.Options().WithBatchWriter(os.Stdout))
+	logger.Info("WriterWithBatch").Log()
+	logger.Flush() // Remember flushing data or flushing by Close().
+	logger.Close()
 
 	// Every level has its own appender so you can append logs in different level with different appender.
 	logger = logit.NewLogger(
-		logit.Options().WithDebugWriter(os.Stdout, true),
-		logit.Options().WithInfoWriter(os.Stdout, true),
-		logit.Options().WithWarnWriter(os.Stdout, false),
-		logit.Options().WithErrorWriter(os.Stdout, false),
+		logit.Options().WithBufferWriter(os.Stdout),
+		logit.Options().WithBatchWriter(os.Stdout),
+		logit.Options().WithWarnWriter(os.Stdout),
+		logit.Options().WithErrorWriter(os.Stdout),
 	)
+
+	// Let me explain buffer writer and batch writer.
+	// Both of them are base on a byte buffer and merge some writes to one write.
+	// Buffer writer will write data in buffer to underlying writer if bytes in buffer are too much.
+	// Batch writer will write data in buffer to underlying writer if writes to buffer are too much.
+	//
+	// Let's see something more interesting:
+	// A buffer writer with buffer size 16 KB and a batch writer with batch count 64, whose performance is better?
+	//
+	// 1. Assume one log is 512 Bytes and its size is fixed
+	// In buffer writer, it will merge 32 writes to 1 writes (16KB / 512Bytes);
+	// In batch writer, it will always merge 64 writes to 1 writes;
+	// Batch writer wins the game! Less writes means it's better to IO.
+	//
+	// 2. Assume one log is 128 Bytes and its size is fixed
+	// In buffer writer, it will merge 128 writes to 1 writes (16KB / 128Bytes);
+	// In batch writer, it will always merge 64 writes to 1 writes;
+	// Buffer writer wins the game! Less writes means it's better to IO.
+	//
+	// 3. How about one log is 256 Bytes and its size is fixed
+	// In buffer writer, it will merge 64 writes to 1 writes (16KB / 256Bytes);
+	// In batch writer, it will always merge 64 writes to 1 writes;
+	// They are the same in writing times.
+	//
+	// Based on what we mentioned above, we can tell the performance of buffer writer is depends on the size of log, and the batch writer is more stable.
+	// Actually, the size of logs in production isn't fixed-size, so batch writer may be a better choice.
+	// However, the buffer in batch writer is out of our control, so it may grow too large if our logs are too large.
+	writer.Buffer(os.Stdout)
+	writer.Batch(os.Stdout)
+	writer.BufferWithSize(os.Stdout, 16*core.KB)
+	writer.BatchWithCount(os.Stdout, 64)
 
 5. global:
 

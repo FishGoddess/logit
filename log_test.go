@@ -16,6 +16,7 @@ package logit
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -227,10 +228,48 @@ func TestLogWithCaller(t *testing.T) {
 
 // go test -v -cover -run=^TestLogWithContext$
 func TestLogWithContext(t *testing.T) {
+	log := newLog()
+	log.WithContext(context.WithValue(context.Background(), "key", "value"))
 
+	value, ok := log.ctx.Value("key").(string)
+	if !ok || value != "value" {
+		t.Errorf("!ok %v || value %s != 'value'", ok, value)
+	}
 }
 
 // go test -v -cover -run=^TestLogIntercept$
 func TestLogIntercept(t *testing.T) {
+	buffer := bytes.NewBuffer(make([]byte, 0, 1024))
+	logger := NewLogger(Options().WithWriter(buffer), Options().WithInterceptors(func(ctx context.Context, log *Log) {
+		log.Int("xxx", 123)
+	}))
+	logger.withCaller = true
 
+	log := newLog()
+	log.logger = logger
+	log.appender = logger.debugAppender
+	log.writer = logger.debugWriter
+	log.begin()
+	log.Log()
+
+	str := buffer.String()
+	if str != "xxx=123\n" {
+		t.Errorf("str %q != '\n'", str)
+	}
+
+	buffer.Reset()
+	log = newLog()
+	log.logger = logger
+	log.appender = logger.debugAppender
+	log.writer = logger.debugWriter
+	log.begin()
+	log.Intercept(func(ctx context.Context, log *Log) {
+		log.String("abc", "666")
+	})
+	log.Log()
+
+	str = buffer.String()
+	if str != "abc=666|xxx=123\n" {
+		t.Errorf("str %q != '\n'", str)
+	}
 }
