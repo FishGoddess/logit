@@ -115,16 +115,33 @@ func (o *options) WithPrintAppender(appender appender.Appender) Option {
 }
 
 // WithWriter returns an option which sets logger's writer to a new one.
-func (o *options) WithWriter(w io.Writer, buffered bool) Option {
+func (o *options) WithWriter(w io.Writer) Option {
 	return func(logger *Logger) {
-		var wr writer.Writer
+		wr := writer.Wrap(w)
+		logger.debugWriter = wr
+		logger.infoWriter = wr
+		logger.warnWriter = wr
+		logger.errorWriter = wr
+		logger.printWriter = wr
+	}
+}
 
-		if buffered {
-			wr = writer.Buffered(w)
-		} else {
-			wr = writer.Wrapped(w)
-		}
+// WithBufferWriter returns an option which sets logger's writer to a buffer one.
+func (o *options) WithBufferWriter(w io.Writer) Option {
+	return func(logger *Logger) {
+		wr := writer.Buffer(w)
+		logger.debugWriter = wr
+		logger.infoWriter = wr
+		logger.warnWriter = wr
+		logger.errorWriter = wr
+		logger.printWriter = wr
+	}
+}
 
+// WithBatchWriter returns an option which sets logger's writer to a batch one.
+func (o *options) WithBatchWriter(w io.Writer) Option {
+	return func(logger *Logger) {
+		wr := writer.Batch(w)
 		logger.debugWriter = wr
 		logger.infoWriter = wr
 		logger.warnWriter = wr
@@ -134,71 +151,58 @@ func (o *options) WithWriter(w io.Writer, buffered bool) Option {
 }
 
 // WithDebugWriter returns an option which sets logger's debug writer to a new one.
-func (o *options) WithDebugWriter(w io.Writer, buffered bool) Option {
+func (o *options) WithDebugWriter(w io.Writer) Option {
 	return func(logger *Logger) {
-		if buffered {
-			logger.debugWriter = writer.Buffered(w)
-		} else {
-			logger.debugWriter = writer.Wrapped(w)
-		}
+		logger.debugWriter = writer.Wrap(w)
 	}
 }
 
 // WithInfoWriter returns an option which sets logger's info writer to a new one.
-func (o *options) WithInfoWriter(w io.Writer, buffered bool) Option {
+func (o *options) WithInfoWriter(w io.Writer) Option {
 	return func(logger *Logger) {
-		if buffered {
-			logger.infoWriter = writer.Buffered(w)
-		} else {
-			logger.infoWriter = writer.Wrapped(w)
-		}
+		logger.infoWriter = writer.Wrap(w)
 	}
 }
 
 // WithWarnWriter returns an option which sets logger's warn writer to a new one.
-func (o *options) WithWarnWriter(w io.Writer, buffered bool) Option {
+func (o *options) WithWarnWriter(w io.Writer) Option {
 	return func(logger *Logger) {
-		if buffered {
-			logger.warnWriter = writer.Buffered(w)
-		} else {
-			logger.warnWriter = writer.Wrapped(w)
-		}
+		logger.warnWriter = writer.Wrap(w)
 	}
 }
 
 // WithErrorWriter returns an option which sets logger's error writer to a new one.
-func (o *options) WithErrorWriter(w io.Writer, buffered bool) Option {
+func (o *options) WithErrorWriter(w io.Writer) Option {
 	return func(logger *Logger) {
-		if buffered {
-			logger.errorWriter = writer.Buffered(w)
-		} else {
-			logger.errorWriter = writer.Wrapped(w)
-		}
+		logger.errorWriter = writer.Wrap(w)
 	}
 }
 
 // WithPrintWriter returns an option which sets logger's print writer to a new one.
-func (o *options) WithPrintWriter(w io.Writer, buffered bool) Option {
+func (o *options) WithPrintWriter(w io.Writer) Option {
 	return func(logger *Logger) {
-		if buffered {
-			logger.printWriter = writer.Buffered(w)
-		} else {
-			logger.printWriter = writer.Wrapped(w)
-		}
+		logger.printWriter = writer.Wrap(w)
 	}
 }
 
-// WithPid returns an option which lets logs carry pid information.
-func (o *options) WithPid() Option {
+// WithPID returns an option which lets logs carry pid information.
+func (o *options) WithPID() Option {
 	return func(logger *Logger) {
-		logger.needPid = true
+		logger.withPID = true
 	}
 }
 
 // WithCaller returns an option which lets logs carry caller information.
 func (o *options) WithCaller() Option {
 	return func(logger *Logger) {
-		logger.needCaller = true
+		logger.withCaller = true
+	}
+}
+
+// WithCallerDepth returns an option which sets caller depth in logs.
+func (o *options) WithCallerDepth(depth int) Option {
+	return func(logger *Logger) {
+		logger.callerDepth = depth
 	}
 }
 
@@ -223,8 +227,8 @@ func (o *options) WithLevelKey(key string) Option {
 	}
 }
 
-// WithPidKey returns an option which sets logger's pidKey to a new one.
-func (o *options) WithPidKey(key string) Option {
+// WithPIDKey returns an option which sets logger's pidKey to a new one.
+func (o *options) WithPIDKey(key string) Option {
 	return func(logger *Logger) {
 		logger.pidKey = key
 	}
@@ -244,10 +248,24 @@ func (o *options) WithLineKey(key string) Option {
 	}
 }
 
+// WithFuncKey returns an option which sets logger's funcKey to a new one.
+func (o *options) WithFuncKey(key string) Option {
+	return func(logger *Logger) {
+		logger.funcKey = key
+	}
+}
+
 // WithTimeFormat returns an option which sets format of time in logs.
 func (o *options) WithTimeFormat(format string) Option {
 	return func(logger *Logger) {
 		logger.timeFormat = format
+	}
+}
+
+// WithInterceptors returns an option which sets interceptors to logger.
+func (o *options) WithInterceptors(interceptors ...Interceptor) Option {
+	return func(logger *Logger) {
+		logger.interceptors = append(logger.interceptors, interceptors...)
 	}
 }
 
@@ -256,24 +274,12 @@ func (o *options) WithAutoFlush(frequency time.Duration) Option {
 	return func(logger *Logger) {
 		go func() {
 			ticker := time.NewTicker(frequency)
+			defer ticker.Stop()
+
 			select {
 			case <-ticker.C:
 				logger.Flush()
 			}
 		}()
-	}
-}
-
-// WithCallerDepth returns an option which sets caller depth in logs.
-func (o *options) WithCallerDepth(callerDepth int) Option {
-	return func(logger *Logger) {
-		logger.callerDepth = callerDepth
-	}
-}
-
-// WithInterceptors returns an option which sets interceptors to logger.
-func (o *options) WithInterceptors(interceptors ...Interceptor) Option {
-	return func(logger *Logger) {
-		logger.interceptors = append(logger.interceptors, interceptors...)
 	}
 }

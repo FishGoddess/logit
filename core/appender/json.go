@@ -207,7 +207,6 @@ func (ja *jsonAppender) AppendError(dst []byte, key string, value error) []byte 
 	if value == nil {
 		return append(ja.appendKey(dst, key), jsonNull...)
 	}
-
 	return ja.AppendString(dst, key, value.Error())
 }
 
@@ -217,7 +216,6 @@ func (ja *jsonAppender) AppendStringer(dst []byte, key string, value fmt.Stringe
 	if val.Kind() == reflect.Ptr && val.IsNil() {
 		return append(dst, jsonNull...)
 	}
-
 	return ja.AppendString(dst, key, value.String())
 }
 
@@ -230,7 +228,6 @@ func (ja *jsonAppender) appendArray(dst []byte, key string, length int, fn func(
 		if dst[len(dst)-1] != jsonArrayBegin {
 			dst = append(dst, jsonItemSeparator)
 		}
-
 		dst = fn(dst, i)
 	}
 
@@ -342,7 +339,6 @@ func (ja *jsonAppender) AppendFloat32s(dst []byte, key string, values []float32)
 		if math.IsNaN(value64) || math.IsInf(value64, 0) {
 			return append(dst, jsonNull...)
 		}
-
 		return strconv.AppendFloat(source, value64, 'f', -1, 64)
 	})
 }
@@ -353,7 +349,6 @@ func (ja *jsonAppender) AppendFloat64s(dst []byte, key string, values []float64)
 		if math.IsNaN(values[index]) || math.IsInf(values[index], 0) {
 			return append(dst, jsonNull...)
 		}
-
 		return strconv.AppendFloat(source, values[index], 'f', -1, 64)
 	})
 }

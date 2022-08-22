@@ -330,7 +330,73 @@ func TestOptionsWithWriter(t *testing.T) {
 	logger.warnWriter = nil
 	logger.errorWriter = nil
 	logger.printWriter = nil
-	opts.WithWriter(os.Stdout, false)(logger)
+	opts.WithWriter(os.Stdout)(logger)
+
+	if logger.debugWriter == nil {
+		t.Errorf("logger's debugWriter %s is wrong", logger.debugWriter)
+	}
+
+	if logger.infoWriter == nil {
+		t.Errorf("logger's infoWriter %s is wrong", logger.infoWriter)
+	}
+
+	if logger.warnWriter == nil {
+		t.Errorf("logger's warnWriter %s is wrong", logger.warnWriter)
+	}
+
+	if logger.errorWriter == nil {
+		t.Errorf("logger's errorWriter %s is wrong", logger.errorWriter)
+	}
+
+	if logger.printWriter == nil {
+		t.Errorf("logger's printWriter %s is wrong", logger.printWriter)
+	}
+}
+
+// go test -v -cover -run=^TestOptionsWithBufferWriter$
+func TestOptionsWithBufferWriter(t *testing.T) {
+	opts := Options()
+
+	logger := NewLogger()
+	logger.debugWriter = nil
+	logger.infoWriter = nil
+	logger.warnWriter = nil
+	logger.errorWriter = nil
+	logger.printWriter = nil
+	opts.WithBufferWriter(os.Stdout)(logger)
+
+	if logger.debugWriter == nil {
+		t.Errorf("logger's debugWriter %s is wrong", logger.debugWriter)
+	}
+
+	if logger.infoWriter == nil {
+		t.Errorf("logger's infoWriter %s is wrong", logger.infoWriter)
+	}
+
+	if logger.warnWriter == nil {
+		t.Errorf("logger's warnWriter %s is wrong", logger.warnWriter)
+	}
+
+	if logger.errorWriter == nil {
+		t.Errorf("logger's errorWriter %s is wrong", logger.errorWriter)
+	}
+
+	if logger.printWriter == nil {
+		t.Errorf("logger's printWriter %s is wrong", logger.printWriter)
+	}
+}
+
+// go test -v -cover -run=^TestOptionsWithBatchWriter$
+func TestOptionsWithBatchWriter(t *testing.T) {
+	opts := Options()
+
+	logger := NewLogger()
+	logger.debugWriter = nil
+	logger.infoWriter = nil
+	logger.warnWriter = nil
+	logger.errorWriter = nil
+	logger.printWriter = nil
+	opts.WithBatchWriter(os.Stdout)(logger)
 
 	if logger.debugWriter == nil {
 		t.Errorf("logger's debugWriter %s is wrong", logger.debugWriter)
@@ -363,7 +429,7 @@ func TestOptionsWithDebugWriter(t *testing.T) {
 	logger.warnWriter = nil
 	logger.errorWriter = nil
 	logger.printWriter = nil
-	opts.WithDebugWriter(os.Stdout, false)(logger)
+	opts.WithDebugWriter(os.Stdout)(logger)
 
 	if logger.debugWriter == nil {
 		t.Errorf("logger's debugWriter %s is wrong", logger.debugWriter)
@@ -396,7 +462,7 @@ func TestOptionsWithInfoWriter(t *testing.T) {
 	logger.warnWriter = nil
 	logger.errorWriter = nil
 	logger.printWriter = nil
-	opts.WithInfoWriter(os.Stdout, false)(logger)
+	opts.WithInfoWriter(os.Stdout)(logger)
 
 	if logger.debugWriter != nil {
 		t.Errorf("logger's debugWriter %s is wrong", logger.debugWriter)
@@ -429,7 +495,7 @@ func TestOptionsWithWarnWriter(t *testing.T) {
 	logger.warnWriter = nil
 	logger.errorWriter = nil
 	logger.printWriter = nil
-	opts.WithWarnWriter(os.Stdout, false)(logger)
+	opts.WithWarnWriter(os.Stdout)(logger)
 
 	if logger.debugWriter != nil {
 		t.Errorf("logger's debugWriter %s is wrong", logger.debugWriter)
@@ -462,7 +528,7 @@ func TestOptionsWithErrorWriter(t *testing.T) {
 	logger.warnWriter = nil
 	logger.errorWriter = nil
 	logger.printWriter = nil
-	opts.WithErrorWriter(os.Stdout, false)(logger)
+	opts.WithErrorWriter(os.Stdout)(logger)
 
 	if logger.debugWriter != nil {
 		t.Errorf("logger's debugWriter %s is wrong", logger.debugWriter)
@@ -495,7 +561,7 @@ func TestOptionsWithPrintWriter(t *testing.T) {
 	logger.warnWriter = nil
 	logger.errorWriter = nil
 	logger.printWriter = nil
-	opts.WithPrintWriter(os.Stdout, false)(logger)
+	opts.WithPrintWriter(os.Stdout)(logger)
 
 	if logger.debugWriter != nil {
 		t.Errorf("logger's debugWriter %s is wrong", logger.debugWriter)
@@ -518,16 +584,16 @@ func TestOptionsWithPrintWriter(t *testing.T) {
 	}
 }
 
-// go test -v -cover -run=^TestOptionsWithPid$
-func TestOptionsWithPid(t *testing.T) {
+// go test -v -cover -run=^TestOptionsWithPID$
+func TestOptionsWithPID(t *testing.T) {
 	opts := Options()
 
 	logger := NewLogger()
-	logger.needPid = false
+	logger.withPID = false
 
-	opts.WithPid()(logger)
-	if logger.needPid != true {
-		t.Errorf("logger's needPid %+v is wrong", logger.needPid)
+	opts.WithPID()(logger)
+	if logger.withPID != true {
+		t.Errorf("logger's withPID %+v is wrong", logger.withPID)
 	}
 }
 
@@ -536,11 +602,11 @@ func TestOptionsWithCaller(t *testing.T) {
 	opts := Options()
 
 	logger := NewLogger()
-	logger.needCaller = false
+	logger.withCaller = false
 
 	opts.WithCaller()(logger)
-	if logger.needCaller != true {
-		t.Errorf("logger's needCaller %+v is wrong", logger.needCaller)
+	if logger.withCaller != true {
+		t.Errorf("logger's withCaller %+v is wrong", logger.withCaller)
 	}
 }
 
@@ -583,14 +649,14 @@ func TestOptionsWithLevelKey(t *testing.T) {
 	}
 }
 
-// go test -v -cover -run=^TestOptionsWithPidKey$
-func TestOptionsWithPidKey(t *testing.T) {
+// go test -v -cover -run=^TestOptionsWithPIDKey$
+func TestOptionsWithPIDKey(t *testing.T) {
 	opts := Options()
 
 	logger := NewLogger()
 	logger.pidKey = ""
 
-	opts.WithPidKey("pid")(logger)
+	opts.WithPIDKey("pid")(logger)
 	if logger.pidKey != "pid" {
 		t.Errorf("logger's pidKey %+v is wrong", logger.pidKey)
 	}
@@ -619,6 +685,19 @@ func TestOptionsWithLineKey(t *testing.T) {
 	opts.WithLineKey("line")(logger)
 	if logger.lineKey != "line" {
 		t.Errorf("logger's lineKey %+v is wrong", logger.lineKey)
+	}
+}
+
+// go test -v -cover -run=^TestOptionsWithFuncKey$
+func TestOptionsWithFuncKey(t *testing.T) {
+	opts := Options()
+
+	logger := NewLogger()
+	logger.funcKey = ""
+
+	opts.WithFuncKey("func")(logger)
+	if logger.funcKey != "func" {
+		t.Errorf("logger's funcKey %+v is wrong", logger.funcKey)
 	}
 }
 

@@ -27,7 +27,7 @@ func main() {
 
 	// FromContext returns the logger in context.
 	logger := logit.FromContext(ctx)
-	logger.Info("This is a message logged by logger from context").End()
+	logger.Info("This is a message logged by logger from context").Log()
 
 	// Actually, you also have a chance to specify the key of logger in context.
 	// It gives you a way to discriminate different businesses in using logger.
@@ -43,8 +43,8 @@ func main() {
 
 	// Get different logger from the same context with different key.
 	logger = logit.FromContextWithKey(ctx, businessOneKey)
-	logger.Info("This is a message logged by logger from context with businessOneKey").End()
+	logger.Info("This is a message logged by logger from context with businessOneKey").Log()
 
 	logger = logit.FromContextWithKey(ctx, businessTwoKey)
-	logger.Info("This is a message logged by logger from context with businessTwoKey").End()
+	logger.Info("This is a message logged by logger from context with businessTwoKey").Log()
 }

@@ -70,20 +70,19 @@ func BenchmarkLogitLoggerWithTextAppender(b *testing.B) {
 	logger := logit.NewLogger(
 		options.WithDebugLevel(),
 		options.WithAppender(appender.Text()),
-		options.WithWriter(ioutil.Discard, false),
+		options.WithWriter(ioutil.Discard),
 		options.WithTimeFormat(timeFormat),
 	)
 
 	logTask := func() {
-		logger.Debug("debug...").String("trace", "xxx").Int("id", 123).Float64("pi", 3.14).End()
-		logger.Info("info...").String("trace", "xxx").Int("id", 123).Float64("pi", 3.14).End()
-		logger.Warn("warning...").String("trace", "xxx").Int("id", 123).Float64("pi", 3.14).End()
-		logger.Error("error...").String("trace", "xxx").Int("id", 123).Float64("pi", 3.14).End()
+		logger.Debug("debug...").String("trace", "xxx").Int("id", 123).Float64("pi", 3.14).Log()
+		logger.Info("info...").String("trace", "xxx").Int("id", 123).Float64("pi", 3.14).Log()
+		logger.Warn("warning...").String("trace", "xxx").Int("id", 123).Float64("pi", 3.14).Log()
+		logger.Error("error...").String("trace", "xxx").Int("id", 123).Float64("pi", 3.14).Log()
 	}
 
 	b.ReportAllocs()
 	b.StartTimer()
-
 	for i := 0; i < b.N; i++ {
 		logTask()
 	}
@@ -96,20 +95,19 @@ func BenchmarkLogitLoggerWithJsonAppender(b *testing.B) {
 	logger := logit.NewLogger(
 		options.WithDebugLevel(),
 		options.WithAppender(appender.Json()),
-		options.WithWriter(ioutil.Discard, false),
+		options.WithWriter(ioutil.Discard),
 		options.WithTimeFormat(timeFormat),
 	)
 
 	logTask := func() {
-		logger.Debug("debug...").String("trace", "xxx").Int("id", 123).Float64("pi", 3.14).End()
-		logger.Info("info...").String("trace", "xxx").Int("id", 123).Float64("pi", 3.14).End()
-		logger.Warn("warning...").String("trace", "xxx").Int("id", 123).Float64("pi", 3.14).End()
-		logger.Error("error...").String("trace", "xxx").Int("id", 123).Float64("pi", 3.14).End()
+		logger.Debug("debug...").String("trace", "xxx").Int("id", 123).Float64("pi", 3.14).Log()
+		logger.Info("info...").String("trace", "xxx").Int("id", 123).Float64("pi", 3.14).Log()
+		logger.Warn("warning...").String("trace", "xxx").Int("id", 123).Float64("pi", 3.14).Log()
+		logger.Error("error...").String("trace", "xxx").Int("id", 123).Float64("pi", 3.14).Log()
 	}
 
 	b.ReportAllocs()
 	b.StartTimer()
-
 	for i := 0; i < b.N; i++ {
 		logTask()
 	}
@@ -122,20 +120,44 @@ func BenchmarkLogitLoggerWithFormat(b *testing.B) {
 	logger := logit.NewLogger(
 		options.WithDebugLevel(),
 		options.WithAppender(appender.Text()),
-		options.WithWriter(ioutil.Discard, false),
+		options.WithWriter(ioutil.Discard),
 		options.WithTimeFormat(timeFormat),
 	)
 
 	logTask := func() {
-		logger.Debug("debug%s", "...").String("trace", "xxx").Int("id", 123).Float64("pi", 3.14).End()
-		logger.Info("info%s", "...").String("trace", "xxx").Int("id", 123).Float64("pi", 3.14).End()
-		logger.Warn("warning%s", "...").String("trace", "xxx").Int("id", 123).Float64("pi", 3.14).End()
-		logger.Error("error%s", "...").String("trace", "xxx").Int("id", 123).Float64("pi", 3.14).End()
+		logger.Debug("debug%s", "...").String("trace", "xxx").Int("id", 123).Float64("pi", 3.14).Log()
+		logger.Info("info%s", "...").String("trace", "xxx").Int("id", 123).Float64("pi", 3.14).Log()
+		logger.Warn("warning%s", "...").String("trace", "xxx").Int("id", 123).Float64("pi", 3.14).Log()
+		logger.Error("error%s", "...").String("trace", "xxx").Int("id", 123).Float64("pi", 3.14).Log()
 	}
 
 	b.ReportAllocs()
 	b.StartTimer()
+	for i := 0; i < b.N; i++ {
+		logTask()
+	}
+}
 
+// go test -v ./_examples/performance_test.go -bench=^BenchmarkLogitLoggerPrint$ -benchtime=1s
+func BenchmarkLogitLoggerPrint(b *testing.B) {
+	options := logit.Options()
+
+	logger := logit.NewLogger(
+		options.WithDebugLevel(),
+		options.WithAppender(appender.Text()),
+		options.WithWriter(ioutil.Discard),
+		options.WithTimeFormat(timeFormat),
+	)
+
+	logTask := func() {
+		logger.Println("debug", "trace", "xxx", "id", 123, "pi", 3.14)
+		logger.Println("info", "trace", "xxx", "id", 123, "pi", 3.14)
+		logger.Println("warn", "trace", "xxx", "id", 123, "pi", 3.14)
+		logger.Println("error", "trace", "xxx", "id", 123, "pi", 3.14)
+	}
+
+	b.ReportAllocs()
+	b.StartTimer()
 	for i := 0; i < b.N; i++ {
 		logTask()
 	}
@@ -155,7 +177,6 @@ func BenchmarkLogitLoggerWithFormat(b *testing.B) {
 //
 //	b.ReportAllocs()
 //	b.StartTimer()
-//
 //	for i := 0; i < b.N; i++ {
 //		logTask()
 //	}
@@ -182,7 +203,6 @@ func BenchmarkLogitLoggerWithFormat(b *testing.B) {
 //
 //	b.ReportAllocs()
 //	b.StartTimer()
-//
 //	for i := 0; i < b.N; i++ {
 //		logTask()
 //	}
@@ -206,13 +226,12 @@ func BenchmarkLogitLoggerWithFormat(b *testing.B) {
 //
 //	b.ReportAllocs()
 //	b.StartTimer()
-//
 //	for i := 0; i < b.N; i++ {
 //		logTask()
 //	}
 //}
 
-// ******************************************************
+// *******************************************************************************
 
 func createFileOf(filePath string) (*os.File, error) {
 	err := os.MkdirAll(filepath.Dir(filePath), 0644)
@@ -224,28 +243,27 @@ func createFileOf(filePath string) (*os.File, error) {
 
 // go test -v ./_examples/performance_test.go -bench=^BenchmarkLogitFileWithTextAppender$ -benchtime=1s
 func BenchmarkLogitFileWithTextAppender(b *testing.B) {
-	file, _ := createFileOf("Z:/" + b.Name() + ".log")
+	file, _ := createFileOf(filepath.Join(b.TempDir(), b.Name()))
 	defer file.Close()
 
 	options := logit.Options()
 	logger := logit.NewLogger(
 		options.WithDebugLevel(),
 		options.WithAppender(appender.Text()),
-		options.WithWriter(file, true),
+		options.WithBufferWriter(file),
 		options.WithTimeFormat(timeFormat),
 	)
 	defer logger.Close()
 
 	logTask := func() {
-		logger.Debug("debug...").String("trace", "xxx").Int("id", 123).Float64("pi", 3.14).End()
-		logger.Info("info...").String("trace", "xxx").Int("id", 123).Float64("pi", 3.14).End()
-		logger.Warn("warning...").String("trace", "xxx").Int("id", 123).Float64("pi", 3.14).End()
-		logger.Error("error...").String("trace", "xxx").Int("id", 123).Float64("pi", 3.14).End()
+		logger.Debug("debug...").String("trace", "xxx").Int("id", 123).Float64("pi", 3.14).Log()
+		logger.Info("info...").String("trace", "xxx").Int("id", 123).Float64("pi", 3.14).Log()
+		logger.Warn("warning...").String("trace", "xxx").Int("id", 123).Float64("pi", 3.14).Log()
+		logger.Error("error...").String("trace", "xxx").Int("id", 123).Float64("pi", 3.14).Log()
 	}
 
 	b.ReportAllocs()
 	b.StartTimer()
-
 	for i := 0; i < b.N; i++ {
 		logTask()
 	}
@@ -253,28 +271,27 @@ func BenchmarkLogitFileWithTextAppender(b *testing.B) {
 
 // go test -v ./_examples/performance_test.go -bench=^BenchmarkLogitFileWithJsonAppender$ -benchtime=1s
 func BenchmarkLogitFileWithJsonAppender(b *testing.B) {
-	file, _ := createFileOf("Z:/" + b.Name() + ".log")
+	file, _ := createFileOf(filepath.Join(b.TempDir(), b.Name()))
 	defer file.Close()
 
 	options := logit.Options()
 	logger := logit.NewLogger(
 		options.WithDebugLevel(),
 		options.WithAppender(appender.Json()),
-		options.WithWriter(file, true),
+		options.WithBufferWriter(file),
 		options.WithTimeFormat(timeFormat),
 	)
 	defer logger.Close()
 
 	logTask := func() {
-		logger.Debug("debug...").String("trace", "xxx").Int("id", 123).Float64("pi", 3.14).End()
-		logger.Info("info...").String("trace", "xxx").Int("id", 123).Float64("pi", 3.14).End()
-		logger.Warn("warning...").String("trace", "xxx").Int("id", 123).Float64("pi", 3.14).End()
-		logger.Error("error...").String("trace", "xxx").Int("id", 123).Float64("pi", 3.14).End()
+		logger.Debug("debug...").String("trace", "xxx").Int("id", 123).Float64("pi", 3.14).Log()
+		logger.Info("info...").String("trace", "xxx").Int("id", 123).Float64("pi", 3.14).Log()
+		logger.Warn("warning...").String("trace", "xxx").Int("id", 123).Float64("pi", 3.14).Log()
+		logger.Error("error...").String("trace", "xxx").Int("id", 123).Float64("pi", 3.14).Log()
 	}
 
 	b.ReportAllocs()
 	b.StartTimer()
-
 	for i := 0; i < b.N; i++ {
 		logTask()
 	}
@@ -282,27 +299,26 @@ func BenchmarkLogitFileWithJsonAppender(b *testing.B) {
 
 // go test -v ./_examples/performance_test.go -bench=^BenchmarkLogitFileWithoutBuffer$ -benchtime=1s
 func BenchmarkLogitFileWithoutBuffer(b *testing.B) {
-	file, _ := createFileOf("Z:/" + b.Name() + ".log")
+	file, _ := createFileOf(filepath.Join(b.TempDir(), b.Name()))
 	defer file.Close()
 
 	options := logit.Options()
 	logger := logit.NewLogger(
 		options.WithDebugLevel(),
 		options.WithAppender(appender.Text()),
-		options.WithWriter(file, false),
+		options.WithWriter(file),
 		options.WithTimeFormat(timeFormat),
 	)
 
 	logTask := func() {
-		logger.Debug("debug...").String("trace", "xxx").Int("id", 123).Float64("pi", 3.14).End()
-		logger.Info("info...").String("trace", "xxx").Int("id", 123).Float64("pi", 3.14).End()
-		logger.Warn("warning...").String("trace", "xxx").Int("id", 123).Float64("pi", 3.14).End()
-		logger.Error("error...").String("trace", "xxx").Int("id", 123).Float64("pi", 3.14).End()
+		logger.Debug("debug...").String("trace", "xxx").Int("id", 123).Float64("pi", 3.14).Log()
+		logger.Info("info...").String("trace", "xxx").Int("id", 123).Float64("pi", 3.14).Log()
+		logger.Warn("warning...").String("trace", "xxx").Int("id", 123).Float64("pi", 3.14).Log()
+		logger.Error("error...").String("trace", "xxx").Int("id", 123).Float64("pi", 3.14).Log()
 	}
 
 	b.ReportAllocs()
 	b.StartTimer()
-
 	for i := 0; i < b.N; i++ {
 		logTask()
 	}
@@ -310,7 +326,7 @@ func BenchmarkLogitFileWithoutBuffer(b *testing.B) {
 
 //// go test -v ./_examples/performance_test.go -bench=^BenchmarkZeroLogFile$ -benchtime=1s
 //func BenchmarkZeroLogFile(b *testing.B) {
-//	file, _ := createFileOf("Z:/" + b.Name() + ".log")
+//	file, _ := createFileOf(filepath.Join(b.TempDir(), b.Name()))
 //	zerolog.TimeFieldFormat = timeFormat
 //	logger := zerolog.New(file).With().Timestamp().Logger()
 //
@@ -323,7 +339,6 @@ func BenchmarkLogitFileWithoutBuffer(b *testing.B) {
 //
 //	b.ReportAllocs()
 //	b.StartTimer()
-//
 //	for i := 0; i < b.N; i++ {
 //		logTask()
 //	}
@@ -331,7 +346,7 @@ func BenchmarkLogitFileWithoutBuffer(b *testing.B) {
 //
 //// go test -v ./_examples/performance_test.go -bench=^BenchmarkZapFile$ -benchtime=1s
 //func BenchmarkZapFile(b *testing.B) {
-//	file, _ := createFileOf("Z:/" + b.Name() + ".log")
+//	file, _ := createFileOf(filepath.Join(b.TempDir(), b.Name()))
 //	config := zap.NewProductionEncoderConfig()
 //	config.EncodeTime = func(t time.Time, enc zapcore.PrimitiveArrayEncoder) {
 //		enc.AppendString(t.Format(timeFormat))
@@ -351,7 +366,6 @@ func BenchmarkLogitFileWithoutBuffer(b *testing.B) {
 //
 //	b.ReportAllocs()
 //	b.StartTimer()
-//
 //	for i := 0; i < b.N; i++ {
 //		logTask()
 //	}
@@ -359,7 +373,7 @@ func BenchmarkLogitFileWithoutBuffer(b *testing.B) {
 //
 //// go test -v ./_examples/performance_test.go -bench=^BenchmarkLogrusFile$ -benchtime=1s
 //func BenchmarkLogrusFile(b *testing.B) {
-//	file, _ := createFileOf("Z:/" + b.Name() + ".log")
+//	file, _ := createFileOf(filepath.Join(b.TempDir(), b.Name()))
 //	logger := logrus.New()
 //	logger.SetOutput(file)
 //	logger.SetLevel(logrus.DebugLevel)
@@ -376,7 +390,6 @@ func BenchmarkLogitFileWithoutBuffer(b *testing.B) {
 //
 //	b.ReportAllocs()
 //	b.StartTimer()
-//
 //	for i := 0; i < b.N; i++ {
 //		logTask()
 //	}

@@ -16,16 +16,33 @@ package core
 
 import "encoding/json"
 
+const (
+	B ByteSize = 1 << (10 * iota)
+	KB
+	MB
+	GB
+)
+
 var (
 	// LogMallocSize is the pre-malloc size of a new Log data.
-	// If your logs are extremely long, such as 4000 bytes/log, you can set it to 4096 to avoid re-malloc.
-	LogMallocSize = 512 // 512 Bytes
+	// If your logs are extremely long, such as 4000 bytes/log, you can set it to 4KB to avoid re-malloc.
+	LogMallocSize = 512 * B
 
-	// WriterBufferedSize is the default size of buffered writer.
+	// WriterBufferSize is the default size of buffer writer.
 	// If your logs are extremely long, such as 4 KB/log, you can set it to 512 KB to avoid re-malloc.
-	WriterBufferedSize = 64 * 1024 // 64 KB
+	WriterBufferSize = 64 * KB
+
+	// WriterBatchCount is the default count of batch writer.
+	WriterBatchCount = uint(128)
 
 	// MarshalToJson marshals v to json bytes.
 	// If you want to use your own way to marshal, change it to your own marshal function.
 	MarshalToJson = json.Marshal
+
+	// CallerDepth is the depth of caller.
+	// See runtime.Caller.
+	CallerDepth = 4
 )
+
+// ByteSize is size of byte.
+type ByteSize = uint64

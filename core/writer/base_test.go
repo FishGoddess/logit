@@ -21,34 +21,34 @@ import (
 
 // go test -v -cover -run=^TestWrapped$
 func TestWrapped(t *testing.T) {
-	writer := Wrapped(os.Stdout)
+	writer := Wrap(os.Stdout)
 
-	_, ok := writer.(*wrappedWriter)
+	_, ok := writer.(*wrapWriter)
 	if !ok {
-		t.Error("Wrapped returns a non-wrappedWriter instance")
+		t.Error("Wrap returns a non-wrapWriter instance")
 	}
 }
 
-// go test -v -cover -run=^TestBuffered$
-func TestBuffered(t *testing.T) {
-	writer := Buffered(os.Stdout)
+// go test -v -cover -run=^TestBuffer$
+func TestBuffer(t *testing.T) {
+	writer := Buffer(os.Stdout)
 
-	_, ok := writer.(*bufferedWriter)
+	_, ok := writer.(*bufferWriter)
 	if !ok {
-		t.Error("Buffered returns a non-bufferedWriter instance")
+		t.Error("Buffer returns a non-bufferWriter instance")
 	}
 }
 
-// go test -v -cover -run=^TestBufferedWithSize$
-func TestBufferedWithSize(t *testing.T) {
-	writer := BufferedWithSize(os.Stdout, 1024)
+// go test -v -cover -run=^TestBufferWithSize$
+func TestBufferWithSize(t *testing.T) {
+	writer := BufferWithSize(os.Stdout, 1024)
 
-	bw, ok := writer.(*bufferedWriter)
+	bw, ok := writer.(*bufferWriter)
 	if !ok {
-		t.Error("Buffered returns a non-bufferedWriter instance")
+		t.Error("Buffer returns a non-bufferWriter instance")
 	}
 
-	if bw.bufferSize != 1024 {
-		t.Errorf("bw.bufferSize %d is wrong", bw.bufferSize)
+	if bw.maxBufferSize != 1024 {
+		t.Errorf("bw.maxBufferSize %d is wrong", bw.maxBufferSize)
 	}
 }

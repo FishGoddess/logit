@@ -34,34 +34,37 @@ func main() {
 	options.WithInfoAppender(appender.Text())
 	options.WithWarnAppender(appender.Text())
 	options.WithErrorAppender(appender.Text())
-	options.WithWriter(os.Stderr, false)
-	options.WithDebugWriter(os.Stderr, false)
-	options.WithInfoWriter(os.Stderr, false)
-	options.WithWarnWriter(os.Stderr, false)
-	options.WithErrorWriter(os.Stderr, false)
-	options.WithPid()
+	options.WithWriter(os.Stderr)
+	options.WithBufferWriter(os.Stdout)
+	options.WithBatchWriter(os.Stdout)
+	options.WithDebugWriter(os.Stderr)
+	options.WithInfoWriter(os.Stderr)
+	options.WithWarnWriter(os.Stderr)
+	options.WithErrorWriter(os.Stderr)
+	options.WithPID()
 	options.WithCaller()
 	options.WithMsgKey("msg")
 	options.WithTimeKey("time")
 	options.WithLevelKey("level")
-	options.WithPidKey("pid")
+	options.WithPIDKey("pid")
 	options.WithFileKey("file")
 	options.WithLineKey("line")
+	options.WithFuncKey("func")
 	options.WithTimeFormat(appender.UnixTime) // UnixTime means time will be logged as unix time, an int64 number.
 	options.WithCallerDepth(3)                // Set caller depth to 3 so the log will get the third depth caller.
 	options.WithInterceptors()
 
 	// Remember, these options is only used for creating a logger.
 	logger := logit.NewLogger(
-		options.WithPid(),
-		options.WithWriter(os.Stdout, false),
+		options.WithPID(),
+		options.WithWriter(os.Stdout),
 		options.WithTimeFormat("2006/01/02 15:04:05"),
 		options.WithCaller(),
 		options.WithCallerDepth(4),
 		// ...
 	)
 	defer logger.Close()
-	logger.Info("check options").End()
+	logger.Info("check options").Log()
 
 	// You can use many options at the same time, but some of them is exclusive.
 	// So only the last one in order will take effect if you use them at the same time.

@@ -19,15 +19,12 @@ import (
 	"os"
 	"testing"
 	"time"
-
-	"github.com/go-logit/logit/core"
 )
 
-// go test -v -cover -run=^TestBufferedWriter$
-func TestBufferedWriter(t *testing.T) {
+// go test -v -cover -run=^TestWrapWriter$
+func TestWrapWriter(t *testing.T) {
 	buffer := bytes.NewBuffer(make([]byte, 0, 4096))
-	writer := newBufferedWriter(buffer, core.WriterBufferedSize)
-	writer.AutoFlush(time.Millisecond)
+	writer := newWrapWriter(buffer)
 	defer writer.Close()
 
 	writer.Write([]byte("abc"))
@@ -46,9 +43,9 @@ func TestBufferedWriter(t *testing.T) {
 	}
 }
 
-// go test -v -cover -run=^TestBufferedWriterClose$
-func TestBufferedWriterClose(t *testing.T) {
-	writer := newBufferedWriter(os.Stdout, 4096)
+// go test -v -cover -run=^TestWrapWriterClose$
+func TestWrapWriterClose(t *testing.T) {
+	writer := newWrapWriter(os.Stdout)
 	for i := 0; i < 10; i++ {
 		err := writer.Close()
 		if err != nil {
@@ -56,7 +53,7 @@ func TestBufferedWriterClose(t *testing.T) {
 		}
 	}
 
-	writer = newBufferedWriter(os.Stderr, 4096)
+	writer = newWrapWriter(os.Stderr)
 	for i := 0; i < 10; i++ {
 		err := writer.Close()
 		if err != nil {

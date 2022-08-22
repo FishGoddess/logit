@@ -8,8 +8,6 @@
 **logit** is a level-based, high-performance and pure-structured logger for all [GoLang](https://golang.org)
 applications.
 
-> After reading some amazing logging libs, I found that logit is just a joke, especially comparing with zerolog, so I decided to redesign logit.
-
 [阅读中文版的 Read me](./README.md)
 
 ~~[Introduction Video on BiliBili](https://www.bilibili.com/video/BV14t4y1y7rF)~~
@@ -20,7 +18,7 @@ applications.
 * Level-based logging, and there are five levels to use: debug, info, warn, error, print, off.
 * Key-Value structured log supports, also supporting format.
 * Support logging as Text/Json string, by using provided appender.
-* Asynchronous write back supports, providing high-performance buffered writer to avoid IO accessing.
+* Asynchronous write back supports, providing high-performance Buffer writer to avoid IO accessing.
 * Provide global optimized settings, let some settings feet your business.
 * Every level has its own appender and writer, separating process error logs is recommended.
 * Context binding supports, using logger is more elegant.
@@ -30,8 +28,6 @@ applications.
 > Configuration plugins is based on an interface, more information can be found in [Github](https://github.com/go-logit) / [Gitee](https://gitee.com/go-logit)
 
 _Check [HISTORY.md](./HISTORY.md) and [FUTURE.md](./FUTURE.md) to know about more information._
-
-> The brand-new version v0.4.x is developing with a more elegant design!
 
 ### 🚀 Installation
 
@@ -50,6 +46,7 @@ import (
 	"os"
 
 	"github.com/go-logit/logit"
+	"github.com/go-logit/logit/core"
 )
 
 func main() {
@@ -62,21 +59,21 @@ func main() {
 
 	// Then, you can log anything you want.
 	// Remember, logs will be ignored if their level is smaller than logger's level.
-	// End() will do some finishing work, so this invocation is necessary.
-	logger.Debug("This is a debug message").End()
-	logger.Info("This is a info message").End()
-	logger.Warn("This is a warn message").End()
-	logger.Error("This is a error message").End()
-	logger.Error("This is a %s message, with format", "error").End() // Format with params.
+	// Log() will do some finishing work, so this invocation is necessary.
+	logger.Debug("This is a debug message").Log()
+	logger.Info("This is a info message").Log()
+	logger.Warn("This is a warn message").Log()
+	logger.Error("This is a error message").Log()
+	logger.Error("This is a %s message, with format", "error").Log() // Format with params.
 
 	// As you know, we provide some levels: debug, info, warn, error, off.
 	// The lowest is debug and the highest is off.
 	// If you want to change the level of your logger, do it at creating.
 	logger = logit.NewLogger(logit.Options().WithWarnLevel())
-	logger.Debug("This is a debug message, but ignored").End()
-	logger.Info("This is a info message, but ignored").End()
-	logger.Warn("This is a warn message, not ignored").End()
-	logger.Error("This is a error message, not ignored").End()
+	logger.Debug("This is a debug message, but ignored").Log()
+	logger.Info("This is a info message, but ignored").Log()
+	logger.Warn("This is a warn message, not ignored").Log()
+	logger.Error("This is a error message, not ignored").Log()
 
 	// Also, we provide some "old school" log method :)
 	// (Don't mistake~ I love old school~)
@@ -94,28 +91,36 @@ func main() {
 		Name: "FishGoddess",
 		Age:  3,
 	}
-	logger.Warn("This is a structured message").Any("user", user).Json("userJson", user).End()
-	logger.Error("This is a structured message").Error("err", io.EOF).Int("trace", 123).End()
+	logger.Warn("This is a structured message").Any("user", user).Json("userJson", user).Log()
+	logger.Error("This is a structured message").Error("err", io.EOF).Int("trace", 123).Log()
 
 	// You may notice logit.Options() which returns an options list.
 	// Here is some of them:
 	options := logit.Options()
 	options.WithCaller()                          // Let logs carry caller information.
 	options.WithLevelKey("lvl")                   // Change logger's level key to "lvl".
-	options.WithWriter(os.Stderr, true)           // Change logger's writer to os.Stderr with buffer.
-	options.WithErrorWriter(os.Stderr, false)     // Change logger's error writer to os.Stderr without buffer.
+	options.WithWriter(os.Stderr)                 // Change logger's writer to os.Stderr without buffer or batch.
+	options.WithBufferWriter(os.Stderr)           // Change logger's writer to os.Stderr with buffer.
+	options.WithBatchWriter(os.Stderr)            // Change logger's writer to os.Stderr with batch.
+	options.WithErrorWriter(os.Stderr)            // Change logger's error writer to os.Stderr without buffer or batch.
 	options.WithTimeFormat("2006-01-02 15:04:05") // Change the format of time (Only the log's time will apply it).
 
 	// You can bind context with logger and use it as long as you can get the context.
 	ctx := logit.NewContext(context.Background(), logger)
 	logger = logit.FromContext(ctx)
+	logger.Info("Logger from context").Log()
 
-	// You can initialize the global logger if you don't want to use a logger.
-	logit.InitGlobal(func() *logit.Logger {
-		return logit.NewLogger()
-	})
+	// You can initialize the global logger if you don't want to use an independent logger.
+	// WithCallerDepth will set the depth of caller, and default is core.CallerDepth.
+	// Functions in global logger are wrapped so depth of caller should be increased 1.
+	// You can specify your depth if you wrap again or have something else reasons.
+	logger = logit.NewLogger(options.WithCallerDepth(core.CallerDepth + 1))
+	logit.SetGlobal(logger)
+	logit.Info("Info from logit").Log()
 
-	logit.Info("Info from logit").End()
+	// We don't recommend you to call logit.SetGlobal unless you really need to call.
+	// Instead, we recommend you to call logger.SetToGlobal to set one logger to global if you need.
+	logger.SetToGlobal()
 	logit.Println("Println from logit")
 }
 ```
@@ -129,6 +134,7 @@ func main() {
 * [creator](./_examples/creator.go)
 * [caller](./_examples/caller.go)
 * [interceptor](./_examples/interceptor.go)
+* [file](./_examples/file.go)
 
 _All examples can be found in [_examples](./_examples)._
 

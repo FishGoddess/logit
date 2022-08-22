@@ -56,6 +56,5 @@ func NewLoggerFromCreator(name string, params ...interface{}) (*Logger, error) {
 	if !ok {
 		return nil, errors.New("logit: logger creator " + name + " not found")
 	}
-
 	return creator.CreateLogger(params...)
 }

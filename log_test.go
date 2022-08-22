@@ -16,13 +16,14 @@ package logit
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
 	"io"
 	"testing"
 	"time"
 
-	"github.com/go-logit/logit/pkg"
+	"github.com/go-logit/logit/pkg/runtime"
 
 	"github.com/go-logit/logit/core/appender"
 )
@@ -31,7 +32,7 @@ import (
 func TestNewLog(t *testing.T) {
 	buffer := bytes.NewBuffer(make([]byte, 0, 1024))
 
-	logger := NewLogger(Options().WithAppender(appender.Json()), Options().WithWriter(buffer, false))
+	logger := NewLogger(Options().WithAppender(appender.Json()), Options().WithWriter(buffer))
 	defer logger.Close()
 
 	entries := map[string]interface{}{
@@ -114,7 +115,7 @@ func TestNewLog(t *testing.T) {
 	log.Times("Times", []time.Time{time.Unix(12580, 0)}, appender.UnixTime)
 	log.Errors("Errors", []error{io.EOF})
 	log.Stringers("Stringers", []fmt.Stringer{time.Second})
-	log.End()
+	log.Log()
 
 	outputMap := map[string]interface{}{}
 	output := buffer.String()
@@ -124,7 +125,6 @@ func TestNewLog(t *testing.T) {
 	}
 
 	//t.Logf("outputMap: %+v", outputMap)
-
 	for k, v := range entries {
 		outputValue, ok := outputMap[k]
 		if !ok {
@@ -157,19 +157,19 @@ func TestNewLog(t *testing.T) {
 	}
 }
 
-// go test -v -cover -run=^TestLogWithPid$
-func TestLogWithPid(t *testing.T) {
+// go test -v -cover -run=^TestLogWithPID$
+func TestLogWithPID(t *testing.T) {
 	buffer := bytes.NewBuffer(make([]byte, 0, 1024))
-	logger := NewLogger(Options().WithWriter(buffer, false))
-	logger.needPid = true
+	logger := NewLogger(Options().WithWriter(buffer))
+	logger.withPID = true
 
 	log := newLog()
 	log.logger = logger
 	log.appender = logger.debugAppender
 	log.writer = logger.debugWriter
 	log.begin()
-	log.WithPid()
-	log.End()
+	log.WithPID()
+	log.Log()
 
 	str := buffer.String()
 	if str != "\n" {
@@ -177,12 +177,12 @@ func TestLogWithPid(t *testing.T) {
 	}
 
 	buffer.Reset()
-	logger.needPid = false
+	logger.withPID = false
 	log.begin()
-	log.WithPid()
-	log.End()
+	log.WithPID()
+	log.Log()
 
-	pid := pkg.Pid()
+	pid := runtime.PID()
 	right := fmt.Sprintf("%s=%d\n", logger.pidKey, pid)
 
 	str = buffer.String()
@@ -194,8 +194,8 @@ func TestLogWithPid(t *testing.T) {
 // go test -v -cover -run=^TestLogWithCaller$
 func TestLogWithCaller(t *testing.T) {
 	buffer := bytes.NewBuffer(make([]byte, 0, 1024))
-	logger := NewLogger(Options().WithWriter(buffer, false))
-	logger.needCaller = true
+	logger := NewLogger(Options().WithWriter(buffer))
+	logger.withCaller = true
 
 	log := newLog()
 	log.logger = logger
@@ -203,7 +203,7 @@ func TestLogWithCaller(t *testing.T) {
 	log.writer = logger.debugWriter
 	log.begin()
 	log.WithCaller()
-	log.End()
+	log.Log()
 
 	str := buffer.String()
 	if str != "\n" {
@@ -211,14 +211,14 @@ func TestLogWithCaller(t *testing.T) {
 	}
 
 	buffer.Reset()
-	logger.needCaller = false
+	logger.withCaller = false
 	log.begin()
 	log.WithCaller()
-	log.End()
+	log.Log()
 
-	file, line := pkg.Caller(1)
+	file, line, function := runtime.Caller(1)
 	line -= 3 // Between log.WithCaller() and pkg.Caller(1) is 3
-	right := fmt.Sprintf("%s=%s|%s=%d\n", logger.fileKey, file, logger.lineKey, line)
+	right := fmt.Sprintf("%s=%s|%s=%d|%s=%s\n", logger.fileKey, file, logger.lineKey, line, logger.funcKey, function)
 
 	str = buffer.String()
 	if str != right {
@@ -228,10 +228,48 @@ func TestLogWithCaller(t *testing.T) {
 
 // go test -v -cover -run=^TestLogWithContext$
 func TestLogWithContext(t *testing.T) {
+	log := newLog()
+	log.WithContext(context.WithValue(context.Background(), "key", "value"))
 
+	value, ok := log.ctx.Value("key").(string)
+	if !ok || value != "value" {
+		t.Errorf("!ok %v || value %s != 'value'", ok, value)
+	}
 }
 
 // go test -v -cover -run=^TestLogIntercept$
 func TestLogIntercept(t *testing.T) {
+	buffer := bytes.NewBuffer(make([]byte, 0, 1024))
+	logger := NewLogger(Options().WithWriter(buffer), Options().WithInterceptors(func(ctx context.Context, log *Log) {
+		log.Int("xxx", 123)
+	}))
+	logger.withCaller = true
 
+	log := newLog()
+	log.logger = logger
+	log.appender = logger.debugAppender
+	log.writer = logger.debugWriter
+	log.begin()
+	log.Log()
+
+	str := buffer.String()
+	if str != "xxx=123\n" {
+		t.Errorf("str %q != '\n'", str)
+	}
+
+	buffer.Reset()
+	log = newLog()
+	log.logger = logger
+	log.appender = logger.debugAppender
+	log.writer = logger.debugWriter
+	log.begin()
+	log.Intercept(func(ctx context.Context, log *Log) {
+		log.String("abc", "666")
+	})
+	log.Log()
+
+	str = buffer.String()
+	if str != "abc=666|xxx=123\n" {
+		t.Errorf("str %q != '\n'", str)
+	}
 }

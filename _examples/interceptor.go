@@ -61,18 +61,18 @@ func main() {
 	defer logger.Close()
 
 	// By default, context passed to interceptor is context.Background().
-	logger.Info("try interceptor - round one").End()
+	logger.Info("try interceptor - round one").Log()
 
 	// You can use WithContext to change context passed to interceptor.
 	ctx := context.WithValue(context.Background(), "trace", "666")
 	ctx = context.WithValue(ctx, "user", "FishGoddess")
-	logger.Info("try interceptor - round two").WithContext(ctx).End()
+	logger.Info("try interceptor - round two").WithContext(ctx).Log()
 
 	// The interceptors appended to logger will apply to all logs.
 	// You can use Intercept to intercept one log rather than all logs.
-	logger.Info("try interceptor - round three").WithContext(ctx).Intercept(businessInterceptor).End()
+	logger.Info("try interceptor - round three").WithContext(ctx).Intercept(businessInterceptor).Log()
 
 	// Notice that WithContext should be called before Intercept if you want to pass this context to Intercept.
 	ctx = context.WithValue(ctx, "business", "logger")
-	logger.Info("try interceptor - round four").WithContext(ctx).Intercept(businessInterceptor).End()
+	logger.Info("try interceptor - round four").WithContext(ctx).Intercept(businessInterceptor).Log()
 }
