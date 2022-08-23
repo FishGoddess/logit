@@ -493,7 +493,7 @@ func (l *Log) WithPID() *Log {
 	return l
 }
 
-// WithCaller adds two entries about caller information to l.
+// WithCaller adds some entries about caller information to l.
 func (l *Log) withCaller(depth int) *Log {
 	if l == nil {
 		return nil
@@ -514,12 +514,17 @@ func (l *Log) withCaller(depth int) *Log {
 	return l
 }
 
-// WithCaller adds two entries about caller information to l.
-func (l *Log) WithCaller() *Log {
+// WithCallerOf adds some entries about caller information to l.
+func (l *Log) WithCallerOf(depth int) *Log {
 	if l == nil || l.logger.withCaller {
 		return l
 	}
-	return l.withCaller(3)
+	return l.withCaller(depth)
+}
+
+// WithCaller adds some entries about caller information to l.
+func (l *Log) WithCaller() *Log {
+	return l.WithCallerOf(core.CallerDepth)
 }
 
 // WithContext sets ctx to l.
