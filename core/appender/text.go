@@ -19,6 +19,8 @@ import (
 	"reflect"
 	"strconv"
 	"time"
+
+	"github.com/go-logit/logit/core"
 )
 
 const (
@@ -56,6 +58,15 @@ func (ta *textAppender) appendKey(dst []byte, key string) []byte {
 // AppendAny appends any entries to dst.
 func (ta *textAppender) AppendAny(dst []byte, key string, value interface{}) []byte {
 	return append(ta.appendKey(dst, key), fmt.Sprintf(`%+v`, value)...)
+}
+
+// AppendJson appends any entries as Json to dst.
+func (ta *textAppender) AppendJson(dst []byte, key string, value interface{}) []byte {
+	valueBytes, err := core.MarshalToJson(value)
+	if err != nil {
+		return ta.AppendString(dst, key, err.Error())
+	}
+	return append(ta.appendKey(dst, key), valueBytes...)
 }
 
 // AppendBool appends a bool entry to dst.

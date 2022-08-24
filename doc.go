@@ -103,6 +103,7 @@ Package logit provides an easy way to use foundation for your logging operations
 	options.WithInfoAppender(appender.Text())
 	options.WithWarnAppender(appender.Text())
 	options.WithErrorAppender(appender.Text())
+	options.WithPrintAppender(appender.Text())
 	options.WithWriter(os.Stderr)
 	options.WithBufferWriter(os.Stdout)
 	options.WithBatchWriter(os.Stdout)
@@ -110,6 +111,7 @@ Package logit provides an easy way to use foundation for your logging operations
 	options.WithInfoWriter(os.Stderr)
 	options.WithWarnWriter(os.Stderr)
 	options.WithErrorWriter(os.Stderr)
+	options.WithPrintWriter(os.Stderr)
 	options.WithPID()
 	options.WithCaller()
 	options.WithMsgKey("msg")
@@ -450,5 +452,5 @@ package logit // import "github.com/go-logit/logit"
 
 const (
 	// Version is the version string representation of logit.
-	Version = "v0.5.0-alpha"
+	Version = "v0.5.1-alpha"
 )

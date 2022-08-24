@@ -85,6 +85,16 @@ func (l *Log) Any(key string, value interface{}) *Log {
 	return l
 }
 
+// Json adds an entry which key is string and value is marshaled to a json string to l.
+func (l *Log) Json(key string, value interface{}) *Log {
+	if l == nil {
+		return nil
+	}
+
+	l.data = l.appender.AppendJson(l.data, key, value)
+	return l
+}
+
 // Bool adds an entry which key is string and value is bool type to l.
 func (l *Log) Bool(key string, value bool) *Log {
 	if l == nil {
@@ -465,22 +475,6 @@ func (l *Log) Stringers(key string, value []fmt.Stringer) *Log {
 	return l
 }
 
-// Json adds an entry which key is string and value is marshaled to a json string to l.
-func (l *Log) Json(key string, value interface{}) *Log {
-	if l == nil {
-		return nil
-	}
-
-	marshaled, err := core.MarshalToJson(value)
-	if err != nil {
-		l.data = l.appender.AppendError(l.data, key, err) // This should not happen...
-		return l
-	}
-
-	l.data = l.appender.AppendString(l.data, key, string(marshaled))
-	return l
-}
-
 // WithPID adds one entry about pid information to l.
 func (l *Log) WithPID() *Log {
 	if l == nil || l.logger.withPID {
@@ -493,7 +487,7 @@ func (l *Log) WithPID() *Log {
 	return l
 }
 
-// WithCaller adds two entries about caller information to l.
+// WithCaller adds some entries about caller information to l.
 func (l *Log) withCaller(depth int) *Log {
 	if l == nil {
 		return nil
@@ -514,12 +508,17 @@ func (l *Log) withCaller(depth int) *Log {
 	return l
 }
 
-// WithCaller adds two entries about caller information to l.
-func (l *Log) WithCaller() *Log {
+// WithCallerOf adds some entries about caller information to l.
+func (l *Log) WithCallerOf(depth int) *Log {
 	if l == nil || l.logger.withCaller {
 		return l
 	}
-	return l.withCaller(3)
+	return l.withCaller(depth)
+}
+
+// WithCaller adds some entries about caller information to l.
+func (l *Log) WithCaller() *Log {
+	return l.WithCallerOf(core.CallerDepth)
 }
 
 // WithContext sets ctx to l.

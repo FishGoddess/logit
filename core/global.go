@@ -14,7 +14,10 @@
 
 package core
 
-import "encoding/json"
+import (
+	"encoding/json"
+	"time"
+)
 
 const (
 	B ByteSize = 1 << (10 * iota)
@@ -42,6 +45,9 @@ var (
 	// CallerDepth is the depth of caller.
 	// See runtime.Caller.
 	CallerDepth = 4
+
+	// CurrentTime returns the current time with time.Time.
+	CurrentTime = time.Now
 )
 
 // ByteSize is size of byte.

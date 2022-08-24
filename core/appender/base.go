@@ -40,6 +40,7 @@ type Appender interface {
 	Begin(dst []byte) []byte                                    // Begin appends begin character to dst.
 	End(dst []byte) []byte                                      // End appends end character to dst.
 	AppendAny(dst []byte, key string, value interface{}) []byte // AppendAny appends any entries to dst.
+	AppendJson(dst []byte, key string, value interface{}) []byte
 
 	AppendBool(dst []byte, key string, value bool) []byte                     // AppendBool appends a bool entry to dst.
 	AppendByte(dst []byte, key string, value byte) []byte                     // AppendByte appends a byte entry to dst.
