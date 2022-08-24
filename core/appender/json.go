@@ -15,12 +15,13 @@
 package appender
 
 import (
-	"encoding/json"
 	"fmt"
 	"math"
 	"reflect"
 	"strconv"
 	"time"
+
+	"github.com/go-logit/logit/core"
 )
 
 const (
@@ -63,12 +64,23 @@ func (ja *jsonAppender) appendKey(dst []byte, key string) []byte {
 func (ja *jsonAppender) AppendAny(dst []byte, key string, value interface{}) []byte {
 	dst = ja.appendKey(dst, key)
 
-	valueBytes, err := json.Marshal(value)
+	valueBytes, err := core.MarshalToJson(value)
 	if err != nil {
-		return append(dst, fmt.Sprintf(`"%+v"`, value)...)
+		dst = append(dst, jsonStringQuotation)
+		dst = appendEscapedString(dst, err.Error())
+		return append(dst, jsonStringQuotation)
 	}
 
 	return append(dst, valueBytes...)
+}
+
+// AppendJson appends any entries as Json to dst.
+func (ja *jsonAppender) AppendJson(dst []byte, key string, value interface{}) []byte {
+	valueBytes, err := core.MarshalToJson(value)
+	if err != nil {
+		return ja.AppendString(dst, key, err.Error())
+	}
+	return append(ja.appendKey(dst, key), valueBytes...)
 }
 
 // AppendBool appends a bool entry to dst.

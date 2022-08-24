@@ -19,8 +19,8 @@ import (
 	"fmt"
 	"os"
 	"sync"
-	"time"
 
+	"github.com/go-logit/logit/core"
 	"github.com/go-logit/logit/core/appender"
 	"github.com/go-logit/logit/core/writer"
 )
@@ -167,7 +167,7 @@ func (l *Logger) log(level level, msg string, params ...interface{}) *Log {
 
 	log := l.getLog(level).begin()
 	if l.timeKey != "" {
-		log = log.Time(l.timeKey, time.Now(), l.timeFormat)
+		log = log.Time(l.timeKey, core.CurrentTime(), l.timeFormat)
 	}
 
 	if l.levelKey != "" {
