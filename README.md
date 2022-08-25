@@ -9,8 +9,6 @@
 
 [Read me in English](./README.en.md)
 
-~~[B站上的介绍视频](https://www.bilibili.com/video/BV14t4y1y7rF)~~
-
 ### 🥇 功能特性
 
 * 独特的日志模块设计，使用 appender 和 writer 装载特定的模块，实现扩展功能。
@@ -21,10 +19,9 @@
 * 提供调优使用的全局配置，对一些高级配置更贴合实际业务的需求。
 * 分级别追加日志数据，分级别写出日志数据，推荐将 error 级别的日志单独处理和存储。
 * 加入 Context 机制，更优雅地使用日志，并支持业务域划分。
-* 以插件的形式支持配置方式初始化，比如 yaml 配置插件可以通过 yaml 配置文件初始化等。
 * 支持拦截器模式，可以从 context 注入外部常量或变量，简化日志输出流程。
 
-> 配置插件以接口注册的形式支持，具体有哪些支持的配置插件请查看 [Github](https://github.com/go-logit) / [码云](https://gitee.com/go-logit)
+> 更多 logit 生态的东西请查看 [GitHub](https://github.com/go-logit) / [码云](https://gitee.com/go-logit)
 
 _历史版本的特性请查看 [HISTORY.md](./HISTORY.md)。未来版本的新特性和计划请查看 [FUTURE.md](./FUTURE.md)。_
 
@@ -130,7 +127,6 @@ func main() {
 * [writer](./_examples/writer.go)
 * [global](./_examples/global.go)
 * [context](./_examples/context.go)
-* [creator](./_examples/creator.go)
 * [caller](./_examples/caller.go)
 * [interceptor](./_examples/interceptor.go)
 * [file](./_examples/file.go)
@@ -143,24 +139,24 @@ _所有的使用案例都在 [_examples](./_examples) 目录。_
 $ go test -v ./_examples/performance_test.go -bench=. -benchtime=1s
 ```
 
-> 测试文件：[_examples/performance_test.go](./_examples/performance_test.go)
-
 | 测试（输出到内存） | 单位时间内运行次数 (越大越好) | 每个操作消耗时间 (越小越好)       | B/op (越小越好)                     | allocs/op (越小越好)              |
 |-----------|------------------|-----------------------|---------------------------------|-------------------------------|
-| **logit** | **799759**       | **&nbsp; 1373 ns/op** | **&nbsp; &nbsp; &nbsp; 0 B/op** | **&nbsp; &nbsp; 0 allocs/op** |
-| zerolog   | 922863           | &nbsp; 1244 ns/op     | &nbsp; &nbsp; &nbsp; 0 B/op     | &nbsp; &nbsp; 0 allocs/op     |
-| zap       | 413701           | &nbsp; 2824 ns/op     | &nbsp; 897 B/op                 | &nbsp; &nbsp; 8 allocs/op     |
-| logrus    | 105238           | 11474 ns/op           | 7411 B/op                       | 128 allocs/op                 |
+| **logit** | **707851**       | **&nbsp; 1704 ns/op** | **&nbsp; &nbsp; &nbsp; 0 B/op** | **&nbsp; &nbsp; 0 allocs/op** |
+| zerolog   | 706714           | &nbsp; 1585 ns/op     | &nbsp; &nbsp; &nbsp; 0 B/op     | &nbsp; &nbsp; 0 allocs/op     |
+| zap       | 389608           | &nbsp; 4688 ns/op     | &nbsp; 865 B/op                 | &nbsp; &nbsp; 8 allocs/op     |
+| logrus    | &nbsp; 69789     | 17142 ns/op           | 8885 B/op                       | 136 allocs/op                 |
 
 | 测试（输出到文件）     | 单位时间内运行次数 (越大越好) | 每个操作消耗时间 (越小越好)       | B/op (越小越好)                     | allocs/op (越小越好)              |
 |---------------|------------------|-----------------------|---------------------------------|-------------------------------|
-| **logit**     | **599862**       | **&nbsp; 1768 ns/op** | **&nbsp; 901 B/op**             | **&nbsp; &nbsp; 0 allocs/op** |
-| **logit-不缓冲** | **148113**       | **&nbsp; 7773 ns/op** | **&nbsp; &nbsp; &nbsp; 0 B/op** | **&nbsp; &nbsp; 0 allocs/op** |
-| zerolog       | 159962           | &nbsp; 7472 ns/op     | &nbsp; &nbsp; &nbsp; 0 B/op     | &nbsp; &nbsp; 0 allocs/op     |
-| zap           | 130405           | &nbsp; 9137 ns/op     | &nbsp; 897 B/op                 | &nbsp; &nbsp; 8 allocs/op     |
-| logrus        | &nbsp; 65202     | 18439 ns/op           | 7410 B/op                       | 128 allocs/op                 |
+| **logit**     | **636033**       | **&nbsp; 1822 ns/op** | **&nbsp; &nbsp; &nbsp; 0 B/op** | **&nbsp; &nbsp; 0 allocs/op** |
+| **logit-不缓冲** | **354542**       | **&nbsp; 3502 ns/op** | **&nbsp; &nbsp; &nbsp; 0 B/op** | **&nbsp; &nbsp; 0 allocs/op** |
+| zerolog       | 354676           | &nbsp; 3440 ns/op     | &nbsp; &nbsp; &nbsp; 0 B/op     | &nbsp; &nbsp; 0 allocs/op     |
+| zap           | 195354           | &nbsp; 6843 ns/op     | &nbsp; 865 B/op                 | &nbsp; &nbsp; 8 allocs/op     |
+| logrus        | &nbsp; 58030     | 21088 ns/op           | 8885 B/op                       | 136 allocs/op                 |
 
-> 测试环境：R7-5800X CPU@3.8GHZ，32GB RAM，512GB SSD
+> 测试文件：[_examples/performance_test.go](./_examples/performance_test.go)
+> 
+> 测试环境：R7-5800X CPU@3.8GHZ，32GB RAM，512GB SSD，Linux/Manjaro
 
 ### 👥 贡献者
 
