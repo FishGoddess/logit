@@ -20,6 +20,7 @@
 * 分级别追加日志数据，分级别写出日志数据，推荐将 error 级别的日志单独处理和存储。
 * 加入 Context 机制，更优雅地使用日志，并支持业务域划分。
 * 支持拦截器模式，可以从 context 注入外部常量或变量，简化日志输出流程。
+* 支持错误监控，可以很方便地进行错误统计和告警。
 
 > 更多 logit 生态的东西请查看 [GitHub](https://github.com/go-logit) / [码云](https://gitee.com/go-logit)
 
@@ -122,7 +123,7 @@ func main() {
 ```
 
 * [basic](./_examples/basic.go)
-* [options](./_examples/options.go)
+* [option](./_examples/option.go)
 * [appender](./_examples/appender.go)
 * [writer](./_examples/writer.go)
 * [global](./_examples/global.go)
@@ -130,6 +131,7 @@ func main() {
 * [caller](./_examples/caller.go)
 * [interceptor](./_examples/interceptor.go)
 * [file](./_examples/file.go)
+* [error](./_examples/error.go)
 
 _所有的使用案例都在 [_examples](./_examples) 目录。_
 

@@ -413,6 +413,25 @@ Package logit provides an easy way to use foundation for your logging operations
 	writer.BatchWithCount(os.Stdout, 256)
 	logit.Options().WithBufferWriter(os.Stdout)
 	logit.Options().WithBatchWriter(os.Stdout)
+
+10. error:
+
+	// uselessWriter is a demo writer to demonstrate the error handling function.
+	type uselessWriter struct{}
+
+	func (uw uselessWriter) Write(p []byte) (n int, err error) {
+		return 0, errors.New("always error in writing")
+	}
+
+	// You can specify a function to handle errors happens in logger.
+	// For example, you can count these errors and report them to team members by email.
+	core.HandleError = func(name string, err error) {
+		fmt.Printf("%s received an error: %+v\n", name, err)
+	}
+
+	// Let's log something to see what happen.
+	logger := logit.NewLogger(logit.Options().WithWriter(&uselessWriter{}))
+	logger.Info("See what happen?").Log()
 */
 package logit // import "github.com/go-logit/logit"
 

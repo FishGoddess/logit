@@ -22,6 +22,7 @@ applications.
 * Context binding supports, using logger is more elegant.
 * Configuration plugins supports, ex: yaml plugin can create logger from yaml configuration file.
 * Interceptor supports which can inject values from context.
+* Error handling supports which can let you count errors and report them.
 
 > More logit ecology can be found in [GitHub](https://github.com/go-logit) / [Gitee](https://gitee.com/go-logit)
 
@@ -124,7 +125,7 @@ func main() {
 ```
 
 * [basic](./_examples/basic.go)
-* [options](./_examples/options.go)
+* [option](./_examples/option.go)
 * [appender](./_examples/appender.go)
 * [writer](./_examples/writer.go)
 * [global](./_examples/global.go)
@@ -132,6 +133,7 @@ func main() {
 * [caller](./_examples/caller.go)
 * [interceptor](./_examples/interceptor.go)
 * [file](./_examples/file.go)
+* [error](./_examples/error.go)
 
 _All examples can be found in [_examples](./_examples)._
 
