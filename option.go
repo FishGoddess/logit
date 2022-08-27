@@ -61,6 +61,13 @@ func (o *options) WithErrorLevel() Option {
 	}
 }
 
+// WithPrintLevel returns an option which sets logger to print level.
+func (o *options) WithPrintLevel() Option {
+	return func(logger *Logger) {
+		logger.level = printLevel
+	}
+}
+
 // WithOffLevel returns an option which sets logger to off level.
 func (o *options) WithOffLevel() Option {
 	return func(logger *Logger) {
@@ -129,24 +136,24 @@ func (o *options) WithWriter(w io.Writer) Option {
 // WithBufferWriter returns an option which sets logger's writer to a buffer one.
 func (o *options) WithBufferWriter(w io.Writer) Option {
 	return func(logger *Logger) {
-		wr := writer.Buffer(w)
-		logger.debugWriter = wr
-		logger.infoWriter = wr
-		logger.warnWriter = wr
-		logger.errorWriter = wr
-		logger.printWriter = wr
+		bw := writer.Buffer(w)
+		logger.debugWriter = bw
+		logger.infoWriter = bw
+		logger.warnWriter = bw
+		logger.errorWriter = bw
+		logger.printWriter = bw
 	}
 }
 
 // WithBatchWriter returns an option which sets logger's writer to a batch one.
 func (o *options) WithBatchWriter(w io.Writer) Option {
 	return func(logger *Logger) {
-		wr := writer.Batch(w)
-		logger.debugWriter = wr
-		logger.infoWriter = wr
-		logger.warnWriter = wr
-		logger.errorWriter = wr
-		logger.printWriter = wr
+		bw := writer.Batch(w)
+		logger.debugWriter = bw
+		logger.infoWriter = bw
+		logger.warnWriter = bw
+		logger.errorWriter = bw
+		logger.printWriter = bw
 	}
 }
 

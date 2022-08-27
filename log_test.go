@@ -51,7 +51,7 @@ func TestNewLog(t *testing.T) {
 		"Uint32":    uint32(123456),
 		"Uint64":    uint64(123456),
 		"String":    "abc",
-		"Time":      time.Unix(12580, 0).Unix(),
+		"Time":      time.Unix(12580, 0).Format("2006-01-02 15:04:05"),
 		"Error":     io.EOF,
 		"Stringer":  fmt.Stringer(time.Second),
 		"Bools":     []bool{true},
@@ -68,9 +68,10 @@ func TestNewLog(t *testing.T) {
 		"Uint32s":   []uint32{123456},
 		"Uint64s":   []uint64{123456},
 		"Strings":   []string{"abc"},
-		"Times":     []int64{time.Unix(12580, 0).Unix()},
+		"Times":     []string{time.Unix(12580, 0).Format("2006-01-02 15:04:05")},
 		"Errors":    []error{io.EOF},
 		"Stringers": []fmt.Stringer{time.Second},
+		"WithTime":  time.Unix(12580, 0).Unix(),
 	}
 
 	//t.Logf("entries: %+v", entries)
@@ -95,7 +96,7 @@ func TestNewLog(t *testing.T) {
 	log.Uint32("Uint32", uint32(123456))
 	log.Uint64("Uint64", uint64(123456))
 	log.String("String", "abc")
-	log.Time("Time", time.Unix(12580, 0), appender.UnixTime)
+	log.Time("Time", time.Unix(12580, 0))
 	log.Error("Error", io.EOF)
 	log.Stringer("Stringer", fmt.Stringer(time.Second))
 	log.Bools("Bools", []bool{true})
@@ -112,9 +113,10 @@ func TestNewLog(t *testing.T) {
 	log.Uint32s("Uint32s", []uint32{123456})
 	log.Uint64s("Uint64s", []uint64{123456})
 	log.Strings("Strings", []string{"abc"})
-	log.Times("Times", []time.Time{time.Unix(12580, 0)}, appender.UnixTime)
+	log.Times("Times", []time.Time{time.Unix(12580, 0)})
 	log.Errors("Errors", []error{io.EOF})
 	log.Stringers("Stringers", []fmt.Stringer{time.Second})
+	log.WithTime("WithTime", time.Unix(12580, 0), appender.UnixTimeFormat)
 	log.Log()
 
 	outputMap := map[string]interface{}{}

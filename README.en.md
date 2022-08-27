@@ -140,7 +140,8 @@ _All examples can be found in [_examples](./_examples)._
 ### 🔥 Benchmarks
 
 ```bash
-$ go test -v ./_examples/performance_test.go -bench=. -benchtime=1s
+$ make bench
+$ make benchfile
 ```
 
 | test case(output to memory) | times ran (large is better) | ns/op (small is better) | B/op                            | allocs/op                     |

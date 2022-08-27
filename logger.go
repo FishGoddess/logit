@@ -167,7 +167,7 @@ func (l *Logger) log(level level, msg string, params ...interface{}) *Log {
 
 	log := l.getLog(level).begin()
 	if l.timeKey != "" {
-		log = log.Time(l.timeKey, core.CurrentTime(), l.timeFormat)
+		log = log.WithTime(l.timeKey, core.CurrentTime(), l.timeFormat)
 	}
 
 	if l.levelKey != "" {

@@ -138,7 +138,8 @@ _所有的使用案例都在 [_examples](./_examples) 目录。_
 ### 🔥 性能测试
 
 ```bash
-$ go test -v ./_examples/performance_test.go -bench=. -benchtime=1s
+$ make bench
+$ make benchfile
 ```
 
 | 测试（输出到内存） | 单位时间内运行次数 (越大越好) | 每个操作消耗时间 (越小越好)       | B/op (越小越好)                     | allocs/op (越小越好)              |
