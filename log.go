@@ -72,7 +72,8 @@ func (l *Log) end() {
 	}
 
 	defer l.logger.releaseLog(l)
-	l.writer.Write(l.appender.End(l.data))
+	_, err := l.writer.Write(l.appender.End(l.data))
+	core.HandleError("Log.writer.Write", err)
 }
 
 // Any adds an entry which key is string and value is interface{} type to l.
