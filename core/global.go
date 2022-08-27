@@ -49,18 +49,18 @@ var (
 	// If you want to use your own way to marshal, change it to your own marshal function.
 	MarshalToJson = json.Marshal
 
-	// HandleError handles an error passed to it.
+	// OnError receives an error passed to it.
 	// You can collect all errors and count them for reporting.
 	// Notice that this function is called synchronously, so don't do too many things in it.
-	HandleError func(name string, err error) = nil
+	OnError func(name string, err error) = nil
 )
 
 // ByteSize is size of byte.
 type ByteSize = uint64
 
-// handleError handles err if HandleError isn't nil.
-func handleError(name string, err error) {
-	if HandleError != nil {
-		HandleError(name, err)
+// HandleError handles err if HandleError isn't nil.
+func HandleError(name string, err error) {
+	if OnError != nil {
+		OnError(name, err)
 	}
 }

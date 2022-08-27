@@ -32,7 +32,7 @@ func (uw uselessWriter) Write(p []byte) (n int, err error) {
 func main() {
 	// You can specify a function to handle errors happens in logger.
 	// For example, you can count these errors and report them to team members by email.
-	core.HandleError = func(name string, err error) {
+	core.OnError = func(name string, err error) {
 		fmt.Printf("%s received an error: %+v\n", name, err)
 	}
 
