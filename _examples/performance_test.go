@@ -32,31 +32,31 @@ import (
 /*
 $ go test -v ./_examples/performance_test.go -bench=. -benchtime=1s
 
-BenchmarkLogitLoggerWithTextAppender-16    856958              1362 ns/op               0 B/op          0 allocs/op
+BenchmarkLogitLoggerWithTextAppender-16           724671              1647 ns/op               0 B/op          0 allocs/op
 
-BenchmarkLogitLoggerWithJsonAppender-16    799759              1373 ns/op               0 B/op          0 allocs/op
+BenchmarkLogitLoggerWithJsonAppender-16           707851              1704 ns/op               0 B/op          0 allocs/op
 
-BenchmarkLogitLoggerWithFormat-16          666484              1740 ns/op              40 B/op          4 allocs/op
+BenchmarkLogitLoggerWithFormat-16                 558015              2124 ns/op              40 B/op          4 allocs/op
 
-BenchmarkZeroLogLogger-16                  922863              1244 ns/op               0 B/op          0 allocs/op
+BenchmarkLogitLoggerPrint-16                      452114              2576 ns/op             128 B/op          4 allocs/op
 
-BenchmarkZapLogger-16                      413701              2824 ns/op             897 B/op          8 allocs/op
+BenchmarkZeroLogLogger-16                         706714              1585 ns/op               0 B/op          0 allocs/op
 
-BenchmarkLogrusLogger-16                   105238             11474 ns/op            7411 B/op        128 allocs/op
+BenchmarkZapLogger-16                             389608              4688 ns/op             865 B/op          8 allocs/op
 
-******************************************************************************************************************
+BenchmarkLogrusLogger-16                           69789             17142 ns/op            8885 B/op        136 allocs/op
 
-BenchmarkLogitFileWithTextAppender-16     631435              1751 ns/op             851 B/op          0 allocs/op
+BenchmarkLogitFileWithTextAppender-16             682292              1729 ns/op               0 B/op          0 allocs/op
 
-BenchmarkLogitFileWithJsonAppender-16     599862              1768 ns/op             896 B/op          0 allocs/op
+BenchmarkLogitFileWithJsonAppender-16             636033              1822 ns/op               0 B/op          0 allocs/op
 
-BenchmarkLogitFileWithoutBuffer-16        148113              7773 ns/op               0 B/op          0 allocs/op
+BenchmarkLogitFileWithoutBuffer-16                354542              3502 ns/op               0 B/op          0 allocs/op
 
-BenchmarkZeroLogFile-16                   159962              7472 ns/op               0 B/op          0 allocs/op
+BenchmarkZeroLogFile-16                           354676              3440 ns/op               0 B/op          0 allocs/op
 
-BenchmarkZapFile-16                       130405              9137 ns/op             897 B/op          8 allocs/op
+BenchmarkZapFile-16                               195354              6843 ns/op             865 B/op          8 allocs/op
 
-BenchmarkLogrusFile-16                     65202             18439 ns/op            7410 B/op        128 allocs/op
+BenchmarkLogrusFile-16                             58030             21088 ns/op            8885 B/op        136 allocs/op
 */
 
 const (
@@ -166,7 +166,7 @@ func BenchmarkLogitLoggerPrint(b *testing.B) {
 //// go test -v ./_examples/performance_test.go -bench=^BenchmarkZeroLogLogger$ -benchtime=1s
 //func BenchmarkZeroLogLogger(b *testing.B) {
 //	zerolog.TimeFieldFormat = timeFormat
-//	logger := zerolog.New(&nopWriter{}).With().Timestamp().Logger()
+//	logger := zerolog.New(ioutil.Discard).With().Timestamp().Logger()
 //
 //	logTask := func() {
 //		logger.Debug().Str("trace", "xxx").Int("id", 123).Float64("pi", 3.14).Msg("debug...")
@@ -189,7 +189,7 @@ func BenchmarkLogitLoggerPrint(b *testing.B) {
 //		enc.AppendString(t.Format(timeFormat))
 //	}
 //	encoder := zapcore.NewJSONEncoder(config)
-//	nopWriteSyncer := zapcore.AddSync(&nopWriter{})
+//	nopWriteSyncer := zapcore.AddSync(ioutil.Discard)
 //	core := zapcore.NewCore(encoder, nopWriteSyncer, zapcore.DebugLevel)
 //	logger := zap.New(core)
 //	defer logger.Sync()
@@ -211,7 +211,7 @@ func BenchmarkLogitLoggerPrint(b *testing.B) {
 //// go test -v ./_examples/performance_test.go -bench=^BenchmarkLogrusLogger$ -benchtime=1s
 //func BenchmarkLogrusLogger(b *testing.B) {
 //	logger := logrus.New()
-//	logger.SetOutput(&nopWriter{})
+//	logger.SetOutput(ioutil.Discard)
 //	logger.SetLevel(logrus.DebugLevel)
 //	logger.SetFormatter(&logrus.JSONFormatter{
 //		TimestampFormat: timeFormat,

@@ -27,6 +27,13 @@ const (
 )
 
 var (
+	// CallerDepth is the depth of caller.
+	// See runtime.Caller.
+	CallerDepth = 4
+
+	// CurrentTime returns the current time with time.Time.
+	CurrentTime = time.Now
+
 	// LogMallocSize is the pre-malloc size of a new Log data.
 	// If your logs are extremely long, such as 4000 bytes/log, you can set it to 4KB to avoid re-malloc.
 	LogMallocSize = 512 * B
@@ -42,13 +49,18 @@ var (
 	// If you want to use your own way to marshal, change it to your own marshal function.
 	MarshalToJson = json.Marshal
 
-	// CallerDepth is the depth of caller.
-	// See runtime.Caller.
-	CallerDepth = 4
-
-	// CurrentTime returns the current time with time.Time.
-	CurrentTime = time.Now
+	// OnError receives an error passed to it.
+	// You can collect all errors and count them for reporting.
+	// Notice that this function is called synchronously, so don't do too many things in it.
+	OnError func(name string, err error) = nil
 )
 
 // ByteSize is size of byte.
 type ByteSize = uint64
+
+// HandleError handles err if HandleError isn't nil.
+func HandleError(name string, err error) {
+	if OnError != nil {
+		OnError(name, err)
+	}
+}

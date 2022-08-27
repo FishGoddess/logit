@@ -10,8 +10,6 @@ applications.
 
 [阅读中文版的 Read me](./README.md)
 
-~~[Introduction Video on BiliBili](https://www.bilibili.com/video/BV14t4y1y7rF)~~
-
 ### 🥇 Features
 
 * Modularization design, easy to extend your logger with appender and writer.
@@ -24,8 +22,9 @@ applications.
 * Context binding supports, using logger is more elegant.
 * Configuration plugins supports, ex: yaml plugin can create logger from yaml configuration file.
 * Interceptor supports which can inject values from context.
+* Error handling supports which can let you count errors and report them.
 
-> Configuration plugins is based on an interface, more information can be found in [Github](https://github.com/go-logit) / [Gitee](https://gitee.com/go-logit)
+> More logit ecology can be found in [GitHub](https://github.com/go-logit) / [Gitee](https://gitee.com/go-logit)
 
 _Check [HISTORY.md](./HISTORY.md) and [FUTURE.md](./FUTURE.md) to know about more information._
 
@@ -126,15 +125,15 @@ func main() {
 ```
 
 * [basic](./_examples/basic.go)
-* [options](./_examples/options.go)
+* [option](./_examples/option.go)
 * [appender](./_examples/appender.go)
 * [writer](./_examples/writer.go)
 * [global](./_examples/global.go)
 * [context](./_examples/context.go)
-* [creator](./_examples/creator.go)
 * [caller](./_examples/caller.go)
 * [interceptor](./_examples/interceptor.go)
 * [file](./_examples/file.go)
+* [error](./_examples/error.go)
 
 _All examples can be found in [_examples](./_examples)._
 
@@ -144,24 +143,24 @@ _All examples can be found in [_examples](./_examples)._
 $ go test -v ./_examples/performance_test.go -bench=. -benchtime=1s
 ```
 
-> Benchmark file：[_examples/performance_test.go](./_examples/performance_test.go)
-
 | test case(output to memory) | times ran (large is better) | ns/op (small is better) | B/op                            | allocs/op                     |
 |-----------------------------|-----------------------------|-------------------------|---------------------------------|-------------------------------|
-| **logit**                   | **799759**                  | **&nbsp; 1373 ns/op**   | **&nbsp; &nbsp; &nbsp; 0 B/op** | **&nbsp; &nbsp; 0 allocs/op** |
-| zerolog                     | 922863                      | &nbsp; 1244 ns/op       | &nbsp; &nbsp; &nbsp; 0 B/op     | &nbsp; &nbsp; 0 allocs/op     |
-| zap                         | 413701                      | &nbsp; 2824 ns/op       | &nbsp; 897 B/op                 | &nbsp; &nbsp; 8 allocs/op     |
-| logrus                      | 105238                      | 11474 ns/op             | 7411 B/op                       | 128 allocs/op                 |
+| **logit**                   | **707851**                  | **&nbsp; 1704 ns/op**   | **&nbsp; &nbsp; &nbsp; 0 B/op** | **&nbsp; &nbsp; 0 allocs/op** |
+| zerolog                     | 706714                      | &nbsp; 1585 ns/op       | &nbsp; &nbsp; &nbsp; 0 B/op     | &nbsp; &nbsp; 0 allocs/op     |
+| zap                         | 389608                      | &nbsp; 4688 ns/op       | &nbsp; 865 B/op                 | &nbsp; &nbsp; 8 allocs/op     |
+| logrus                      | &nbsp; 69789                | 17142 ns/op             | 8885 B/op                       | 136 allocs/op                 |
 
-| test case(output to file) | times ran (large is better) | ns/op (small is better) | B/op                            | allocs/op                     |
-|---------------------------|-----------------------------|-------------------------|---------------------------------|-------------------------------|
-| **logit**                 | **599862**                  | **&nbsp; 1768 ns/op**   | **&nbsp; 901 B/op**             | **&nbsp; &nbsp; 0 allocs/op** |
-| **logit-notBuffer**       | **148113**                  | **&nbsp; 7773 ns/op**   | **&nbsp; &nbsp; &nbsp; 0 B/op** | **&nbsp; &nbsp; 0 allocs/op** |
-| zerolog                   | 159962                      | &nbsp; 7472 ns/op       | &nbsp; &nbsp; &nbsp; 0 B/op     | &nbsp; &nbsp; 0 allocs/op     |
-| zap                       | 130405                      | &nbsp; 9137 ns/op       | &nbsp; 897 B/op                 | &nbsp; &nbsp; 8 allocs/op     |
-| logrus                    | &nbsp; 65202                | 18439 ns/op             | 7410 B/op                       | 128 allocs/op                 |
+| test case(output to file) | times ran (large is better) | ns/op (small is better) | B/op                            | allocs/op                                 |
+|---------------------------|-----------------------------|-------------------------|---------------------------------|-------------------------------------------|
+| **logit**                 | **636033**                  | **&nbsp; 1822 ns/op**   | **&nbsp; &nbsp; &nbsp; 0 B/op** | **&nbsp; &nbsp; 0 allocs/op**             |
+| **logit-withoutBuffer**   | **354542**                  | **&nbsp; 3502 ns/op**   | **&nbsp; &nbsp; &nbsp; 0 B/op** | **&nbsp; &nbsp; 0             allows/op** |
+| zerolog                   | 354676                      | &nbsp; 3440 ns/op       | &nbsp; &nbsp; &nbsp; 0 B/op     | &nbsp; &nbsp; 0 allocs/op                 |
+| zap                       | 195354                      | &nbsp; 6843 ns/op       | &nbsp; 865 B/op                 | &nbsp; &nbsp; 8 allocs/op                 |
+| logrus                    | &nbsp; 58030                | 21088 ns/op             | 8885 B/op                       | 136 allocs/op                             |
 
-> Environment：R7-5800X CPU@3.8GHZ，32GB RAM，512GB SSD
+> Benchmark file：[_examples/performance_test.go](./_examples/performance_test.go)
+> 
+> Environment：R7-5800X CPU@3.8GHZ, 32GB RAM, 512GB SSD, Linux/Manjaro
 
 ### 👥 Contributing
 

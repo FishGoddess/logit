@@ -315,41 +315,7 @@ Package logit provides an easy way to use foundation for your logging operations
 	logger = logit.FromContextWithKey(ctx, businessTwoKey)
 	logger.Info("This is a message logged by logger from context with businessTwoKey").Log()
 
-7. creator:
-
-	type testLoggerCreator struct{}
-
-	func (tlm *testLoggerCreator) CreateLogger(params ...interface{}) (*logit.Logger, error) {
-		if len(params) < 1 {
-			return nil, errors.New("testLoggerCreator: len(params) < 1")
-		}
-
-		if params[0].(string) == "error" {
-			return nil, errors.New("testLoggerCreator: params[0] isn't a string")
-		}
-
-		// Customize your creation of logger here.
-		return logit.NewLogger(), nil
-	}
-
-	name := "testLoggerCreator"
-
-	// RegisterLoggerCreator registers creator to logit with given name.
-	err := logit.RegisterLoggerCreator(name, new(testLoggerCreator))
-	if err != nil {
-		panic(err)
-	}
-
-	// NewLoggerFromCreator creates logger from creator with given params.
-	// Panic will be invoked if params is "error" because CreateLogger in testLoggerCreator has this logic.
-	logger, err := logit.NewLoggerFromCreator(name, "xxx")
-	if err != nil {
-		panic(err)
-	}
-
-	logger.Info("I am made of logger creator!").Log()
-
-8. caller:
+7. caller:
 
 	// Let's create a logger without caller information.
 	logger := logit.NewLogger()
@@ -369,7 +335,7 @@ Package logit provides an easy way to use foundation for your logging operations
 	logger.Info("Invoke log.WithCaller() again").WithCaller().Log()
 	logger.Close()
 
-9. interceptor:
+8. interceptor:
 
 	// serverInterceptor is the global interceptor applied to all logs.
 	func serverInterceptor(ctx context.Context, log *logit.Log) {
@@ -416,7 +382,7 @@ Package logit provides an easy way to use foundation for your logging operations
 	ctx = context.WithValue(ctx, "business", "logger")
 	logger.Info("try interceptor - round four").WithContext(ctx).Intercept(businessInterceptor).Log()
 
-10. file:
+9. file:
 
 	// Logger will log everything to console by default.
 	logger := logit.NewLogger()
@@ -447,10 +413,29 @@ Package logit provides an easy way to use foundation for your logging operations
 	writer.BatchWithCount(os.Stdout, 256)
 	logit.Options().WithBufferWriter(os.Stdout)
 	logit.Options().WithBatchWriter(os.Stdout)
+
+10. error:
+
+	// uselessWriter is a demo writer to demonstrate the error handling function.
+	type uselessWriter struct{}
+
+	func (uw uselessWriter) Write(p []byte) (n int, err error) {
+		return 0, errors.New("always error in writing")
+	}
+
+	// You can specify a function to handle errors happens in logger.
+	// For example, you can count these errors and report them to team members by email.
+	core.OnError = func(name string, err error) {
+		fmt.Printf("%s received an error: %+v\n", name, err)
+	}
+
+	// Let's log something to see what happen.
+	logger := logit.NewLogger(logit.Options().WithWriter(&uselessWriter{}))
+	logger.Info("See what happen?").Log()
 */
 package logit // import "github.com/go-logit/logit"
 
 const (
 	// Version is the version string representation of logit.
-	Version = "v0.5.1-alpha"
+	Version = "v0.5.2-alpha"
 )
