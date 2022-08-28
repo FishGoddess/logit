@@ -81,7 +81,7 @@ Package logit provides an easy way to use foundation for your logging operations
 	// WithCallerDepth will set the depth of caller, and default is core.CallerDepth.
 	// Functions in global logger are wrapped so depth of caller should be increased 1.
 	// You can specify your depth if you wrap again or have something else reasons.
-	logger = logit.NewLogger(options.WithCallerDepth(core.CallerDepth + 1))
+	logger = logit.NewLogger(options.WithCallerDepth(global.CallerDepth + 1))
 	logit.SetGlobal(logger)
 	logit.Info("Info from logit").Log()
 
@@ -121,8 +121,8 @@ Package logit provides an easy way to use foundation for your logging operations
 	options.WithFileKey("file")
 	options.WithLineKey("line")
 	options.WithFuncKey("func")
-	options.WithTimeFormat(appender.UnixTime) // UnixTime means time will be logged as unix time, an int64 number.
-	options.WithCallerDepth(3)                // Set caller depth to 3 so the log will get the third depth caller.
+	options.WithTimeFormat(appender.UnixTimeFormat) // UnixTimeFormat means time will be logged as unix time, an int64 number.
+	options.WithCallerDepth(3)                      // Set caller depth to 3 so the log will get the third depth caller.
 	options.WithInterceptors()
 
 	// Remember, these options is only used for creating a logger.
@@ -257,34 +257,30 @@ Package logit provides an easy way to use foundation for your logging operations
 	// However, the buffer in batch writer is out of our control, so it may grow too large if our logs are too large.
 	writer.Buffer(os.Stdout)
 	writer.Batch(os.Stdout)
-	writer.BufferWithSize(os.Stdout, 16*core.KB)
+	writer.BufferWithSize(os.Stdout, 16*size.KB)
 	writer.BatchWithCount(os.Stdout, 64)
 
 5. global:
 
 	// There are some global settings for optimizations, and you can set all of them in need.
-	//
-	//     import "github.com/go-logit/logit/core"
-	//
-	// All global settings are stored in package core.
 
 	// 1. LogMallocSize (The pre-malloc size of a new Log data)
 	// If your logs are extremely long, such as 4000 bytes, you can set it to 4096 to avoid re-malloc.
-	core.LogMallocSize = 4 * core.MB // 4096 Bytes
+	global.LogMallocSize = 4 * size.MB
 
 	// 2. WriterBufferSize (The default size of buffer writer)
 	// If your logs are extremely long, such as 16 KB, you can set it to 2048 to avoid re-malloc.
-	core.WriterBufferSize = 32 * core.KB
+	global.WriterBufferSize = 32 * size.KB
 
 	// 3. MarshalToJson (The marshal function which marshal interface{} to json data)
 	// Use std by default, and you can customize your marshal function.
-	core.MarshalToJson = json.Marshal
+	global.MarshalToJson = json.Marshal
 
 	// After setting global settings, just use Logger as normal.
 	logger := logit.NewLogger()
 	defer logger.Close()
 
-	logger.Info("set global settings").Uint64("LogMallocSize", core.LogMallocSize).Uint64("WriterBufferSize", core.WriterBufferSize).Log()
+	logger.Info("set global settings").Uint64("LogMallocSize", global.LogMallocSize).Uint64("WriterBufferSize", global.WriterBufferSize).Log()
 
 6. context:
 
@@ -362,6 +358,16 @@ Package logit provides an easy way to use foundation for your logging operations
 		log.String("user", user)
 	}
 
+	// businessInterceptor is the log-level interceptor applied to one/some logs.
+	func businessInterceptor(ctx context.Context, log *logit.Log) {
+		business, ok := ctx.Value("business").(string)
+		if !ok {
+			business = "unknown business"
+		}
+
+		log.String("business", business)
+	}
+
 	// Use logit.Options().WithInterceptors to append some interceptors.
 	logger := logit.NewLogger(logit.Options().WithInterceptors(serverInterceptor, traceInterceptor, userInterceptor))
 	defer logger.Close()
@@ -384,6 +390,14 @@ Package logit provides an easy way to use foundation for your logging operations
 
 9. file:
 
+	func mustCreateFile(filePath string) *os.File {
+		f, err := os.OpenFile(filePath, os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0644)
+		if err != nil {
+			panic(err)
+		}
+		return f
+	}
+
 	// Logger will log everything to console by default.
 	logger := logit.NewLogger()
 	logger.Info("I log everything to console.").Log()
@@ -393,10 +407,9 @@ Package logit provides an easy way to use foundation for your logging operations
 	logger.Info("I also log everything to console.").Log()
 
 	// As we know, we always log everything to file in production.
-	// So we provide a convenient way to create a file.
 	logFile := filepath.Join(os.TempDir(), "test.log")
 	fmt.Println(logFile)
-	logger = logit.NewLogger(logit.Options().WithWriter(file.MustNewFile(logFile)))
+	logger = logit.NewLogger(logit.Options().WithWriter(mustCreateFile(logFile)))
 	logger.Info("I log everything to file.").String("logFile", logFile).Log()
 	logger.Close()
 
@@ -404,12 +417,12 @@ Package logit provides an easy way to use foundation for your logging operations
 	// It will use a buffer writer to write logs if withBuffer is true which will bring a huge performance improvement.
 	logFile = filepath.Join(os.TempDir(), "test_buffer.log")
 	fmt.Println(logFile)
-	logger = logit.NewLogger(logit.Options().WithWriter(file.MustNewFile(logFile)))
+	logger = logit.NewLogger(logit.Options().WithWriter(mustCreateFile(logFile)))
 	logger.Info("I log everything to file with buffer.").String("logFile", logFile).Log()
 	logger.Close()
 
 	// We provide some high-performance file for you. Try these:
-	writer.BufferWithSize(os.Stdout, 128*core.KB)
+	writer.BufferWithSize(os.Stdout, 128*size.KB)
 	writer.BatchWithCount(os.Stdout, 256)
 	logit.Options().WithBufferWriter(os.Stdout)
 	logit.Options().WithBatchWriter(os.Stdout)
@@ -425,17 +438,70 @@ Package logit provides an easy way to use foundation for your logging operations
 
 	// You can specify a function to handle errors happens in logger.
 	// For example, you can count these errors and report them to team members by email.
-	core.OnError = func(name string, err error) {
+	global.HandleError = func(name string, err error) {
 		fmt.Printf("%s received an error: %+v\n", name, err)
 	}
 
 	// Let's log something to see what happen.
 	logger := logit.NewLogger(logit.Options().WithWriter(&uselessWriter{}))
 	logger.Info("See what happen?").Log()
+
+11. config:
+
+	// We provide a config which can be converted to option in logit.
+	// It has many tags in fields, such json, yaml, toml, which means you can use config file to create logger.
+	// You just need to define your config file then unmarshal your config file to this config.
+	// Of course, you can embed this struct to your application config struct!
+	cfg := config.Config{
+		Level:         config.LevelDebug,
+		TimeKey:       "log.time",
+		LevelKey:      "log.level",
+		MsgKey:        "log.msg",
+		PIDKey:        "log.pid",
+		FileKey:       "log.file",
+		LineKey:       "log.line",
+		FuncKey:       "log.func",
+		TimeFormat:    config.UnixTimeFormat,
+		WithPID:       false,
+		WithCaller:    false,
+		CallerDepth:   0,
+		AutoFlush:     "",
+		Appender:      config.AppenderText,
+		DebugAppender: "",
+		InfoAppender:  "",
+		WarnAppender:  "",
+		ErrorAppender: "",
+		PrintAppender: "",
+		Writer: config.WriterConfig{
+			Target:     config.WriterTargetStdout,
+			Mode:       config.WriterModeDirect,
+			FileName:   "",
+			BufferSize: "4MB",
+			BatchCount: 1024,
+		},
+		DebugWriter: config.WriterConfig{},
+		InfoWriter:  config.WriterConfig{},
+		WarnWriter:  config.WriterConfig{},
+		ErrorWriter: config.WriterConfig{},
+		PrintWriter: config.WriterConfig{},
+	}
+
+	// Once you got a config, use Options() to convert to option in logger.
+	opts, err := cfg.Options()
+	if err != nil {
+		panic(err)
+	}
+	fmt.Println(opts)
+
+	// Then you can create your logger by options.
+	// Amazing!
+	logger := logit.NewLogger(opts...)
+	defer logger.Close()
+	logger.Info("My mother is a config").Any("config", cfg).Log()
 */
 package logit // import "github.com/go-logit/logit"
 
 const (
 	// Version is the version string representation of logit.
-	Version = "v0.5.2-alpha"
+	Version = "v0.5.3-alpha"
 )

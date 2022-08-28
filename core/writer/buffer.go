@@ -21,13 +21,13 @@ import (
 	"sync"
 	"time"
 
-	"github.com/go-logit/logit/core"
+	"github.com/go-logit/logit/support/size"
 )
 
 const (
 	// minBufferSize is the min size of buffer.
 	// A panic will happen if buffer size is smaller than it.
-	minBufferSize = 2 * core.B
+	minBufferSize = 2 * size.B
 )
 
 // bufferWriter is a writer having a buffer inside to reduce times of writing underlying writer.
@@ -37,7 +37,7 @@ type bufferWriter struct {
 	writer io.Writer
 
 	// maxBufferSize is the max size of buffer.
-	maxBufferSize core.ByteSize
+	maxBufferSize size.ByteSize
 
 	// buffer is for keeping data together and writing them one time.
 	// Data won't be written to underlying writer if buffer doesn't full, so you can pre-write them by Flush() if you need.
@@ -51,7 +51,7 @@ type bufferWriter struct {
 // newBufferWriter returns a new buffer writer of this writer with specified bufferSize.
 // Notice that bufferSize must be larger than minBufferSize or a panic will happen. See minBufferSize.
 // The size we want to use is bufferSize, but we add more bytes to it for avoiding buffer growing up.
-func newBufferWriter(writer io.Writer, bufferSize core.ByteSize) *bufferWriter {
+func newBufferWriter(writer io.Writer, bufferSize size.ByteSize) *bufferWriter {
 	if bufferSize <= minBufferSize {
 		panic(fmt.Errorf("bufferSize %d <= minBufferSize %d", bufferSize, minBufferSize))
 	}
@@ -110,14 +110,14 @@ func (bw *bufferWriter) Write(p []byte) (n int, err error) {
 	defer bw.lock.Unlock()
 
 	// This p is too large, so we write it directly to avoid copying.
-	tooLarge := core.ByteSize(len(p)) >= bw.maxBufferSize
+	tooLarge := size.ByteSize(len(p)) >= bw.maxBufferSize
 	if tooLarge {
 		bw.flush() // Flush before writing to keep the sequence between writes.
 		return bw.writer.Write(p)
 	}
 
 	// The remaining buffer is not enough, flush data to write this p.
-	notEnough := core.ByteSize(bw.buffer.Len()+len(p)) >= bw.maxBufferSize
+	notEnough := size.ByteSize(bw.buffer.Len()+len(p)) >= bw.maxBufferSize
 	if notEnough {
 		bw.flush()
 	}

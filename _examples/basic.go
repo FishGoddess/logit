@@ -20,7 +20,7 @@ import (
 	"os"
 
 	"github.com/go-logit/logit"
-	"github.com/go-logit/logit/core"
+	"github.com/go-logit/logit/support/global"
 )
 
 func main() {
@@ -88,7 +88,7 @@ func main() {
 	// WithCallerDepth will set the depth of caller, and default is core.CallerDepth.
 	// Functions in global logger are wrapped so depth of caller should be increased 1.
 	// You can specify your depth if you wrap again or have something else reasons.
-	logger = logit.NewLogger(options.WithCallerDepth(core.CallerDepth + 1))
+	logger = logit.NewLogger(options.WithCallerDepth(global.CallerDepth + 1))
 	logit.SetGlobal(logger)
 	logit.Info("Info from logit").Log()
 

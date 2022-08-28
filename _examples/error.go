@@ -19,7 +19,7 @@ import (
 	"fmt"
 
 	"github.com/go-logit/logit"
-	"github.com/go-logit/logit/core"
+	"github.com/go-logit/logit/support/global"
 )
 
 // uselessWriter is a demo writer to demonstrate the error handling function.
@@ -32,7 +32,7 @@ func (uw uselessWriter) Write(p []byte) (n int, err error) {
 func main() {
 	// You can specify a function to handle errors happens in logger.
 	// For example, you can count these errors and report them to team members by email.
-	core.OnError = func(name string, err error) {
+	global.HandleError = func(name string, err error) {
 		fmt.Printf("%s received an error: %+v\n", name, err)
 	}
 

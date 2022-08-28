@@ -45,7 +45,7 @@ import (
 	"os"
 
 	"github.com/go-logit/logit"
-	"github.com/go-logit/logit/core"
+	"github.com/go-logit/logit/support/global"
 )
 
 func main() {
@@ -113,7 +113,7 @@ func main() {
 	// WithCallerDepth will set the depth of caller, and default is core.CallerDepth.
 	// Functions in global logger are wrapped so depth of caller should be increased 1.
 	// You can specify your depth if you wrap again or have something else reasons.
-	logger = logit.NewLogger(options.WithCallerDepth(core.CallerDepth + 1))
+	logger = logit.NewLogger(options.WithCallerDepth(global.CallerDepth + 1))
 	logit.SetGlobal(logger)
 	logit.Info("Info from logit").Log()
 
@@ -124,23 +124,13 @@ func main() {
 }
 ```
 
-* [basic](./_examples/basic.go)
-* [option](./_examples/option.go)
-* [appender](./_examples/appender.go)
-* [writer](./_examples/writer.go)
-* [global](./_examples/global.go)
-* [context](./_examples/context.go)
-* [caller](./_examples/caller.go)
-* [interceptor](./_examples/interceptor.go)
-* [file](./_examples/file.go)
-* [error](./_examples/error.go)
-
-_All examples can be found in [_examples](./_examples)._
+_More examples can be found in [_examples](./_examples)._
 
 ### 🔥 Benchmarks
 
 ```bash
-$ go test -v ./_examples/performance_test.go -bench=. -benchtime=1s
+$ make bench
+$ make benchfile
 ```
 
 | test case(output to memory) | times ran (large is better) | ns/op (small is better) | B/op                            | allocs/op                     |

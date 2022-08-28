@@ -14,18 +14,4 @@
 
 package file
 
-import "os"
-
-// NewFile creates a new file for logging and returns an error if failed.
-func NewFile(filePath string) (*os.File, error) {
-	return os.OpenFile(filePath, os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0644)
-}
-
-// MustNewFile creates a new file for logging and panic if failed.
-func MustNewFile(filePath string) *os.File {
-	file, err := NewFile(filePath)
-	if err != nil {
-		panic(err)
-	}
-	return file
-}
+// TODO rotate file supports...

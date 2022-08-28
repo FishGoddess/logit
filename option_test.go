@@ -82,6 +82,19 @@ func TestOptionsWithErrorLevel(t *testing.T) {
 	}
 }
 
+// go test -v -cover -run=^TestOptionsWithPrintLevel$
+func TestOptionsWithPrintLevel(t *testing.T) {
+	opts := Options()
+
+	logger := NewLogger()
+	logger.level = offLevel
+
+	opts.WithPrintLevel()(logger)
+	if logger.level != printLevel {
+		t.Errorf("logger's level %s is wrong", logger.level)
+	}
+}
+
 // go test -v -cover -run=^TestOptionsWithOffLevel$
 func TestOptionsWithOffLevel(t *testing.T) {
 	opts := Options()

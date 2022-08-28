@@ -19,9 +19,9 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/go-logit/logit/pkg/runtime"
+	"github.com/go-logit/logit/support/global"
+	"github.com/go-logit/logit/support/runtime"
 
-	"github.com/go-logit/logit/core"
 	"github.com/go-logit/logit/core/appender"
 	"github.com/go-logit/logit/core/writer"
 )
@@ -50,7 +50,7 @@ type Log struct {
 // So if your logs are extremely long, you can set LogMallocSize to larger to avoid re-malloc.
 func newLog() *Log {
 	return &Log{
-		data: make([]byte, 0, core.LogMallocSize),
+		data: make([]byte, 0, global.LogMallocSize),
 		ctx:  context.Background(),
 	}
 }
@@ -73,7 +73,7 @@ func (l *Log) end() {
 
 	defer l.logger.releaseLog(l)
 	_, err := l.writer.Write(l.appender.End(l.data))
-	core.HandleError("Log.writer.Write", err)
+	global.HandleError("Log.writer.Write", err)
 }
 
 // Any adds an entry which key is string and value is interface{} type to l.
@@ -257,12 +257,16 @@ func (l *Log) String(key string, value string) *Log {
 }
 
 // Time adds an entry which key is string and value is time.Time type to l.
-func (l *Log) Time(key string, value time.Time, format string) *Log {
+func (l *Log) Time(key string, value time.Time) *Log {
 	if l == nil {
 		return nil
 	}
 
-	l.data = l.appender.AppendTime(l.data, key, value, format)
+	if l.logger != nil {
+		l.data = l.appender.AppendTime(l.data, key, value, l.logger.timeFormat)
+	} else {
+		l.data = l.appender.AppendTime(l.data, key, value, appender.UnixTimeFormat)
+	}
 	return l
 }
 
@@ -447,12 +451,16 @@ func (l *Log) Strings(key string, value []string) *Log {
 }
 
 // Times adds an entry which key is string and value is []time.Time type to l.
-func (l *Log) Times(key string, value []time.Time, format string) *Log {
+func (l *Log) Times(key string, value []time.Time) *Log {
 	if l == nil {
 		return nil
 	}
 
-	l.data = l.appender.AppendTimes(l.data, key, value, format)
+	if l.logger != nil {
+		l.data = l.appender.AppendTimes(l.data, key, value, l.logger.timeFormat)
+	} else {
+		l.data = l.appender.AppendTimes(l.data, key, value, appender.UnixTimeFormat)
+	}
 	return l
 }
 
@@ -473,6 +481,16 @@ func (l *Log) Stringers(key string, value []fmt.Stringer) *Log {
 	}
 
 	l.data = l.appender.AppendStringers(l.data, key, value)
+	return l
+}
+
+// WithTime adds an entry which key is string and value is time.Time formatted type to l.
+func (l *Log) WithTime(key string, value time.Time, format string) *Log {
+	if l == nil {
+		return nil
+	}
+
+	l.data = l.appender.AppendTime(l.data, key, value, format)
 	return l
 }
 
@@ -519,7 +537,7 @@ func (l *Log) WithCallerOf(depth int) *Log {
 
 // WithCaller adds some entries about caller information to l.
 func (l *Log) WithCaller() *Log {
-	return l.WithCallerOf(core.CallerDepth)
+	return l.WithCallerOf(global.CallerDepth)
 }
 
 // WithContext sets ctx to l.
