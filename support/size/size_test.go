@@ -12,12 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package core
+package size
 
-import (
-	"io"
-	"testing"
-)
+import "testing"
 
 // go test -v -cover -run=^TestParseByteSize$
 func TestParseByteSize(t *testing.T) {
@@ -64,24 +61,4 @@ func TestParseByteSize(t *testing.T) {
 	if err == nil {
 		t.Error("ParseByteSize 'xxx' should be error")
 	}
-}
-
-// go test -v -cover -run=^TestHandleError$
-func TestHandleError(t *testing.T) {
-	defer func() {
-		r := recover()
-		if r != nil {
-			t.Error(r)
-		}
-	}()
-
-	OnError = nil
-	HandleError("", nil)
-	HandleError("", io.EOF)
-
-	OnError = func(name string, err error) {
-		// ...
-	}
-	HandleError("", nil)
-	HandleError("", io.EOF)
 }

@@ -13,34 +13,3 @@
 // limitations under the License.
 
 package file
-
-import (
-	"os"
-	"path/filepath"
-	"testing"
-)
-
-// go test -v -cover -run=^TestNewFile$
-func TestNewFile(t *testing.T) {
-	filePath := filepath.Join(t.TempDir(), t.Name())
-	os.Remove(filePath)
-
-	file, err := NewFile(filePath)
-	if err != nil {
-		t.Error(err)
-	}
-
-	err = file.Close()
-	if err != nil {
-		t.Error(err)
-	}
-
-	stat, err := os.Stat(filePath)
-	if err != nil {
-		t.Error(err)
-	}
-
-	if stat.IsDir() {
-		t.Error("file is a directory, not file")
-	}
-}

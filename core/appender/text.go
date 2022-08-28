@@ -20,7 +20,7 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/go-logit/logit/core"
+	"github.com/go-logit/logit/support/global"
 )
 
 const (
@@ -62,7 +62,7 @@ func (ta *textAppender) AppendAny(dst []byte, key string, value interface{}) []b
 
 // AppendJson appends any entries as Json to dst.
 func (ta *textAppender) AppendJson(dst []byte, key string, value interface{}) []byte {
-	valueBytes, err := core.MarshalToJson(value)
+	valueBytes, err := global.MarshalToJson(value)
 	if err != nil {
 		return ta.AppendString(dst, key, err.Error())
 	}

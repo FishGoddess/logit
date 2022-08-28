@@ -23,9 +23,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/go-logit/logit/pkg/runtime"
-
 	"github.com/go-logit/logit/core/appender"
+
+	"github.com/go-logit/logit/support/runtime"
 )
 
 // go test -v -cover -run=^TestNewLog$

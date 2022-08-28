@@ -19,9 +19,9 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/go-logit/logit/pkg/runtime"
+	"github.com/go-logit/logit/support/global"
+	"github.com/go-logit/logit/support/runtime"
 
-	"github.com/go-logit/logit/core"
 	"github.com/go-logit/logit/core/appender"
 	"github.com/go-logit/logit/core/writer"
 )
@@ -50,7 +50,7 @@ type Log struct {
 // So if your logs are extremely long, you can set LogMallocSize to larger to avoid re-malloc.
 func newLog() *Log {
 	return &Log{
-		data: make([]byte, 0, core.LogMallocSize),
+		data: make([]byte, 0, global.LogMallocSize),
 		ctx:  context.Background(),
 	}
 }
@@ -73,7 +73,7 @@ func (l *Log) end() {
 
 	defer l.logger.releaseLog(l)
 	_, err := l.writer.Write(l.appender.End(l.data))
-	core.HandleError("Log.writer.Write", err)
+	global.HandleError("Log.writer.Write", err)
 }
 
 // Any adds an entry which key is string and value is interface{} type to l.
@@ -537,7 +537,7 @@ func (l *Log) WithCallerOf(depth int) *Log {
 
 // WithCaller adds some entries about caller information to l.
 func (l *Log) WithCaller() *Log {
-	return l.WithCallerOf(core.CallerDepth)
+	return l.WithCallerOf(global.CallerDepth)
 }
 
 // WithContext sets ctx to l.

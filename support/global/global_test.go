@@ -12,34 +12,22 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package logit
+package global
 
 import (
+	"io"
 	"testing"
-
-	"github.com/go-logit/logit/support/global"
 )
 
-// go test -v -cover -run=^TestNewDefaultConfig$
-func TestNewDefaultConfig(t *testing.T) {
-	defaultConfig := newDefaultConfig()
+// go test -v -cover -run=^TestHandleError$
+func TestHandleError(t *testing.T) {
+	defer func() {
+		r := recover()
+		if r != nil {
+			t.Error(r)
+		}
+	}()
 
-	cfg := config{
-		level:       debugLevel,
-		withPID:     false,
-		withCaller:  false,
-		msgKey:      "log.msg",
-		timeKey:     "log.time",
-		levelKey:    "log.level",
-		pidKey:      "log.pid",
-		fileKey:     "log.file",
-		lineKey:     "log.line",
-		funcKey:     "log.func",
-		timeFormat:  "2006-01-02 15:04:05",
-		callerDepth: global.CallerDepth,
-	}
-
-	if defaultConfig != cfg {
-		t.Errorf("default config %+v is wrong", defaultConfig)
-	}
+	HandleError("", nil)
+	HandleError("", io.EOF)
 }

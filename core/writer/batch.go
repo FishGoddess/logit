@@ -21,7 +21,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/go-logit/logit/core"
+	"github.com/go-logit/logit/support/global"
 )
 
 const (
@@ -62,7 +62,7 @@ func newBatchWriter(writer io.Writer, batchCount uint) *batchWriter {
 		writer:            writer,
 		maxBatchCount:     batchCount,
 		currentBatchCount: 0,
-		buffer:            bytes.NewBuffer(make([]byte, 0, core.WriterBufferSize)),
+		buffer:            bytes.NewBuffer(make([]byte, 0, global.WriterBufferSize)),
 		lock:              sync.Mutex{},
 	}
 }

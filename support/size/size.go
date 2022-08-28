@@ -12,14 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package core
+package size
 
 import (
-	"encoding/json"
 	"errors"
 	"strconv"
 	"strings"
-	"time"
 )
 
 const (
@@ -27,35 +25,6 @@ const (
 	KB
 	MB
 	GB
-)
-
-var (
-	// CallerDepth is the depth of caller.
-	// See runtime.Caller.
-	CallerDepth = 4
-
-	// CurrentTime returns the current time with time.Time.
-	CurrentTime = time.Now
-
-	// LogMallocSize is the pre-malloc size of a new Log data.
-	// If your logs are extremely long, such as 4000 bytes/log, you can set it to 4KB to avoid re-malloc.
-	LogMallocSize = 512 * B
-
-	// WriterBufferSize is the default size of buffer writer.
-	// If your logs are extremely long, such as 4 KB/log, you can set it to 512 KB to avoid re-malloc.
-	WriterBufferSize = 64 * KB
-
-	// WriterBatchCount is the default count of batch writer.
-	WriterBatchCount = uint(128)
-
-	// MarshalToJson marshals v to json bytes.
-	// If you want to use your own way to marshal, change it to your own marshal function.
-	MarshalToJson = json.Marshal
-
-	// OnError receives an error passed to it.
-	// You can collect all errors and count them for reporting.
-	// Notice that this function is called synchronously, so don't do too many things in it.
-	OnError func(name string, err error) = nil
 )
 
 // ByteSize is size of byte.
@@ -106,11 +75,4 @@ func ParseByteSize(size string) (ByteSize, error) {
 		return parseByteSize(size, "K", KB, bitUnit)
 	}
 	return parseByteSize(size, "", B, bitUnit)
-}
-
-// HandleError handles err if HandleError isn't nil.
-func HandleError(name string, err error) {
-	if OnError != nil {
-		OnError(name, err)
-	}
 }

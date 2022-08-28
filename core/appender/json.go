@@ -21,7 +21,7 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/go-logit/logit/core"
+	"github.com/go-logit/logit/support/global"
 )
 
 const (
@@ -64,7 +64,7 @@ func (ja *jsonAppender) appendKey(dst []byte, key string) []byte {
 func (ja *jsonAppender) AppendAny(dst []byte, key string, value interface{}) []byte {
 	dst = ja.appendKey(dst, key)
 
-	valueBytes, err := core.MarshalToJson(value)
+	valueBytes, err := global.MarshalToJson(value)
 	if err != nil {
 		dst = append(dst, jsonStringQuotation)
 		dst = appendEscapedString(dst, err.Error())
@@ -76,7 +76,7 @@ func (ja *jsonAppender) AppendAny(dst []byte, key string, value interface{}) []b
 
 // AppendJson appends any entries as Json to dst.
 func (ja *jsonAppender) AppendJson(dst []byte, key string, value interface{}) []byte {
-	valueBytes, err := core.MarshalToJson(value)
+	valueBytes, err := global.MarshalToJson(value)
 	if err != nil {
 		return ja.AppendString(dst, key, err.Error())
 	}

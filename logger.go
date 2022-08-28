@@ -20,9 +20,9 @@ import (
 	"os"
 	"sync"
 
-	"github.com/go-logit/logit/core"
 	"github.com/go-logit/logit/core/appender"
 	"github.com/go-logit/logit/core/writer"
+	"github.com/go-logit/logit/support/global"
 )
 
 // Interceptor intercepts log with context.
@@ -167,7 +167,7 @@ func (l *Logger) log(level level, msg string, params ...interface{}) *Log {
 
 	log := l.getLog(level).begin()
 	if l.timeKey != "" {
-		log = log.WithTime(l.timeKey, core.CurrentTime(), l.timeFormat)
+		log = log.WithTime(l.timeKey, global.CurrentTime(), l.timeFormat)
 	}
 
 	if l.levelKey != "" {

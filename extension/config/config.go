@@ -22,10 +22,9 @@ import (
 	"time"
 
 	"github.com/go-logit/logit"
-	"github.com/go-logit/logit/core"
 	"github.com/go-logit/logit/core/appender"
 	"github.com/go-logit/logit/core/writer"
-	"github.com/go-logit/logit/pkg/file"
+	"github.com/go-logit/logit/support/size"
 )
 
 const (
@@ -128,6 +127,10 @@ type Config struct {
 	PrintWriter WriterConfig `json:"print_writer" yaml:"print_writer"`
 }
 
+func (c *Config) createFile(filePath string) (*os.File, error) {
+	return os.OpenFile(filePath, os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0644)
+}
+
 // parseLevel returns the level option of c.
 func (c *Config) parseLevel(level string) (logit.Option, error) {
 	switch strings.ToLower(level) {
@@ -183,7 +186,7 @@ func (c *Config) parseWriter(wc WriterConfig) (io.Writer, error) {
 	case WriterTargetStderr:
 		w = os.Stderr
 	case WriterTargetFile:
-		f, err := file.NewFile(wc.FileName)
+		f, err := c.createFile(wc.FileName)
 		if err != nil {
 			return nil, err
 		}
@@ -195,11 +198,11 @@ func (c *Config) parseWriter(wc WriterConfig) (io.Writer, error) {
 		w = writer.Wrap(w)
 	case WriterModeBuffer:
 		if wc.BufferSize != "" {
-			size, err := core.ParseByteSize(wc.BufferSize)
+			s, err := size.ParseByteSize(wc.BufferSize)
 			if err != nil {
 				return nil, err
 			}
-			w = writer.BufferWithSize(w, size)
+			w = writer.BufferWithSize(w, s)
 		} else {
 			w = writer.Buffer(w)
 		}

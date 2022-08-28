@@ -20,13 +20,13 @@ import (
 	"testing"
 	"time"
 
-	"github.com/go-logit/logit/core"
+	"github.com/go-logit/logit/support/global"
 )
 
 // go test -v -cover -run=^TestBufferWriter$
 func TestBufferWriter(t *testing.T) {
 	buffer := bytes.NewBuffer(make([]byte, 0, 4096))
-	writer := newBufferWriter(buffer, core.WriterBufferSize)
+	writer := newBufferWriter(buffer, global.WriterBufferSize)
 	writer.AutoFlush(time.Millisecond)
 	defer writer.Close()
 

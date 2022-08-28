@@ -18,8 +18,8 @@ import (
 	"os"
 
 	"github.com/go-logit/logit"
-	"github.com/go-logit/logit/core"
 	"github.com/go-logit/logit/core/writer"
+	"github.com/go-logit/logit/support/size"
 )
 
 func main() {
@@ -89,6 +89,6 @@ func main() {
 	// However, the buffer in batch writer is out of our control, so it may grow too large if our logs are too large.
 	writer.Buffer(os.Stdout)
 	writer.Batch(os.Stdout)
-	writer.BufferWithSize(os.Stdout, 16*core.KB)
+	writer.BufferWithSize(os.Stdout, 16*size.KB)
 	writer.BatchWithCount(os.Stdout, 64)
 }
