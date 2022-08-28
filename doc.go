@@ -445,6 +445,59 @@ Package logit provides an easy way to use foundation for your logging operations
 	// Let's log something to see what happen.
 	logger := logit.NewLogger(logit.Options().WithWriter(&uselessWriter{}))
 	logger.Info("See what happen?").Log()
+
+11. config:
+
+	// We provide a config which can be converted to option in logit.
+	// It has many tags in fields, such json, yaml, toml, which means you can use config file to create logger.
+	// You just need to define your config file then unmarshal your config file to this config.
+	// Of course, you can embed this struct to your application config struct!
+	cfg := config.Config{
+		Level:         config.LevelDebug,
+		TimeKey:       "log.time",
+		LevelKey:      "log.level",
+		MsgKey:        "log.msg",
+		PIDKey:        "log.pid",
+		FileKey:       "log.file",
+		LineKey:       "log.line",
+		FuncKey:       "log.func",
+		TimeFormat:    config.UnixTimeFormat,
+		WithPID:       false,
+		WithCaller:    false,
+		CallerDepth:   0,
+		AutoFlush:     "",
+		Appender:      config.AppenderText,
+		DebugAppender: "",
+		InfoAppender:  "",
+		WarnAppender:  "",
+		ErrorAppender: "",
+		PrintAppender: "",
+		Writer: config.WriterConfig{
+			Target:     config.WriterTargetStdout,
+			Mode:       config.WriterModeDirect,
+			FileName:   "",
+			BufferSize: "4MB",
+			BatchCount: 1024,
+		},
+		DebugWriter: config.WriterConfig{},
+		InfoWriter:  config.WriterConfig{},
+		WarnWriter:  config.WriterConfig{},
+		ErrorWriter: config.WriterConfig{},
+		PrintWriter: config.WriterConfig{},
+	}
+
+	// Once you got a config, use Options() to convert to option in logger.
+	opts, err := cfg.Options()
+	if err != nil {
+		panic(err)
+	}
+	fmt.Println(opts)
+
+	// Then you can create your logger by options.
+	// Amazing!
+	logger := logit.NewLogger(opts...)
+	defer logger.Close()
+	logger.Info("My mother is a config").Any("config", cfg).Log()
 */
 package logit // import "github.com/go-logit/logit"
 

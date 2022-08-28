@@ -124,18 +124,7 @@ func main() {
 }
 ```
 
-* [basic](./_examples/basic.go)
-* [option](./_examples/option.go)
-* [appender](./_examples/appender.go)
-* [writer](./_examples/writer.go)
-* [global](./_examples/global.go)
-* [context](./_examples/context.go)
-* [caller](./_examples/caller.go)
-* [interceptor](./_examples/interceptor.go)
-* [file](./_examples/file.go)
-* [error](./_examples/error.go)
-
-_All examples can be found in [_examples](./_examples)._
+_More examples can be found in [_examples](./_examples)._
 
 ### 🔥 Benchmarks
 

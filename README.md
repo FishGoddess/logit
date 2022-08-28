@@ -122,18 +122,7 @@ func main() {
 }
 ```
 
-* [basic](./_examples/basic.go)
-* [option](./_examples/option.go)
-* [appender](./_examples/appender.go)
-* [writer](./_examples/writer.go)
-* [global](./_examples/global.go)
-* [context](./_examples/context.go)
-* [caller](./_examples/caller.go)
-* [interceptor](./_examples/interceptor.go)
-* [file](./_examples/file.go)
-* [error](./_examples/error.go)
-
-_所有的使用案例都在 [_examples](./_examples) 目录。_
+_更多使用案例请查看 [_examples](./_examples) 目录。_
 
 ### 🔥 性能测试
 

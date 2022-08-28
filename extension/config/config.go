@@ -59,23 +59,23 @@ const (
 type WriterConfig struct {
 	// Target is where the writer writes to.
 	// Values: stdout, stderr, file.
-	Target string `json:"target" yaml:"target"`
+	Target string `json:"target" yaml:"target" toml:"target" bson:"target"`
 
 	// Mode is how the writer writes to.
 	// Values: direct, buffer, batch.
-	Mode string `json:"mode" yaml:"mode"`
+	Mode string `json:"mode" yaml:"mode" toml:"mode" bson:"mode"`
 
 	// FileName is the name of file.
 	// Only available when target is file.
-	FileName string `json:"file_name" yaml:"file_name"`
+	FileName string `json:"file_name" yaml:"file_name" toml:"file_name" bson:"file_name"`
 
 	// BufferSize is the buffer size of buffer writer.
 	// Only available when mode is buffer.
-	BufferSize string `json:"buffer_size" yaml:"buffer_size"`
+	BufferSize string `json:"buffer_size" yaml:"buffer_size" toml:"buffer_size" bson:"buffer_size"`
 
 	// BatchCount is the batch count of batch writer.
 	// Only available when mode is batch.
-	BatchCount uint `json:"batch_count" yaml:"batch_count"`
+	BatchCount uint `json:"batch_count" yaml:"batch_count" toml:"batch_count" bson:"batch_count"`
 }
 
 // Config stores all configs of logger.
@@ -83,48 +83,48 @@ type WriterConfig struct {
 type Config struct {
 	// Level is the level of logger.
 	// Values: debug, info, warn, error, print, off.
-	Level string `json:"level" yaml:"level"`
+	Level string `json:"level" yaml:"level" toml:"level" bson:"level"`
 
 	// These keys are standard fields in log.
-	TimeKey  string `json:"time_key" yaml:"time_key"`
-	LevelKey string `json:"level_key" yaml:"level_key"`
-	MsgKey   string `json:"msg_key" yaml:"msg_key"`
-	PIDKey   string `json:"pid_key" yaml:"pid_key"`
-	FileKey  string `json:"file_key" yaml:"file_key"`
-	LineKey  string `json:"line_key" yaml:"line_key"`
-	FuncKey  string `json:"func_key" yaml:"func_key"`
+	TimeKey  string `json:"time_key" yaml:"time_key" toml:"time_key" bson:"time_key"`
+	LevelKey string `json:"level_key" yaml:"level_key" toml:"level_key" bson:"level_key"`
+	MsgKey   string `json:"msg_key" yaml:"msg_key" toml:"msg_key" bson:"msg_key"`
+	PIDKey   string `json:"pid_key" yaml:"pid_key" toml:"pid_key" bson:"pid_key"`
+	FileKey  string `json:"file_key" yaml:"file_key" toml:"file_key" bson:"file_key"`
+	LineKey  string `json:"line_key" yaml:"line_key" toml:"line_key" bson:"line_key"`
+	FuncKey  string `json:"func_key" yaml:"func_key" toml:"func_key" bson:"func_key"`
 
 	// TimeFormat is the format of time.
 	// Values: unix, ...
-	TimeFormat string `json:"time_format" yaml:"time_format"`
+	TimeFormat string `json:"time_format" yaml:"time_format" toml:"time_format" bson:"time_format"`
 
 	// These flags are standard fields in log.
-	WithPID     bool `json:"with_pid" yaml:"with_pid"`
-	WithCaller  bool `json:"with_caller" yaml:"with_caller"`
-	CallerDepth int  `json:"caller_depth" yaml:"caller_depth"`
+	WithPID     bool `json:"with_pid" yaml:"with_pid" toml:"with_pid" bson:"with_pid"`
+	WithCaller  bool `json:"with_caller" yaml:"with_caller" toml:"with_caller" bson:"with_caller"`
+	CallerDepth int  `json:"caller_depth" yaml:"caller_depth" toml:"caller_depth" bson:"caller_depth"`
 
 	// AutoFlush is the frequency of flushing.
 	// You can use common words like 5m or 60s.
 	// See time.Duration and time.ParseDuration.
-	AutoFlush string `json:"auto_flush" yaml:"auto_flush"`
+	AutoFlush string `json:"auto_flush" yaml:"auto_flush" toml:"auto_flush" bson:"auto_flush"`
 
 	// Appender is the appender of logger.
 	// Values: text, json.
-	Appender      string `json:"appender" yaml:"appender"`
-	DebugAppender string `json:"debug_appender" yaml:"debug_appender"`
-	InfoAppender  string `json:"info_appender" yaml:"info_appender"`
-	WarnAppender  string `json:"warn_appender" yaml:"warn_appender"`
-	ErrorAppender string `json:"error_appender" yaml:"error_appender"`
-	PrintAppender string `json:"print_appender" yaml:"print_appender"`
+	Appender      string `json:"appender" yaml:"appender" toml:"appender" bson:"appender"`
+	DebugAppender string `json:"debug_appender" yaml:"debug_appender" toml:"debug_appender" bson:"debug_appender"`
+	InfoAppender  string `json:"info_appender" yaml:"info_appender" toml:"info_appender" bson:"info_appender"`
+	WarnAppender  string `json:"warn_appender" yaml:"warn_appender" toml:"warn_appender" bson:"warn_appender"`
+	ErrorAppender string `json:"error_appender" yaml:"error_appender" toml:"error_appender" bson:"error_appender"`
+	PrintAppender string `json:"print_appender" yaml:"print_appender" toml:"print_appender" bson:"print_appender"`
 
 	// Writer is the writer of logger.
 	// See WriterConfig.
-	Writer      WriterConfig `json:"writer" yaml:"writer"`
-	DebugWriter WriterConfig `json:"debug_writer" yaml:"debug_writer"`
-	InfoWriter  WriterConfig `json:"info_writer" yaml:"info_writer"`
-	WarnWriter  WriterConfig `json:"warn_writer" yaml:"warn_writer"`
-	ErrorWriter WriterConfig `json:"error_writer" yaml:"error_writer"`
-	PrintWriter WriterConfig `json:"print_writer" yaml:"print_writer"`
+	Writer      WriterConfig `json:"writer" yaml:"writer" toml:"writer" bson:"writer"`
+	DebugWriter WriterConfig `json:"debug_writer" yaml:"debug_writer" toml:"debug_writer" bson:"debug_writer"`
+	InfoWriter  WriterConfig `json:"info_writer" yaml:"info_writer" toml:"info_writer" bson:"info_writer"`
+	WarnWriter  WriterConfig `json:"warn_writer" yaml:"warn_writer" toml:"warn_writer" bson:"warn_writer"`
+	ErrorWriter WriterConfig `json:"error_writer" yaml:"error_writer" toml:"error_writer" bson:"error_writer"`
+	PrintWriter WriterConfig `json:"print_writer" yaml:"print_writer" toml:"print_writer" bson:"print_writer"`
 }
 
 func (c *Config) createFile(filePath string) (*os.File, error) {
