@@ -23,7 +23,36 @@ import (
 
 	"github.com/go-logit/logit"
 	"github.com/go-logit/logit/core/appender"
+	"github.com/go-logit/logit/core/writer"
 	"github.com/go-logit/logit/pkg/file"
+)
+
+const (
+	LevelDebug = "debug"
+	LevelInfo  = "info"
+	LevelWarn  = "warn"
+	LevelError = "error"
+	LevelPrint = "print"
+	LevelOff   = "off"
+)
+
+const (
+	AppenderText = "text"
+	AppenderJson = "json"
+)
+
+const (
+	WriterTargetStdout = "stdout"
+	WriterTargetStderr = "stderr"
+	WriterTargetFile   = "file"
+
+	WriterModeDirect = "direct"
+	WriterModeBuffer = "buffer"
+	WriterModeBatch  = "batch"
+)
+
+const (
+	UnixTimeFormat = "unix"
 )
 
 // WriterConfig stores all configs of writer.
@@ -34,7 +63,14 @@ type WriterConfig struct {
 
 	// Mode is how the writer writes to.
 	// Values: direct, buffer, batch.
-	Mode bool `json:"mode" yaml:"mode"`
+	Mode string `json:"mode" yaml:"mode"`
+
+	// FileName is the name of file.
+	// Only available when target is file.
+	FileName string `json:"file_name" yaml:"file_name"`
+
+	BufferSize string `json:"buffer_size" yaml:"buffer_size"`
+	BatchCount uint   `json:"buffer_size" yaml:"buffer_size"`
 }
 
 // Config stores all configs of logger.
@@ -89,17 +125,17 @@ type Config struct {
 // parseLevel returns the level option of c.
 func (c *Config) parseLevel(level string) (logit.Option, error) {
 	switch strings.ToLower(level) {
-	case "debug":
+	case LevelDebug:
 		return logit.Options().WithDebugLevel(), nil
-	case "info":
+	case LevelInfo:
 		return logit.Options().WithInfoLevel(), nil
-	case "warn":
+	case LevelWarn:
 		return logit.Options().WithWarnLevel(), nil
-	case "error":
+	case LevelError:
 		return logit.Options().WithErrorLevel(), nil
-	case "print":
+	case LevelPrint:
 		return logit.Options().WithPrintLevel(), nil
-	case "off":
+	case LevelOff:
 		return logit.Options().WithOffLevel(), nil
 	default:
 		return nil, fmt.Errorf("level %s unknown", level)
@@ -108,7 +144,7 @@ func (c *Config) parseLevel(level string) (logit.Option, error) {
 
 // parseTimeFormat returns the format of time.
 func (c *Config) parseTimeFormat(format string) string {
-	if strings.ToLower(format) == "unix" {
+	if strings.ToLower(format) == UnixTimeFormat {
 		return appender.UnixTimeFormat
 	}
 	return format
@@ -122,9 +158,9 @@ func (c *Config) parseAutoFlush(frequency string) (time.Duration, error) {
 // parseAppender returns the appender of appenderName.
 func (c *Config) parseAppender(name string) (appender.Appender, error) {
 	switch strings.ToLower(name) {
-	case "text":
+	case AppenderText:
 		return appender.Text(), nil
-	case "json":
+	case AppenderJson:
 		return appender.Json(), nil
 	default:
 		return nil, fmt.Errorf("appender %s unknown", name)
@@ -132,15 +168,32 @@ func (c *Config) parseAppender(name string) (appender.Appender, error) {
 }
 
 // parseWriter returns the writer of writerName.
-func (c *Config) parseWriter(writerName string) (io.Writer, error) {
-	switch strings.ToLower(writerName) {
-	case "stdout":
-		return os.Stdout, nil
-	case "stderr":
-		return os.Stderr, nil
-	default:
-		return file.NewFile(writerName)
+func (c *Config) parseWriter(wc WriterConfig) (io.Writer, error) {
+	var w io.Writer
+
+	switch strings.ToLower(wc.Target) {
+	case WriterTargetStdout:
+		w = os.Stdout
+	case WriterTargetStderr:
+		w = os.Stderr
+	case WriterTargetFile:
+		f, err := file.NewFile(wc.FileName)
+		if err != nil {
+			return nil, err
+		}
+		w = f
 	}
+
+	switch strings.ToLower(wc.Mode) {
+	case WriterModeDirect:
+		w = writer.Wrap(w)
+	case WriterModeBuffer:
+		w = writer.Buffer(w)
+	case WriterModeBatch:
+		w = writer.Batch(w)
+	}
+
+	return w, nil
 }
 
 // Options returns a slice of logit.Option for creating logit.Logger.
@@ -262,7 +315,7 @@ func (c *Config) Options() ([]logit.Option, error) {
 	}
 
 	if c.Writer.Target != "" {
-		writer, err := c.parseWriter(c.Writer.Target)
+		writer, err := c.parseWriter(c.Writer)
 		if err != nil {
 			return nil, err
 		}
@@ -270,7 +323,7 @@ func (c *Config) Options() ([]logit.Option, error) {
 	}
 
 	if c.DebugWriter.Target != "" {
-		writer, err := c.parseWriter(c.DebugWriter.Target)
+		writer, err := c.parseWriter(c.DebugWriter)
 		if err != nil {
 			return nil, err
 		}
@@ -278,7 +331,7 @@ func (c *Config) Options() ([]logit.Option, error) {
 	}
 
 	if c.InfoWriter.Target != "" {
-		writer, err := c.parseWriter(c.InfoWriter.Target)
+		writer, err := c.parseWriter(c.InfoWriter)
 		if err != nil {
 			return nil, err
 		}
@@ -286,7 +339,7 @@ func (c *Config) Options() ([]logit.Option, error) {
 	}
 
 	if c.WarnWriter.Target != "" {
-		writer, err := c.parseWriter(c.WarnWriter.Target)
+		writer, err := c.parseWriter(c.WarnWriter)
 		if err != nil {
 			return nil, err
 		}
@@ -294,7 +347,7 @@ func (c *Config) Options() ([]logit.Option, error) {
 	}
 
 	if c.ErrorWriter.Target != "" {
-		writer, err := c.parseWriter(c.ErrorWriter.Target)
+		writer, err := c.parseWriter(c.ErrorWriter)
 		if err != nil {
 			return nil, err
 		}
@@ -302,7 +355,7 @@ func (c *Config) Options() ([]logit.Option, error) {
 	}
 
 	if c.PrintWriter.Target != "" {
-		writer, err := c.parseWriter(c.PrintWriter.Target)
+		writer, err := c.parseWriter(c.PrintWriter)
 		if err != nil {
 			return nil, err
 		}
