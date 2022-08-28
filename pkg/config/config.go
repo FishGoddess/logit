@@ -22,6 +22,7 @@ import (
 	"time"
 
 	"github.com/go-logit/logit"
+	"github.com/go-logit/logit/core"
 	"github.com/go-logit/logit/core/appender"
 	"github.com/go-logit/logit/core/writer"
 	"github.com/go-logit/logit/pkg/file"
@@ -69,8 +70,13 @@ type WriterConfig struct {
 	// Only available when target is file.
 	FileName string `json:"file_name" yaml:"file_name"`
 
+	// BufferSize is the buffer size of buffer writer.
+	// Only available when mode is buffer.
 	BufferSize string `json:"buffer_size" yaml:"buffer_size"`
-	BatchCount uint   `json:"buffer_size" yaml:"buffer_size"`
+
+	// BatchCount is the batch count of batch writer.
+	// Only available when mode is batch.
+	BatchCount uint `json:"batch_count" yaml:"batch_count"`
 }
 
 // Config stores all configs of logger.
@@ -188,9 +194,21 @@ func (c *Config) parseWriter(wc WriterConfig) (io.Writer, error) {
 	case WriterModeDirect:
 		w = writer.Wrap(w)
 	case WriterModeBuffer:
-		w = writer.Buffer(w)
+		if wc.BufferSize != "" {
+			size, err := core.ParseByteSize(wc.BufferSize)
+			if err != nil {
+				return nil, err
+			}
+			w = writer.BufferWithSize(w, size)
+		} else {
+			w = writer.Buffer(w)
+		}
 	case WriterModeBatch:
-		w = writer.Batch(w)
+		if wc.BatchCount > 0 {
+			w = writer.BatchWithCount(w, wc.BatchCount)
+		} else {
+			w = writer.Batch(w)
+		}
 	}
 
 	return w, nil
@@ -315,51 +333,51 @@ func (c *Config) Options() ([]logit.Option, error) {
 	}
 
 	if c.Writer.Target != "" {
-		writer, err := c.parseWriter(c.Writer)
+		w, err := c.parseWriter(c.Writer)
 		if err != nil {
 			return nil, err
 		}
-		result = append(result, options.WithWriter(writer))
+		result = append(result, options.WithWriter(w))
 	}
 
 	if c.DebugWriter.Target != "" {
-		writer, err := c.parseWriter(c.DebugWriter)
+		w, err := c.parseWriter(c.DebugWriter)
 		if err != nil {
 			return nil, err
 		}
-		result = append(result, options.WithDebugWriter(writer))
+		result = append(result, options.WithDebugWriter(w))
 	}
 
 	if c.InfoWriter.Target != "" {
-		writer, err := c.parseWriter(c.InfoWriter)
+		w, err := c.parseWriter(c.InfoWriter)
 		if err != nil {
 			return nil, err
 		}
-		result = append(result, options.WithInfoWriter(writer))
+		result = append(result, options.WithInfoWriter(w))
 	}
 
 	if c.WarnWriter.Target != "" {
-		writer, err := c.parseWriter(c.WarnWriter)
+		w, err := c.parseWriter(c.WarnWriter)
 		if err != nil {
 			return nil, err
 		}
-		result = append(result, options.WithWarnWriter(writer))
+		result = append(result, options.WithWarnWriter(w))
 	}
 
 	if c.ErrorWriter.Target != "" {
-		writer, err := c.parseWriter(c.ErrorWriter)
+		w, err := c.parseWriter(c.ErrorWriter)
 		if err != nil {
 			return nil, err
 		}
-		result = append(result, options.WithErrorWriter(writer))
+		result = append(result, options.WithErrorWriter(w))
 	}
 
 	if c.PrintWriter.Target != "" {
-		writer, err := c.parseWriter(c.PrintWriter)
+		w, err := c.parseWriter(c.PrintWriter)
 		if err != nil {
 			return nil, err
 		}
-		result = append(result, options.WithPrintWriter(writer))
+		result = append(result, options.WithPrintWriter(w))
 	}
 
 	return result, nil
