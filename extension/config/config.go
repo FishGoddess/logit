@@ -65,9 +65,9 @@ type WriterConfig struct {
 	// Values: direct, buffer, batch.
 	Mode string `json:"mode" yaml:"mode" toml:"mode" bson:"mode"`
 
-	// FileName is the name of file.
+	// Filename is the name of file.
 	// Only available when target is file.
-	FileName string `json:"file_name" yaml:"file_name" toml:"file_name" bson:"file_name"`
+	Filename string `json:"filename" yaml:"filename" toml:"filename" bson:"filename"`
 
 	// BufferSize is the buffer size of buffer writer.
 	// Only available when mode is buffer.
@@ -186,7 +186,7 @@ func (c *Config) parseWriter(wc WriterConfig) (io.Writer, error) {
 	case WriterTargetStderr:
 		w = os.Stderr
 	case WriterTargetFile:
-		f, err := c.createFile(wc.FileName)
+		f, err := c.createFile(wc.Filename)
 		if err != nil {
 			return nil, err
 		}

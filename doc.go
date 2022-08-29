@@ -475,7 +475,7 @@ Package logit provides an easy way to use foundation for your logging operations
 		Writer: config.WriterConfig{
 			Target:     config.WriterTargetStdout,
 			Mode:       config.WriterModeDirect,
-			FileName:   "",
+			Filename:   "",
 			BufferSize: "4MB",
 			BatchCount: 1024,
 		},
