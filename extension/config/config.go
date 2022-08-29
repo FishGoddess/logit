@@ -127,6 +127,11 @@ type Config struct {
 	PrintWriter WriterConfig `json:"print_writer" yaml:"print_writer" toml:"print_writer" bson:"print_writer"`
 }
 
+// New returns a pointer to config.
+func New() *Config {
+	return new(Config)
+}
+
 func (c *Config) createFile(filePath string) (*os.File, error) {
 	return os.OpenFile(filePath, os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0644)
 }
