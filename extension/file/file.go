@@ -15,103 +15,231 @@
 package file
 
 import (
+	"errors"
+	"fmt"
+	"io/ioutil"
 	"os"
 	"path/filepath"
+	"sort"
+	"strings"
 	"sync"
+	"time"
 
+	"github.com/go-logit/logit/support/global"
 	"github.com/go-logit/logit/support/size"
 )
 
 var (
-	Mode os.FileMode = 0644
-
-	CreateFile = func(filename string) (*os.File, error) {
-		return os.OpenFile(filename, os.O_CREATE|os.O_APPEND|os.O_WRONLY, Mode)
-	}
+	now = global.CurrentTime
 )
 
 type File struct {
-	filename  string
-	directory string
+	config
 
-	maxSize     size.ByteSize
-	currentSize size.ByteSize
+	path string
+	size size.ByteSize
 
-	file    *os.File
-	eventCh chan struct{}
-	lock    sync.Mutex
+	file *os.File
+	ch   chan struct{}
+	lock sync.Mutex
 }
 
-func New(filename string, maxSize size.ByteSize) (*File, error) {
-	// TODO 处理参数的合法性校验，考虑使用 options 机制创建
-	directory := filepath.Dir(filename)
-	err := os.MkdirAll(directory, Mode)
-	if err != nil {
-		return nil, err
-	}
-
-	file, err := CreateFile(filename)
-	if err != nil {
-		return nil, err
-	}
-
+func New(path string) (*File, error) {
 	f := &File{
-		filename:    filename,
-		directory:   directory,
-		maxSize:     maxSize,
-		currentSize: 0,
-		file:        file,
-		eventCh:     make(chan struct{}, 1),
+		config: newDefaultConfig(),
+		path:   path,
+		ch:     make(chan struct{}, 1),
 	}
 
-	go f.handleEvents()
+	if err := f.beforeOpen(); err != nil {
+		return nil, err
+	}
+
+	if err := f.openNewFile(); err != nil {
+		return nil, err
+	}
+
+	go f.watch()
 	return f, nil
 }
 
-func (f *File) handleEvents() {
-	for range f.eventCh {
-		// TODO 处理过期文件的清理和压缩等工作
-	}
+func (f *File) beforeOpen() error {
+	return os.MkdirAll(filepath.Dir(f.path), f.mode)
 }
 
-func (f *File) roll() error {
-	f.lock.Lock()
-	defer f.lock.Unlock()
+func (f *File) open() (*os.File, error) {
+	return os.OpenFile(f.path, os.O_CREATE|os.O_APPEND|os.O_WRONLY, f.mode)
+}
 
-	err := f.close()
+func (f *File) openNewFile() error {
+	file, err := f.open()
 	if err != nil {
 		return err
 	}
 
-	err = os.Remove(f.filename)
+	info, err := file.Stat()
 	if err != nil {
 		return err
 	}
 
-	// TODO ...
+	f.file = file
+	f.size = size.ByteSize(info.Size())
 	return nil
 }
 
-// beforeWrite do some checks before writing.
-func (f *File) beforeWrite(p []byte) (err error) {
-	if f.file == nil {
-		_, err := os.Stat(f.filename)
-		if os.IsNotExist(err) {
-			f.file, err = CreateFile(f.filename)
-			if err != nil {
-				return err
+func (f *File) needClean() bool {
+	return f.maxSize <= 0 && f.maxAge <= 0
+}
+
+func (f *File) filterStaleBackups(backups []backup) []string {
+	staleBackups := make(map[string]bool)
+
+	maxBackups := f.maxBackups
+	if maxBackups > 0 && uint(len(backups)) > maxBackups {
+		for i := uint(0); i < uint(len(backups))-maxBackups; i++ {
+			staleBackups[backups[i].Path] = true
+		}
+	}
+
+	maxAge := f.maxAge
+	if maxAge > 0 {
+		deadline := now().Add(-maxAge)
+
+		for _, b := range backups {
+			if !b.Before(deadline) {
+				break
 			}
+
+			staleBackups[b.Path] = true
+		}
+	}
+
+	var paths []string
+	for k := range staleBackups {
+		paths = append(paths, k)
+	}
+
+	return paths
+}
+
+func (f *File) removeBackups(paths []string) {
+	for _, p := range paths {
+		os.Remove(p)
+	}
+}
+
+func (f *File) listBackups() ([]backup, error) {
+	dir := filepath.Dir(f.path)
+
+	files, err := ioutil.ReadDir(dir)
+	if err != nil {
+		return nil, err
+	}
+
+	prefix, ext := f.prefixAndExt(filepath.Base(f.path))
+
+	var backups []backup
+	for _, file := range files {
+		if file.IsDir() {
+			continue
 		}
 
+		t, err := f.parseBackupTime(file.Name(), prefix, ext)
 		if err != nil {
-			// TODO ...
+			continue
 		}
+
+		b := backup{
+			Path: filepath.Join(dir, file.Name()),
+			Time: t,
+		}
+		backups = append(backups, b)
 	}
 
-	writeSize := size.ByteSize(len(p))
-	if writeSize > f.maxSize-f.currentSize {
-		f.roll() // ignore rolling error so this p won't be discarded.
+	sort.Slice(backups, func(i, j int) bool { return backups[i].Before(backups[j].Time) })
+	return backups, nil
+}
+
+func (f *File) parseBackupTime(filename string, prefix string, ext string) (time.Time, error) {
+	if !strings.HasPrefix(filename, prefix) {
+		return time.Time{}, errors.New("filename prefix not match")
 	}
+
+	if !strings.HasSuffix(filename, ext) {
+		return time.Time{}, errors.New("filename extension not match")
+	}
+
+	ts := filename[len(prefix) : len(filename)-len(ext)]
+	return time.Parse(f.timeFormat, ts)
+}
+
+func (f *File) clean() {
+	backups, err := f.listBackups()
+	if err != nil {
+		return
+	}
+
+	paths := f.filterStaleBackups(backups)
+	f.removeBackups(paths)
+}
+
+func (f *File) watch() {
+	if f.needClean() {
+		return
+	}
+
+	for range f.ch {
+		f.clean()
+	}
+}
+
+func (f *File) trigger() {
+	if f.needClean() {
+		return
+	}
+
+	select {
+	case f.ch <- struct{}{}:
+	default:
+	}
+}
+
+func (f *File) closeOldFile() error {
+	if err := f.file.Close(); err != nil {
+		return err
+	}
+
+	newPath := f.backupPath(f.path)
+	if err := os.Rename(f.path, newPath); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (f *File) backupPath(path string) string {
+	prefix, ext := f.prefixAndExt(path)
+	now := now().Format(f.timeFormat)
+
+	return fmt.Sprintf("%s%s%s", prefix, now, ext)
+}
+
+func (f *File) prefixAndExt(path string) (string, string) {
+	ext := filepath.Ext(path)
+	prefix := path[:len(path)-len(ext)] + "-"
+	return prefix, ext
+}
+
+func (f *File) rotate() error {
+	if err := f.closeOldFile(); err != nil {
+		return err
+	}
+
+	if err := f.openNewFile(); err != nil {
+		return err
+	}
+
+	f.trigger()
 	return nil
 }
 
@@ -119,32 +247,28 @@ func (f *File) Write(p []byte) (n int, err error) {
 	f.lock.Lock()
 	defer f.lock.Unlock()
 
-	err = f.beforeWrite(p)
-	if err != nil {
-		return 0, err
+	writeSize := size.ByteSize(len(p))
+	if f.size+writeSize > f.maxSize {
+		f.rotate() // Ignore rotating error so this p won't be discarded.
 	}
 
 	n, err = f.file.Write(p)
-	if err != nil {
-		return 0, err
-	}
+	f.size += size.ByteSize(n)
 
-	f.currentSize += size.ByteSize(n)
-	return n, nil
+	return n, err
 }
 
-func (f *File) close() (err error) {
-	if f.file == nil {
-		return nil
-	}
-
-	file := f.file
-	f.file = nil
-	return file.Close()
-}
-
-func (f *File) Close() (err error) {
+func (f *File) Sync() error {
 	f.lock.Lock()
 	defer f.lock.Unlock()
-	return f.close()
+
+	return f.file.Sync()
+}
+
+func (f *File) Close() error {
+	f.lock.Lock()
+	defer f.lock.Unlock()
+
+	close(f.ch)
+	return f.file.Close()
 }
