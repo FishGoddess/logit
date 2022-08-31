@@ -15,15 +15,11 @@
 package file
 
 import (
-	"errors"
-	"fmt"
 	"io/ioutil"
 	"os"
 	"path/filepath"
-	"sort"
 	"strings"
 	"sync"
-	"time"
 
 	"github.com/go-logit/logit/support/global"
 	"github.com/go-logit/logit/support/size"
@@ -64,7 +60,7 @@ func New(path string) (*File, error) {
 }
 
 func (f *File) beforeOpen() error {
-	return os.MkdirAll(filepath.Dir(f.path), f.mode)
+	return os.MkdirAll(filepath.Dir(f.path), f.dirMode)
 }
 
 func (f *File) open() (*os.File, error) {
@@ -97,7 +93,7 @@ func (f *File) filterStaleBackups(backups []backup) []string {
 	maxBackups := f.maxBackups
 	if maxBackups > 0 && uint(len(backups)) > maxBackups {
 		for i := uint(0); i < uint(len(backups))-maxBackups; i++ {
-			staleBackups[backups[i].Path] = true
+			staleBackups[backups[i].path] = true
 		}
 	}
 
@@ -106,11 +102,11 @@ func (f *File) filterStaleBackups(backups []backup) []string {
 		deadline := now().Add(-maxAge)
 
 		for _, b := range backups {
-			if !b.Before(deadline) {
+			if !b.BeforeTime(deadline) {
 				break
 			}
 
-			staleBackups[b.Path] = true
+			staleBackups[b.path] = true
 		}
 	}
 
@@ -122,12 +118,6 @@ func (f *File) filterStaleBackups(backups []backup) []string {
 	return paths
 }
 
-func (f *File) removeBackups(paths []string) {
-	for _, p := range paths {
-		os.Remove(p)
-	}
-}
-
 func (f *File) listBackups() ([]backup, error) {
 	dir := filepath.Dir(f.path)
 
@@ -136,7 +126,8 @@ func (f *File) listBackups() ([]backup, error) {
 		return nil, err
 	}
 
-	prefix, ext := f.prefixAndExt(filepath.Base(f.path))
+	basePath := filepath.Base(f.path)
+	prefix, ext := backupPrefixAndExt(basePath)
 
 	var backups []backup
 	for _, file := range files {
@@ -144,33 +135,31 @@ func (f *File) listBackups() ([]backup, error) {
 			continue
 		}
 
-		t, err := f.parseBackupTime(file.Name(), prefix, ext)
+		filename := file.Name()
+		notBackup := filename == basePath || !strings.HasPrefix(filename, prefix) || !strings.HasSuffix(filename, ext)
+		if notBackup {
+			continue
+		}
+
+		t, err := parseBackupTime(filename, prefix, ext, f.timeFormat)
 		if err != nil {
 			continue
 		}
 
-		b := backup{
-			Path: filepath.Join(dir, file.Name()),
-			Time: t,
-		}
-		backups = append(backups, b)
+		backups = append(backups, backup{
+			path: filepath.Join(dir, filename),
+			t:    t,
+		})
 	}
 
-	sort.Slice(backups, func(i, j int) bool { return backups[i].Before(backups[j].Time) })
+	sortBackups(backups)
 	return backups, nil
 }
 
-func (f *File) parseBackupTime(filename string, prefix string, ext string) (time.Time, error) {
-	if !strings.HasPrefix(filename, prefix) {
-		return time.Time{}, errors.New("filename prefix not match")
+func (f *File) removeBackups(paths []string) {
+	for _, p := range paths {
+		os.Remove(p)
 	}
-
-	if !strings.HasSuffix(filename, ext) {
-		return time.Time{}, errors.New("filename extension not match")
-	}
-
-	ts := filename[len(prefix) : len(filename)-len(ext)]
-	return time.Parse(f.timeFormat, ts)
 }
 
 func (f *File) clean() {
@@ -209,25 +198,12 @@ func (f *File) closeOldFile() error {
 		return err
 	}
 
-	newPath := f.backupPath(f.path)
-	if err := os.Rename(f.path, newPath); err != nil {
+	backupPath := backupPath(f.path, f.timeFormat)
+	if err := os.Rename(f.path, backupPath); err != nil {
 		return err
 	}
 
 	return nil
-}
-
-func (f *File) backupPath(path string) string {
-	prefix, ext := f.prefixAndExt(path)
-	now := now().Format(f.timeFormat)
-
-	return fmt.Sprintf("%s%s%s", prefix, now, ext)
-}
-
-func (f *File) prefixAndExt(path string) (string, string) {
-	ext := filepath.Ext(path)
-	prefix := path[:len(path)-len(ext)] + "-"
-	return prefix, ext
 }
 
 func (f *File) rotate() error {
@@ -268,6 +244,10 @@ func (f *File) Sync() error {
 func (f *File) Close() error {
 	f.lock.Lock()
 	defer f.lock.Unlock()
+
+	if err := f.file.Sync(); err != nil {
+		return err
+	}
 
 	close(f.ch)
 	return f.file.Close()

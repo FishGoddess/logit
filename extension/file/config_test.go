@@ -15,48 +15,25 @@
 package file
 
 import (
-	"os"
-	"time"
+	"testing"
 
 	"github.com/go-logit/logit/support/size"
 )
 
-const (
-	day = 24 * time.Hour
-)
+// go test -v -cover -run=^TestNewDefaultConfig$
+func TestNewDefaultConfig(t *testing.T) {
+	c := newDefaultConfig()
 
-// config stores some fields of file.
-type config struct {
-	// mode is the permission mode of file.
-	mode os.FileMode
-
-	// dirMode is the permission mode of file directory.
-	dirMode os.FileMode
-
-	// timeFormat is the time format of backup path.
-	timeFormat string
-
-	// maxSize is the max size of file.
-	// If size of data in one write is bigger than maxSize, then file will rotate and write it,
-	// which means file and its backup may bigger than maxSize in size.
-	maxSize size.ByteSize
-
-	// maxAge is the time that backup will live.
-	// All backups reach maxAge will be removed automatically.
-	maxAge time.Duration
-
-	// maxBackups is the max count of backups.
-	maxBackups uint
-}
-
-// newDefaultConfig returns a default config.
-func newDefaultConfig() config {
-	return config{
+	want := config{
 		mode:       0644,
 		dirMode:    0755,
 		timeFormat: "20060102150405",
 		maxSize:    256 * size.MB,
 		maxAge:     14 * day,
 		maxBackups: 14,
+	}
+
+	if c != want {
+		t.Errorf("c %+v != want %+v", c, want)
 	}
 }

@@ -14,13 +14,48 @@
 
 package file
 
-import "time"
+import (
+	"path/filepath"
+	"sort"
+	"time"
+)
+
+const (
+	backupSeparator = "."
+)
 
 type backup struct {
-	Path string
-	Time time.Time
+	path string
+	t    time.Time
 }
 
-func (b *backup) Before(t time.Time) bool {
-	return b.Time.Before(t)
+func (b backup) BeforeTime(t time.Time) bool {
+	return b.t.Before(t)
+}
+
+func (b backup) Before(other backup) bool {
+	return b.t.Before(other.t)
+}
+
+func sortBackups(backups []backup) {
+	sort.Slice(backups, func(i, j int) bool {
+		return backups[i].Before(backups[j])
+	})
+}
+
+func backupPrefixAndExt(path string) (string, string) {
+	ext := filepath.Ext(path)
+	prefix := path[:len(path)-len(ext)] + backupSeparator
+	return prefix, ext
+}
+
+func backupPath(path string, timeFormat string) string {
+	name, ext := backupPrefixAndExt(path)
+	now := now().Format(timeFormat)
+	return name + now + ext
+}
+
+func parseBackupTime(filename string, prefix string, ext string, timeFormat string) (time.Time, error) {
+	ts := filename[len(prefix) : len(filename)-len(ext)]
+	return time.Parse(timeFormat, ts)
 }

@@ -6,18 +6,20 @@ import (
 	"path/filepath"
 	"testing"
 	"time"
+
+	"github.com/go-logit/logit/support/size"
 )
 
-func TestNewFile(t *testing.T) {
-	dir, _ := ioutil.TempDir("", "TestNewFile")
-	defer os.RemoveAll(dir)
-
-	path := filepath.Join(dir, "New")
+// go test -v -cover -run=^TestNew$
+func TestNew(t *testing.T) {
+	path := filepath.Join(t.TempDir(), t.Name())
 
 	f, err := New(path)
 	if err != nil {
-		t.Fatalf("NewWriter error: %v", err)
+		t.Fatal(err)
 	}
+
+	defer f.Close()
 
 	data := []byte("水不要鱼")
 	n, err := f.Write(data)
@@ -26,49 +28,53 @@ func TestNewFile(t *testing.T) {
 	}
 
 	if n != len(data) {
-		t.Errorf("Write() = %v; want %v", n, len(data))
+		t.Errorf("n %d != len(data) %d", n, len(data))
 	}
 
-	out, err := ioutil.ReadFile(path)
+	read, err := ioutil.ReadFile(path)
 	if err != nil {
 		t.Errorf("ReadFile error: %v", err)
 	}
 
-	if string(out) != string(data) {
-		t.Errorf("ReadFile = %q; want %q", out, data)
+	if string(read) != string(data) {
+		t.Errorf("string(read) %s != string(data) %s", read, data)
 	}
 }
 
-func TestExistingFile(t *testing.T) {
-	dir, _ := ioutil.TempDir("", "TestNewFile")
-	defer os.RemoveAll(dir)
+// go test -v -cover -run=^TestNewExisting$
+func TestNewExisting(t *testing.T) {
+	path := filepath.Join(t.TempDir(), t.Name())
 
-	path := filepath.Join(dir, "New")
-	ioutil.WriteFile(path, []byte("水不要鱼，"), 0644)
+	err := ioutil.WriteFile(path, []byte("水不要鱼"), 0644)
+	if err != nil {
+		t.Fatal(err)
+	}
 
 	f, err := New(path)
 	if err != nil {
-		t.Fatalf("NewWriter error: %v", err)
+		t.Fatal(err)
 	}
+
+	defer f.Close()
 
 	data := []byte("FishGoddess")
 	n, err := f.Write(data)
 	if err != nil {
-		t.Errorf("Write error: %v", err)
+		t.Error(err)
 	}
 
 	if n != len(data) {
-		t.Errorf("Write() = %v; want %v", n, len(data))
+		t.Errorf("n %d != len(data) %d", n, len(data))
 	}
 
-	out, err := ioutil.ReadFile(path)
+	read, err := ioutil.ReadFile(path)
 	if err != nil {
 		t.Errorf("ReadFile error: %v", err)
 	}
 
 	want := "水不要鱼FishGoddess"
-	if string(out) != want {
-		t.Errorf("ReadFile = %q; want %q", out, want)
+	if string(read) != want {
+		t.Errorf("string(read) %s != want %s", read, want)
 	}
 }
 
@@ -77,67 +83,104 @@ func countFiles(dir string) int {
 	return len(files)
 }
 
-func TestRotate(t *testing.T) {
+// go test -v -cover -run=^TestFileRotate$
+func TestFileRotate(t *testing.T) {
+	second := int64(0)
 	now = func() time.Time {
-		return time.Unix(0, 0)
+		second++
+		return time.Unix(second, 0)
 	}
 
-	dir, _ := ioutil.TempDir("", "TestRotate")
-	defer os.RemoveAll(dir)
+	dir := filepath.Join(t.TempDir(), t.Name())
+	if err := os.RemoveAll(dir); err != nil {
+		t.Fatal(err)
+	}
 
-	path := filepath.Join(dir, "rock.log")
+	path := filepath.Join(dir, "test.log")
 
 	f, err := New(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	f.maxSize = 4 * size.B
+	defer f.Close()
+
+	data := []byte("test")
+	n, err := f.Write(data)
 	if err != nil {
 		t.Error(err)
 	}
 
-	defer f.Close()
-
-	b := []byte("boo!")
-	n, err := f.Write(b)
-	if err != nil || n != len(b) {
-		t.Errorf("Write(%q) = (%v, %v); want (%v, %v)", b, n, err, len(b), nil)
+	if n != len(data) {
+		t.Errorf("n %d != len(data) %d", n, len(data))
 	}
 
-	out, err := ioutil.ReadFile(path)
+	read, err := ioutil.ReadFile(path)
 	if err != nil {
-		t.Errorf("ReadFile error: %v", err)
+		t.Error(err)
 	}
 
-	if string(out) != string(b) {
-		t.Errorf("ReadFile = %q; want %q", out, b)
+	if string(read) != string(data) {
+		t.Errorf("string(read) %s != string(data) %s", read, data)
 	}
 
-	if got := countFiles(dir); got != 1 {
-		t.Errorf("File count = %v; want 1", got)
+	count := countFiles(dir)
+	if count != 1 {
+		t.Errorf("count %d != 1", count)
 	}
 
-	b2 := []byte("foooooo!")
-	n, err = f.Write(b2)
-	if err != nil || n != len(b2) {
-		t.Errorf("Write(%q) = (%v, %v); want (%v, %v)", b2, n, err, len(b2), nil)
-	}
-
-	out, err = ioutil.ReadFile(path)
+	data = []byte("burst")
+	n, err = f.Write(data)
 	if err != nil {
-		t.Errorf("ReadFile error: %v", err)
+		t.Error(err)
 	}
 
-	if string(out) != string(b2) {
-		t.Errorf("ReadFile = %q; want %q", out, b2)
+	if n != len(data) {
+		t.Errorf("n %d != len(data) %d", n, len(data))
 	}
 
-	out, err = ioutil.ReadFile(f.backupPath(path))
+	data = []byte("!!!")
+	n, err = f.Write(data)
 	if err != nil {
-		t.Errorf("ReadFile error: %v", err)
+		t.Error(err)
 	}
 
-	if string(out) != string(b) {
-		t.Errorf("ReadFile = %q; want %q", out, b)
+	if n != len(data) {
+		t.Errorf("n %d != len(data) %d", n, len(data))
 	}
 
-	if got := countFiles(dir); got != 2 {
-		t.Errorf("File count = %v; want 2", got)
+	read, err = ioutil.ReadFile(path)
+	if err != nil {
+		t.Error(err)
+	}
+
+	if string(read) != "!!!" {
+		t.Errorf("string(read) %s != '!!!'", read)
+	}
+
+	count = countFiles(dir)
+	if count != 3 {
+		t.Errorf("count %d != 3", count)
+	}
+
+	second = 3
+	now = func() time.Time {
+		second--
+		return time.Unix(second, 0)
+	}
+
+	for second > 1 {
+		var bs []byte
+		bs, err = ioutil.ReadFile(backupPath(path, f.timeFormat))
+		if err != nil {
+			t.Error(err)
+		}
+
+		read = append(read, bs...)
+	}
+
+	if string(read) != "!!!bursttest" {
+		t.Errorf("string(read) %s != '!!!bursttest'", read)
 	}
 }
