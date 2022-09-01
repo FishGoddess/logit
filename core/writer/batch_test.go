@@ -24,12 +24,13 @@ import (
 // go test -v -cover -run=^TestBatchWriter$
 func TestBatchWriter(t *testing.T) {
 	buffer := bytes.NewBuffer(make([]byte, 0, 4096))
+
 	writer := newBatchWriter(buffer, 10)
-	writer.AutoFlush(time.Millisecond)
+	writer.AutoSync(time.Millisecond)
 	defer writer.Close()
 
 	writer.Write([]byte("abc"))
-	writer.Flush()
+	writer.Sync()
 	if buffer.String() != "abc" {
 		t.Errorf("writing abc but found %s in buffer", buffer.String())
 	}
@@ -47,6 +48,7 @@ func TestBatchWriter(t *testing.T) {
 // go test -v -cover -run=^TestBatchWriterCount$
 func TestBatchWriterCount(t *testing.T) {
 	buffer := bytes.NewBuffer(make([]byte, 0, 4096))
+
 	writer := newBatchWriter(buffer, 10)
 	defer writer.Close()
 
@@ -58,7 +60,7 @@ func TestBatchWriterCount(t *testing.T) {
 		t.Errorf("buffer.String() %s != ''", buffer.String())
 	}
 
-	writer.Flush()
+	writer.Sync()
 	if buffer.String() != "1111111111" {
 		t.Errorf("buffer.String() %s != '1111111111'", buffer.String())
 	}
@@ -72,7 +74,7 @@ func TestBatchWriterCount(t *testing.T) {
 		t.Errorf("buffer.String() %s != '1111111111'", buffer.String())
 	}
 
-	writer.Flush()
+	writer.Sync()
 	if buffer.String() != "111111111111" {
 		t.Errorf("buffer.String() %s != '111111111111'", buffer.String())
 	}

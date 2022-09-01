@@ -65,9 +65,9 @@ func Println(params ...interface{}) {
 	globalLogger.Println(params...)
 }
 
-// Flush flushes data storing in global logger's writer.
-func Flush() (n int, err error) {
-	return globalLogger.Flush()
+// Sync syncs data storing in global logger's writer.
+func Sync() error {
+	return globalLogger.Sync()
 }
 
 // Close closes global logger and releases resources.

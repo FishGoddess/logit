@@ -39,7 +39,7 @@ func main() {
 		WithPID:       false,
 		WithCaller:    false,
 		CallerDepth:   0,
-		AutoFlush:     "",
+		AutoSync:      "",
 		Appender:      config.AppenderText,
 		DebugAppender: "",
 		InfoAppender:  "",

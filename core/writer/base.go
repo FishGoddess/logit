@@ -22,15 +22,15 @@ import (
 	"github.com/go-logit/logit/support/size"
 )
 
-// Flusher is an interface that flushes data to somewhere.
-type Flusher interface {
-	Flush() (n int, err error)
+// Syncer is an interface that syncs data to somewhere.
+type Syncer interface {
+	Sync() error
 }
 
-// Writer is an interface which have flush, write and close functions.
+// Writer is an interface which have sync, write and close functions.
 type Writer interface {
 	io.WriteCloser // WriteCloser is an interface that writes data to somewhere and can be closed.
-	Flusher        // Flusher is an interface that flushes data to somewhere.
+	Syncer         // Syncer is an interface that syncs data to somewhere.
 }
 
 // notStdoutAndStderr returns true if w isn't stdout and stderr.
@@ -40,9 +40,10 @@ func notStdoutAndStderr(w io.Writer) bool {
 
 // Wrap wraps io.writer to Writer.
 func Wrap(writer io.Writer) Writer {
-	if w, ok := writer.(Writer); ok {
+	if w, ok := writer.(*wrapWriter); ok {
 		return w
 	}
+
 	return newWrapWriter(writer)
 }
 
@@ -51,6 +52,7 @@ func BufferWithSize(writer io.Writer, bufferSize size.ByteSize) Writer {
 	if bw, ok := writer.(*bufferWriter); ok {
 		return bw
 	}
+
 	return newBufferWriter(writer, bufferSize)
 }
 

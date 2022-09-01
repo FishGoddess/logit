@@ -36,15 +36,15 @@ type batchWriter struct {
 	// writer is the underlying writer to write data.
 	writer io.Writer
 
-	// maxBatchCount is the max count of batch.
-	maxBatchCount uint
+	// maxBatches is the max count of batch.
+	maxBatches uint
 
-	// currentBatchCount is the current count of batch.
-	currentBatchCount uint
+	// currentBatches is the current count of batch.
+	currentBatches uint
 
 	// buffer is for keeping data together and writing them one time.
-	// Data won't be written to underlying writer if batch count is less than max batch count, so you can pre-write them by Flush() if you need.
-	// Also, we provide a way to flush data automatically, see batchWriter.AutoFlush.
+	// Data won't be written to underlying writer if batch count is less than max batch count, so you can pre-write them by Sync() if you need.
+	// Also, we provide a way to sync data automatically, see batchWriter.AutoSync.
 	buffer *bytes.Buffer
 
 	// lock is for safe concurrency.
@@ -59,35 +59,43 @@ func newBatchWriter(writer io.Writer, batchCount uint) *batchWriter {
 	}
 
 	return &batchWriter{
-		writer:            writer,
-		maxBatchCount:     batchCount,
-		currentBatchCount: 0,
-		buffer:            bytes.NewBuffer(make([]byte, 0, global.WriterBufferSize)),
-		lock:              sync.Mutex{},
+		writer:         writer,
+		maxBatches:     batchCount,
+		currentBatches: 0,
+		buffer:         bytes.NewBuffer(make([]byte, 0, global.WriterBufferSize)),
+		lock:           sync.Mutex{},
 	}
 }
 
-// flush writes data in buffer to underlying writer.
-func (bw *batchWriter) flush() (n int, err error) {
-	writen, err := bw.buffer.WriteTo(bw.writer)
-	return int(writen), err
+// sync writes data in buffer to underlying writer.
+func (bw *batchWriter) sync() error {
+	if _, err := bw.buffer.WriteTo(bw.writer); err != nil {
+		return err
+	}
+
+	if syncer, ok := bw.writer.(Syncer); ok && notStdoutAndStderr(bw.writer) {
+		return syncer.Sync()
+	}
+
+	return nil
 }
 
-// Flush writes data in buffer to underlying writer if buffer has data.
+// Sync writes data in buffer to underlying writer if buffer has data.
 // It's safe in concurrency.
-func (bw *batchWriter) Flush() (n int, err error) {
+func (bw *batchWriter) Sync() error {
 	bw.lock.Lock()
 	defer bw.lock.Unlock()
 
 	if bw.buffer.Len() > 0 {
-		return bw.flush()
+		return bw.sync()
 	}
-	return 0, nil
+
+	return nil
 }
 
-// AutoFlush starts a goroutine to flush data automatically.
+// AutoSync starts a goroutine to sync data automatically.
 // It returns a channel for stopping this goroutine.
-func (bw *batchWriter) AutoFlush(frequency time.Duration) chan<- struct{} {
+func (bw *batchWriter) AutoSync(frequency time.Duration) chan<- struct{} {
 	stopCh := make(chan struct{}, 1)
 
 	go func() {
@@ -97,7 +105,7 @@ func (bw *batchWriter) AutoFlush(frequency time.Duration) chan<- struct{} {
 		for {
 			select {
 			case <-ticker.C:
-				bw.Flush()
+				bw.Sync()
 			case <-stopCh:
 				return
 			}
@@ -107,33 +115,32 @@ func (bw *batchWriter) AutoFlush(frequency time.Duration) chan<- struct{} {
 	return stopCh
 }
 
-// Write writes p to buffer and flushes data to underlying writer first if it needs.
+// Write writes p to buffer and syncs data to underlying writer first if it needs.
 func (bw *batchWriter) Write(p []byte) (n int, err error) {
 	bw.lock.Lock()
 	defer bw.lock.Unlock()
 
-	needFlush := bw.currentBatchCount >= bw.maxBatchCount
-	if needFlush {
-		bw.flush()
-		bw.currentBatchCount = 0
+	if bw.currentBatches >= bw.maxBatches {
+		bw.sync()
+		bw.currentBatches = 0
 	}
 
-	bw.currentBatchCount++
+	bw.currentBatches++
 	return bw.buffer.Write(p)
 }
 
-// Close flushes data and closes underlying writer if writer implements io.Closer.
+// Close syncs data and closes underlying writer if writer implements io.Closer.
 func (bw *batchWriter) Close() error {
 	bw.lock.Lock()
 	defer bw.lock.Unlock()
 
-	_, err := bw.flush()
-	if err != nil {
+	if err := bw.sync(); err != nil {
 		return err
 	}
 
 	if closer, ok := bw.writer.(io.Closer); ok && notStdoutAndStderr(bw.writer) {
 		return closer.Close()
 	}
+
 	return nil
 }

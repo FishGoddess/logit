@@ -26,9 +26,13 @@ import (
 )
 
 var (
+	// now returns current time in time.Time.
 	now = global.CurrentTime
 )
 
+// File is a file which supports rotating automatically.
+// It has max size and file will rotate if size exceeds max size.
+// It has max age and max backups, so rotated files will be controlled in quantity which is beneficial to space.
 type File struct {
 	config
 
@@ -40,6 +44,7 @@ type File struct {
 	lock sync.Mutex
 }
 
+// New returns a new file.
 func New(path string) (*File, error) {
 	f := &File{
 		config: newDefaultConfig(),
@@ -124,7 +129,7 @@ func (f *File) filterStaleBackups(backups []backup) []string {
 		deadline := now().Add(-maxAge)
 
 		for _, backup := range backups {
-			if !backup.Before(deadline) {
+			if !backup.before(deadline) {
 				break
 			}
 
@@ -211,6 +216,7 @@ func (f *File) rotate() error {
 	return nil
 }
 
+// Write writes len(p) bytes from p to the underlying data stream.
 func (f *File) Write(p []byte) (n int, err error) {
 	f.lock.Lock()
 	defer f.lock.Unlock()
@@ -226,6 +232,7 @@ func (f *File) Write(p []byte) (n int, err error) {
 	return n, err
 }
 
+// Sync syncs data to the underlying io device.
 func (f *File) Sync() error {
 	f.lock.Lock()
 	defer f.lock.Unlock()
@@ -233,6 +240,7 @@ func (f *File) Sync() error {
 	return f.file.Sync()
 }
 
+// Close closes file and returns an error if failed.
 func (f *File) Close() error {
 	f.lock.Lock()
 	defer f.lock.Unlock()

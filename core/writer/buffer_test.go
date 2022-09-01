@@ -26,12 +26,13 @@ import (
 // go test -v -cover -run=^TestBufferWriter$
 func TestBufferWriter(t *testing.T) {
 	buffer := bytes.NewBuffer(make([]byte, 0, 4096))
+
 	writer := newBufferWriter(buffer, global.WriterBufferSize)
-	writer.AutoFlush(time.Millisecond)
+	writer.AutoSync(time.Millisecond)
 	defer writer.Close()
 
 	writer.Write([]byte("abc"))
-	writer.Flush()
+	writer.Sync()
 	if buffer.String() != "abc" {
 		t.Errorf("writing abc but found %s in buffer", buffer.String())
 	}

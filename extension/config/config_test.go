@@ -36,7 +36,7 @@ func TestConfigOptions(t *testing.T) {
 		WithPID:       true,
 		WithCaller:    true,
 		CallerDepth:   global.CallerDepth,
-		AutoFlush:     "30s",
+		AutoSync:      "30s",
 		Appender:      AppenderText,
 		DebugAppender: AppenderText,
 		InfoAppender:  AppenderText,
@@ -94,5 +94,6 @@ func TestConfigOptions(t *testing.T) {
 
 	logger := logit.NewLogger(opts...)
 	defer logger.Close()
+
 	logger.Info("My mother is a config").Any("config", cfg).Log()
 }

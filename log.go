@@ -73,6 +73,7 @@ func (l *Log) end() {
 
 	defer l.logger.releaseLog(l)
 	_, err := l.writer.Write(l.appender.End(l.data))
+
 	global.HandleError("Log.writer.Write", err)
 }
 
@@ -267,6 +268,7 @@ func (l *Log) Time(key string, value time.Time) *Log {
 	} else {
 		l.data = l.appender.AppendTime(l.data, key, value, appender.UnixTimeFormat)
 	}
+
 	return l
 }
 
@@ -461,6 +463,7 @@ func (l *Log) Times(key string, value []time.Time) *Log {
 	} else {
 		l.data = l.appender.AppendTimes(l.data, key, value, appender.UnixTimeFormat)
 	}
+
 	return l
 }
 
@@ -503,6 +506,7 @@ func (l *Log) WithPID() *Log {
 	if l.logger.pidKey != "" {
 		l.Int(l.logger.pidKey, runtime.PID())
 	}
+
 	return l
 }
 
@@ -524,6 +528,7 @@ func (l *Log) withCaller(depth int) *Log {
 	if l.logger.funcKey != "" {
 		l.String(l.logger.funcKey, function)
 	}
+
 	return l
 }
 
@@ -532,6 +537,7 @@ func (l *Log) WithCallerOf(depth int) *Log {
 	if l == nil || l.logger.withCaller {
 		return l
 	}
+
 	return l.withCaller(depth)
 }
 
@@ -559,6 +565,7 @@ func (l *Log) Intercept(interceptors ...Interceptor) *Log {
 	for _, interceptor := range interceptors {
 		interceptor(l.ctx, l)
 	}
+
 	return l
 }
 
@@ -571,5 +578,6 @@ func (l *Log) Log() {
 	for _, interceptor := range l.logger.interceptors {
 		interceptor(l.ctx, l)
 	}
+
 	l.end()
 }

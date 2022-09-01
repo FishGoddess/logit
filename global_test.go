@@ -37,6 +37,7 @@ func TestGlobalLogger(t *testing.T) {
 		//options.WithLineKey("line"),
 		//options.WithTimeFormat("060102"),
 	)
+
 	logger.SetToGlobal()
 	defer logger.Close()
 

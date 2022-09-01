@@ -118,8 +118,8 @@ func TestOptionsWithAppender(t *testing.T) {
 	logger.warnAppender = nil
 	logger.errorAppender = nil
 	logger.printAppender = nil
-	opts.WithAppender(appender.Text())(logger)
 
+	opts.WithAppender(appender.Text())(logger)
 	if logger.debugAppender != appender.Text() {
 		t.Errorf("logger's debugAppender %s is wrong", logger.debugAppender)
 	}
@@ -145,8 +145,8 @@ func TestOptionsWithAppender(t *testing.T) {
 	logger.warnAppender = nil
 	logger.errorAppender = nil
 	logger.printAppender = nil
-	opts.WithAppender(appender.Json())(logger)
 
+	opts.WithAppender(appender.Json())(logger)
 	if logger.debugAppender != appender.Json() {
 		t.Errorf("logger's debugAppender %s is wrong", logger.debugAppender)
 	}
@@ -178,8 +178,8 @@ func TestOptionsWithDebugAppender(t *testing.T) {
 	logger.warnAppender = nil
 	logger.errorAppender = nil
 	logger.printAppender = nil
-	opts.WithDebugAppender(appender.Text())(logger)
 
+	opts.WithDebugAppender(appender.Text())(logger)
 	if logger.debugAppender != appender.Text() {
 		t.Errorf("logger's debugAppender %s is wrong", logger.debugAppender)
 	}
@@ -211,8 +211,8 @@ func TestOptionsWithInfoAppender(t *testing.T) {
 	logger.warnAppender = nil
 	logger.errorAppender = nil
 	logger.printAppender = nil
-	opts.WithInfoAppender(appender.Text())(logger)
 
+	opts.WithInfoAppender(appender.Text())(logger)
 	if logger.debugAppender != nil {
 		t.Errorf("logger's debugAppender %s is wrong", logger.debugAppender)
 	}
@@ -244,8 +244,8 @@ func TestOptionsWithWarnAppender(t *testing.T) {
 	logger.warnAppender = nil
 	logger.errorAppender = nil
 	logger.printAppender = nil
-	opts.WithWarnAppender(appender.Text())(logger)
 
+	opts.WithWarnAppender(appender.Text())(logger)
 	if logger.debugAppender != nil {
 		t.Errorf("logger's debugAppender %s is wrong", logger.debugAppender)
 	}
@@ -277,8 +277,8 @@ func TestOptionsWithErrorAppender(t *testing.T) {
 	logger.warnAppender = nil
 	logger.errorAppender = nil
 	logger.printAppender = nil
-	opts.WithErrorAppender(appender.Text())(logger)
 
+	opts.WithErrorAppender(appender.Text())(logger)
 	if logger.debugAppender != nil {
 		t.Errorf("logger's debugAppender %s is wrong", logger.debugAppender)
 	}
@@ -310,8 +310,8 @@ func TestOptionsWithPrintAppender(t *testing.T) {
 	logger.warnAppender = nil
 	logger.errorAppender = nil
 	logger.printAppender = nil
-	opts.WithPrintAppender(appender.Text())(logger)
 
+	opts.WithPrintAppender(appender.Text())(logger)
 	if logger.debugAppender != nil {
 		t.Errorf("logger's debugAppender %s is wrong", logger.debugAppender)
 	}
@@ -343,8 +343,8 @@ func TestOptionsWithWriter(t *testing.T) {
 	logger.warnWriter = nil
 	logger.errorWriter = nil
 	logger.printWriter = nil
-	opts.WithWriter(os.Stdout)(logger)
 
+	opts.WithWriter(os.Stdout)(logger)
 	if logger.debugWriter == nil {
 		t.Errorf("logger's debugWriter %s is wrong", logger.debugWriter)
 	}
@@ -376,8 +376,8 @@ func TestOptionsWithBufferWriter(t *testing.T) {
 	logger.warnWriter = nil
 	logger.errorWriter = nil
 	logger.printWriter = nil
-	opts.WithBufferWriter(os.Stdout)(logger)
 
+	opts.WithBufferWriter(os.Stdout)(logger)
 	if logger.debugWriter == nil {
 		t.Errorf("logger's debugWriter %s is wrong", logger.debugWriter)
 	}
@@ -409,8 +409,8 @@ func TestOptionsWithBatchWriter(t *testing.T) {
 	logger.warnWriter = nil
 	logger.errorWriter = nil
 	logger.printWriter = nil
-	opts.WithBatchWriter(os.Stdout)(logger)
 
+	opts.WithBatchWriter(os.Stdout)(logger)
 	if logger.debugWriter == nil {
 		t.Errorf("logger's debugWriter %s is wrong", logger.debugWriter)
 	}
@@ -442,8 +442,8 @@ func TestOptionsWithDebugWriter(t *testing.T) {
 	logger.warnWriter = nil
 	logger.errorWriter = nil
 	logger.printWriter = nil
-	opts.WithDebugWriter(os.Stdout)(logger)
 
+	opts.WithDebugWriter(os.Stdout)(logger)
 	if logger.debugWriter == nil {
 		t.Errorf("logger's debugWriter %s is wrong", logger.debugWriter)
 	}
@@ -475,8 +475,8 @@ func TestOptionsWithInfoWriter(t *testing.T) {
 	logger.warnWriter = nil
 	logger.errorWriter = nil
 	logger.printWriter = nil
-	opts.WithInfoWriter(os.Stdout)(logger)
 
+	opts.WithInfoWriter(os.Stdout)(logger)
 	if logger.debugWriter != nil {
 		t.Errorf("logger's debugWriter %s is wrong", logger.debugWriter)
 	}
@@ -508,8 +508,8 @@ func TestOptionsWithWarnWriter(t *testing.T) {
 	logger.warnWriter = nil
 	logger.errorWriter = nil
 	logger.printWriter = nil
-	opts.WithWarnWriter(os.Stdout)(logger)
 
+	opts.WithWarnWriter(os.Stdout)(logger)
 	if logger.debugWriter != nil {
 		t.Errorf("logger's debugWriter %s is wrong", logger.debugWriter)
 	}
@@ -541,8 +541,8 @@ func TestOptionsWithErrorWriter(t *testing.T) {
 	logger.warnWriter = nil
 	logger.errorWriter = nil
 	logger.printWriter = nil
-	opts.WithErrorWriter(os.Stdout)(logger)
 
+	opts.WithErrorWriter(os.Stdout)(logger)
 	if logger.debugWriter != nil {
 		t.Errorf("logger's debugWriter %s is wrong", logger.debugWriter)
 	}
@@ -574,8 +574,8 @@ func TestOptionsWithPrintWriter(t *testing.T) {
 	logger.warnWriter = nil
 	logger.errorWriter = nil
 	logger.printWriter = nil
-	opts.WithPrintWriter(os.Stdout)(logger)
 
+	opts.WithPrintWriter(os.Stdout)(logger)
 	if logger.debugWriter != nil {
 		t.Errorf("logger's debugWriter %s is wrong", logger.debugWriter)
 	}

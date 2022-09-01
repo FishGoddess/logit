@@ -65,6 +65,7 @@ func main() {
 		options.WithCallerDepth(4),
 		// ...
 	)
+
 	defer logger.Close()
 	logger.Info("check options").Log()
 
@@ -80,14 +81,14 @@ func main() {
 	// You can customize an option for your logger.
 	// Actually, Option is just a function like func(logger *Logger).
 	// So you can do what you want in creating a logger.
-	autoFlushOption := func(logger *logit.Logger) {
+	syncOption := func(logger *logit.Logger) {
 		go func() {
 			select {
 			case <-time.Tick(time.Second):
-				logger.Flush()
+				logger.Sync()
 			}
 		}()
 	}
 
-	logit.NewLogger(autoFlushOption)
+	logit.NewLogger(syncOption)
 }

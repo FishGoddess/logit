@@ -41,6 +41,7 @@ func TestNewLogger(t *testing.T) {
 		//options.WithLineKey("line"),
 		//options.WithTimeFormat("060102"),
 	)
+
 	defer logger.Close()
 
 	logger.Debug("debug...").String("trace", "xxx").Int("id", 123).Float64("pi", 3.14).Any("any", map[string]interface{}{"a": 1, "b": "bbb"}).Log()
@@ -102,12 +103,11 @@ func TestLoggerPrintf(t *testing.T) {
 	}
 }
 
-// go test -v -cover -run=^TestLoggerFlush$
-func TestLoggerFlush(t *testing.T) {
+// go test -v -cover -run=^TestLoggerSync$
+func TestLoggerSync(t *testing.T) {
 	logger := NewLogger()
 
-	_, err := logger.Flush()
-	if err != nil {
+	if err := logger.Sync(); err != nil {
 		t.Error(err)
 	}
 }
@@ -116,8 +116,7 @@ func TestLoggerFlush(t *testing.T) {
 func TestLoggerClose(t *testing.T) {
 	logger := NewLogger()
 
-	err := logger.Close()
-	if err != nil {
+	if err := logger.Close(); err != nil {
 		t.Error(err)
 	}
 

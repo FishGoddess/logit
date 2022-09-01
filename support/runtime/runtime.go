@@ -42,5 +42,6 @@ func Caller(depth int) (file string, line int, function string) {
 	if f != nil {
 		function = f.Name()
 	}
+
 	return file, line, function
 }

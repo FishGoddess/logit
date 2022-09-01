@@ -24,18 +24,18 @@ import (
 
 func main() {
 	// As you know, writer in logit is customized, not io.Writer.
-	// The reason why we create a new Writer interface is we want a flushable writer.
-	// Then, we notice a flushable writer also need a close method to flush all data in buffer when closing.
+	// The reason why we create a new Writer interface is we want a sync-able writer.
+	// Then, we notice a sync-able writer also need a close method to sync all data in buffer when closing.
 	// So, a new Writer is born:
 	//
 	//     type Writer interface {
-	//	       Flusher
+	//	       Syncer
 	//	       io.WriteCloser
 	//     }
 	//
 	// In package writer, we provide some writers for you.
 	writer.Wrap(os.Stdout)   // Wrap io.Writer to writer.Writer.
-	writer.Buffer(os.Stderr) // Wrap io.Writer to writer.Writer with buffer, which needs invoking Flush() or Close().
+	writer.Buffer(os.Stderr) // Wrap io.Writer to writer.Writer with buffer, which needs invoking Sync() or Close().
 
 	// Use the writer without buffer.
 	logger := logit.NewLogger(logit.Options().WithWriter(os.Stdout))
@@ -44,13 +44,13 @@ func main() {
 	// Use the writer with buffer, which is good for io.
 	logger = logit.NewLogger(logit.Options().WithBufferWriter(os.Stdout))
 	logger.Info("WriterWithBuffer").Log()
-	logger.Flush() // Remember flushing data or flushing by Close().
+	logger.Sync() // Remember syncing data or syncing by Close().
 	logger.Close()
 
 	// Use the writer with batch, which is also good for io.
 	logger = logit.NewLogger(logit.Options().WithBatchWriter(os.Stdout))
 	logger.Info("WriterWithBatch").Log()
-	logger.Flush() // Remember flushing data or flushing by Close().
+	logger.Sync() // Remember syncing data or syncing by Close().
 	logger.Close()
 
 	// Every level has its own appender so you can append logs in different level with different appender.

@@ -28,12 +28,12 @@ func newWrapWriter(writer io.Writer) *wrapWriter {
 	return &wrapWriter{writer: writer}
 }
 
-// Flush flushes data to underlying writer.
-func (ww *wrapWriter) Flush() (n int, err error) {
-	if flusher, ok := ww.writer.(Flusher); ok {
-		return flusher.Flush()
+// Sync syncs data to underlying writer.
+func (ww *wrapWriter) Sync() error {
+	if syncer, ok := ww.writer.(Syncer); ok && notStdoutAndStderr(ww.writer) {
+		return syncer.Sync()
 	}
-	return 0, nil
+	return nil
 }
 
 // Write writes data to underlying writer.
