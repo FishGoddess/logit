@@ -40,6 +40,7 @@ func parseByteSize(size string, trimUnit string, unitSize ByteSize, bitUnit bool
 	if bitUnit {
 		return n / 8 * unitSize, nil
 	}
+
 	return n * unitSize, nil
 }
 
@@ -74,5 +75,6 @@ func ParseByteSize(size string) (ByteSize, error) {
 	if strings.HasSuffix(size, "K") {
 		return parseByteSize(size, "K", KB, bitUnit)
 	}
+
 	return parseByteSize(size, "", B, bitUnit)
 }

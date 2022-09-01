@@ -65,9 +65,9 @@ type WriterConfig struct {
 	// Values: direct, buffer, batch.
 	Mode string `json:"mode" yaml:"mode" toml:"mode" bson:"mode"`
 
-	// FileName is the name of file.
+	// Filename is the name of file.
 	// Only available when target is file.
-	FileName string `json:"file_name" yaml:"file_name" toml:"file_name" bson:"file_name"`
+	Filename string `json:"filename" yaml:"filename" toml:"filename" bson:"filename"`
 
 	// BufferSize is the buffer size of buffer writer.
 	// Only available when mode is buffer.
@@ -103,10 +103,10 @@ type Config struct {
 	WithCaller  bool `json:"with_caller" yaml:"with_caller" toml:"with_caller" bson:"with_caller"`
 	CallerDepth int  `json:"caller_depth" yaml:"caller_depth" toml:"caller_depth" bson:"caller_depth"`
 
-	// AutoFlush is the frequency of flushing.
+	// AutoSync is the frequency of syncing.
 	// You can use common words like 5m or 60s.
 	// See time.Duration and time.ParseDuration.
-	AutoFlush string `json:"auto_flush" yaml:"auto_flush" toml:"auto_flush" bson:"auto_flush"`
+	AutoSync string `json:"auto_sync" yaml:"auto_sync" toml:"auto_sync" bson:"auto_sync"`
 
 	// Appender is the appender of logger.
 	// Values: text, json.
@@ -125,6 +125,11 @@ type Config struct {
 	WarnWriter  WriterConfig `json:"warn_writer" yaml:"warn_writer" toml:"warn_writer" bson:"warn_writer"`
 	ErrorWriter WriterConfig `json:"error_writer" yaml:"error_writer" toml:"error_writer" bson:"error_writer"`
 	PrintWriter WriterConfig `json:"print_writer" yaml:"print_writer" toml:"print_writer" bson:"print_writer"`
+}
+
+// New returns a pointer to config.
+func New() *Config {
+	return new(Config)
 }
 
 func (c *Config) createFile(filePath string) (*os.File, error) {
@@ -156,11 +161,12 @@ func (c *Config) parseTimeFormat(format string) string {
 	if strings.ToLower(format) == UnixTimeFormat {
 		return appender.UnixTimeFormat
 	}
+
 	return format
 }
 
-// parseAutoFlush returns the frequency of flushing.
-func (c *Config) parseAutoFlush(frequency string) (time.Duration, error) {
+// parseAutoSync returns the frequency of syncing.
+func (c *Config) parseAutoSync(frequency string) (time.Duration, error) {
 	return time.ParseDuration(frequency)
 }
 
@@ -186,10 +192,11 @@ func (c *Config) parseWriter(wc WriterConfig) (io.Writer, error) {
 	case WriterTargetStderr:
 		w = os.Stderr
 	case WriterTargetFile:
-		f, err := c.createFile(wc.FileName)
+		f, err := c.createFile(wc.Filename)
 		if err != nil {
 			return nil, err
 		}
+
 		w = f
 	}
 
@@ -202,6 +209,7 @@ func (c *Config) parseWriter(wc WriterConfig) (io.Writer, error) {
 			if err != nil {
 				return nil, err
 			}
+
 			w = writer.BufferWithSize(w, s)
 		} else {
 			w = writer.Buffer(w)
@@ -232,6 +240,7 @@ func (c *Config) Options() ([]logit.Option, error) {
 		if err != nil {
 			return nil, err
 		}
+
 		result = append(result, levelOption)
 	}
 
@@ -279,12 +288,13 @@ func (c *Config) Options() ([]logit.Option, error) {
 		result = append(result, options.WithCallerDepth(c.CallerDepth))
 	}
 
-	if strings.TrimSpace(c.AutoFlush) != "" {
-		frequency, err := c.parseAutoFlush(c.AutoFlush)
+	if strings.TrimSpace(c.AutoSync) != "" {
+		frequency, err := c.parseAutoSync(c.AutoSync)
 		if err != nil {
 			return nil, err
 		}
-		result = append(result, options.WithAutoFlush(frequency))
+
+		result = append(result, options.WithAutoSync(frequency))
 	}
 
 	if strings.TrimSpace(c.Appender) != "" {
@@ -292,6 +302,7 @@ func (c *Config) Options() ([]logit.Option, error) {
 		if err != nil {
 			return nil, err
 		}
+
 		result = append(result, options.WithAppender(apdr))
 	}
 
@@ -300,6 +311,7 @@ func (c *Config) Options() ([]logit.Option, error) {
 		if err != nil {
 			return nil, err
 		}
+
 		result = append(result, options.WithDebugAppender(apdr))
 	}
 
@@ -308,6 +320,7 @@ func (c *Config) Options() ([]logit.Option, error) {
 		if err != nil {
 			return nil, err
 		}
+
 		result = append(result, options.WithInfoAppender(apdr))
 	}
 
@@ -316,6 +329,7 @@ func (c *Config) Options() ([]logit.Option, error) {
 		if err != nil {
 			return nil, err
 		}
+
 		result = append(result, options.WithWarnAppender(apdr))
 	}
 
@@ -324,6 +338,7 @@ func (c *Config) Options() ([]logit.Option, error) {
 		if err != nil {
 			return nil, err
 		}
+
 		result = append(result, options.WithErrorAppender(apdr))
 	}
 
@@ -332,6 +347,7 @@ func (c *Config) Options() ([]logit.Option, error) {
 		if err != nil {
 			return nil, err
 		}
+
 		result = append(result, options.WithPrintAppender(apdr))
 	}
 
@@ -340,6 +356,7 @@ func (c *Config) Options() ([]logit.Option, error) {
 		if err != nil {
 			return nil, err
 		}
+
 		result = append(result, options.WithWriter(w))
 	}
 
@@ -348,6 +365,7 @@ func (c *Config) Options() ([]logit.Option, error) {
 		if err != nil {
 			return nil, err
 		}
+
 		result = append(result, options.WithDebugWriter(w))
 	}
 
@@ -356,6 +374,7 @@ func (c *Config) Options() ([]logit.Option, error) {
 		if err != nil {
 			return nil, err
 		}
+
 		result = append(result, options.WithInfoWriter(w))
 	}
 
@@ -364,6 +383,7 @@ func (c *Config) Options() ([]logit.Option, error) {
 		if err != nil {
 			return nil, err
 		}
+
 		result = append(result, options.WithWarnWriter(w))
 	}
 
@@ -372,6 +392,7 @@ func (c *Config) Options() ([]logit.Option, error) {
 		if err != nil {
 			return nil, err
 		}
+
 		result = append(result, options.WithErrorWriter(w))
 	}
 
@@ -380,6 +401,7 @@ func (c *Config) Options() ([]logit.Option, error) {
 		if err != nil {
 			return nil, err
 		}
+
 		result = append(result, options.WithPrintWriter(w))
 	}
 

@@ -19,10 +19,10 @@ import (
 )
 
 const (
-	debugLevel level = iota              // For debug.
-	infoLevel                            // For info.
-	warnLevel                            // For Warn.
-	errorLevel                           // For error.
+	debugLevel level = 0
+	infoLevel  level = 1
+	warnLevel  level = 2
+	errorLevel level = 3
 	printLevel level = math.MaxUint8 - 1 // For printing.
 	offLevel   level = math.MaxUint8     // For turning off the logger.
 )

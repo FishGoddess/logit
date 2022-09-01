@@ -12,36 +12,28 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package runtime
+package file
 
 import (
-	"os"
-	"runtime"
+	"testing"
+
+	"github.com/go-logit/logit/support/size"
 )
 
-var (
-	pid = os.Getpid() // The pid of current process.
-)
+// go test -v -cover -run=^TestNewDefaultConfig$
+func TestNewDefaultConfig(t *testing.T) {
+	c := newDefaultConfig()
 
-// PID returns the pid of current process.
-func PID() int {
-	return pid
-}
-
-// Caller returns the caller information of depth.
-func Caller(depth int) (file string, line int, function string) {
-	var pc uintptr
-	var ok bool
-
-	pc, file, line, ok = runtime.Caller(depth)
-	if !ok {
-		return "unknown", -1, "unknown"
+	want := config{
+		mode:       0644,
+		dirMode:    0755,
+		timeFormat: "20060102150405",
+		maxSize:    256 * size.MB,
+		maxAge:     14 * day,
+		maxBackups: 14,
 	}
 
-	f := runtime.FuncForPC(pc)
-	if f != nil {
-		function = f.Name()
+	if c != want {
+		t.Errorf("c %+v != want %+v", c, want)
 	}
-
-	return file, line, function
 }

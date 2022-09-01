@@ -28,7 +28,7 @@ func TestWrapWriter(t *testing.T) {
 	defer writer.Close()
 
 	writer.Write([]byte("abc"))
-	writer.Flush()
+	writer.Sync()
 	if buffer.String() != "abc" {
 		t.Errorf("writing abc but found %s in buffer", buffer.String())
 	}

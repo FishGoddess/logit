@@ -78,6 +78,7 @@ func NewLogger(options ...Option) *Logger {
 	for _, applyOption := range options {
 		applyOption(logger)
 	}
+
 	return logger
 }
 
@@ -185,6 +186,7 @@ func (l *Logger) log(level level, msg string, params ...interface{}) *Log {
 	if len(params) > 0 {
 		msg = fmt.Sprintf(msg, params...)
 	}
+
 	return log.String(l.msgKey, msg)
 }
 
@@ -223,75 +225,62 @@ func (l *Logger) Println(params ...interface{}) {
 	l.log(printLevel, fmt.Sprintln(params...)).Log()
 }
 
-// Flush flushes data storing in logger's writer.
-// This isn't necessary for all writers, but Buffer writer needs.
-// Actually, you can use an option to flush automatically, see options.
-// Close a logger will also invoke Flush(), so you can use an option or Close() to flush instead.
-// However, you still need to flush manually if you want your logs store immediately.
-func (l *Logger) Flush() (n int, err error) {
-	i, e := l.printWriter.Flush()
-	if e != nil {
+// Sync syncs data storing in logger's writer.
+// You can use an option to sync automatically, see options.
+// Close a logger will also invoke Sync(), so you can use an option or Close() to sync instead.
+// However, you still need to sync manually if you want your logs to be stored immediately.
+func (l *Logger) Sync() error {
+	var err error
+
+	if e := l.printWriter.Sync(); e != nil {
 		err = e
 	}
 
-	n += i
-	i, e = l.errorWriter.Flush()
-	if e != nil {
+	if e := l.errorWriter.Sync(); e != nil {
 		err = e
 	}
 
-	n += i
-	i, e = l.warnWriter.Flush()
-	if e != nil {
+	if e := l.warnWriter.Sync(); e != nil {
 		err = e
 	}
 
-	n += i
-	i, e = l.infoWriter.Flush()
-	if e != nil {
+	if e := l.infoWriter.Sync(); e != nil {
 		err = e
 	}
 
-	n += i
-	i, e = l.debugWriter.Flush()
-	if e != nil {
+	if e := l.debugWriter.Sync(); e != nil {
 		err = e
 	}
 
-	n += i
-	return n, err
+	return err
 }
 
 // Close closes logger and releases resources.
-// It will flush data and set level to offLevel.
+// It will sync data and set level to offLevel.
 // It will invoke close() if writer is io.Closer.
 // So, it is recommended for you to invoke it habitually.
 func (l *Logger) Close() error {
 	l.level = offLevel // uint8 is safe-concurrent in assignment, but may cause dirty read?
 
-	_, err := l.Flush()
-	if err != nil {
+	if err := l.Sync(); err != nil {
 		return err
 	}
 
-	err = l.printWriter.Close()
-	if err != nil {
+	if err := l.printWriter.Close(); err != nil {
 		return err
 	}
 
-	err = l.errorWriter.Close()
-	if err != nil {
+	if err := l.errorWriter.Close(); err != nil {
 		return err
 	}
 
-	err = l.warnWriter.Close()
-	if err != nil {
+	if err := l.warnWriter.Close(); err != nil {
 		return err
 	}
 
-	err = l.infoWriter.Close()
-	if err != nil {
+	if err := l.infoWriter.Close(); err != nil {
 		return err
 	}
+
 	return l.debugWriter.Close()
 }

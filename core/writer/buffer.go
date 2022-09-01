@@ -40,8 +40,8 @@ type bufferWriter struct {
 	maxBufferSize size.ByteSize
 
 	// buffer is for keeping data together and writing them one time.
-	// Data won't be written to underlying writer if buffer doesn't full, so you can pre-write them by Flush() if you need.
-	// Also, we provide a way to flush data automatically, see bufferWriter.AutoFlush.
+	// Data won't be written to underlying writer if buffer doesn't full, so you can pre-write them by Sync() if you need.
+	// Also, we provide a way to sync data automatically, see bufferWriter.AutoSync.
 	buffer *bytes.Buffer
 
 	// lock is for safe concurrency.
@@ -64,27 +64,35 @@ func newBufferWriter(writer io.Writer, bufferSize size.ByteSize) *bufferWriter {
 	}
 }
 
-// flush writes data in buffer to underlying writer.
-func (bw *bufferWriter) flush() (n int, err error) {
-	writen, err := bw.buffer.WriteTo(bw.writer)
-	return int(writen), err
+// sync writes data in buffer to underlying writer.
+func (bw *bufferWriter) sync() error {
+	if _, err := bw.buffer.WriteTo(bw.writer); err != nil {
+		return err
+	}
+
+	if syncer, ok := bw.writer.(Syncer); ok && notStdoutAndStderr(bw.writer) {
+		return syncer.Sync()
+	}
+
+	return nil
 }
 
-// Flush writes data in buffer to underlying writer if buffer has data.
+// Sync writes data in buffer to underlying writer if buffer has data.
 // It's safe in concurrency.
-func (bw *bufferWriter) Flush() (n int, err error) {
+func (bw *bufferWriter) Sync() error {
 	bw.lock.Lock()
 	defer bw.lock.Unlock()
 
 	if bw.buffer.Len() > 0 {
-		return bw.flush()
+		return bw.sync()
 	}
-	return 0, nil
+
+	return nil
 }
 
-// AutoFlush starts a goroutine to flush data automatically.
+// AutoSync starts a goroutine to sync data automatically.
 // It returns a channel for stopping this goroutine.
-func (bw *bufferWriter) AutoFlush(frequency time.Duration) chan<- struct{} {
+func (bw *bufferWriter) AutoSync(frequency time.Duration) chan<- struct{} {
 	stopCh := make(chan struct{}, 1)
 
 	go func() {
@@ -94,7 +102,7 @@ func (bw *bufferWriter) AutoFlush(frequency time.Duration) chan<- struct{} {
 		for {
 			select {
 			case <-ticker.C:
-				bw.Flush()
+				bw.Sync()
 			case <-stopCh:
 				return
 			}
@@ -104,7 +112,7 @@ func (bw *bufferWriter) AutoFlush(frequency time.Duration) chan<- struct{} {
 	return stopCh
 }
 
-// Write writes p to buffer and flushes data to underlying writer first if it needs.
+// Write writes p to buffer and syncs data to underlying writer first if it needs.
 func (bw *bufferWriter) Write(p []byte) (n int, err error) {
 	bw.lock.Lock()
 	defer bw.lock.Unlock()
@@ -112,30 +120,31 @@ func (bw *bufferWriter) Write(p []byte) (n int, err error) {
 	// This p is too large, so we write it directly to avoid copying.
 	tooLarge := size.ByteSize(len(p)) >= bw.maxBufferSize
 	if tooLarge {
-		bw.flush() // Flush before writing to keep the sequence between writes.
+		bw.sync() // Sync before writing to keep the sequence between writes.
 		return bw.writer.Write(p)
 	}
 
-	// The remaining buffer is not enough, flush data to write this p.
+	// The remaining buffer is not enough, sync data to write this p.
 	notEnough := size.ByteSize(bw.buffer.Len()+len(p)) >= bw.maxBufferSize
 	if notEnough {
-		bw.flush()
+		bw.sync()
 	}
+
 	return bw.buffer.Write(p)
 }
 
-// Close flushes data and closes underlying writer if writer implements io.Closer.
+// Close syncs data and closes underlying writer if writer implements io.Closer.
 func (bw *bufferWriter) Close() error {
 	bw.lock.Lock()
 	defer bw.lock.Unlock()
 
-	_, err := bw.flush()
-	if err != nil {
+	if err := bw.sync(); err != nil {
 		return err
 	}
 
 	if closer, ok := bw.writer.(io.Closer); ok && notStdoutAndStderr(bw.writer) {
 		return closer.Close()
 	}
+
 	return nil
 }

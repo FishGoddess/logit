@@ -121,8 +121,8 @@ func TestNewLog(t *testing.T) {
 
 	outputMap := map[string]interface{}{}
 	output := buffer.String()
-	err := json.Unmarshal(buffer.Bytes(), &outputMap)
-	if err != nil {
+
+	if err := json.Unmarshal(buffer.Bytes(), &outputMap); err != nil {
 		t.Errorf("unmarshal output %+v from Json failed", output)
 	}
 
@@ -162,6 +162,7 @@ func TestNewLog(t *testing.T) {
 // go test -v -cover -run=^TestLogWithPID$
 func TestLogWithPID(t *testing.T) {
 	buffer := bytes.NewBuffer(make([]byte, 0, 1024))
+
 	logger := NewLogger(Options().WithWriter(buffer))
 	logger.withPID = true
 
@@ -196,6 +197,7 @@ func TestLogWithPID(t *testing.T) {
 // go test -v -cover -run=^TestLogWithCaller$
 func TestLogWithCaller(t *testing.T) {
 	buffer := bytes.NewBuffer(make([]byte, 0, 1024))
+
 	logger := NewLogger(Options().WithWriter(buffer))
 	logger.withCaller = true
 
@@ -203,6 +205,7 @@ func TestLogWithCaller(t *testing.T) {
 	log.logger = logger
 	log.appender = logger.debugAppender
 	log.writer = logger.debugWriter
+
 	log.begin()
 	log.WithCaller()
 	log.Log()
@@ -214,6 +217,7 @@ func TestLogWithCaller(t *testing.T) {
 
 	buffer.Reset()
 	logger.withCaller = false
+
 	log.begin()
 	log.WithCaller()
 	log.Log()
@@ -242,6 +246,7 @@ func TestLogWithContext(t *testing.T) {
 // go test -v -cover -run=^TestLogIntercept$
 func TestLogIntercept(t *testing.T) {
 	buffer := bytes.NewBuffer(make([]byte, 0, 1024))
+
 	logger := NewLogger(Options().WithWriter(buffer), Options().WithInterceptors(func(ctx context.Context, log *Log) {
 		log.Int("xxx", 123)
 	}))
@@ -251,6 +256,7 @@ func TestLogIntercept(t *testing.T) {
 	log.logger = logger
 	log.appender = logger.debugAppender
 	log.writer = logger.debugWriter
+
 	log.begin()
 	log.Log()
 
@@ -264,6 +270,7 @@ func TestLogIntercept(t *testing.T) {
 	log.logger = logger
 	log.appender = logger.debugAppender
 	log.writer = logger.debugWriter
+
 	log.begin()
 	log.Intercept(func(ctx context.Context, log *Log) {
 		log.String("abc", "666")

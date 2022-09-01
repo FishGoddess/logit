@@ -20,7 +20,7 @@ Package logit provides an easy way to use foundation for your logging operations
 	// Create a new logger for use.
 	// Default level is debug, so all logs will be logged.
 	// Invoke Close() isn't necessary in all situations.
-	// If logger's writer has buffer or something like that, it's better to invoke Close() for flushing buffer or something else.
+	// If logger's writer has buffer or something like that, it's better to invoke Close() for syncing buffer or something else.
 	logger := logit.NewLogger()
 	//defer logger.Close()
 
@@ -28,9 +28,9 @@ Package logit provides an easy way to use foundation for your logging operations
 	// Remember, logs will be ignored if their level is smaller than logger's level.
 	// Log() will do some finishing work, so this invocation is necessary.
 	logger.Debug("This is a debug message").Log()
-	logger.Info("This is a info message").Log()
+	logger.Info("This is an info message").Log()
 	logger.Warn("This is a warn message").Log()
-	logger.Error("This is a error message").Log()
+	logger.Error("This is an error message").Log()
 	logger.Error("This is a %s message, with format", "error").Log() // Format with params.
 
 	// As you know, we provide some levels: debug, info, warn, error, off.
@@ -38,9 +38,9 @@ Package logit provides an easy way to use foundation for your logging operations
 	// If you want to change the level of your logger, do it at creating.
 	logger = logit.NewLogger(logit.Options().WithWarnLevel())
 	logger.Debug("This is a debug message, but ignored").Log()
-	logger.Info("This is a info message, but ignored").Log()
+	logger.Info("This is an info message, but ignored").Log()
 	logger.Warn("This is a warn message, not ignored").Log()
-	logger.Error("This is a error message, not ignored").Log()
+	logger.Error("This is an error message, not ignored").Log()
 
 	// Also, we provide some "old school" log method :)
 	// (Don't mistake~ I love old school~)
@@ -134,6 +134,7 @@ Package logit provides an easy way to use foundation for your logging operations
 		options.WithCallerDepth(4),
 		// ...
 	)
+
 	defer logger.Close()
 	logger.Info("check options").Log()
 
@@ -149,16 +150,16 @@ Package logit provides an easy way to use foundation for your logging operations
 	// You can customize an option for your logger.
 	// Actually, Option is just a function like func(logger *Logger).
 	// So you can do what you want in creating a logger.
-	autoFlushOption := func(logger *logit.Logger) {
+	syncOption := func(logger *logit.Logger) {
 		go func() {
 			select {
 			case <-time.Tick(time.Second):
-				logger.Flush()
+				logger.Sync()
 			}
 		}()
 	}
 
-	logit.NewLogger(autoFlushOption)
+	logit.NewLogger(syncOption)
 
 3. appender:
 
@@ -192,18 +193,18 @@ Package logit provides an easy way to use foundation for your logging operations
 4. writer:
 
 	// As you know, writer in logit is customized, not io.Writer.
-	// The reason why we create a new Writer interface is we want a flushable writer.
-	// Then, we notice a flushable writer also need a close method to flush all data in buffer when closing.
+	// The reason why we create a new Writer interface is we want a sync-able writer.
+	// Then, we notice a sync-able writer also need a close method to sync all data in buffer when closing.
 	// So, a new Writer is born:
 	//
 	//     type Writer interface {
-	//	       Flusher
+	//	       Syncer
 	//	       io.WriteCloser
 	//     }
 	//
 	// In package writer, we provide some writers for you.
 	writer.Wrap(os.Stdout)   // Wrap io.Writer to writer.Writer.
-	writer.Buffer(os.Stderr) // Wrap io.Writer to writer.Writer with buffer, which needs invoking Flush() or Close().
+	writer.Buffer(os.Stderr) // Wrap io.Writer to writer.Writer with buffer, which needs invoking Sync() or Close().
 
 	// Use the writer without buffer.
 	logger := logit.NewLogger(logit.Options().WithWriter(os.Stdout))
@@ -212,13 +213,13 @@ Package logit provides an easy way to use foundation for your logging operations
 	// Use the writer with buffer, which is good for io.
 	logger = logit.NewLogger(logit.Options().WithBufferWriter(os.Stdout))
 	logger.Info("WriterWithBuffer").Log()
-	logger.Flush() // Remember flushing data or flushing by Close().
+	logger.Sync() // Remember syncing data or syncing by Close().
 	logger.Close()
 
 	// Use the writer with batch, which is also good for io.
 	logger = logit.NewLogger(logit.Options().WithBatchWriter(os.Stdout))
 	logger.Info("WriterWithBatch").Log()
-	logger.Flush() // Remember flushing data or flushing by Close().
+	logger.Sync() // Remember syncing data or syncing by Close().
 	logger.Close()
 
 	// Every level has its own appender so you can append logs in different level with different appender.
@@ -465,7 +466,7 @@ Package logit provides an easy way to use foundation for your logging operations
 		WithPID:       false,
 		WithCaller:    false,
 		CallerDepth:   0,
-		AutoFlush:     "",
+		AutoSync:      "",
 		Appender:      config.AppenderText,
 		DebugAppender: "",
 		InfoAppender:  "",
@@ -475,7 +476,7 @@ Package logit provides an easy way to use foundation for your logging operations
 		Writer: config.WriterConfig{
 			Target:     config.WriterTargetStdout,
 			Mode:       config.WriterModeDirect,
-			FileName:   "",
+			Filename:   "",
 			BufferSize: "4MB",
 			BatchCount: 1024,
 		},

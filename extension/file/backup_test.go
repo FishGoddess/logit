@@ -12,36 +12,4 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package runtime
-
-import (
-	"os"
-	"runtime"
-)
-
-var (
-	pid = os.Getpid() // The pid of current process.
-)
-
-// PID returns the pid of current process.
-func PID() int {
-	return pid
-}
-
-// Caller returns the caller information of depth.
-func Caller(depth int) (file string, line int, function string) {
-	var pc uintptr
-	var ok bool
-
-	pc, file, line, ok = runtime.Caller(depth)
-	if !ok {
-		return "unknown", -1, "unknown"
-	}
-
-	f := runtime.FuncForPC(pc)
-	if f != nil {
-		function = f.Name()
-	}
-
-	return file, line, function
-}
+package file

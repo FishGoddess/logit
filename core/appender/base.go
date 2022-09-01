@@ -121,6 +121,7 @@ func appendEscapedByte(dst []byte, value byte) []byte {
 		if value < 32 {
 			return strconv.AppendInt(append(dst, '\\', 'u', '0', '0'), int64(value), 16)
 		}
+
 		return append(dst, value)
 	}
 }
@@ -131,6 +132,7 @@ func appendEscapedRune(dst []byte, value rune) []byte {
 	if needEscapedRune(value) {
 		return appendEscapedByte(dst, byte(value))
 	}
+
 	return append(dst, string(value)...)
 }
 

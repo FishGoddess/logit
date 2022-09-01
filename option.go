@@ -276,8 +276,8 @@ func (o *options) WithInterceptors(interceptors ...Interceptor) Option {
 	}
 }
 
-// WithAutoFlush returns an option which do flush automatically at fixed frequency.
-func (o *options) WithAutoFlush(frequency time.Duration) Option {
+// WithAutoSync returns an option which do sync automatically at fixed frequency.
+func (o *options) WithAutoSync(frequency time.Duration) Option {
 	return func(logger *Logger) {
 		go func() {
 			ticker := time.NewTicker(frequency)
@@ -285,7 +285,7 @@ func (o *options) WithAutoFlush(frequency time.Duration) Option {
 
 			select {
 			case <-ticker.C:
-				logger.Flush()
+				logger.Sync()
 			}
 		}()
 	}

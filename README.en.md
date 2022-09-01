@@ -23,6 +23,7 @@ applications.
 * Configuration plugins supports, ex: yaml plugin can create logger from yaml configuration file.
 * Interceptor supports which can inject values from context.
 * Error handling supports which can let you count errors and report them.
+* Rotate file supports, clean automatically if files are aged or too many.
 
 > More logit ecology can be found in [GitHub](https://github.com/go-logit) / [Gitee](https://gitee.com/go-logit)
 
@@ -52,7 +53,7 @@ func main() {
 	// Create a new logger for use.
 	// Default level is debug, so all logs will be logged.
 	// Invoke Close() isn't necessary in all situations.
-	// If logger's writer has buffer or something like that, it's better to invoke Close() for flushing buffer or something else.
+	// If logger's writer has buffer or something like that, it's better to invoke Close() for syncing buffer or something else.
 	logger := logit.NewLogger()
 	//defer logger.Close()
 
@@ -60,9 +61,9 @@ func main() {
 	// Remember, logs will be ignored if their level is smaller than logger's level.
 	// Log() will do some finishing work, so this invocation is necessary.
 	logger.Debug("This is a debug message").Log()
-	logger.Info("This is a info message").Log()
+	logger.Info("This is an info message").Log()
 	logger.Warn("This is a warn message").Log()
-	logger.Error("This is a error message").Log()
+	logger.Error("This is an error message").Log()
 	logger.Error("This is a %s message, with format", "error").Log() // Format with params.
 
 	// As you know, we provide some levels: debug, info, warn, error, off.
@@ -70,9 +71,9 @@ func main() {
 	// If you want to change the level of your logger, do it at creating.
 	logger = logit.NewLogger(logit.Options().WithWarnLevel())
 	logger.Debug("This is a debug message, but ignored").Log()
-	logger.Info("This is a info message, but ignored").Log()
+	logger.Info("This is an info message, but ignored").Log()
 	logger.Warn("This is a warn message, not ignored").Log()
-	logger.Error("This is a error message, not ignored").Log()
+	logger.Error("This is an error message, not ignored").Log()
 
 	// Also, we provide some "old school" log method :)
 	// (Don't mistake~ I love old school~)
@@ -122,6 +123,7 @@ func main() {
 	logger.SetToGlobal()
 	logit.Println("Println from logit")
 }
+
 ```
 
 _More examples can be found in [_examples](./_examples)._

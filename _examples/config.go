@@ -39,7 +39,7 @@ func main() {
 		WithPID:       false,
 		WithCaller:    false,
 		CallerDepth:   0,
-		AutoFlush:     "",
+		AutoSync:      "",
 		Appender:      config.AppenderText,
 		DebugAppender: "",
 		InfoAppender:  "",
@@ -49,7 +49,7 @@ func main() {
 		Writer: config.WriterConfig{
 			Target:     config.WriterTargetStdout,
 			Mode:       config.WriterModeDirect,
-			FileName:   "",
+			Filename:   "",
 			BufferSize: "4MB",
 			BatchCount: 1024,
 		},
