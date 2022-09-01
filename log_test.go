@@ -24,6 +24,7 @@ import (
 	"time"
 
 	"github.com/go-logit/logit/core/appender"
+	"github.com/go-logit/logit/support/global"
 
 	"github.com/go-logit/logit/support/runtime"
 )
@@ -116,7 +117,7 @@ func TestNewLog(t *testing.T) {
 	log.Times("Times", []time.Time{time.Unix(12580, 0)})
 	log.Errors("Errors", []error{io.EOF})
 	log.Stringers("Stringers", []fmt.Stringer{time.Second})
-	log.WithTime("WithTime", time.Unix(12580, 0), appender.UnixTimeFormat)
+	log.WithTime("WithTime", time.Unix(12580, 0), global.UnixTimeFormat)
 	log.Log()
 
 	outputMap := map[string]interface{}{}

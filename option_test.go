@@ -37,7 +37,7 @@ func TestOptionsWithDebugLevel(t *testing.T) {
 	logger := NewLogger()
 	logger.level = offLevel
 
-	opts.WithDebugLevel()(logger)
+	opts.WithDebugLevel().Apply(logger)
 	if logger.level != debugLevel {
 		t.Errorf("logger's level %s is wrong", logger.level)
 	}
@@ -50,7 +50,7 @@ func TestOptionsWithInfoLevel(t *testing.T) {
 	logger := NewLogger()
 	logger.level = offLevel
 
-	opts.WithInfoLevel()(logger)
+	opts.WithInfoLevel().Apply(logger)
 	if logger.level != infoLevel {
 		t.Errorf("logger's level %s is wrong", logger.level)
 	}
@@ -63,7 +63,7 @@ func TestOptionsWithWarnLevel(t *testing.T) {
 	logger := NewLogger()
 	logger.level = offLevel
 
-	opts.WithWarnLevel()(logger)
+	opts.WithWarnLevel().Apply(logger)
 	if logger.level != warnLevel {
 		t.Errorf("logger's level %s is wrong", logger.level)
 	}
@@ -76,7 +76,7 @@ func TestOptionsWithErrorLevel(t *testing.T) {
 	logger := NewLogger()
 	logger.level = offLevel
 
-	opts.WithErrorLevel()(logger)
+	opts.WithErrorLevel().Apply(logger)
 	if logger.level != errorLevel {
 		t.Errorf("logger's level %s is wrong", logger.level)
 	}
@@ -89,7 +89,7 @@ func TestOptionsWithPrintLevel(t *testing.T) {
 	logger := NewLogger()
 	logger.level = offLevel
 
-	opts.WithPrintLevel()(logger)
+	opts.WithPrintLevel().Apply(logger)
 	if logger.level != printLevel {
 		t.Errorf("logger's level %s is wrong", logger.level)
 	}
@@ -102,7 +102,7 @@ func TestOptionsWithOffLevel(t *testing.T) {
 	logger := NewLogger()
 	logger.level = debugLevel
 
-	opts.WithOffLevel()(logger)
+	opts.WithOffLevel().Apply(logger)
 	if logger.level != offLevel {
 		t.Errorf("logger's level %s is wrong", logger.level)
 	}
@@ -119,7 +119,7 @@ func TestOptionsWithAppender(t *testing.T) {
 	logger.errorAppender = nil
 	logger.printAppender = nil
 
-	opts.WithAppender(appender.Text())(logger)
+	opts.WithAppender(appender.Text()).Apply(logger)
 	if logger.debugAppender != appender.Text() {
 		t.Errorf("logger's debugAppender %s is wrong", logger.debugAppender)
 	}
@@ -146,7 +146,7 @@ func TestOptionsWithAppender(t *testing.T) {
 	logger.errorAppender = nil
 	logger.printAppender = nil
 
-	opts.WithAppender(appender.Json())(logger)
+	opts.WithAppender(appender.Json()).Apply(logger)
 	if logger.debugAppender != appender.Json() {
 		t.Errorf("logger's debugAppender %s is wrong", logger.debugAppender)
 	}
@@ -179,7 +179,7 @@ func TestOptionsWithDebugAppender(t *testing.T) {
 	logger.errorAppender = nil
 	logger.printAppender = nil
 
-	opts.WithDebugAppender(appender.Text())(logger)
+	opts.WithDebugAppender(appender.Text()).Apply(logger)
 	if logger.debugAppender != appender.Text() {
 		t.Errorf("logger's debugAppender %s is wrong", logger.debugAppender)
 	}
@@ -212,7 +212,7 @@ func TestOptionsWithInfoAppender(t *testing.T) {
 	logger.errorAppender = nil
 	logger.printAppender = nil
 
-	opts.WithInfoAppender(appender.Text())(logger)
+	opts.WithInfoAppender(appender.Text()).Apply(logger)
 	if logger.debugAppender != nil {
 		t.Errorf("logger's debugAppender %s is wrong", logger.debugAppender)
 	}
@@ -245,7 +245,7 @@ func TestOptionsWithWarnAppender(t *testing.T) {
 	logger.errorAppender = nil
 	logger.printAppender = nil
 
-	opts.WithWarnAppender(appender.Text())(logger)
+	opts.WithWarnAppender(appender.Text()).Apply(logger)
 	if logger.debugAppender != nil {
 		t.Errorf("logger's debugAppender %s is wrong", logger.debugAppender)
 	}
@@ -278,7 +278,7 @@ func TestOptionsWithErrorAppender(t *testing.T) {
 	logger.errorAppender = nil
 	logger.printAppender = nil
 
-	opts.WithErrorAppender(appender.Text())(logger)
+	opts.WithErrorAppender(appender.Text()).Apply(logger)
 	if logger.debugAppender != nil {
 		t.Errorf("logger's debugAppender %s is wrong", logger.debugAppender)
 	}
@@ -311,7 +311,7 @@ func TestOptionsWithPrintAppender(t *testing.T) {
 	logger.errorAppender = nil
 	logger.printAppender = nil
 
-	opts.WithPrintAppender(appender.Text())(logger)
+	opts.WithPrintAppender(appender.Text()).Apply(logger)
 	if logger.debugAppender != nil {
 		t.Errorf("logger's debugAppender %s is wrong", logger.debugAppender)
 	}
@@ -344,7 +344,7 @@ func TestOptionsWithWriter(t *testing.T) {
 	logger.errorWriter = nil
 	logger.printWriter = nil
 
-	opts.WithWriter(os.Stdout)(logger)
+	opts.WithWriter(os.Stdout).Apply(logger)
 	if logger.debugWriter == nil {
 		t.Errorf("logger's debugWriter %s is wrong", logger.debugWriter)
 	}
@@ -377,7 +377,7 @@ func TestOptionsWithBufferWriter(t *testing.T) {
 	logger.errorWriter = nil
 	logger.printWriter = nil
 
-	opts.WithBufferWriter(os.Stdout)(logger)
+	opts.WithBufferWriter(os.Stdout).Apply(logger)
 	if logger.debugWriter == nil {
 		t.Errorf("logger's debugWriter %s is wrong", logger.debugWriter)
 	}
@@ -410,7 +410,7 @@ func TestOptionsWithBatchWriter(t *testing.T) {
 	logger.errorWriter = nil
 	logger.printWriter = nil
 
-	opts.WithBatchWriter(os.Stdout)(logger)
+	opts.WithBatchWriter(os.Stdout).Apply(logger)
 	if logger.debugWriter == nil {
 		t.Errorf("logger's debugWriter %s is wrong", logger.debugWriter)
 	}
@@ -443,7 +443,7 @@ func TestOptionsWithDebugWriter(t *testing.T) {
 	logger.errorWriter = nil
 	logger.printWriter = nil
 
-	opts.WithDebugWriter(os.Stdout)(logger)
+	opts.WithDebugWriter(os.Stdout).Apply(logger)
 	if logger.debugWriter == nil {
 		t.Errorf("logger's debugWriter %s is wrong", logger.debugWriter)
 	}
@@ -476,7 +476,7 @@ func TestOptionsWithInfoWriter(t *testing.T) {
 	logger.errorWriter = nil
 	logger.printWriter = nil
 
-	opts.WithInfoWriter(os.Stdout)(logger)
+	opts.WithInfoWriter(os.Stdout).Apply(logger)
 	if logger.debugWriter != nil {
 		t.Errorf("logger's debugWriter %s is wrong", logger.debugWriter)
 	}
@@ -509,7 +509,7 @@ func TestOptionsWithWarnWriter(t *testing.T) {
 	logger.errorWriter = nil
 	logger.printWriter = nil
 
-	opts.WithWarnWriter(os.Stdout)(logger)
+	opts.WithWarnWriter(os.Stdout).Apply(logger)
 	if logger.debugWriter != nil {
 		t.Errorf("logger's debugWriter %s is wrong", logger.debugWriter)
 	}
@@ -542,7 +542,7 @@ func TestOptionsWithErrorWriter(t *testing.T) {
 	logger.errorWriter = nil
 	logger.printWriter = nil
 
-	opts.WithErrorWriter(os.Stdout)(logger)
+	opts.WithErrorWriter(os.Stdout).Apply(logger)
 	if logger.debugWriter != nil {
 		t.Errorf("logger's debugWriter %s is wrong", logger.debugWriter)
 	}
@@ -575,7 +575,7 @@ func TestOptionsWithPrintWriter(t *testing.T) {
 	logger.errorWriter = nil
 	logger.printWriter = nil
 
-	opts.WithPrintWriter(os.Stdout)(logger)
+	opts.WithPrintWriter(os.Stdout).Apply(logger)
 	if logger.debugWriter != nil {
 		t.Errorf("logger's debugWriter %s is wrong", logger.debugWriter)
 	}
@@ -604,7 +604,7 @@ func TestOptionsWithPID(t *testing.T) {
 	logger := NewLogger()
 	logger.withPID = false
 
-	opts.WithPID()(logger)
+	opts.WithPID().Apply(logger)
 	if logger.withPID != true {
 		t.Errorf("logger's withPID %+v is wrong", logger.withPID)
 	}
@@ -617,7 +617,7 @@ func TestOptionsWithCaller(t *testing.T) {
 	logger := NewLogger()
 	logger.withCaller = false
 
-	opts.WithCaller()(logger)
+	opts.WithCaller().Apply(logger)
 	if logger.withCaller != true {
 		t.Errorf("logger's withCaller %+v is wrong", logger.withCaller)
 	}
@@ -630,7 +630,7 @@ func TestOptionsWithMsgKey(t *testing.T) {
 	logger := NewLogger()
 	logger.msgKey = ""
 
-	opts.WithMsgKey("msg")(logger)
+	opts.WithMsgKey("msg").Apply(logger)
 	if logger.msgKey != "msg" {
 		t.Errorf("logger's msgKey %+v is wrong", logger.msgKey)
 	}
@@ -643,7 +643,7 @@ func TestOptionsWithTimeKey(t *testing.T) {
 	logger := NewLogger()
 	logger.timeKey = ""
 
-	opts.WithTimeKey("time")(logger)
+	opts.WithTimeKey("time").Apply(logger)
 	if logger.timeKey != "time" {
 		t.Errorf("logger's timeKey %+v is wrong", logger.timeKey)
 	}
@@ -656,7 +656,7 @@ func TestOptionsWithLevelKey(t *testing.T) {
 	logger := NewLogger()
 	logger.levelKey = ""
 
-	opts.WithLevelKey("level")(logger)
+	opts.WithLevelKey("level").Apply(logger)
 	if logger.levelKey != "level" {
 		t.Errorf("logger's levelKey %+v is wrong", logger.levelKey)
 	}
@@ -669,7 +669,7 @@ func TestOptionsWithPIDKey(t *testing.T) {
 	logger := NewLogger()
 	logger.pidKey = ""
 
-	opts.WithPIDKey("pid")(logger)
+	opts.WithPIDKey("pid").Apply(logger)
 	if logger.pidKey != "pid" {
 		t.Errorf("logger's pidKey %+v is wrong", logger.pidKey)
 	}
@@ -682,7 +682,7 @@ func TestOptionsWithFileKey(t *testing.T) {
 	logger := NewLogger()
 	logger.fileKey = ""
 
-	opts.WithFileKey("file")(logger)
+	opts.WithFileKey("file").Apply(logger)
 	if logger.fileKey != "file" {
 		t.Errorf("logger's fileKey %+v is wrong", logger.fileKey)
 	}
@@ -695,7 +695,7 @@ func TestOptionsWithLineKey(t *testing.T) {
 	logger := NewLogger()
 	logger.lineKey = ""
 
-	opts.WithLineKey("line")(logger)
+	opts.WithLineKey("line").Apply(logger)
 	if logger.lineKey != "line" {
 		t.Errorf("logger's lineKey %+v is wrong", logger.lineKey)
 	}
@@ -708,7 +708,7 @@ func TestOptionsWithFuncKey(t *testing.T) {
 	logger := NewLogger()
 	logger.funcKey = ""
 
-	opts.WithFuncKey("func")(logger)
+	opts.WithFuncKey("func").Apply(logger)
 	if logger.funcKey != "func" {
 		t.Errorf("logger's funcKey %+v is wrong", logger.funcKey)
 	}
@@ -721,7 +721,7 @@ func TestOptionsWithTimeFormat(t *testing.T) {
 	logger := NewLogger()
 	logger.timeFormat = ""
 
-	opts.WithTimeFormat("20060102150405")(logger)
+	opts.WithTimeFormat("20060102150405").Apply(logger)
 	if logger.timeFormat != "20060102150405" {
 		t.Errorf("logger's timeFormat %+v is wrong", logger.timeFormat)
 	}
@@ -734,7 +734,7 @@ func TestOptionsWithCallerDepth(t *testing.T) {
 	logger := NewLogger()
 	logger.callerDepth = 0
 
-	opts.WithCallerDepth(3)(logger)
+	opts.WithCallerDepth(3).Apply(logger)
 	if logger.callerDepth != 3 {
 		t.Errorf("logger's callerDepth %d is wrong", logger.callerDepth)
 	}
@@ -753,7 +753,7 @@ func TestOptionsWithInterceptors(t *testing.T) {
 		func(ctx context.Context, log *Log) {},
 	}
 
-	opts.WithInterceptors(interceptors...)(logger)
+	opts.WithInterceptors(interceptors...).Apply(logger)
 	if len(logger.interceptors) != len(interceptors) {
 		t.Errorf("len(logger.interceptors) %d != len(interceptors) %d", len(logger.interceptors), len(interceptors))
 	}

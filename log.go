@@ -263,10 +263,14 @@ func (l *Log) Time(key string, value time.Time) *Log {
 		return nil
 	}
 
+	if global.TimeLocation != nil {
+		value = value.In(global.TimeLocation)
+	}
+
 	if l.logger != nil {
 		l.data = l.appender.AppendTime(l.data, key, value, l.logger.timeFormat)
 	} else {
-		l.data = l.appender.AppendTime(l.data, key, value, appender.UnixTimeFormat)
+		l.data = l.appender.AppendTime(l.data, key, value, global.UnixTimeFormat)
 	}
 
 	return l
@@ -461,7 +465,7 @@ func (l *Log) Times(key string, value []time.Time) *Log {
 	if l.logger != nil {
 		l.data = l.appender.AppendTimes(l.data, key, value, l.logger.timeFormat)
 	} else {
-		l.data = l.appender.AppendTimes(l.data, key, value, appender.UnixTimeFormat)
+		l.data = l.appender.AppendTimes(l.data, key, value, global.UnixTimeFormat)
 	}
 
 	return l
@@ -498,8 +502,8 @@ func (l *Log) WithTime(key string, value time.Time, format string) *Log {
 }
 
 // WithPID adds one entry about pid information to l.
-func (l *Log) WithPID() *Log {
-	if l == nil || l.logger.withPID {
+func (l *Log) withPID() *Log {
+	if l == nil {
 		return l
 	}
 
@@ -508,6 +512,15 @@ func (l *Log) WithPID() *Log {
 	}
 
 	return l
+}
+
+// WithPID adds one entry about pid information to l.
+func (l *Log) WithPID() *Log {
+	if l == nil || l.logger.withPID {
+		return l
+	}
+
+	return l.withPID()
 }
 
 // WithCaller adds some entries about caller information to l.

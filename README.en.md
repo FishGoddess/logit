@@ -24,6 +24,7 @@ applications.
 * Interceptor supports which can inject values from context.
 * Error handling supports which can let you count errors and report them.
 * Rotate file supports, clean automatically if files are aged or too many.
+* Config file supports, such as json/yaml/toml/bson.
 
 > More logit ecology can be found in [GitHub](https://github.com/go-logit) / [Gitee](https://gitee.com/go-logit)
 
