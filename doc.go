@@ -534,5 +534,5 @@ package logit // import "github.com/go-logit/logit"
 
 const (
 	// Version is the version string representation of logit.
-	Version = "v0.5.4-alpha"
+	Version = "v0.5.5-alpha"
 )
