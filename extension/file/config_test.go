@@ -29,8 +29,8 @@ func TestNewDefaultConfig(t *testing.T) {
 		dirMode:    0755,
 		timeFormat: "20060102150405",
 		maxSize:    256 * size.MB,
-		maxAge:     14 * Day,
-		maxBackups: 14,
+		maxAge:     0,
+		maxBackups: 0,
 	}
 
 	if c != want {
