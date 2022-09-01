@@ -110,12 +110,12 @@ func (f *File) listBackups() ([]backup, error) {
 }
 
 func (f *File) filterStaleBackups(backups []backup) []string {
-	staleBackups := make(map[string]bool)
+	staleBackups := make(map[string]struct{})
 
 	maxBackups := f.maxBackups
 	if maxBackups > 0 && uint(len(backups)) > maxBackups {
 		for i := uint(0); i < uint(len(backups))-maxBackups; i++ {
-			staleBackups[backups[i].path] = true
+			staleBackups[backups[i].path] = struct{}{}
 		}
 	}
 
@@ -128,7 +128,7 @@ func (f *File) filterStaleBackups(backups []backup) []string {
 				break
 			}
 
-			staleBackups[backup.path] = true
+			staleBackups[backup.path] = struct{}{}
 		}
 	}
 
