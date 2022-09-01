@@ -16,9 +16,18 @@ package global
 
 import (
 	"encoding/json"
+	"os"
 	"time"
 
 	"github.com/go-logit/logit/support/size"
+)
+
+const (
+	// Day is one day in time.Duration.
+	Day = 24 * time.Hour
+
+	// UnixTimeFormat is time format of unix.
+	UnixTimeFormat = ""
 )
 
 var (
@@ -37,12 +46,20 @@ var (
 	// WriterBatchCount is the default count of batch writer.
 	WriterBatchCount = uint(128)
 
+	// TimeLocation is the location of time.
+	TimeLocation = time.Local
+
 	// CurrentTime returns the current time with time.Time.
 	CurrentTime = time.Now
 
 	// MarshalToJson marshals v to json bytes.
 	// If you want to use your own way to marshal, change it to your own marshal function.
 	MarshalToJson = json.Marshal
+
+	// OpenFile opens a file with mode.
+	OpenFile = func(path string, mode os.FileMode) (*os.File, error) {
+		return os.OpenFile(path, os.O_CREATE|os.O_APPEND|os.O_WRONLY, mode)
+	}
 
 	// HandleError handles an error passed to it.
 	// You can collect all errors and count them for reporting.

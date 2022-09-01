@@ -170,7 +170,7 @@ func (ta *textAppender) AppendString(dst []byte, key string, value string) []byt
 func (ta *textAppender) AppendTime(dst []byte, key string, value time.Time, format string) []byte {
 	dst = ta.appendKey(dst, key)
 
-	if format == UnixTimeFormat {
+	if format == global.UnixTimeFormat {
 		return strconv.AppendInt(dst, value.Unix(), 10)
 	}
 
@@ -328,7 +328,7 @@ func (ta *textAppender) AppendStrings(dst []byte, key string, values []string) [
 // AppendTimes appends a []time.Time entry formatted with format to dst.
 func (ta *textAppender) AppendTimes(dst []byte, key string, values []time.Time, format string) []byte {
 	return ta.appendArray(dst, key, len(values), func(source []byte, index int) []byte {
-		if format == UnixTimeFormat {
+		if format == global.UnixTimeFormat {
 			return strconv.AppendInt(source, values[index].Unix(), 10)
 		}
 

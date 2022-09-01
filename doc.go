@@ -396,6 +396,7 @@ Package logit provides an easy way to use foundation for your logging operations
 		if err != nil {
 			panic(err)
 		}
+
 		return f
 	}
 
@@ -410,6 +411,7 @@ Package logit provides an easy way to use foundation for your logging operations
 	// As we know, we always log everything to file in production.
 	logFile := filepath.Join(os.TempDir(), "test.log")
 	fmt.Println(logFile)
+
 	logger = logit.NewLogger(logit.Options().WithWriter(mustCreateFile(logFile)))
 	logger.Info("I log everything to file.").String("logFile", logFile).Log()
 	logger.Close()
@@ -418,6 +420,7 @@ Package logit provides an easy way to use foundation for your logging operations
 	// It will use a buffer writer to write logs if withBuffer is true which will bring a huge performance improvement.
 	logFile = filepath.Join(os.TempDir(), "test_buffer.log")
 	fmt.Println(logFile)
+
 	logger = logit.NewLogger(logit.Options().WithWriter(mustCreateFile(logFile)))
 	logger.Info("I log everything to file with buffer.").String("logFile", logFile).Log()
 	logger.Close()
@@ -427,6 +430,24 @@ Package logit provides an easy way to use foundation for your logging operations
 	writer.BatchWithCount(os.Stdout, 256)
 	logit.Options().WithBufferWriter(os.Stdout)
 	logit.Options().WithBatchWriter(os.Stdout)
+
+	// Wait a minute, we also provide a powerful file for you!
+	// See extension/file/file.go.
+	// It will rotate file and clean backups automatically.
+	// You can set maxSize, maxAge and maxBackups by options.
+	logFile = filepath.Join(os.TempDir(), "test_powerful.log")
+
+	f, err := file.New(logFile)
+	if err != nil {
+		panic(err)
+	}
+
+	defer f.Close()
+
+	_, err = f.Write([]byte("xxx"))
+	if err != nil {
+		panic(err)
+	}
 
 10. error:
 
@@ -455,30 +476,36 @@ Package logit provides an easy way to use foundation for your logging operations
 	// Of course, you can embed this struct to your application config struct!
 	cfg := config.Config{
 		Level:         config.LevelDebug,
-		TimeKey:       "log.time",
-		LevelKey:      "log.level",
-		MsgKey:        "log.msg",
-		PIDKey:        "log.pid",
-		FileKey:       "log.file",
-		LineKey:       "log.line",
-		FuncKey:       "log.func",
+		TimeKey:       "x.time",
+		LevelKey:      "x.level",
+		MsgKey:        "x.msg",
+		PIDKey:        "x.pid",
+		FileKey:       "x.file",
+		LineKey:       "x.line",
+		FuncKey:       "x.func",
 		TimeFormat:    config.UnixTimeFormat,
-		WithPID:       false,
-		WithCaller:    false,
+		WithPID:       true,
+		WithCaller:    true,
 		CallerDepth:   0,
-		AutoSync:      "",
+		AutoSync:      "10s",
 		Appender:      config.AppenderText,
-		DebugAppender: "",
-		InfoAppender:  "",
-		WarnAppender:  "",
-		ErrorAppender: "",
-		PrintAppender: "",
+		DebugAppender: config.AppenderText,
+		InfoAppender:  config.AppenderText,
+		WarnAppender:  config.AppenderText,
+		ErrorAppender: config.AppenderText,
+		PrintAppender: config.AppenderJson,
 		Writer: config.WriterConfig{
 			Target:     config.WriterTargetStdout,
 			Mode:       config.WriterModeDirect,
-			Filename:   "",
 			BufferSize: "4MB",
 			BatchCount: 1024,
+			Filename:   "test.log",
+			DirMode:    0755,
+			FileMode:   0644,
+			TimeFormat: "20060102150405",
+			MaxSize:    "128MB",
+			MaxAge:     "30d",
+			MaxBackups: 32,
 		},
 		DebugWriter: config.WriterConfig{},
 		InfoWriter:  config.WriterConfig{},
@@ -492,17 +519,20 @@ Package logit provides an easy way to use foundation for your logging operations
 	if err != nil {
 		panic(err)
 	}
+
 	fmt.Println(opts)
 
 	// Then you can create your logger by options.
 	// Amazing!
 	logger := logit.NewLogger(opts...)
 	defer logger.Close()
+
 	logger.Info("My mother is a config").Any("config", cfg).Log()
+	logger.Info("See logger").Any("logger", logger).Log()
 */
 package logit // import "github.com/go-logit/logit"
 
 const (
 	// Version is the version string representation of logit.
-	Version = "v0.5.4-alpha"
+	Version = "v0.5.5-alpha"
 )

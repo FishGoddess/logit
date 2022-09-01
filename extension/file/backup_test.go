@@ -13,3 +13,76 @@
 // limitations under the License.
 
 package file
+
+import (
+	"testing"
+	"time"
+)
+
+// go test -v -cover -run=^TestBackupBefore$
+func TestBackupBefore(t *testing.T) {
+	b := backup{t: time.Unix(2, 0)}
+	if b.before(time.Unix(1, 0)) {
+		t.Errorf("b.before(time.Unix(1, 0)) returns false")
+	}
+
+	if b.before(time.Unix(2, 0)) {
+		t.Errorf("b.before(time.Unix(2, 0)) returns false")
+	}
+}
+
+// go test -v -cover -run=^TestSortBackups$
+func TestSortBackups(t *testing.T) {
+	backups := []backup{
+		{t: time.Unix(2, 0)}, {t: time.Unix(1, 0)}, {t: time.Unix(4, 0)}, {t: time.Unix(0, 0)}, {t: time.Unix(3, 0)},
+	}
+
+	sortBackups(backups)
+	for i, backup := range backups {
+		if backup.t.Unix() != int64(i) {
+			t.Errorf("backup.t.Unix() %d != int64(i) %d", backup.t.Unix(), int64(i))
+		}
+	}
+}
+
+// go test -v -cover -run=^TestBackupPrefixAndExt$
+func TestBackupPrefixAndExt(t *testing.T) {
+	prefix, ext := backupPrefixAndExt("test.log")
+	if prefix != "test"+backupSeparator {
+		t.Errorf("prefix %s != 'test'+backupSeparator %s", prefix, "test"+backupSeparator)
+	}
+
+	if ext != ".log" {
+		t.Errorf("ext %s != '.log'", ext)
+	}
+}
+
+// go test -v -cover -run=^TestBackupPath$
+func TestBackupPath(t *testing.T) {
+	now = func() time.Time {
+		return time.Unix(1, 0)
+	}
+
+	path := backupPath("test.log", "20060102150405")
+
+	if path != "test.19700101080001.log" {
+		t.Errorf("path %s != 'test.19700101080001.log'", path)
+	}
+}
+
+// go test -v -cover -run=^TestParseBackupTime$
+func TestParseBackupTime(t *testing.T) {
+	filename := "test.19700101080001.log"
+	prefix := "test."
+	ext := ".log"
+	timeFormat := "20060102150405"
+
+	backupTime, err := parseBackupTime(filename, prefix, ext, timeFormat)
+	if err != nil {
+		t.Error(err)
+	}
+
+	if backupTime.Unix() != 1 {
+		t.Errorf("backupTime.Unix() %d != 1", backupTime.Unix())
+	}
+}

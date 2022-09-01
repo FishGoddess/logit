@@ -34,9 +34,13 @@ var (
 // It has max size and file will rotate if size exceeds max size.
 // It has max age and max backups, so rotated files will be controlled in quantity which is beneficial to space.
 type File struct {
+	// config stores all configurations of file.
 	config
 
+	// path is the path of file.
 	path string
+
+	// size is the current size of writing in file.
 	size size.ByteSize
 
 	file *os.File
@@ -45,12 +49,8 @@ type File struct {
 }
 
 // New returns a new file.
-func New(path string) (*File, error) {
-	f := &File{
-		config: newDefaultConfig(),
-		path:   path,
-		ch:     make(chan struct{}, 1),
-	}
+func New(path string, opts ...Option) (*File, error) {
+	f := newFile(path, opts)
 
 	if err := f.mkdir(); err != nil {
 		return nil, err
@@ -64,12 +64,23 @@ func New(path string) (*File, error) {
 	return f, nil
 }
 
+// newFile creates a new file.
+func newFile(path string, opts []Option) *File {
+	c := newDefaultConfig()
+
+	for _, opt := range opts {
+		opt.Apply(&c)
+	}
+
+	return &File{config: c, path: path, ch: make(chan struct{}, 1)}
+}
+
 func (f *File) mkdir() error {
 	return os.MkdirAll(filepath.Dir(f.path), f.dirMode)
 }
 
 func (f *File) open() (*os.File, error) {
-	return os.OpenFile(f.path, os.O_CREATE|os.O_APPEND|os.O_WRONLY, f.mode)
+	return global.OpenFile(f.path, f.mode)
 }
 
 func (f *File) listBackups() ([]backup, error) {
@@ -114,19 +125,17 @@ func (f *File) listBackups() ([]backup, error) {
 	return backups, nil
 }
 
-func (f *File) filterStaleBackups(backups []backup) []string {
-	staleBackups := make(map[string]struct{})
+func (f *File) removeStaleBackups(backups []backup) {
+	staleBackups := make(map[string]struct{}, 16)
 
-	maxBackups := f.maxBackups
-	if maxBackups > 0 && uint(len(backups)) > maxBackups {
-		for i := uint(0); i < uint(len(backups))-maxBackups; i++ {
+	if f.maxBackups > 0 {
+		for i := 0; i < len(backups)-f.maxBackups; i++ {
 			staleBackups[backups[i].path] = struct{}{}
 		}
 	}
 
-	maxAge := f.maxAge
-	if maxAge > 0 {
-		deadline := now().Add(-maxAge)
+	if f.maxAge > 0 {
+		deadline := now().Add(-f.maxAge)
 
 		for _, backup := range backups {
 			if !backup.before(deadline) {
@@ -137,16 +146,7 @@ func (f *File) filterStaleBackups(backups []backup) []string {
 		}
 	}
 
-	var paths []string
-	for k := range staleBackups {
-		paths = append(paths, k)
-	}
-
-	return paths
-}
-
-func (f *File) removeBackups(backups []string) {
-	for _, backup := range backups {
+	for backup := range staleBackups {
 		os.Remove(backup)
 	}
 }
@@ -157,8 +157,7 @@ func (f *File) clean() {
 		return
 	}
 
-	paths := f.filterStaleBackups(backups)
-	f.removeBackups(paths)
+	f.removeStaleBackups(backups)
 }
 
 func (f *File) runCleanTask() {

@@ -206,7 +206,7 @@ func (ja *jsonAppender) AppendString(dst []byte, key string, value string) []byt
 func (ja *jsonAppender) AppendTime(dst []byte, key string, value time.Time, format string) []byte {
 	dst = ja.appendKey(dst, key)
 
-	if format == UnixTimeFormat {
+	if format == global.UnixTimeFormat {
 		return strconv.AppendInt(dst, value.Unix(), 10)
 	}
 
@@ -385,7 +385,7 @@ func (ja *jsonAppender) AppendStrings(dst []byte, key string, values []string) [
 // AppendTimes appends a []time.Time entry formatted with format to dst.
 func (ja *jsonAppender) AppendTimes(dst []byte, key string, values []time.Time, format string) []byte {
 	return ja.appendArray(dst, key, len(values), func(source []byte, index int) []byte {
-		if format == UnixTimeFormat {
+		if format == global.UnixTimeFormat {
 			return strconv.AppendInt(source, values[index].Unix(), 10)
 		}
 

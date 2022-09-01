@@ -24,9 +24,6 @@ import (
 const (
 	// lineBreak is the break between lines.
 	lineBreak = '\n'
-
-	// UnixTimeFormat is time format of unix.
-	UnixTimeFormat = ""
 )
 
 var (

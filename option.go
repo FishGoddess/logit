@@ -25,6 +25,11 @@ import (
 // Option is a function that applies to logger.
 type Option func(logger *Logger)
 
+// Apply applies option to logger.
+func (o Option) Apply(logger *Logger) {
+	o(logger)
+}
+
 // options stores all provided options.
 type options struct{}
 

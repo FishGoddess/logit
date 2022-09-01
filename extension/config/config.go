@@ -15,44 +15,10 @@
 package config
 
 import (
-	"fmt"
-	"io"
 	"os"
 	"strings"
-	"time"
 
 	"github.com/go-logit/logit"
-	"github.com/go-logit/logit/core/appender"
-	"github.com/go-logit/logit/core/writer"
-	"github.com/go-logit/logit/support/size"
-)
-
-const (
-	LevelDebug = "debug"
-	LevelInfo  = "info"
-	LevelWarn  = "warn"
-	LevelError = "error"
-	LevelPrint = "print"
-	LevelOff   = "off"
-)
-
-const (
-	AppenderText = "text"
-	AppenderJson = "json"
-)
-
-const (
-	WriterTargetStdout = "stdout"
-	WriterTargetStderr = "stderr"
-	WriterTargetFile   = "file"
-
-	WriterModeDirect = "direct"
-	WriterModeBuffer = "buffer"
-	WriterModeBatch  = "batch"
-)
-
-const (
-	UnixTimeFormat = "unix"
 )
 
 // WriterConfig stores all configs of writer.
@@ -65,17 +31,49 @@ type WriterConfig struct {
 	// Values: direct, buffer, batch.
 	Mode string `json:"mode" yaml:"mode" toml:"mode" bson:"mode"`
 
-	// Filename is the name of file.
-	// Only available when target is file.
-	Filename string `json:"filename" yaml:"filename" toml:"filename" bson:"filename"`
-
 	// BufferSize is the buffer size of buffer writer.
+	// You can use common words like 512B or 4KB.
 	// Only available when mode is buffer.
 	BufferSize string `json:"buffer_size" yaml:"buffer_size" toml:"buffer_size" bson:"buffer_size"`
 
 	// BatchCount is the batch count of batch writer.
 	// Only available when mode is batch.
 	BatchCount uint `json:"batch_count" yaml:"batch_count" toml:"batch_count" bson:"batch_count"`
+
+	// Filename is the name of file.
+	// Only available when target is file and rotate_file.
+	Filename string `json:"filename" yaml:"filename" toml:"filename" bson:"filename"`
+
+	// DirMode is the permission mode of directory.
+	// Only available when target is file and rotate_file.
+	DirMode os.FileMode `json:"dir_mode" yaml:"dir_mode" toml:"dir_mode" bson:"dir_mode"`
+
+	// FileMode is the permission mode of file.
+	// Only available when target is file and rotate_file.
+	FileMode os.FileMode `json:"file_mode" yaml:"file_mode" toml:"file_mode" bson:"file_mode"`
+
+	// TimeFormat is the format of time.
+	// Only available when target is rotate_file.
+	// Values: unix, ...
+	TimeFormat string `json:"time_format" yaml:"time_format" toml:"time_format" bson:"time_format"`
+
+	// MaxSize is the max size of file.
+	// If size of data in one write is bigger than MaxSize, then file will rotate and write it,
+	// which means file and its backup may bigger than MaxSize in size.
+	// You can use common words like 64MB or 1GB.
+	// Only available when target is rotate_file.
+	MaxSize string `json:"max_size" yaml:"max_size" toml:"max_size" bson:"max_size"`
+
+	// MaxAge is the time that backup will live.
+	// All backups reach MaxAge will be removed automatically.
+	// You can use common words like 7d or 24h.
+	// See time.Duration and time.ParseDuration.
+	// Only available when target is rotate_file.
+	MaxAge string `json:"max_age" yaml:"max_age" toml:"max_age" bson:"max_age"`
+
+	// MaxBackups is the max count of backups.
+	// Only available when target is rotate_file.
+	MaxBackups int `json:"max_backups" yaml:"max_backups" toml:"max_backups" bson:"max_backups"`
 }
 
 // Config stores all configs of logger.
@@ -132,99 +130,6 @@ func New() *Config {
 	return new(Config)
 }
 
-func (c *Config) createFile(filePath string) (*os.File, error) {
-	return os.OpenFile(filePath, os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0644)
-}
-
-// parseLevel returns the level option of c.
-func (c *Config) parseLevel(level string) (logit.Option, error) {
-	switch strings.ToLower(level) {
-	case LevelDebug:
-		return logit.Options().WithDebugLevel(), nil
-	case LevelInfo:
-		return logit.Options().WithInfoLevel(), nil
-	case LevelWarn:
-		return logit.Options().WithWarnLevel(), nil
-	case LevelError:
-		return logit.Options().WithErrorLevel(), nil
-	case LevelPrint:
-		return logit.Options().WithPrintLevel(), nil
-	case LevelOff:
-		return logit.Options().WithOffLevel(), nil
-	default:
-		return nil, fmt.Errorf("level %s unknown", level)
-	}
-}
-
-// parseTimeFormat returns the format of time.
-func (c *Config) parseTimeFormat(format string) string {
-	if strings.ToLower(format) == UnixTimeFormat {
-		return appender.UnixTimeFormat
-	}
-
-	return format
-}
-
-// parseAutoSync returns the frequency of syncing.
-func (c *Config) parseAutoSync(frequency string) (time.Duration, error) {
-	return time.ParseDuration(frequency)
-}
-
-// parseAppender returns the appender of appenderName.
-func (c *Config) parseAppender(name string) (appender.Appender, error) {
-	switch strings.ToLower(name) {
-	case AppenderText:
-		return appender.Text(), nil
-	case AppenderJson:
-		return appender.Json(), nil
-	default:
-		return nil, fmt.Errorf("appender %s unknown", name)
-	}
-}
-
-// parseWriter returns the writer of writerName.
-func (c *Config) parseWriter(wc WriterConfig) (io.Writer, error) {
-	var w io.Writer
-
-	switch strings.ToLower(wc.Target) {
-	case WriterTargetStdout:
-		w = os.Stdout
-	case WriterTargetStderr:
-		w = os.Stderr
-	case WriterTargetFile:
-		f, err := c.createFile(wc.Filename)
-		if err != nil {
-			return nil, err
-		}
-
-		w = f
-	}
-
-	switch strings.ToLower(wc.Mode) {
-	case WriterModeDirect:
-		w = writer.Wrap(w)
-	case WriterModeBuffer:
-		if wc.BufferSize != "" {
-			s, err := size.ParseByteSize(wc.BufferSize)
-			if err != nil {
-				return nil, err
-			}
-
-			w = writer.BufferWithSize(w, s)
-		} else {
-			w = writer.Buffer(w)
-		}
-	case WriterModeBatch:
-		if wc.BatchCount > 0 {
-			w = writer.BatchWithCount(w, wc.BatchCount)
-		} else {
-			w = writer.Batch(w)
-		}
-	}
-
-	return w, nil
-}
-
 // Options returns a slice of logit.Option for creating logit.Logger.
 // Returns an error if something wrong happens.
 func (c *Config) Options() ([]logit.Option, error) {
@@ -232,11 +137,11 @@ func (c *Config) Options() ([]logit.Option, error) {
 		return nil, nil
 	}
 
-	options := logit.Options()
+	opts := logit.Options()
 	result := make([]logit.Option, 0, 16)
 
 	if c.Level != "" {
-		levelOption, err := c.parseLevel(c.Level)
+		levelOption, err := parseLevel(c.Level)
 		if err != nil {
 			return nil, err
 		}
@@ -245,164 +150,164 @@ func (c *Config) Options() ([]logit.Option, error) {
 	}
 
 	if c.TimeKey != "" {
-		result = append(result, options.WithTimeKey(c.TimeKey))
+		result = append(result, opts.WithTimeKey(c.TimeKey))
 	}
 
 	if c.LevelKey != "" {
-		result = append(result, options.WithLevelKey(c.LevelKey))
+		result = append(result, opts.WithLevelKey(c.LevelKey))
 	}
 
 	if c.MsgKey != "" {
-		result = append(result, options.WithMsgKey(c.MsgKey))
+		result = append(result, opts.WithMsgKey(c.MsgKey))
 	}
 
 	if c.PIDKey != "" {
-		result = append(result, options.WithPIDKey(c.PIDKey))
+		result = append(result, opts.WithPIDKey(c.PIDKey))
 	}
 
 	if c.FileKey != "" {
-		result = append(result, options.WithFileKey(c.FileKey))
+		result = append(result, opts.WithFileKey(c.FileKey))
 	}
 
 	if c.LineKey != "" {
-		result = append(result, options.WithLineKey(c.LineKey))
+		result = append(result, opts.WithLineKey(c.LineKey))
 	}
 
 	if c.FuncKey != "" {
-		result = append(result, options.WithFuncKey(c.FuncKey))
+		result = append(result, opts.WithFuncKey(c.FuncKey))
 	}
 
 	if strings.TrimSpace(c.TimeFormat) != "" {
-		result = append(result, options.WithTimeFormat(c.parseTimeFormat(c.TimeFormat)))
+		result = append(result, opts.WithTimeFormat(parseTimeFormat(c.TimeFormat)))
 	}
 
 	if c.WithPID {
-		result = append(result, options.WithPID())
+		result = append(result, opts.WithPID())
 	}
 
 	if c.WithCaller {
-		result = append(result, options.WithCaller())
+		result = append(result, opts.WithCaller())
 	}
 
 	if c.CallerDepth > 0 {
-		result = append(result, options.WithCallerDepth(c.CallerDepth))
+		result = append(result, opts.WithCallerDepth(c.CallerDepth))
 	}
 
 	if strings.TrimSpace(c.AutoSync) != "" {
-		frequency, err := c.parseAutoSync(c.AutoSync)
+		frequency, err := parseTimeDuration(c.AutoSync)
 		if err != nil {
 			return nil, err
 		}
 
-		result = append(result, options.WithAutoSync(frequency))
+		result = append(result, opts.WithAutoSync(frequency))
 	}
 
 	if strings.TrimSpace(c.Appender) != "" {
-		apdr, err := c.parseAppender(c.Appender)
+		apdr, err := parseAppender(c.Appender)
 		if err != nil {
 			return nil, err
 		}
 
-		result = append(result, options.WithAppender(apdr))
+		result = append(result, opts.WithAppender(apdr))
 	}
 
 	if strings.TrimSpace(c.DebugAppender) != "" {
-		apdr, err := c.parseAppender(c.DebugAppender)
+		apdr, err := parseAppender(c.DebugAppender)
 		if err != nil {
 			return nil, err
 		}
 
-		result = append(result, options.WithDebugAppender(apdr))
+		result = append(result, opts.WithDebugAppender(apdr))
 	}
 
 	if strings.TrimSpace(c.InfoAppender) != "" {
-		apdr, err := c.parseAppender(c.InfoAppender)
+		apdr, err := parseAppender(c.InfoAppender)
 		if err != nil {
 			return nil, err
 		}
 
-		result = append(result, options.WithInfoAppender(apdr))
+		result = append(result, opts.WithInfoAppender(apdr))
 	}
 
 	if strings.TrimSpace(c.WarnAppender) != "" {
-		apdr, err := c.parseAppender(c.WarnAppender)
+		apdr, err := parseAppender(c.WarnAppender)
 		if err != nil {
 			return nil, err
 		}
 
-		result = append(result, options.WithWarnAppender(apdr))
+		result = append(result, opts.WithWarnAppender(apdr))
 	}
 
 	if strings.TrimSpace(c.ErrorAppender) != "" {
-		apdr, err := c.parseAppender(c.ErrorAppender)
+		apdr, err := parseAppender(c.ErrorAppender)
 		if err != nil {
 			return nil, err
 		}
 
-		result = append(result, options.WithErrorAppender(apdr))
+		result = append(result, opts.WithErrorAppender(apdr))
 	}
 
 	if strings.TrimSpace(c.PrintAppender) != "" {
-		apdr, err := c.parseAppender(c.PrintAppender)
+		apdr, err := parseAppender(c.PrintAppender)
 		if err != nil {
 			return nil, err
 		}
 
-		result = append(result, options.WithPrintAppender(apdr))
+		result = append(result, opts.WithPrintAppender(apdr))
 	}
 
 	if c.Writer.Target != "" {
-		w, err := c.parseWriter(c.Writer)
+		w, err := parseWriter(c.Writer)
 		if err != nil {
 			return nil, err
 		}
 
-		result = append(result, options.WithWriter(w))
+		result = append(result, opts.WithWriter(w))
 	}
 
 	if c.DebugWriter.Target != "" {
-		w, err := c.parseWriter(c.DebugWriter)
+		w, err := parseWriter(c.DebugWriter)
 		if err != nil {
 			return nil, err
 		}
 
-		result = append(result, options.WithDebugWriter(w))
+		result = append(result, opts.WithDebugWriter(w))
 	}
 
 	if c.InfoWriter.Target != "" {
-		w, err := c.parseWriter(c.InfoWriter)
+		w, err := parseWriter(c.InfoWriter)
 		if err != nil {
 			return nil, err
 		}
 
-		result = append(result, options.WithInfoWriter(w))
+		result = append(result, opts.WithInfoWriter(w))
 	}
 
 	if c.WarnWriter.Target != "" {
-		w, err := c.parseWriter(c.WarnWriter)
+		w, err := parseWriter(c.WarnWriter)
 		if err != nil {
 			return nil, err
 		}
 
-		result = append(result, options.WithWarnWriter(w))
+		result = append(result, opts.WithWarnWriter(w))
 	}
 
 	if c.ErrorWriter.Target != "" {
-		w, err := c.parseWriter(c.ErrorWriter)
+		w, err := parseWriter(c.ErrorWriter)
 		if err != nil {
 			return nil, err
 		}
 
-		result = append(result, options.WithErrorWriter(w))
+		result = append(result, opts.WithErrorWriter(w))
 	}
 
 	if c.PrintWriter.Target != "" {
-		w, err := c.parseWriter(c.PrintWriter)
+		w, err := parseWriter(c.PrintWriter)
 		if err != nil {
 			return nil, err
 		}
 
-		result = append(result, options.WithPrintWriter(w))
+		result = append(result, opts.WithPrintWriter(w))
 	}
 
 	return result, nil
