@@ -47,7 +47,7 @@ func New(path string) (*File, error) {
 		ch:     make(chan struct{}, 1),
 	}
 
-	if err := f.beforeOpen(); err != nil {
+	if err := f.mkdir(); err != nil {
 		return nil, err
 	}
 
@@ -55,67 +55,16 @@ func New(path string) (*File, error) {
 		return nil, err
 	}
 
-	go f.watch()
+	go f.runCleanTask()
 	return f, nil
 }
 
-func (f *File) beforeOpen() error {
+func (f *File) mkdir() error {
 	return os.MkdirAll(filepath.Dir(f.path), f.dirMode)
 }
 
 func (f *File) open() (*os.File, error) {
 	return os.OpenFile(f.path, os.O_CREATE|os.O_APPEND|os.O_WRONLY, f.mode)
-}
-
-func (f *File) openNewFile() error {
-	file, err := f.open()
-	if err != nil {
-		return err
-	}
-
-	info, err := file.Stat()
-	if err != nil {
-		return err
-	}
-
-	f.file = file
-	f.size = size.ByteSize(info.Size())
-	return nil
-}
-
-func (f *File) needClean() bool {
-	return f.maxSize <= 0 && f.maxAge <= 0
-}
-
-func (f *File) filterStaleBackups(backups []backup) []string {
-	staleBackups := make(map[string]bool)
-
-	maxBackups := f.maxBackups
-	if maxBackups > 0 && uint(len(backups)) > maxBackups {
-		for i := uint(0); i < uint(len(backups))-maxBackups; i++ {
-			staleBackups[backups[i].path] = true
-		}
-	}
-
-	maxAge := f.maxAge
-	if maxAge > 0 {
-		deadline := now().Add(-maxAge)
-
-		for _, b := range backups {
-			if !b.BeforeTime(deadline) {
-				break
-			}
-
-			staleBackups[b.path] = true
-		}
-	}
-
-	var paths []string
-	for k := range staleBackups {
-		paths = append(paths, k)
-	}
-
-	return paths
 }
 
 func (f *File) listBackups() ([]backup, error) {
@@ -126,8 +75,8 @@ func (f *File) listBackups() ([]backup, error) {
 		return nil, err
 	}
 
-	basePath := filepath.Base(f.path)
-	prefix, ext := backupPrefixAndExt(basePath)
+	baseName := filepath.Base(f.path)
+	prefix, ext := backupPrefixAndExt(baseName)
 
 	var backups []backup
 	for _, file := range files {
@@ -136,7 +85,11 @@ func (f *File) listBackups() ([]backup, error) {
 		}
 
 		filename := file.Name()
-		notBackup := filename == basePath || !strings.HasPrefix(filename, prefix) || !strings.HasSuffix(filename, ext)
+		if filename == baseName {
+			continue
+		}
+
+		notBackup := !strings.HasPrefix(filename, prefix) || !strings.HasSuffix(filename, ext)
 		if notBackup {
 			continue
 		}
@@ -156,9 +109,40 @@ func (f *File) listBackups() ([]backup, error) {
 	return backups, nil
 }
 
-func (f *File) removeBackups(paths []string) {
-	for _, p := range paths {
-		os.Remove(p)
+func (f *File) filterStaleBackups(backups []backup) []string {
+	staleBackups := make(map[string]bool)
+
+	maxBackups := f.maxBackups
+	if maxBackups > 0 && uint(len(backups)) > maxBackups {
+		for i := uint(0); i < uint(len(backups))-maxBackups; i++ {
+			staleBackups[backups[i].path] = true
+		}
+	}
+
+	maxAge := f.maxAge
+	if maxAge > 0 {
+		deadline := now().Add(-maxAge)
+
+		for _, backup := range backups {
+			if !backup.Before(deadline) {
+				break
+			}
+
+			staleBackups[backup.path] = true
+		}
+	}
+
+	var paths []string
+	for k := range staleBackups {
+		paths = append(paths, k)
+	}
+
+	return paths
+}
+
+func (f *File) removeBackups(backups []string) {
+	for _, backup := range backups {
+		os.Remove(backup)
 	}
 }
 
@@ -172,25 +156,33 @@ func (f *File) clean() {
 	f.removeBackups(paths)
 }
 
-func (f *File) watch() {
-	if f.needClean() {
-		return
-	}
-
+func (f *File) runCleanTask() {
 	for range f.ch {
 		f.clean()
 	}
 }
 
-func (f *File) trigger() {
-	if f.needClean() {
-		return
-	}
-
+func (f *File) triggerCleanTask() {
 	select {
 	case f.ch <- struct{}{}:
 	default:
 	}
+}
+
+func (f *File) openNewFile() error {
+	file, err := f.open()
+	if err != nil {
+		return err
+	}
+
+	info, err := file.Stat()
+	if err != nil {
+		return err
+	}
+
+	f.file = file
+	f.size = size.ByteSize(info.Size())
+	return nil
 }
 
 func (f *File) closeOldFile() error {
@@ -215,7 +207,7 @@ func (f *File) rotate() error {
 		return err
 	}
 
-	f.trigger()
+	f.triggerCleanTask()
 	return nil
 }
 

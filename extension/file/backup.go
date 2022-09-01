@@ -29,17 +29,13 @@ type backup struct {
 	t    time.Time
 }
 
-func (b backup) BeforeTime(t time.Time) bool {
+func (b backup) Before(t time.Time) bool {
 	return b.t.Before(t)
-}
-
-func (b backup) Before(other backup) bool {
-	return b.t.Before(other.t)
 }
 
 func sortBackups(backups []backup) {
 	sort.Slice(backups, func(i, j int) bool {
-		return backups[i].Before(backups[j])
+		return backups[i].Before(backups[j].t)
 	})
 }
 
