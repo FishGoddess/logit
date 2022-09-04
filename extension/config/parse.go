@@ -58,7 +58,7 @@ const (
 
 const (
 	Day            = global.Day
-	UnixTimeFormat = global.UnixTimeFormat
+	UnixTimeFormat = "unix"
 )
 
 func mkdir(path string, mode os.FileMode) error {

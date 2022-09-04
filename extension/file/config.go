@@ -18,12 +18,7 @@ import (
 	"os"
 	"time"
 
-	"github.com/go-logit/logit/support/global"
 	"github.com/go-logit/logit/support/size"
-)
-
-const (
-	Day = global.Day
 )
 
 // config stores some fields of file.
@@ -57,7 +52,7 @@ func newDefaultConfig() config {
 		dirMode:    0755,
 		timeFormat: "20060102150405",
 		maxSize:    256 * size.MB,
-		maxAge:     14 * Day,
-		maxBackups: 14,
+		maxAge:     0,
+		maxBackups: 0,
 	}
 }

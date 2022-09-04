@@ -177,7 +177,7 @@ Package logit provides an easy way to use foundation for your logging operations
 	logger = logit.NewLogger(logit.Options().WithAppender(appender.Json()))
 	logger.Info("appender.Json()").Log()
 
-	// Every level has its own appender so you can append logs in different level with different appender.
+	// Every level has its own appender, so you can append logs in different level with different appender.
 	logger = logit.NewLogger(
 		logit.Options().WithDebugAppender(appender.Text()),
 		logit.Options().WithInfoAppender(appender.Text()),
@@ -185,10 +185,28 @@ Package logit provides an easy way to use foundation for your logging operations
 		logit.Options().WithErrorAppender(appender.Json()),
 	)
 
-	// Appender is an interface so you can implement your own appender.
+	// Appender is an interface, so you can implement your own appender.
 	// However, we don't recommend you to do that.
 	// This interface may change in every version, so you will pay lots of extra attention to it.
 	// So you should implement it only if you really need to do.
+
+	// appender.TextWith can let you configure the escaping flags of text appender.
+	// Default will escape keys and values.
+	logger = logit.NewLogger(logit.Options().WithAppender(appender.Text()))
+	logger.Info("appender.Text() try \t \b \n and see?").Byte("byte\n", '\n').Rune("rune\n", '\n').String("1\t2\b3\n4", "1\t2\b3\n4").Log()
+	logger.Info("appender.Text() try \t \b \n and see?").Bytes("bytes\n", []byte{'\t', '\b', '\n'}).Runes("runes\n", []rune{'\t', '\b', '\n'}).Strings("1\t2\b3\n4", []string{"1\t2\b3\n4"}).Log()
+
+	logger = logit.NewLogger(logit.Options().WithAppender(appender.TextWith(true, false)))
+	logger.Info("appender.TextWith(true, false) try \t \b \n and see?").Byte("byte\n", '\n').Rune("rune\n", '\n').String("1\t2\b3\n4", "1\t2\b3\n4").Log()
+	logger.Info("appender.TextWith(true, false) try \t \b \n and see?").Bytes("bytes\n", []byte{'\t', '\b', '\n'}).Runes("runes\n", []rune{'\t', '\b', '\n'}).Strings("1\t2\b3\n4", []string{"1\t2\b3\n4"}).Log()
+
+	logger = logit.NewLogger(logit.Options().WithAppender(appender.TextWith(false, true)))
+	logger.Info("appender.TextWith(false, true) try \t \b \n and see?").Byte("byte\n", '\n').Rune("rune\n", '\n').String("1\t2\b3\n4", "1\t2\b3\n4").Log()
+	logger.Info("appender.TextWith(false, true) try \t \b \n and see?").Bytes("bytes\n", []byte{'\t', '\b', '\n'}).Runes("runes\n", []rune{'\t', '\b', '\n'}).Strings("1\t2\b3\n4", []string{"1\t2\b3\n4"}).Log()
+
+	logger = logit.NewLogger(logit.Options().WithAppender(appender.TextWith(true, true)))
+	logger.Info("appender.TextWith(true, true) try \t \b \n and see?").Byte("byte\n", '\n').Rune("rune\n", '\n').String("1\t2\b3\n4", "1\t2\b3\n4").Log()
+	logger.Info("appender.TextWith(true, true) try \t \b \n and see?").Bytes("bytes\n", []byte{'\t', '\b', '\n'}).Runes("runes\n", []rune{'\t', '\b', '\n'}).Strings("1\t2\b3\n4", []string{"1\t2\b3\n4"}).Log()
 
 4. writer:
 
@@ -534,5 +552,5 @@ package logit // import "github.com/go-logit/logit"
 
 const (
 	// Version is the version string representation of logit.
-	Version = "v0.5.5-alpha"
+	Version = "v0.5.6-alpha"
 )
