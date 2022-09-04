@@ -7,6 +7,7 @@
 * 继续完善单元测试
 * 继续优化代码设计
 * 修复了 config 的 unix 时间解析问题
+* 增加 appender.TextWith 函数，支持不转义 key 和 value 的值
 
 ### v0.5.5-alpha
 
