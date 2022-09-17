@@ -159,12 +159,12 @@ func appendEscapedString(dst []byte, value string) []byte {
 
 // Text returns a Text appender with escaped keys and values.
 func Text() Appender {
-	return newTextAppender(false, false)
+	return newTextAppender(true, true)
 }
 
 // TextWith returns a Text appender with escaping config of keys and values.
-func TextWith(rawKey bool, rawValue bool) Appender {
-	return newTextAppender(rawKey, rawValue)
+func TextWith(escapeKey bool, escapeValue bool) Appender {
+	return newTextAppender(escapeKey, escapeValue)
 }
 
 // Json returns a Json appender.

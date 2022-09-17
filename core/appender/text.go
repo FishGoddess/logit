@@ -34,15 +34,15 @@ const (
 
 // textAppender is a Text appender.
 type textAppender struct {
-	rawKey   bool
-	rawValue bool
+	escapeKey   bool
+	escapeValue bool
 }
 
 // newTextAppender returns a text appender.
-func newTextAppender(rawKey bool, rawValue bool) textAppender {
+func newTextAppender(escapeKey bool, escapeValue bool) textAppender {
 	return textAppender{
-		rawKey:   rawKey,
-		rawValue: rawValue,
+		escapeKey:   escapeKey,
+		escapeValue: escapeValue,
 	}
 }
 
@@ -62,10 +62,10 @@ func (ta textAppender) appendKey(dst []byte, key string) []byte {
 		dst = append(dst, textItemSeparator)
 	}
 
-	if ta.rawKey {
-		dst = append(dst, key...)
-	} else {
+	if ta.escapeKey {
 		dst = appendEscapedString(dst, key)
+	} else {
+		dst = append(dst, key...)
 	}
 
 	return append(dst, textKeyValueSeparator)
@@ -96,22 +96,22 @@ func (ta textAppender) AppendBool(dst []byte, key string, value bool) []byte {
 func (ta textAppender) AppendByte(dst []byte, key string, value byte) []byte {
 	dst = ta.appendKey(dst, key)
 
-	if ta.rawValue {
-		return append(dst, value)
+	if ta.escapeValue {
+		return appendEscapedByte(dst, value)
 	}
 
-	return appendEscapedByte(dst, value)
+	return append(dst, value)
 }
 
 // AppendRune appends a rune entry to dst.
 func (ta textAppender) AppendRune(dst []byte, key string, value rune) []byte {
 	dst = ta.appendKey(dst, key)
 
-	if ta.rawValue {
-		return append(dst, string(value)...)
+	if ta.escapeValue {
+		return appendEscapedRune(dst, value)
 	}
 
-	return appendEscapedRune(dst, value)
+	return append(dst, string(value)...)
 }
 
 // AppendInt appends an int entry to dst.
@@ -190,11 +190,11 @@ func (ta textAppender) AppendFloat64(dst []byte, key string, value float64) []by
 func (ta textAppender) AppendString(dst []byte, key string, value string) []byte {
 	dst = ta.appendKey(dst, key)
 
-	if ta.rawValue {
-		return append(dst, value...)
+	if ta.escapeValue {
+		return appendEscapedString(dst, value)
 	}
 
-	return appendEscapedString(dst, value)
+	return append(dst, value...)
 }
 
 // AppendTime appends a time.Time entry formatted with format to dst.
@@ -254,22 +254,22 @@ func (ta textAppender) AppendBools(dst []byte, key string, values []bool) []byte
 // AppendBytes appends a []byte entry to dst.
 func (ta textAppender) AppendBytes(dst []byte, key string, values []byte) []byte {
 	return ta.appendArray(dst, key, len(values), func(innerDst []byte, index int) []byte {
-		if ta.rawValue {
-			return append(innerDst, values[index])
+		if ta.escapeValue {
+			return appendEscapedByte(innerDst, values[index])
 		}
 
-		return appendEscapedByte(innerDst, values[index])
+		return append(innerDst, values[index])
 	})
 }
 
 // AppendRunes appends a []rune entry to dst.
 func (ta textAppender) AppendRunes(dst []byte, key string, values []rune) []byte {
 	return ta.appendArray(dst, key, len(values), func(innerDst []byte, index int) []byte {
-		if ta.rawValue {
-			return append(innerDst, string(values[index])...)
+		if ta.escapeValue {
+			return appendEscapedRune(innerDst, values[index])
 		}
 
-		return appendEscapedRune(innerDst, values[index])
+		return append(innerDst, string(values[index])...)
 	})
 }
 
@@ -360,11 +360,11 @@ func (ta textAppender) AppendFloat64s(dst []byte, key string, values []float64) 
 // AppendStrings appends a []string entry to dst.
 func (ta textAppender) AppendStrings(dst []byte, key string, values []string) []byte {
 	return ta.appendArray(dst, key, len(values), func(innerDst []byte, index int) []byte {
-		if ta.rawValue {
-			return append(innerDst, values[index]...)
+		if ta.escapeValue {
+			return appendEscapedString(innerDst, values[index])
 		}
 
-		return appendEscapedString(innerDst, values[index])
+		return append(innerDst, values[index]...)
 	})
 }
 
@@ -386,11 +386,11 @@ func (ta textAppender) AppendErrors(dst []byte, key string, values []error) []by
 			return append(innerDst, textNil...)
 		}
 
-		if ta.rawValue {
-			return append(innerDst, values[index].Error()...)
+		if ta.escapeValue {
+			return appendEscapedString(innerDst, values[index].Error())
 		}
 
-		return appendEscapedString(innerDst, values[index].Error())
+		return append(innerDst, values[index].Error()...)
 	})
 }
 
@@ -402,10 +402,10 @@ func (ta textAppender) AppendStringers(dst []byte, key string, values []fmt.Stri
 			return append(innerDst, textNil...)
 		}
 
-		if ta.rawValue {
-			return append(innerDst, values[index].String()...)
+		if ta.escapeValue {
+			return appendEscapedString(innerDst, values[index].String())
 		}
 
-		return appendEscapedString(innerDst, values[index].String())
+		return append(innerDst, values[index].String()...)
 	})
 }

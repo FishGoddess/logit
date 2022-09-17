@@ -146,11 +146,13 @@ func (l *Logger) writerOf(level level) writer.Writer {
 // This is a better way to memory.
 func (l *Logger) getLog(level level) *Log {
 	log := l.logPool.Get().(*Log)
+
 	log.logger = l
 	log.appender = l.appenderOf(level)
 	log.writer = l.writerOf(level)
 	log.data = log.data[:0]
 	log.ctx = context.Background()
+
 	return log
 }
 

@@ -61,7 +61,7 @@ func main() {
 	logger.Info("appender.TextWith(false, true) try \t \b \n and see?").Byte("byte\n", '\n').Rune("rune\n", '\n').String("1\t2\b3\n4", "1\t2\b3\n4").Log()
 	logger.Info("appender.TextWith(false, true) try \t \b \n and see?").Bytes("bytes\n", []byte{'\t', '\b', '\n'}).Runes("runes\n", []rune{'\t', '\b', '\n'}).Strings("1\t2\b3\n4", []string{"1\t2\b3\n4"}).Log()
 
-	logger = logit.NewLogger(logit.Options().WithAppender(appender.TextWith(true, true)))
+	logger = logit.NewLogger(logit.Options().WithAppender(appender.TextWith(false, false)))
 	logger.Info("appender.TextWith(true, true) try \t \b \n and see?").Byte("byte\n", '\n').Rune("rune\n", '\n').String("1\t2\b3\n4", "1\t2\b3\n4").Log()
 	logger.Info("appender.TextWith(true, true) try \t \b \n and see?").Bytes("bytes\n", []byte{'\t', '\b', '\n'}).Runes("runes\n", []rune{'\t', '\b', '\n'}).Strings("1\t2\b3\n4", []string{"1\t2\b3\n4"}).Log()
 }
