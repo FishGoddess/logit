@@ -28,30 +28,36 @@ func main() {
 	// Of course, you can embed this struct to your application config struct!
 	cfg := config.Config{
 		Level:         config.LevelDebug,
-		TimeKey:       "log.time",
-		LevelKey:      "log.level",
-		MsgKey:        "log.msg",
-		PIDKey:        "log.pid",
-		FileKey:       "log.file",
-		LineKey:       "log.line",
-		FuncKey:       "log.func",
+		TimeKey:       "x.time",
+		LevelKey:      "x.level",
+		MsgKey:        "x.msg",
+		PIDKey:        "x.pid",
+		FileKey:       "x.file",
+		LineKey:       "x.line",
+		FuncKey:       "x.func",
 		TimeFormat:    config.UnixTimeFormat,
-		WithPID:       false,
-		WithCaller:    false,
+		WithPID:       true,
+		WithCaller:    true,
 		CallerDepth:   0,
-		AutoSync:      "",
+		AutoSync:      "10s",
 		Appender:      config.AppenderText,
-		DebugAppender: "",
-		InfoAppender:  "",
-		WarnAppender:  "",
-		ErrorAppender: "",
-		PrintAppender: "",
+		DebugAppender: config.AppenderText,
+		InfoAppender:  config.AppenderText,
+		WarnAppender:  config.AppenderText,
+		ErrorAppender: config.AppenderText,
+		PrintAppender: config.AppenderJson,
 		Writer: config.WriterConfig{
 			Target:     config.WriterTargetStdout,
 			Mode:       config.WriterModeDirect,
-			Filename:   "",
 			BufferSize: "4MB",
 			BatchCount: 1024,
+			Filename:   "test.log",
+			DirMode:    0755,
+			FileMode:   0644,
+			TimeFormat: "20060102150405",
+			MaxSize:    "128MB",
+			MaxAge:     "30d",
+			MaxBackups: 32,
 		},
 		DebugWriter: config.WriterConfig{},
 		InfoWriter:  config.WriterConfig{},
@@ -65,11 +71,14 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
+
 	fmt.Println(opts)
 
 	// Then you can create your logger by options.
 	// Amazing!
 	logger := logit.NewLogger(opts...)
 	defer logger.Close()
+
 	logger.Info("My mother is a config").Any("config", cfg).Log()
+	logger.Info("See logger").Any("logger", logger).Log()
 }

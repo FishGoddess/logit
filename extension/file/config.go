@@ -21,10 +21,6 @@ import (
 	"github.com/go-logit/logit/support/size"
 )
 
-const (
-	day = 24 * time.Hour
-)
-
 // config stores some fields of file.
 type config struct {
 	// mode is the permission mode of file.
@@ -46,7 +42,7 @@ type config struct {
 	maxAge time.Duration
 
 	// maxBackups is the max count of backups.
-	maxBackups uint
+	maxBackups int
 }
 
 // newDefaultConfig returns a default config.
@@ -56,7 +52,7 @@ func newDefaultConfig() config {
 		dirMode:    0755,
 		timeFormat: "20060102150405",
 		maxSize:    256 * size.MB,
-		maxAge:     14 * day,
-		maxBackups: 14,
+		maxAge:     0,
+		maxBackups: 0,
 	}
 }

@@ -21,6 +21,7 @@ import (
 
 	"github.com/go-logit/logit"
 	"github.com/go-logit/logit/core/writer"
+	"github.com/go-logit/logit/extension/file"
 	"github.com/go-logit/logit/support/size"
 )
 
@@ -29,6 +30,7 @@ func mustCreateFile(filePath string) *os.File {
 	if err != nil {
 		panic(err)
 	}
+
 	return f
 }
 
@@ -44,6 +46,7 @@ func main() {
 	// As we know, we always log everything to file in production.
 	logFile := filepath.Join(os.TempDir(), "test.log")
 	fmt.Println(logFile)
+
 	logger = logit.NewLogger(logit.Options().WithWriter(mustCreateFile(logFile)))
 	logger.Info("I log everything to file.").String("logFile", logFile).Log()
 	logger.Close()
@@ -52,6 +55,7 @@ func main() {
 	// It will use a buffer writer to write logs if withBuffer is true which will bring a huge performance improvement.
 	logFile = filepath.Join(os.TempDir(), "test_buffer.log")
 	fmt.Println(logFile)
+
 	logger = logit.NewLogger(logit.Options().WithWriter(mustCreateFile(logFile)))
 	logger.Info("I log everything to file with buffer.").String("logFile", logFile).Log()
 	logger.Close()
@@ -61,4 +65,22 @@ func main() {
 	writer.BatchWithCount(os.Stdout, 256)
 	logit.Options().WithBufferWriter(os.Stdout)
 	logit.Options().WithBatchWriter(os.Stdout)
+
+	// Wait a minute, we also provide a powerful file for you!
+	// See extension/file/file.go.
+	// It will rotate file and clean backups automatically.
+	// You can set maxSize, maxAge and maxBackups by options.
+	logFile = filepath.Join(os.TempDir(), "test_powerful.log")
+
+	f, err := file.New(logFile)
+	if err != nil {
+		panic(err)
+	}
+
+	defer f.Close()
+
+	_, err = f.Write([]byte("xxx"))
+	if err != nil {
+		panic(err)
+	}
 }

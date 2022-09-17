@@ -22,6 +22,7 @@
 * 支持拦截器模式，可以从 context 注入外部常量或变量，简化日志输出流程。
 * 支持错误监控，可以很方便地进行错误统计和告警。
 * 支持日志按大小自动分割，并支持按照时间和数量自动清理。
+* 支持多种配置文件序列化成 option，比如 json/yaml/toml/bson，然后创建日志记录器。
 
 > 更多 logit 生态的东西请查看 [GitHub](https://github.com/go-logit) / [码云](https://gitee.com/go-logit)
 

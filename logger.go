@@ -55,7 +55,7 @@ type Logger struct {
 }
 
 // NewLogger returns a new Logger created with options.
-func NewLogger(options ...Option) *Logger {
+func NewLogger(opts ...Option) *Logger {
 	logger := &Logger{
 		config:        newDefaultConfig(),
 		debugAppender: appender.Text(),
@@ -75,8 +75,8 @@ func NewLogger(options ...Option) *Logger {
 		},
 	}
 
-	for _, applyOption := range options {
-		applyOption(logger)
+	for _, opt := range opts {
+		opt.Apply(logger)
 	}
 
 	return logger
@@ -146,11 +146,13 @@ func (l *Logger) writerOf(level level) writer.Writer {
 // This is a better way to memory.
 func (l *Logger) getLog(level level) *Log {
 	log := l.logPool.Get().(*Log)
+
 	log.logger = l
 	log.appender = l.appenderOf(level)
 	log.writer = l.writerOf(level)
 	log.data = log.data[:0]
 	log.ctx = context.Background()
+
 	return log
 }
 
@@ -176,7 +178,7 @@ func (l *Logger) log(level level, msg string, params ...interface{}) *Log {
 	}
 
 	if l.withPID {
-		log = log.WithPID()
+		log = log.withPID()
 	}
 
 	if l.withCaller {

@@ -24,14 +24,11 @@ import (
 const (
 	// lineBreak is the break between lines.
 	lineBreak = '\n'
-
-	// UnixTimeFormat is time format of unix.
-	UnixTimeFormat = ""
 )
 
 var (
-	globalTextAppender Appender = (*textAppender)(nil) // Check and use.
-	globalJsonAppender Appender = (*jsonAppender)(nil) // Check and use.
+	_ Appender = (*textAppender)(nil) // Check.
+	_ Appender = (*jsonAppender)(nil) // Check.
 )
 
 // Appender is an interface of appending entries to a byte slice.
@@ -160,12 +157,17 @@ func appendEscapedString(dst []byte, value string) []byte {
 	return append(dst, value...)
 }
 
-// Text returns the global Text appender.
+// Text returns a Text appender with escaped keys and values.
 func Text() Appender {
-	return globalTextAppender
+	return newTextAppender(true, true)
 }
 
-// Json returns the global Json appender.
+// TextWith returns a Text appender with escaping config of keys and values.
+func TextWith(escapeKey bool, escapeValue bool) Appender {
+	return newTextAppender(escapeKey, escapeValue)
+}
+
+// Json returns a Json appender.
 func Json() Appender {
-	return globalJsonAppender
+	return newJsonAppender()
 }

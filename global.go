@@ -15,12 +15,19 @@
 package logit
 
 import (
+	"os"
+
 	"github.com/go-logit/logit/support/global"
 )
 
 var (
 	// globalLogger is a logger for global usage.
-	globalLogger = NewLogger(Options().WithInfoLevel(), Options().WithCallerDepth(global.CallerDepth+1))
+	globalLogger = NewLogger(
+		Options().WithInfoLevel(),
+		Options().WithWarnWriter(os.Stderr),
+		Options().WithErrorWriter(os.Stderr),
+		Options().WithCallerDepth(global.CallerDepth+1),
+	)
 )
 
 // SetGlobal sets global logger to value returned from newLogger.
