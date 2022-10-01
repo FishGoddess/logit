@@ -60,7 +60,7 @@ func TestBackupPrefixAndExt(t *testing.T) {
 // go test -v -cover -run=^TestBackupPath$
 func TestBackupPath(t *testing.T) {
 	now = func() time.Time {
-		return time.Unix(1, 0)
+		return time.Unix(1, 0).In(time.Local)
 	}
 
 	path := backupPath("test.log", "20060102150405")
