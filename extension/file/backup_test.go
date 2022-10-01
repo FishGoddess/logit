@@ -59,20 +59,24 @@ func TestBackupPrefixAndExt(t *testing.T) {
 
 // go test -v -cover -run=^TestBackupPath$
 func TestBackupPath(t *testing.T) {
+	location = time.UTC
+
 	now = func() time.Time {
 		return time.Unix(1, 0)
 	}
 
 	path := backupPath("test.log", "20060102150405")
 
-	if path != "test.19700101080001.log" {
+	if path != "test.19700101000001.log" {
 		t.Errorf("path %s != 'test.19700101080001.log'", path)
 	}
 }
 
 // go test -v -cover -run=^TestParseBackupTime$
 func TestParseBackupTime(t *testing.T) {
-	filename := "test.19700101080001.log"
+	location = time.UTC
+
+	filename := "test.19700101000001.log"
 	prefix := "test."
 	ext := ".log"
 	timeFormat := "20060102150405"
