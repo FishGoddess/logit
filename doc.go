@@ -548,9 +548,9 @@ Package logit provides an easy way to use foundation for your logging operations
 	logger.Info("My mother is a config").Any("config", cfg).Log()
 	logger.Info("See logger").Any("logger", logger).Log()
 */
-package logit // import "github.com/go-logit/logit"
+package logit // import "github.com/FishGoddess/logit"
 
 const (
 	// Version is the version string representation of logit.
-	Version = "v0.5.8"
+	Version = "v0.6.0"
 )

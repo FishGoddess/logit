@@ -17,7 +17,7 @@ package logit
 import (
 	"os"
 
-	"github.com/go-logit/logit/support/global"
+	"github.com/FishGoddess/logit/support/global"
 )
 
 var (

@@ -5,7 +5,7 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/go-logit/logit/core/appender"
+	"github.com/FishGoddess/logit/core/appender"
 )
 
 // go test -v -cover -run=^TestSetGlobal$

@@ -1,5 +1,11 @@
 ## ✒ 历史版本的特性介绍 (Features in old versions)
 
+### v0.6.0
+
+> 此版本发布于 2022-10-08
+
+* 原谅我将仓库从组织中转移回个人。。因为组织没啥用。。
+
 ### v0.5.8
 
 > 此版本发布于 2022-10-01
@@ -345,13 +351,13 @@
 
 > 此版本发布于 2020-04-19
 
-* 完善 Json 处理器没有做字符转义的修复方案，详情查询 [issue/1](https://github.com/go-logit/logit/issues/1)
+* 完善 Json 处理器没有做字符转义的修复方案，详情查询 [issue/1](https://github.com/FishGoddess/logit/issues/1)
 
 ### v0.1.4
 
 > 此版本发布于 2020-04-10
 
-* 紧急修复 Json 处理器没有做字符转义的 bug，详情查询 [issue/1](https://github.com/go-logit/logit/issues/1)
+* 紧急修复 Json 处理器没有做字符转义的 bug，详情查询 [issue/1](https://github.com/FishGoddess/logit/issues/1)
 
 ### v0.1.3
 

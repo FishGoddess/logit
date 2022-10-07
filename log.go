@@ -19,11 +19,11 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/go-logit/logit/support/global"
-	"github.com/go-logit/logit/support/runtime"
+	"github.com/FishGoddess/logit/support/global"
+	"github.com/FishGoddess/logit/support/runtime"
 
-	"github.com/go-logit/logit/core/appender"
-	"github.com/go-logit/logit/core/writer"
+	"github.com/FishGoddess/logit/core/appender"
+	"github.com/FishGoddess/logit/core/writer"
 )
 
 // Log stores data of a whole logging message.

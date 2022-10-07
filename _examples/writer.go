@@ -17,9 +17,9 @@ package main
 import (
 	"os"
 
-	"github.com/go-logit/logit"
-	"github.com/go-logit/logit/core/writer"
-	"github.com/go-logit/logit/support/size"
+	"github.com/FishGoddess/logit"
+	"github.com/FishGoddess/logit/core/writer"
+	"github.com/FishGoddess/logit/support/size"
 )
 
 func main() {

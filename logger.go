@@ -20,9 +20,9 @@ import (
 	"os"
 	"sync"
 
-	"github.com/go-logit/logit/core/appender"
-	"github.com/go-logit/logit/core/writer"
-	"github.com/go-logit/logit/support/global"
+	"github.com/FishGoddess/logit/core/appender"
+	"github.com/FishGoddess/logit/core/writer"
+	"github.com/FishGoddess/logit/support/global"
 )
 
 // Interceptor intercepts log with context.

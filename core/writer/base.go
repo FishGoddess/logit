@@ -18,8 +18,8 @@ import (
 	"io"
 	"os"
 
-	"github.com/go-logit/logit/support/global"
-	"github.com/go-logit/logit/support/size"
+	"github.com/FishGoddess/logit/support/global"
+	"github.com/FishGoddess/logit/support/size"
 )
 
 // Syncer is an interface that syncs data to somewhere.

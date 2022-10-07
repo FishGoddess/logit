@@ -17,8 +17,8 @@ package main
 import (
 	"fmt"
 
-	"github.com/go-logit/logit"
-	"github.com/go-logit/logit/extension/config"
+	"github.com/FishGoddess/logit"
+	"github.com/FishGoddess/logit/extension/config"
 )
 
 func main() {

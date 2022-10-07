@@ -23,10 +23,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/go-logit/logit/core/appender"
-	"github.com/go-logit/logit/support/global"
+	"github.com/FishGoddess/logit/core/appender"
+	"github.com/FishGoddess/logit/support/global"
 
-	"github.com/go-logit/logit/support/runtime"
+	"github.com/FishGoddess/logit/support/runtime"
 )
 
 // go test -v -cover -run=^TestNewLog$
