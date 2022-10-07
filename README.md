@@ -1,9 +1,9 @@
 # 📝 logit
 
-[![Go Doc](_icons/godoc.svg)](https://pkg.go.dev/github.com/go-logit/logit)
+[![Go Doc](_icons/godoc.svg)](https://pkg.go.dev/github.com/FishGoddess/logit)
 [![License](_icons/license.svg)](https://www.apache.org/licenses/LICENSE-2.0.html)
 [![Coverage](_icons/coverage.svg)](_icons/coverage.svg)
-![Test](https://github.com/go-logit/logit/actions/workflows/test.yml/badge.svg)
+![Test](https://github.com/FishGoddess/logit/actions/workflows/test.yml/badge.svg)
 
 **logit** 是一个基于级别控制的高性能纯结构化日志库，可以应用于所有的 [GoLang](https://golang.org) 应用程序中。
 
@@ -24,14 +24,14 @@
 * 支持日志按大小自动分割，并支持按照时间和数量自动清理。
 * 支持多种配置文件序列化成 option，比如 json/yaml/toml/bson，然后创建日志记录器。
 
-> 更多 logit 生态的东西请查看 [GitHub](https://github.com/go-logit) / [码云](https://gitee.com/go-logit)
+_原谅我，先建了个组织，后面发现没啥用，又转移回个人仓库了。。。_
 
 _历史版本的特性请查看 [HISTORY.md](./HISTORY.md)。未来版本的新特性和计划请查看 [FUTURE.md](./FUTURE.md)。_
 
 ### 🚀 安装方式
 
 ```bash
-$ go get -u github.com/go-logit/logit
+$ go get -u github.com/FishGoddess/logit
 ```
 
 ### 📖 参考案例
@@ -44,8 +44,8 @@ import (
 	"io"
 	"os"
 
-	"github.com/go-logit/logit"
-	"github.com/go-logit/logit/support/global"
+	"github.com/FishGoddess/logit"
+	"github.com/FishGoddess/logit/support/global"
 )
 
 func main() {

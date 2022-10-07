@@ -17,7 +17,7 @@ package main
 import (
 	"time"
 
-	"github.com/go-logit/logit"
+	"github.com/FishGoddess/logit"
 )
 
 func main() {

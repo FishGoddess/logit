@@ -17,7 +17,7 @@ package main
 import (
 	"context"
 
-	"github.com/go-logit/logit"
+	"github.com/FishGoddess/logit"
 )
 
 // serverInterceptor is the global interceptor applied to all logs.

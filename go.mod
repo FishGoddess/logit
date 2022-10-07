@@ -1,3 +1,3 @@
-module github.com/go-logit/logit
+module github.com/FishGoddess/logit
 
 go 1.15

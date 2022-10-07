@@ -18,7 +18,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/go-logit/logit"
+	"github.com/FishGoddess/logit"
 )
 
 // WriterConfig stores all configs of writer.

@@ -21,7 +21,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/go-logit/logit/support/global"
+	"github.com/FishGoddess/logit/support/global"
 )
 
 const (

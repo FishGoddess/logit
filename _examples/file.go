@@ -19,10 +19,10 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/go-logit/logit"
-	"github.com/go-logit/logit/core/writer"
-	"github.com/go-logit/logit/extension/file"
-	"github.com/go-logit/logit/support/size"
+	"github.com/FishGoddess/logit"
+	"github.com/FishGoddess/logit/core/writer"
+	"github.com/FishGoddess/logit/extension/file"
+	"github.com/FishGoddess/logit/support/size"
 )
 
 func mustCreateFile(filePath string) *os.File {

@@ -17,7 +17,7 @@ package main
 import (
 	"context"
 
-	"github.com/go-logit/logit"
+	"github.com/FishGoddess/logit"
 )
 
 func main() {

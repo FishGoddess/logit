@@ -18,8 +18,8 @@ import (
 	"io"
 	"time"
 
-	"github.com/go-logit/logit/core/appender"
-	"github.com/go-logit/logit/core/writer"
+	"github.com/FishGoddess/logit/core/appender"
+	"github.com/FishGoddess/logit/core/writer"
 )
 
 // Option is a function that applies to logger.

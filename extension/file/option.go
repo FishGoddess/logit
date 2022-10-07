@@ -18,7 +18,7 @@ import (
 	"os"
 	"time"
 
-	"github.com/go-logit/logit/support/size"
+	"github.com/FishGoddess/logit/support/size"
 )
 
 // Option will set something to config.

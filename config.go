@@ -15,7 +15,7 @@
 package logit
 
 import (
-	"github.com/go-logit/logit/support/global"
+	"github.com/FishGoddess/logit/support/global"
 )
 
 // config stores all configurations used in Logger.
