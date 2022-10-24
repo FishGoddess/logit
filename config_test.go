@@ -35,6 +35,7 @@ func TestNewDefaultConfig(t *testing.T) {
 		fileKey:     "log.file",
 		lineKey:     "log.line",
 		funcKey:     "log.func",
+		errorKey:    "log.err",
 		timeFormat:  "2006-01-02 15:04:05",
 		callerDepth: global.CallerDepth,
 	}

@@ -714,6 +714,19 @@ func TestOptionsWithFuncKey(t *testing.T) {
 	}
 }
 
+// go test -v -cover -run=^TestOptionsWithErrorKey$
+func TestOptionsWithErrorKey(t *testing.T) {
+	opts := Options()
+
+	logger := NewLogger()
+	logger.errorKey = ""
+
+	opts.WithErrorKey("err").Apply(logger)
+	if logger.errorKey != "err" {
+		t.Errorf("logger's errorKey %+v is wrong", logger.errorKey)
+	}
+}
+
 // go test -v -cover -run=^TestOptionsWithTimeFormat$
 func TestOptionsWithTimeFormat(t *testing.T) {
 	opts := Options()

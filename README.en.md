@@ -92,8 +92,13 @@ func main() {
 		Name: "FishGoddess",
 		Age:  3,
 	}
+
 	logger.Warn("This is a structured message").Any("user", user).Json("userJson", user).Log()
 	logger.Error("This is a structured message").Error("err", io.EOF).Int("trace", 123).Log()
+
+	// Tired to write Error("err", io.EOF)?
+	// Try Err method!
+	logger.Error("This is a structured message, too").Err(io.EOF).Int("trace", 456).Log()
 
 	// You may notice logit.Options() which returns an options list.
 	// Here is some of them:
