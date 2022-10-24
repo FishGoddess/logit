@@ -267,6 +267,13 @@ func (o *options) WithFuncKey(key string) Option {
 	}
 }
 
+// WithErrorKey returns an option which sets logger's errorKey to a new one.
+func (o *options) WithErrorKey(key string) Option {
+	return func(logger *Logger) {
+		logger.errorKey = key
+	}
+}
+
 // WithTimeFormat returns an option which sets format of time in logs.
 func (o *options) WithTimeFormat(format string) Option {
 	return func(logger *Logger) {

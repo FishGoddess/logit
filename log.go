@@ -491,6 +491,19 @@ func (l *Log) Stringers(key string, value []fmt.Stringer) *Log {
 	return l
 }
 
+// Err adds an error to l.
+func (l *Log) Err(err error) *Log {
+	if l == nil {
+		return nil
+	}
+
+	if l.logger.errorKey != "" {
+		l.Error(l.logger.errorKey, err)
+	}
+
+	return l
+}
+
 // WithTime adds an entry which key is string and value is time.Time formatted type to l.
 func (l *Log) WithTime(key string, value time.Time, format string) *Log {
 	if l == nil {

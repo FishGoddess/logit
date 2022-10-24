@@ -58,8 +58,13 @@ Package logit provides an easy way to use foundation for your logging operations
 		Name: "FishGoddess",
 		Age:  3,
 	}
+
 	logger.Warn("This is a structured message").Any("user", user).Json("userJson", user).Log()
 	logger.Error("This is a structured message").Error("err", io.EOF).Int("trace", 123).Log()
+
+	// Tired to write Error("err", io.EOF)?
+	// Try Err method!
+	logger.Error("This is a structured message, too").Err(io.EOF).Int("trace", 456).Log()
 
 	// You may notice logit.Options() which returns an options list.
 	// Here is some of them:
@@ -121,8 +126,8 @@ Package logit provides an easy way to use foundation for your logging operations
 	options.WithFileKey("file")
 	options.WithLineKey("line")
 	options.WithFuncKey("func")
-	options.WithTimeFormat(appender.UnixTimeFormat) // UnixTimeFormat means time will be logged as unix time, an int64 number.
-	options.WithCallerDepth(3)                      // Set caller depth to 3 so the log will get the third depth caller.
+	options.WithTimeFormat(global.UnixTimeFormat) // UnixTimeFormat means time will be logged as unix time, an int64 number.
+	options.WithCallerDepth(3)                    // Set caller depth to 3 so the log will get the third depth caller.
 	options.WithInterceptors()
 
 	// Remember, these options is only used for creating a logger.
@@ -552,5 +557,5 @@ package logit // import "github.com/FishGoddess/logit"
 
 const (
 	// Version is the version string representation of logit.
-	Version = "v0.6.0"
+	Version = "v0.6.1"
 )
