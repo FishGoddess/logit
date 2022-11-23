@@ -78,7 +78,7 @@ func BenchmarkLogitLoggerWithTextAppender(b *testing.B) {
 		logger.Debug("debug...").String("trace", "xxx").Int("id", 123).Float64("pi", 3.14).Log()
 		logger.Info("info...").String("trace", "xxx").Int("id", 123).Float64("pi", 3.14).Log()
 		logger.Warn("warning...").String("trace", "xxx").Int("id", 123).Float64("pi", 3.14).Log()
-		logger.Error("error...").String("trace", "xxx").Int("id", 123).Float64("pi", 3.14).Log()
+		logger.Error(nil, "error...").String("trace", "xxx").Int("id", 123).Float64("pi", 3.14).Log()
 	}
 
 	b.ReportAllocs()
@@ -103,7 +103,7 @@ func BenchmarkLogitLoggerWithJsonAppender(b *testing.B) {
 		logger.Debug("debug...").String("trace", "xxx").Int("id", 123).Float64("pi", 3.14).Log()
 		logger.Info("info...").String("trace", "xxx").Int("id", 123).Float64("pi", 3.14).Log()
 		logger.Warn("warning...").String("trace", "xxx").Int("id", 123).Float64("pi", 3.14).Log()
-		logger.Error("error...").String("trace", "xxx").Int("id", 123).Float64("pi", 3.14).Log()
+		logger.Error(nil, "error...").String("trace", "xxx").Int("id", 123).Float64("pi", 3.14).Log()
 	}
 
 	b.ReportAllocs()
@@ -128,7 +128,7 @@ func BenchmarkLogitLoggerWithFormat(b *testing.B) {
 		logger.Debug("debug%s", "...").String("trace", "xxx").Int("id", 123).Float64("pi", 3.14).Log()
 		logger.Info("info%s", "...").String("trace", "xxx").Int("id", 123).Float64("pi", 3.14).Log()
 		logger.Warn("warning%s", "...").String("trace", "xxx").Int("id", 123).Float64("pi", 3.14).Log()
-		logger.Error("error%s", "...").String("trace", "xxx").Int("id", 123).Float64("pi", 3.14).Log()
+		logger.Error(nil, "error%s", "...").String("trace", "xxx").Int("id", 123).Float64("pi", 3.14).Log()
 	}
 
 	b.ReportAllocs()
@@ -259,7 +259,7 @@ func BenchmarkLogitFileWithTextAppender(b *testing.B) {
 		logger.Debug("debug...").String("trace", "xxx").Int("id", 123).Float64("pi", 3.14).Log()
 		logger.Info("info...").String("trace", "xxx").Int("id", 123).Float64("pi", 3.14).Log()
 		logger.Warn("warning...").String("trace", "xxx").Int("id", 123).Float64("pi", 3.14).Log()
-		logger.Error("error...").String("trace", "xxx").Int("id", 123).Float64("pi", 3.14).Log()
+		logger.Error(nil, "error...").String("trace", "xxx").Int("id", 123).Float64("pi", 3.14).Log()
 	}
 
 	b.ReportAllocs()
@@ -287,7 +287,7 @@ func BenchmarkLogitFileWithJsonAppender(b *testing.B) {
 		logger.Debug("debug...").String("trace", "xxx").Int("id", 123).Float64("pi", 3.14).Log()
 		logger.Info("info...").String("trace", "xxx").Int("id", 123).Float64("pi", 3.14).Log()
 		logger.Warn("warning...").String("trace", "xxx").Int("id", 123).Float64("pi", 3.14).Log()
-		logger.Error("error...").String("trace", "xxx").Int("id", 123).Float64("pi", 3.14).Log()
+		logger.Error(nil, "error...").String("trace", "xxx").Int("id", 123).Float64("pi", 3.14).Log()
 	}
 
 	b.ReportAllocs()
@@ -314,7 +314,7 @@ func BenchmarkLogitFileWithoutBuffer(b *testing.B) {
 		logger.Debug("debug...").String("trace", "xxx").Int("id", 123).Float64("pi", 3.14).Log()
 		logger.Info("info...").String("trace", "xxx").Int("id", 123).Float64("pi", 3.14).Log()
 		logger.Warn("warning...").String("trace", "xxx").Int("id", 123).Float64("pi", 3.14).Log()
-		logger.Error("error...").String("trace", "xxx").Int("id", 123).Float64("pi", 3.14).Log()
+		logger.Error(nil, "error...").String("trace", "xxx").Int("id", 123).Float64("pi", 3.14).Log()
 	}
 
 	b.ReportAllocs()

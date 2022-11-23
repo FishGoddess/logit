@@ -91,6 +91,7 @@ type Config struct {
 	FileKey  string `json:"file_key" yaml:"file_key" toml:"file_key" bson:"file_key"`
 	LineKey  string `json:"line_key" yaml:"line_key" toml:"line_key" bson:"line_key"`
 	FuncKey  string `json:"func_key" yaml:"func_key" toml:"func_key" bson:"func_key"`
+	ErrorKey string `json:"error_key" yaml:"error_key" toml:"error_key" bson:"error_key"`
 
 	// TimeFormat is the format of time.
 	// Values: unix, ...
@@ -175,6 +176,10 @@ func (c *Config) Options() ([]logit.Option, error) {
 
 	if c.FuncKey != "" {
 		result = append(result, opts.WithFuncKey(c.FuncKey))
+	}
+
+	if c.ErrorKey != "" {
+		result = append(result, opts.WithErrorKey(c.ErrorKey))
 	}
 
 	if strings.TrimSpace(c.TimeFormat) != "" {

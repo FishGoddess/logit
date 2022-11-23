@@ -62,8 +62,8 @@ func main() {
 	logger.Debug("This is a debug message").Log()
 	logger.Info("This is an info message").Log()
 	logger.Warn("This is a warn message").Log()
-	logger.Error("This is an error message").Log()
-	logger.Error("This is a %s message, with format", "error").Log() // Format with params.
+	logger.Error(nil, "This is an error message").Log()
+	logger.Error(nil, "This is a %s message, with format", "error").Log() // Format with params.
 
 	// As you know, we provide some levels: debug, info, warn, error, off.
 	// The lowest is debug and the highest is off.
@@ -72,7 +72,7 @@ func main() {
 	logger.Debug("This is a debug message, but ignored").Log()
 	logger.Info("This is an info message, but ignored").Log()
 	logger.Warn("This is a warn message, not ignored").Log()
-	logger.Error("This is an error message, not ignored").Log()
+	logger.Error(nil, "This is an error message, not ignored").Log()
 
 	// Also, we provide some "old school" log method :)
 	// (Don't mistake~ I love old school~)
@@ -92,11 +92,7 @@ func main() {
 	}
 
 	logger.Warn("This is a structured message").Any("user", user).Json("userJson", user).Log()
-	logger.Error("This is a structured message").Error("err", io.EOF).Int("trace", 123).Log()
-
-	// Tired to write Error("err", io.EOF)?
-	// Try Err method!
-	logger.Error("This is a structured message, too").Err(io.EOF).Int("trace", 456).Log()
+	logger.Error(io.EOF, "This is a structured message").Int("trace", 123).Log()
 
 	// You may notice logit.Options() which returns an options list.
 	// Here is some of them:

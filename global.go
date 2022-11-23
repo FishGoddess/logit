@@ -53,8 +53,8 @@ func Warn(msg string, params ...interface{}) *Log {
 }
 
 // Error returns a Log with error level if error level is enabled.
-func Error(msg string, params ...interface{}) *Log {
-	return globalLogger.Error(msg, params...)
+func Error(err error, msg string, params ...interface{}) *Log {
+	return globalLogger.Error(err, msg, params...)
 }
 
 // Printf prints a log if print level is enabled.

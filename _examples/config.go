@@ -16,6 +16,7 @@ package main
 
 import (
 	"fmt"
+	"io"
 
 	"github.com/FishGoddess/logit"
 	"github.com/FishGoddess/logit/extension/config"
@@ -35,6 +36,7 @@ func main() {
 		FileKey:       "x.file",
 		LineKey:       "x.line",
 		FuncKey:       "x.func",
+		ErrorKey:      "x.err",
 		TimeFormat:    config.UnixTimeFormat,
 		WithPID:       true,
 		WithCaller:    true,
@@ -81,4 +83,5 @@ func main() {
 
 	logger.Info("My mother is a config").Any("config", cfg).Log()
 	logger.Info("See logger").Any("logger", logger).Log()
+	logger.Error(io.EOF, "error message").Log()
 }
