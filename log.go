@@ -491,8 +491,8 @@ func (l *Log) Stringers(key string, value []fmt.Stringer) *Log {
 	return l
 }
 
-// Err adds an error to l.
-func (l *Log) Err(err error) *Log {
+// WithError adds an error to l.
+func (l *Log) WithError(err error) *Log {
 	if l == nil {
 		return nil
 	}
@@ -543,6 +543,7 @@ func (l *Log) withCaller(depth int) *Log {
 	}
 
 	file, line, function := runtime.Caller(depth)
+
 	if l.logger.fileKey != "" {
 		l.String(l.logger.fileKey, file)
 	}

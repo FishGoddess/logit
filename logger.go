@@ -169,6 +169,7 @@ func (l *Logger) log(level level, msg string, params ...interface{}) *Log {
 	}
 
 	log := l.getLog(level).begin()
+
 	if l.timeKey != "" {
 		log = log.WithTime(l.timeKey, global.CurrentTime(), l.timeFormat)
 	}
@@ -208,8 +209,10 @@ func (l *Logger) Warn(msg string, params ...interface{}) *Log {
 }
 
 // Error returns a Log with error level if error level is enabled.
-func (l *Logger) Error(msg string, params ...interface{}) *Log {
-	return l.log(errorLevel, msg, params...)
+// We think an error log should carry an error in most situations.
+// Pass a nil error if you really don't have an error to pass.
+func (l *Logger) Error(err error, msg string, params ...interface{}) *Log {
+	return l.log(errorLevel, msg, params...).WithError(err)
 }
 
 // Printf prints a log if print level is enabled.

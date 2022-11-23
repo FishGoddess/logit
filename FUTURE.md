@@ -1,5 +1,9 @@
 ## ✒ 未来版本的新特性 (Features in future versions)
 
+### v1.x
+
+* [ ] 稳定的 API
+
 ### v0.5.x
 
 * [x] ~~去掉讨厌的 End() 方法，考虑增加一个 Log 方法，然后直接以 logger.Log(log.Debug("test").Int64("userID", 123)) 这样的形式改造~~
