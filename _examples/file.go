@@ -25,7 +25,7 @@ import (
 	"github.com/FishGoddess/logit/support/size"
 )
 
-func mustCreateFile(filePath string) *os.File {
+func createFile(filePath string) *os.File {
 	f, err := os.OpenFile(filePath, os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0644)
 	if err != nil {
 		panic(err)
@@ -47,24 +47,17 @@ func main() {
 	logFile := filepath.Join(os.TempDir(), "test.log")
 	fmt.Println(logFile)
 
-	logger = logit.NewLogger(logit.Options().WithWriter(mustCreateFile(logFile)))
+	logger = logit.NewLogger(logit.Options().WithWriter(createFile(logFile)))
 	logger.Info("I log everything to file.").String("logFile", logFile).Log()
 	logger.Close()
 
-	// Also, as you can see, there is a parameter called withBuffer in WithWriter option.
-	// It will use a buffer writer to write logs if withBuffer is true which will bring a huge performance improvement.
-	logFile = filepath.Join(os.TempDir(), "test_buffer.log")
-	fmt.Println(logFile)
-
-	logger = logit.NewLogger(logit.Options().WithWriter(mustCreateFile(logFile)))
-	logger.Info("I log everything to file with buffer.").String("logFile", logFile).Log()
-	logger.Close()
-
 	// We provide some high-performance file for you. Try these:
+	logger = logit.NewLogger(logit.Options().WithBufferWriter(createFile(logFile)))
+	logger = logit.NewLogger(logit.Options().WithBatchWriter(createFile(logFile)))
+
+	// Or you can use the original writer package to create a writer configured by you.
 	writer.BufferWithSize(os.Stdout, 128*size.KB)
 	writer.BatchWithCount(os.Stdout, 256)
-	logit.Options().WithBufferWriter(os.Stdout)
-	logit.Options().WithBatchWriter(os.Stdout)
 
 	// Wait a minute, we also provide a powerful file for you!
 	// See extension/file/file.go.

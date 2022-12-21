@@ -15,6 +15,7 @@
 package file
 
 import (
+	"fmt"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -26,8 +27,8 @@ import (
 )
 
 var (
-	// now returns current time in time.Time.
-	now = global.CurrentTime
+	// CurrentTime returns current time in time.Time.
+	CurrentTime = global.CurrentTime
 )
 
 // File is a file which supports rotating automatically.
@@ -135,7 +136,7 @@ func (f *File) removeStaleBackups(backups []backup) {
 	}
 
 	if f.maxAge > 0 {
-		deadline := now().Add(-f.maxAge)
+		deadline := CurrentTime().Add(-f.maxAge)
 
 		for _, backup := range backups {
 			if !backup.before(deadline) {
@@ -189,13 +190,42 @@ func (f *File) openNewFile() error {
 	return nil
 }
 
-func (f *File) closeOldFile() error {
-	if err := f.file.Close(); err != nil {
+func (f *File) nextBackupPath() (string, error) {
+	backupPath := backupPath(f.path, f.timeFormat)
+
+	_, err := os.Stat(backupPath)
+	if os.IsNotExist(err) {
+		return backupPath, nil
+	}
+
+	if err != nil {
+		return "", err
+	}
+
+	// Backup path conflict...
+	return "", fmt.Errorf("logit: extension.file wants a backup path %s but conflict", backupPath)
+}
+
+func (f *File) closeOldFile() (err error) {
+	backupPath, err := f.nextBackupPath()
+	if err != nil {
 		return err
 	}
 
-	backupPath := backupPath(f.path, f.timeFormat)
-	if err := os.Rename(f.path, backupPath); err != nil {
+	fileClosed := false
+
+	defer func() {
+		if err != nil && fileClosed {
+			f.openNewFile() // Reopen closed file.
+		}
+	}()
+
+	if err = f.file.Close(); err != nil {
+		return err
+	}
+
+	fileClosed = true
+	if err = os.Rename(f.path, backupPath); err != nil {
 		return err
 	}
 
