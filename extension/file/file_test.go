@@ -86,7 +86,7 @@ func countFiles(dir string) int {
 // go test -v -cover -run=^TestFileRotate$
 func TestFileRotate(t *testing.T) {
 	second := int64(0)
-	now = func() time.Time {
+	CurrentTime = func() time.Time {
 		second++
 		return time.Unix(second, 0)
 	}
@@ -165,7 +165,7 @@ func TestFileRotate(t *testing.T) {
 	}
 
 	second = 3
-	now = func() time.Time {
+	CurrentTime = func() time.Time {
 		second--
 		return time.Unix(second, 0)
 	}

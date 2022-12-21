@@ -61,7 +61,7 @@ func TestBackupPrefixAndExt(t *testing.T) {
 func TestBackupPath(t *testing.T) {
 	location = time.UTC
 
-	now = func() time.Time {
+	CurrentTime = func() time.Time {
 		return time.Unix(1, 0)
 	}
 

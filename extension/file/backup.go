@@ -60,9 +60,9 @@ func backupPrefixAndExt(path string) (string, string) {
 
 // backupPath returns the backup path of path with time format.
 func backupPath(path string, timeFormat string) string {
+	now := CurrentTime().In(location)
 	name, ext := backupPrefixAndExt(path)
 
-	now := now().In(location)
 	if strings.ToLower(timeFormat) == UnixTimeFormat {
 		return name + strconv.FormatInt(now.Unix(), 10) + ext
 	}
