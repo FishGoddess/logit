@@ -549,5 +549,5 @@ package logit // import "github.com/FishGoddess/logit"
 
 const (
 	// Version is the version string representation of logit.
-	Version = "v0.7.1"
+	Version = "v1.0.0"
 )
