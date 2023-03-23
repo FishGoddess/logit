@@ -17,7 +17,7 @@ Package logit provides an easy way to use foundation for your logging operations
 
 1. basic:
 
-	// Create a new logger for use.
+// Create a new logger for use.
 	// Default level is debug, so all logs will be logged.
 	// Invoke Close() isn't necessary in all situations.
 	// If logger's writer has buffer or something like that, it's better to invoke Close() for syncing buffer or something else.
@@ -79,16 +79,12 @@ Package logit provides an easy way to use foundation for your logging operations
 	logger.Info("Logger from context").Log()
 
 	// You can initialize the global logger if you don't want to use an independent logger.
-	// WithCallerDepth will set the depth of caller, and default is core.CallerDepth.
-	// Functions in global logger are wrapped so depth of caller should be increased 1.
-	// You can specify your depth if you wrap again or have something else reasons.
-	logger = logit.NewLogger(options.WithCallerDepth(global.CallerDepth + 1))
+	logger = logit.NewLogger()
 	logit.SetGlobal(logger)
 	logit.Info("Info from logit").Log()
 
-	// We don't recommend you to call logit.SetGlobal unless you really need to call.
-	// Instead, we recommend you to call logger.SetToGlobal to set one logger to global if you need.
-	logger.SetToGlobal()
+	// Actually, we recommend you to call logger.SetToGlobal to set one logger to global if you need.
+	logger = logit.NewLogger().SetToGlobal()
 	logit.Println("Println from logit")
 
 2. option:
@@ -549,5 +545,5 @@ package logit // import "github.com/FishGoddess/logit"
 
 const (
 	// Version is the version string representation of logit.
-	Version = "v1.0.0"
+	Version = "v1.1.0"
 )

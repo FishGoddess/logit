@@ -15,61 +15,61 @@
 package logit
 
 import (
-	"os"
-
-	"github.com/FishGoddess/logit/support/global"
+	"fmt"
 )
 
 var (
-	// globalLogger is a logger for global usage.
-	globalLogger = NewLogger(
-		Options().WithInfoLevel(),
-		Options().WithWarnWriter(os.Stderr),
-		Options().WithErrorWriter(os.Stderr),
-		Options().WithCallerDepth(global.CallerDepth+1),
-	)
+	// globalLogger is a logger for global usages.
+	globalLogger = NewLogger()
 )
 
-// SetGlobal sets global logger to value returned from newLogger.
-// We don't recommend you to call this function unless you really need to call.
-// Instead, we recommend you to call logger.SetToGlobal to set one logger to global if you need.
-func SetGlobal(logger *Logger) {
-	globalLogger = logger
+// Global returns the global logger.
+func Global() *Logger {
+	return globalLogger
+}
+
+// SetGlobal sets logger to global usages.
+func SetGlobal(logger *Logger) *Logger {
+	if logger != nil {
+		globalLogger = logger
+	}
+
+	return globalLogger
 }
 
 // Debug returns a Log with debug level if debug level is enabled.
 func Debug(msg string, params ...interface{}) *Log {
-	return globalLogger.Debug(msg, params...)
+	return globalLogger.log(debugLevel, msg, params...)
 }
 
 // Info returns a Log with info level if info level is enabled.
 func Info(msg string, params ...interface{}) *Log {
-	return globalLogger.Info(msg, params...)
+	return globalLogger.log(infoLevel, msg, params...)
 }
 
 // Warn returns a Log with warn level if warn level is enabled.
 func Warn(msg string, params ...interface{}) *Log {
-	return globalLogger.Warn(msg, params...)
+	return globalLogger.log(warnLevel, msg, params...)
 }
 
 // Error returns a Log with error level if error level is enabled.
 func Error(err error, msg string, params ...interface{}) *Log {
-	return globalLogger.Error(err, msg, params...)
+	return globalLogger.log(errorLevel, msg, params...).WithError(err)
 }
 
 // Printf prints a log if print level is enabled.
 func Printf(format string, params ...interface{}) {
-	globalLogger.Printf(format, params...)
+	globalLogger.log(printLevel, format, params...).Log()
 }
 
 // Print prints a log if print level is enabled.
 func Print(params ...interface{}) {
-	globalLogger.Print(params...)
+	globalLogger.log(printLevel, fmt.Sprint(params...)).Log()
 }
 
 // Println prints a log if print level is enabled.
 func Println(params ...interface{}) {
-	globalLogger.Println(params...)
+	globalLogger.log(printLevel, fmt.Sprintln(params...)).Log()
 }
 
 // Sync syncs data storing in global logger's writer.
