@@ -82,32 +82,10 @@ func NewLogger(opts ...Option) *Logger {
 	return logger
 }
 
-// SetToGlobal clones a new logger of current logger and sets it to global.
-// Depth of caller will increase 1 due to wrapping functions.
-func (l *Logger) SetToGlobal() {
-	newLogger := &Logger{
-		config:        l.config,
-		debugAppender: l.debugAppender,
-		infoAppender:  l.infoAppender,
-		warnAppender:  l.warnAppender,
-		errorAppender: l.errorAppender,
-		printAppender: l.printAppender,
-		debugWriter:   l.debugWriter,
-		infoWriter:    l.infoWriter,
-		warnWriter:    l.warnWriter,
-		errorWriter:   l.errorWriter,
-		printWriter:   l.printWriter,
-		interceptors:  l.interceptors,
-		logPool: sync.Pool{
-			New: func() interface{} {
-				return newLog()
-			},
-		},
-	}
-
-	// Increase depth so the caller is correct.
-	newLogger.callerDepth++
-	SetGlobal(newLogger)
+// SetToGlobal sets logger to global position.
+func (l *Logger) SetToGlobal() *Logger {
+	SetGlobal(l)
+	return l
 }
 
 // appenderOf returns the appender of level.

@@ -1,5 +1,10 @@
 ## ✒ 未来版本的新特性 (Features in future versions)
 
+### v1.1.x
+
+* [x] 调整 global logger 的设计，去除 caller + 1 的代码
+* [ ] 考虑增加类似于 scope 的机制，可以在 logit 中装载超过一个 global 的 logger
+
 ### v1.0.0
 
 * [x] 稳定的 API

@@ -26,8 +26,6 @@ applications.
 * Rotate file supports, clean automatically if files are aged or too many.
 * Config file supports, such as json/yaml/toml/bson.
 
-_Forgive me for transferring repository from an organization to mine..._
-
 _Check [HISTORY.md](./HISTORY.md) and [FUTURE.md](./FUTURE.md) to know about more information._
 
 ### 🚀 Installation
@@ -47,7 +45,6 @@ import (
 	"os"
 
 	"github.com/FishGoddess/logit"
-	"github.com/FishGoddess/logit/support/global"
 )
 
 func main() {
@@ -113,16 +110,12 @@ func main() {
 	logger.Info("Logger from context").Log()
 
 	// You can initialize the global logger if you don't want to use an independent logger.
-	// WithCallerDepth will set the depth of caller, and default is core.CallerDepth.
-	// Functions in global logger are wrapped so depth of caller should be increased 1.
-	// You can specify your depth if you wrap again or have something else reasons.
-	logger = logit.NewLogger(options.WithCallerDepth(global.CallerDepth + 1))
+	logger = logit.NewLogger()
 	logit.SetGlobal(logger)
 	logit.Info("Info from logit").Log()
 
-	// We don't recommend you to call logit.SetGlobal unless you really need to call.
-	// Instead, we recommend you to call logger.SetToGlobal to set one logger to global if you need.
-	logger.SetToGlobal()
+	// Actually, we recommend you to call logger.SetToGlobal to set one logger to global if you need.
+	logger = logit.NewLogger().SetToGlobal()
 	logit.Println("Println from logit")
 }
 ```

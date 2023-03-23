@@ -15,6 +15,7 @@
 package appender
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"net"
@@ -76,5 +77,10 @@ func TestJsonAppender(t *testing.T) {
 		`5.255.255"]}` + "\n"
 	if result != want {
 		t.Errorf("result %s != want %s", result, want)
+	}
+
+	m := make(map[string]interface{}, 16)
+	if err := json.Unmarshal(buffer, &m); err != nil {
+		t.Error(err)
 	}
 }

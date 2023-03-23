@@ -26,23 +26,23 @@ import (
 func TestNewLogger(t *testing.T) {
 	buffer := bytes.NewBuffer(make([]byte, 0, 1024))
 
-	options := Options()
-	logger := NewLogger(
-		options.WithDebugLevel(),
-		options.WithAppender(appender.Json()),
-		options.WithWriter(buffer),
-		//options.WithPID(),
-		//options.WithCaller(),
-		//options.WithMsgKey("message"),
-		options.WithTimeKey(""),
-		//options.WithLevelKey("level"),
-		//options.WithPIDKey("pid"),
-		//options.WithFileKey("file"),
-		//options.WithLineKey("line"),
-		//options.WithErrorKey("err"),
-		//options.WithTimeFormat("060102"),
-	)
+	options := []Option{
+		Options().WithDebugLevel(),
+		Options().WithAppender(appender.Json()),
+		Options().WithWriter(buffer),
+		Options().WithCaller(),
+		Options().WithMsgKey("msg"),
+		Options().WithTimeKey(""),
+		Options().WithLevelKey("level"),
+		Options().WithPIDKey("pid"),
+		Options().WithFileKey("file"),
+		Options().WithLineKey("line"),
+		Options().WithFuncKey("func"),
+		Options().WithErrorKey("err"),
+		Options().WithTimeFormat("060102"),
+	}
 
+	logger := NewLogger(options...)
 	defer logger.Close()
 
 	logger.Debug("debug...").String("trace", "xxx").Int("id", 123).Float64("pi", 3.14).Any("any", map[string]interface{}{"a": 1, "b": "bbb"}).Log()
@@ -51,11 +51,11 @@ func TestNewLogger(t *testing.T) {
 	logger.Warn("\"warn\"...\r\b\t\n").Strings("s\tb\nd\b", []string{"abc\r", "efg\n"}).Log()
 	logger.Info("info...").Bools("bools", []bool{true, false}).Bytes("bytes", []byte{'\b', '\t', 'a', 'b', 'c', '"', '\n'}).Int16s("int16s", []int16{123, 4567, 8901}).Float32s("float32s", []float32{3.14, 6.18}).Log()
 
-	logs := `{"log.level":"debug","log.msg":"debug...","trace":"xxx","id":123,"pi":3.14,"any":{"a":1,"b":"bbb"}}
-{"log.level":"error","log.msg":"error...","log.err":"我是错误","b":"a","es":"\n","words":["我","是","中","国","人"]}
-{"log.level":"error","log.msg":"error with 666...","log.err":null,"trace":"xxx","id":123,"pi":3.14}
-{"log.level":"warn","log.msg":"\"warn\"...\r\b\t\n","s\tb\nd\b":["abc\r","efg\n"]}
-{"log.level":"info","log.msg":"info...","bools":[true,false],"bytes":["\b","\t","a","b","c","\"","\n"],"int16s":[123,4567,8901],"float32s":[3.140000104904175,6.179999828338623]}
+	logs := `{"level":"debug","file":"D:/GoProject/go-logit/logit/logger_test.go","line":48,"func":"github.com/FishGoddess/logit.TestNewLogger","msg":"debug...","trace":"xxx","id":123,"pi":3.14,"any":{"a":1,"b":"bbb"}}
+{"level":"error","file":"D:/GoProject/go-logit/logit/logger_test.go","line":49,"func":"github.com/FishGoddess/logit.TestNewLogger","msg":"error...","err":"我是错误","b":"a","es":"\n","words":["我","是","中","国","人"]}
+{"level":"error","file":"D:/GoProject/go-logit/logit/logger_test.go","line":50,"func":"github.com/FishGoddess/logit.TestNewLogger","msg":"error with 666...","err":null,"trace":"xxx","id":123,"pi":3.14}
+{"level":"warn","file":"D:/GoProject/go-logit/logit/logger_test.go","line":51,"func":"github.com/FishGoddess/logit.TestNewLogger","msg":"\"warn\"...\r\b\t\n","s\tb\nd\b":["abc\r","efg\n"]}
+{"level":"info","file":"D:/GoProject/go-logit/logit/logger_test.go","line":52,"func":"github.com/FishGoddess/logit.TestNewLogger","msg":"info...","bools":[true,false],"bytes":["\b","\t","a","b","c","\"","\n"],"int16s":[123,4567,8901],"float32s":[3.140000104904175,6.179999828338623]}
 `
 
 	output := buffer.String()
@@ -66,15 +66,14 @@ func TestNewLogger(t *testing.T) {
 
 // go test -v -cover -run=^TestLoggerSetToGlobal$
 func TestLoggerSetToGlobal(t *testing.T) {
-	logger := NewLogger()
-	logger.SetToGlobal()
+	logger := NewLogger().SetToGlobal()
 
-	if logger == globalLogger {
-		t.Error("logger == globalLogger")
+	if logger != globalLogger {
+		t.Errorf("logger %p != globalLogger %p", logger, globalLogger)
 	}
 
-	if logger.callerDepth+1 != globalLogger.callerDepth {
-		t.Errorf("logger.callerDepth + 1 %d != globalLogger.callerDepth %d", logger.callerDepth+1, globalLogger.callerDepth)
+	if logger.callerDepth != globalLogger.callerDepth {
+		t.Errorf("logger.callerDepth %d != globalLogger.callerDepth %d", logger.callerDepth, globalLogger.callerDepth)
 	}
 }
 

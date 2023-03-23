@@ -24,8 +24,6 @@
 * 支持日志按大小自动分割，并支持按照时间和数量自动清理。
 * 支持多种配置文件序列化成 option，比如 json/yaml/toml/bson，然后创建日志记录器。
 
-_原谅我，先建了个组织，后面发现没啥用，又转移回个人仓库了。。。_
-
 _历史版本的特性请查看 [HISTORY.md](./HISTORY.md)。未来版本的新特性和计划请查看 [FUTURE.md](./FUTURE.md)。_
 
 ### 🚀 安装方式
@@ -45,7 +43,6 @@ import (
 	"os"
 
 	"github.com/FishGoddess/logit"
-	"github.com/FishGoddess/logit/support/global"
 )
 
 func main() {
@@ -111,16 +108,12 @@ func main() {
 	logger.Info("Logger from context").Log()
 
 	// You can initialize the global logger if you don't want to use an independent logger.
-	// WithCallerDepth will set the depth of caller, and default is core.CallerDepth.
-	// Functions in global logger are wrapped so depth of caller should be increased 1.
-	// You can specify your depth if you wrap again or have something else reasons.
-	logger = logit.NewLogger(options.WithCallerDepth(global.CallerDepth + 1))
+	logger = logit.NewLogger()
 	logit.SetGlobal(logger)
 	logit.Info("Info from logit").Log()
 
-	// We don't recommend you to call logit.SetGlobal unless you really need to call.
-	// Instead, we recommend you to call logger.SetToGlobal to set one logger to global if you need.
-	logger.SetToGlobal()
+	// Actually, we recommend you to call logger.SetToGlobal to set one logger to global if you need.
+	logger = logit.NewLogger().SetToGlobal()
 	logit.Println("Println from logit")
 }
 ```
