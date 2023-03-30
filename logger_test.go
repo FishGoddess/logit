@@ -20,6 +20,7 @@ import (
 	"testing"
 
 	"github.com/FishGoddess/logit/core/appender"
+	"github.com/FishGoddess/logit/support/runtime"
 )
 
 // go test -v -cover -run=^TestNewLogger$
@@ -51,11 +52,13 @@ func TestNewLogger(t *testing.T) {
 	logger.Warn("\"warn\"...\r\b\t\n").Strings("s\tb\nd\b", []string{"abc\r", "efg\n"}).Log()
 	logger.Info("info...").Bools("bools", []bool{true, false}).Bytes("bytes", []byte{'\b', '\t', 'a', 'b', 'c', '"', '\n'}).Int16s("int16s", []int16{123, 4567, 8901}).Float32s("float32s", []float32{3.14, 6.18}).Log()
 
-	logs := `{"level":"debug","file":"D:/GoProject/go-logit/logit/logger_test.go","line":48,"func":"github.com/FishGoddess/logit.TestNewLogger","msg":"debug...","trace":"xxx","id":123,"pi":3.14,"any":{"a":1,"b":"bbb"}}
-{"level":"error","file":"D:/GoProject/go-logit/logit/logger_test.go","line":49,"func":"github.com/FishGoddess/logit.TestNewLogger","msg":"error...","err":"我是错误","b":"a","es":"\n","words":["我","是","中","国","人"]}
-{"level":"error","file":"D:/GoProject/go-logit/logit/logger_test.go","line":50,"func":"github.com/FishGoddess/logit.TestNewLogger","msg":"error with 666...","err":null,"trace":"xxx","id":123,"pi":3.14}
-{"level":"warn","file":"D:/GoProject/go-logit/logit/logger_test.go","line":51,"func":"github.com/FishGoddess/logit.TestNewLogger","msg":"\"warn\"...\r\b\t\n","s\tb\nd\b":["abc\r","efg\n"]}
-{"level":"info","file":"D:/GoProject/go-logit/logit/logger_test.go","line":52,"func":"github.com/FishGoddess/logit.TestNewLogger","msg":"info...","bools":[true,false],"bytes":["\b","\t","a","b","c","\"","\n"],"int16s":[123,4567,8901],"float32s":[3.140000104904175,6.179999828338623]}
+	file, _, _ := runtime.Caller(1)
+
+	logs := `{"level":"debug","file":"` + file + `","line":49,"func":"github.com/FishGoddess/logit.TestNewLogger","msg":"debug...","trace":"xxx","id":123,"pi":3.14,"any":{"a":1,"b":"bbb"}}
+{"level":"error","file":"` + file + `","line":50,"func":"github.com/FishGoddess/logit.TestNewLogger","msg":"error...","err":"我是错误","b":"a","es":"\n","words":["我","是","中","国","人"]}
+{"level":"error","file":"` + file + `","line":51,"func":"github.com/FishGoddess/logit.TestNewLogger","msg":"error with 666...","err":null,"trace":"xxx","id":123,"pi":3.14}
+{"level":"warn","file":"` + file + `","line":52,"func":"github.com/FishGoddess/logit.TestNewLogger","msg":"\"warn\"...\r\b\t\n","s\tb\nd\b":["abc\r","efg\n"]}
+{"level":"info","file":"` + file + `","line":53,"func":"github.com/FishGoddess/logit.TestNewLogger","msg":"info...","bools":[true,false],"bytes":["\b","\t","a","b","c","\"","\n"],"int16s":[123,4567,8901],"float32s":[3.140000104904175,6.179999828338623]}
 `
 
 	output := buffer.String()

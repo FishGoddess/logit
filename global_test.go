@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/FishGoddess/logit/core/appender"
+	"github.com/FishGoddess/logit/support/runtime"
 )
 
 // go test -v -cover -run=^TestSetGlobal$
@@ -47,11 +48,13 @@ func TestGlobalLogger(t *testing.T) {
 	Info("info...").Bools("bools", []bool{true, false}).Bytes("bytes", []byte{'\b', '\t', 'a', 'b', 'c', '"', '\n'}).Int16s("int16s", []int16{123, 4567, 8901}).Float32s("float32s", []float32{3.14, 6.18}).Log()
 	logger.Close()
 
-	logs := `{"level":"debug","file":"D:/GoProject/go-logit/logit/global_test.go","line":43,"func":"github.com/FishGoddess/logit.TestGlobalLogger","msg":"debug...","trace":"xxx","id":123,"pi":3.14,"any":{"a":1,"b":"bbb"}}
-{"level":"error","file":"D:/GoProject/go-logit/logit/global_test.go","line":44,"func":"github.com/FishGoddess/logit.TestGlobalLogger","msg":"error...","err":"我是错误","b":"a","es":"\n","words":["我","是","中","国","人"]}
-{"level":"error","file":"D:/GoProject/go-logit/logit/global_test.go","line":45,"func":"github.com/FishGoddess/logit.TestGlobalLogger","msg":"error with 666...","err":null,"trace":"xxx","id":123,"pi":3.14}
-{"level":"warn","file":"D:/GoProject/go-logit/logit/global_test.go","line":46,"func":"github.com/FishGoddess/logit.TestGlobalLogger","msg":"\"warn\"...\r\b\t\n","s\tb\nd\b":["abc\r","efg\n"]}
-{"level":"info","file":"D:/GoProject/go-logit/logit/global_test.go","line":47,"func":"github.com/FishGoddess/logit.TestGlobalLogger","msg":"info...","bools":[true,false],"bytes":["\b","\t","a","b","c","\"","\n"],"int16s":[123,4567,8901],"float32s":[3.140000104904175,6.179999828338623]}
+	file, _, _ := runtime.Caller(1)
+
+	logs := `{"level":"debug","file":"` + file + `","line":44,"func":"github.com/FishGoddess/logit.TestGlobalLogger","msg":"debug...","trace":"xxx","id":123,"pi":3.14,"any":{"a":1,"b":"bbb"}}
+{"level":"error","file":"` + file + `","line":45,"func":"github.com/FishGoddess/logit.TestGlobalLogger","msg":"error...","err":"我是错误","b":"a","es":"\n","words":["我","是","中","国","人"]}
+{"level":"error","file":"` + file + `","line":46,"func":"github.com/FishGoddess/logit.TestGlobalLogger","msg":"error with 666...","err":null,"trace":"xxx","id":123,"pi":3.14}
+{"level":"warn","file":"` + file + `","line":47,"func":"github.com/FishGoddess/logit.TestGlobalLogger","msg":"\"warn\"...\r\b\t\n","s\tb\nd\b":["abc\r","efg\n"]}
+{"level":"info","file":"` + file + `","line":48,"func":"github.com/FishGoddess/logit.TestGlobalLogger","msg":"info...","bools":[true,false],"bytes":["\b","\t","a","b","c","\"","\n"],"int16s":[123,4567,8901],"float32s":[3.140000104904175,6.179999828338623]}
 `
 
 	output := buffer.String()
