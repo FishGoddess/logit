@@ -75,4 +75,7 @@ func main() {
 	// Notice that WithContext should be called before Intercept if you want to pass this context to Intercept.
 	ctx = context.WithValue(ctx, "business", "logger")
 	logger.Info("try interceptor - round four").WithContext(ctx).Intercept(businessInterceptor).Log()
+
+	// Try LogX?
+	logger.Info("try interceptor - LogX").LogX(ctx)
 }

@@ -1,5 +1,12 @@
 ## ✒ 历史版本的特性介绍 (Features in old versions)
 
+### v1.2.0
+
+> 此版本发布于 2023-06-19
+
+* 增加 LogX 方法，方便使用 context 和 interceptor
+* 增加 time.Duration 相关方法
+
 ### v1.1.0
 
 > 此版本发布于 2023-03-24

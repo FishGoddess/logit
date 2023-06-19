@@ -55,6 +55,7 @@ type Appender interface {
 	AppendFloat32(dst []byte, key string, value float32) []byte               // AppendFloat32 appends a float32 entry to dst.
 	AppendFloat64(dst []byte, key string, value float64) []byte               // AppendFloat64 appends a float64 entry to dst.
 	AppendString(dst []byte, key string, value string) []byte                 // AppendString appends a string entry to dst.
+	AppendDuration(dst []byte, key string, value time.Duration) []byte        // AppendDuration appends a time.Duration entry to dst.
 	AppendTime(dst []byte, key string, value time.Time, format string) []byte // AppendTime appends a time.Time entry formatted with format to dst.
 	AppendError(dst []byte, key string, value error) []byte                   // AppendError appends an error entry to dst.
 	AppendStringer(dst []byte, key string, value fmt.Stringer) []byte         // AppendStringer appends an fmt.Stringer entry to dst.
@@ -75,6 +76,7 @@ type Appender interface {
 	AppendFloat32s(dst []byte, key string, values []float32) []byte               // AppendFloat32s appends a []float32 entry to dst.
 	AppendFloat64s(dst []byte, key string, values []float64) []byte               // AppendFloat64s appends a []float64 entry to dst.
 	AppendStrings(dst []byte, key string, values []string) []byte                 // AppendStrings appends a []string entry to dst.
+	AppendDurations(dst []byte, key string, values []time.Duration) []byte        // AppendDurations appends a []time.Duration entry to dst.
 	AppendTimes(dst []byte, key string, values []time.Time, format string) []byte // AppendTimes appends a []time.Time entry formatted with format to dst.
 	AppendErrors(dst []byte, key string, values []error) []byte                   // AppendErrors appends an []error entry to dst.
 	AppendStringers(dst []byte, key string, values []fmt.Stringer) []byte         // AppendStringers appends a []fmt.Stringer entry to dst.
