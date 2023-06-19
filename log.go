@@ -257,6 +257,16 @@ func (l *Log) String(key string, value string) *Log {
 	return l
 }
 
+// Duration adds an entry which key is string and value is time.Duration type to l.
+func (l *Log) Duration(key string, value time.Duration) *Log {
+	if l == nil {
+		return nil
+	}
+
+	l.data = l.appender.AppendDuration(l.data, key, value)
+	return l
+}
+
 // Time adds an entry which key is string and value is time.Time type to l.
 func (l *Log) Time(key string, value time.Time) *Log {
 	if l == nil {
@@ -456,6 +466,16 @@ func (l *Log) Strings(key string, value []string) *Log {
 	return l
 }
 
+// Durations adds an entry which key is string and value is []time.Duration type to l.
+func (l *Log) Durations(key string, value []time.Duration) *Log {
+	if l == nil {
+		return nil
+	}
+
+	l.data = l.appender.AppendDurations(l.data, key, value)
+	return l
+}
+
 // Times adds an entry which key is string and value is []time.Time type to l.
 func (l *Log) Times(key string, value []time.Time) *Log {
 	if l == nil {
@@ -607,4 +627,9 @@ func (l *Log) Log() {
 	}
 
 	l.end()
+}
+
+// LogX logs l with context and interceptors.
+func (l *Log) LogX(ctx context.Context, interceptors ...Interceptor) {
+	l.WithContext(ctx).Intercept(interceptors...).Log()
 }

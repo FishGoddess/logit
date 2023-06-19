@@ -405,6 +405,9 @@ Package logit provides an easy way to use foundation for your logging operations
 	ctx = context.WithValue(ctx, "business", "logger")
 	logger.Info("try interceptor - round four").WithContext(ctx).Intercept(businessInterceptor).Log()
 
+	// Try LogX?
+	logger.Info("try interceptor - LogX").LogX(ctx)
+
 9. file:
 
 	func createFile(filePath string) *os.File {
@@ -545,5 +548,5 @@ package logit // import "github.com/FishGoddess/logit"
 
 const (
 	// Version is the version string representation of logit.
-	Version = "v1.1.0"
+	Version = "v1.2.0"
 )

@@ -52,6 +52,7 @@ func TestNewLog(t *testing.T) {
 		"Uint32":    uint32(123456),
 		"Uint64":    uint64(123456),
 		"String":    "abc",
+		"Duration":  time.Second,
 		"Time":      time.Unix(12580, 0).Format("2006-01-02 15:04:05"),
 		"Error":     io.EOF,
 		"Stringer":  fmt.Stringer(time.Second),
@@ -69,6 +70,7 @@ func TestNewLog(t *testing.T) {
 		"Uint32s":   []uint32{123456},
 		"Uint64s":   []uint64{123456},
 		"Strings":   []string{"abc"},
+		"Durations": []time.Duration{time.Second, 2 * time.Second, 3 * time.Second},
 		"Times":     []string{time.Unix(12580, 0).Format("2006-01-02 15:04:05")},
 		"Errors":    []error{io.EOF},
 		"Stringers": []fmt.Stringer{time.Second},
@@ -97,6 +99,7 @@ func TestNewLog(t *testing.T) {
 	log.Uint32("Uint32", uint32(123456))
 	log.Uint64("Uint64", uint64(123456))
 	log.String("String", "abc")
+	log.Duration("Duration", time.Second)
 	log.Time("Time", time.Unix(12580, 0))
 	log.Error("Error", io.EOF)
 	log.Stringer("Stringer", fmt.Stringer(time.Second))
@@ -114,6 +117,7 @@ func TestNewLog(t *testing.T) {
 	log.Uint32s("Uint32s", []uint32{123456})
 	log.Uint64s("Uint64s", []uint64{123456})
 	log.Strings("Strings", []string{"abc"})
+	log.Durations("Durations", []time.Duration{time.Second, 2 * time.Second, 3 * time.Second})
 	log.Times("Times", []time.Time{time.Unix(12580, 0)})
 	log.Errors("Errors", []error{io.EOF})
 	log.Stringers("Stringers", []fmt.Stringer{time.Second})
@@ -277,6 +281,54 @@ func TestLogIntercept(t *testing.T) {
 		log.String("abc", "666")
 	})
 	log.Log()
+
+	str = buffer.String()
+	if str != "abc=666|xxx=123\n" {
+		t.Errorf("str %q != '\n'", str)
+	}
+}
+
+// go test -v -cover -run=^TestLogLogX$
+func TestLogLogX(t *testing.T) {
+	ctx := context.WithValue(context.Background(), "key", "value")
+	buffer := bytes.NewBuffer(make([]byte, 0, 1024))
+
+	logger := NewLogger(Options().WithWriter(buffer), Options().WithInterceptors(func(ctx context.Context, log *Log) {
+		log.Int("xxx", 123)
+
+		value, ok := log.ctx.Value("key").(string)
+		if !ok || value != "value" {
+			t.Errorf("!ok %v || value %s != 'value'", ok, value)
+		}
+	}))
+	logger.withCaller = true
+
+	log := newLog()
+	log.logger = logger
+	log.appender = logger.debugAppender
+	log.writer = logger.debugWriter
+	log.LogX(ctx)
+
+	str := buffer.String()
+	if str != "xxx=123\n" {
+		t.Errorf("str %q != '\n'", str)
+	}
+
+	buffer.Reset()
+	log = newLog()
+	log.logger = logger
+	log.appender = logger.debugAppender
+	log.writer = logger.debugWriter
+
+	log.begin()
+	log.LogX(ctx, func(ctx context.Context, log *Log) {
+		log.String("abc", "666")
+
+		value, ok := log.ctx.Value("key").(string)
+		if !ok || value != "value" {
+			t.Errorf("!ok %v || value %s != 'value'", ok, value)
+		}
+	})
 
 	str = buffer.String()
 	if str != "abc=666|xxx=123\n" {

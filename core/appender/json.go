@@ -207,6 +207,15 @@ func (ja jsonAppender) AppendString(dst []byte, key string, value string) []byte
 	return dst
 }
 
+// AppendDuration appends a time.Duration entry to dst.
+func (ja jsonAppender) AppendDuration(dst []byte, key string, value time.Duration) []byte {
+	dst = ja.appendKey(dst, key)
+	dst = append(dst, jsonStringQuotation)
+	dst = appendEscapedString(dst, value.String())
+	dst = append(dst, jsonStringQuotation)
+	return dst
+}
+
 // AppendTime appends a time.Time entry formatted with format to dst.
 func (ja jsonAppender) AppendTime(dst []byte, key string, value time.Time, format string) []byte {
 	dst = ja.appendKey(dst, key)
@@ -382,6 +391,16 @@ func (ja jsonAppender) AppendStrings(dst []byte, key string, values []string) []
 	return ja.appendArray(dst, key, len(values), func(innerDst []byte, index int) []byte {
 		innerDst = append(innerDst, jsonStringQuotation)
 		innerDst = appendEscapedString(innerDst, values[index])
+		innerDst = append(innerDst, jsonStringQuotation)
+		return innerDst
+	})
+}
+
+// AppendDurations appends a []time.Duration entry to dst.
+func (ja jsonAppender) AppendDurations(dst []byte, key string, values []time.Duration) []byte {
+	return ja.appendArray(dst, key, len(values), func(innerDst []byte, index int) []byte {
+		innerDst = append(innerDst, jsonStringQuotation)
+		innerDst = appendEscapedString(innerDst, values[index].String())
 		innerDst = append(innerDst, jsonStringQuotation)
 		return innerDst
 	})

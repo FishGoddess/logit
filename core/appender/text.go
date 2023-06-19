@@ -197,6 +197,17 @@ func (ta textAppender) AppendString(dst []byte, key string, value string) []byte
 	return append(dst, value...)
 }
 
+// AppendDuration appends a time.Duration entry to dst.
+func (ta textAppender) AppendDuration(dst []byte, key string, value time.Duration) []byte {
+	dst = ta.appendKey(dst, key)
+
+	if ta.escapeValue {
+		return appendEscapedString(dst, value.String())
+	}
+
+	return append(dst, value.String()...)
+}
+
 // AppendTime appends a time.Time entry formatted with format to dst.
 func (ta textAppender) AppendTime(dst []byte, key string, value time.Time, format string) []byte {
 	dst = ta.appendKey(dst, key)
@@ -365,6 +376,17 @@ func (ta textAppender) AppendStrings(dst []byte, key string, values []string) []
 		}
 
 		return append(innerDst, values[index]...)
+	})
+}
+
+// AppendDurations appends a []time.Duration entry to dst.
+func (ta textAppender) AppendDurations(dst []byte, key string, values []time.Duration) []byte {
+	return ta.appendArray(dst, key, len(values), func(innerDst []byte, index int) []byte {
+		if ta.escapeValue {
+			return appendEscapedString(innerDst, values[index].String())
+		}
+
+		return append(innerDst, values[index].String()...)
 	})
 }
 
