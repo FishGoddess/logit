@@ -51,7 +51,7 @@ type Logger struct {
 	interceptors []Interceptor
 
 	// logPool is for reusing logs.
-	logPool sync.Pool
+	logPool *sync.Pool
 }
 
 // NewLogger returns a new Logger created with options.
@@ -68,7 +68,7 @@ func NewLogger(opts ...Option) *Logger {
 		warnWriter:    writer.Wrap(os.Stderr),
 		errorWriter:   writer.Wrap(os.Stderr),
 		printWriter:   writer.Wrap(os.Stdout),
-		logPool: sync.Pool{
+		logPool: &sync.Pool{
 			New: func() interface{} {
 				return newLog()
 			},
