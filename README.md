@@ -150,6 +150,8 @@ $ make benchfile
 
 如果您觉得 logit 缺少您需要的功能，请不要犹豫，马上参与进来，发起一个 _**issue**_。
 
+[![Star History Chart](https://api.star-history.com/svg?repos=fishgoddess/logit&type=Date)](https://star-history.com/#fishgoddess/logit&Date)
+
 ### 📦 使用 logit 的项目
 
 | 项目     | 作者          | 描述               | 链接                                                                                         |

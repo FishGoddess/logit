@@ -152,6 +152,8 @@ $ make benchfile
 
 If you find that something is not working as expected please open an _**issue**_.
 
+[![Star History Chart](https://api.star-history.com/svg?repos=fishgoddess/logit&type=Date)](https://star-history.com/#fishgoddess/logit&Date)
+
 ### 📦 Projects using logit
 
 | Project | Author      | Description                                     | link                                                                                          |
