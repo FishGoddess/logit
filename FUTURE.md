@@ -1,5 +1,9 @@
 ## ✒ 未来版本的新特性 (Features in future versions)
 
+### v2
+
+* [ ] 考虑结合 Go1.21 新加的 slog 包，做一些生产化的适配和功能
+
 ### v1.2.x
 
 * [ ] 考虑增加类似于 scope 的机制，可以在 logit 中装载超过一个 global 的 logger
