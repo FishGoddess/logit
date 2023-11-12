@@ -145,7 +145,7 @@ $ make benchfile
 | logrus                    | &nbsp; 58030                | 21088 ns/op             | 8885 B/op                       | 136 allocs/op                             |
 
 > Benchmark file：[_examples/performance_test.go](./_examples/performance_test.go)
-> 
+>
 > Environment：R7-5800X CPU@3.8GHZ, 32GB RAM, 512GB SSD, Linux/Manjaro
 
 ### 👥 Contributing
@@ -153,14 +153,3 @@ $ make benchfile
 If you find that something is not working as expected please open an _**issue**_.
 
 [![Star History Chart](https://api.star-history.com/svg?repos=fishgoddess/logit&type=Date)](https://star-history.com/#fishgoddess/logit&Date)
-
-### 📦 Projects using logit
-
-| Project | Author      | Description                                     | link                                                                                          |
-|---------|-------------|-------------------------------------------------|-----------------------------------------------------------------------------------------------|
-| postar  | avino-plan  | An easy-to-use and low-coupling email service   | [Github](https://github.com/avino-plan/postar) / [Gitee](https://gitee.com/avino-plan/postar) |
-| kafo    | FishGoddess | An easy-to-use and distributed cache middleware | [Github](https://github.com/FishGoddess/kafo) / [Gitee](https://gitee.com/FishGoddess/kafo)   |
-
-At last, I want to thank JetBrains for **free JetBrains Open Source license(s)**, because `logit` is developed with Idea / GoLand under it.
-
-<a href="https://www.jetbrains.com/?from=logit" target="_blank"><img src="./_icons/jetbrains.png" width="250"/></a>
