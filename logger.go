@@ -1,4 +1,4 @@
-// Copyright 2022 FishGoddess. All Rights Reserved.
+// Copyright 2023 FishGoddess. All Rights Reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -16,254 +16,187 @@ package logit
 
 import (
 	"context"
-	"fmt"
-	"os"
-	"sync"
+	"io"
+	"log/slog"
 
-	"github.com/FishGoddess/logit/core/appender"
 	"github.com/FishGoddess/logit/core/writer"
 	"github.com/FishGoddess/logit/support/global"
+	"github.com/FishGoddess/logit/support/runtime"
 )
 
-// Interceptor intercepts log with context.
-type Interceptor = func(ctx context.Context, log *Log)
+const (
+	keyBad = "!BADKEY"
+	keyPID = "pid"
+)
 
-// Logger is the core of logging operations.
 type Logger struct {
-	// config stores all configurations of logger.
-	config
+	handler slog.Handler
 
-	// debugAppender, infoAppender, warnAppender, errorAppender, printAppender is an appender appending entries to debug, info, warn, error, print logs.
-	debugAppender appender.Appender
-	infoAppender  appender.Appender
-	warnAppender  appender.Appender
-	errorAppender appender.Appender
-	printAppender appender.Appender
-
-	// debugWriter, infoWriter, warnWriter, errorWriter, printWriter writes debug, info, warn, error, print logs to somewhere.
-	debugWriter writer.Writer
-	infoWriter  writer.Writer
-	warnWriter  writer.Writer
-	errorWriter writer.Writer
-	printWriter writer.Writer
-
-	// interceptors stores all interceptors.
-	interceptors []Interceptor
-
-	// logPool is for reusing logs.
-	logPool *sync.Pool
+	withSource bool
+	withPID    bool
 }
 
-// NewLogger returns a new Logger created with options.
-func NewLogger(opts ...Option) *Logger {
-	logger := &Logger{
-		config:        newDefaultConfig(),
-		debugAppender: appender.Text(),
-		infoAppender:  appender.Text(),
-		warnAppender:  appender.Text(),
-		errorAppender: appender.Text(),
-		printAppender: appender.Text(),
-		debugWriter:   writer.Wrap(os.Stdout),
-		infoWriter:    writer.Wrap(os.Stdout),
-		warnWriter:    writer.Wrap(os.Stderr),
-		errorWriter:   writer.Wrap(os.Stderr),
-		printWriter:   writer.Wrap(os.Stdout),
-		logPool: &sync.Pool{
-			New: func() interface{} {
-				return newLog()
-			},
-		},
-	}
+func New(opts ...Option) *Logger {
+	conf := newDefaultConfig()
+	conf.Accept(opts...)
 
-	for _, opt := range opts {
-		opt.Apply(logger)
+	logger := &Logger{
+		handler:    conf.NewHandler(),
+		withSource: conf.withSource,
+		withPID:    conf.withPID,
 	}
 
 	return logger
 }
 
-// SetToGlobal sets logger to global position.
-func (l *Logger) SetToGlobal() *Logger {
-	SetGlobal(l)
-	return l
+func (l *Logger) clone() *Logger {
+	newLogger := *l
+	return &newLogger
 }
 
-// appenderOf returns the appender of level.
-func (l *Logger) appenderOf(level level) appender.Appender {
-	switch level {
-	case printLevel:
-		return l.printAppender
-	case errorLevel:
-		return l.errorAppender
-	case warnLevel:
-		return l.warnAppender
-	case infoLevel:
-		return l.infoAppender
+func (l *Logger) squeezeAttr(args []any) (slog.Attr, []any) {
+	switch arg := args[0].(type) {
+	case string:
+		if len(args) <= 1 {
+			return slog.String(keyBad, arg), nil
+		}
+
+		return slog.Any(arg, args[1]), args[2:]
+	case slog.Attr:
+		return arg, args[1:]
 	default:
-		return l.debugAppender
+		return slog.Any(keyBad, arg), args[1:]
 	}
 }
 
-// writerOf returns the writer of level.
-func (l *Logger) writerOf(level level) writer.Writer {
-	switch level {
-	case printLevel:
-		return l.printWriter
-	case errorLevel:
-		return l.errorWriter
-	case warnLevel:
-		return l.warnWriter
-	case infoLevel:
-		return l.infoWriter
-	default:
-		return l.debugWriter
+func (l *Logger) newAttrs(args []any) (attrs []slog.Attr) {
+	var attr slog.Attr
+	for len(args) > 0 {
+		attr, args = l.squeezeAttr(args)
+		attrs = append(attrs, attr)
 	}
+
+	return attrs
 }
 
-// getLog returns a Log instance from pool.
-// This is a better way to memory.
-func (l *Logger) getLog(level level) *Log {
-	log := l.logPool.Get().(*Log)
+func (l *Logger) With(args ...any) *Logger {
+	if len(args) <= 0 {
+		return l
+	}
 
-	log.logger = l
-	log.appender = l.appenderOf(level)
-	log.writer = l.writerOf(level)
-	log.data = log.data[:0]
-	log.ctx = context.Background()
+	attrs := l.newAttrs(args)
+	if len(attrs) <= 0 {
+		return l
+	}
 
-	return log
+	newLogger := l.clone()
+	newLogger.handler = l.handler.WithAttrs(attrs)
+	return newLogger
 }
 
-// releaseLog releases a Log instance to pool.
-func (l *Logger) releaseLog(log *Log) {
-	l.logPool.Put(log)
+func (l *Logger) WithGroup(name string) *Logger {
+	if name == "" {
+		return l
+	}
+
+	newLogger := l.clone()
+	newLogger.handler = l.handler.WithGroup(name)
+	return newLogger
+
 }
 
-// log returns a Log instance with level and msg.
-// Check Log for more information.
-func (l *Logger) log(level level, msg string, params ...interface{}) *Log {
-	if level < l.level {
-		return nil
+func (l *Logger) Enabled(ctx context.Context, level slog.Level) bool {
+	if ctx == nil {
+		ctx = context.Background()
 	}
 
-	log := l.getLog(level).begin()
+	return l.handler.Enabled(ctx, level)
+}
 
-	if l.timeKey != "" {
-		log = log.WithTime(l.timeKey, global.CurrentTime(), l.timeFormat)
+func (l *Logger) newRecord(level slog.Level, msg string, args []any) slog.Record {
+	now := global.CurrentTime()
+
+	var pc uintptr
+	if l.withSource {
+		pc, _, _, _ = runtime.Caller(global.CallerDepth)
 	}
 
-	if l.levelKey != "" {
-		log = log.String(l.levelKey, level.String())
-	}
-
+	record := slog.NewRecord(now, level, msg, pc)
 	if l.withPID {
-		log = log.withPID()
+		record.AddAttrs(slog.Int(keyPID, runtime.PID()))
 	}
 
-	if l.withCaller {
-		log = log.withCaller(l.callerDepth)
+	attrs := l.newAttrs(args)
+	record.AddAttrs(attrs...)
+
+	return record
+}
+
+func (l *Logger) log(ctx context.Context, level slog.Level, msg string, args ...any) {
+	if !l.Enabled(ctx, level) {
+		return
 	}
 
-	if len(params) > 0 {
-		msg = fmt.Sprintf(msg, params...)
+	if ctx == nil {
+		ctx = context.Background()
 	}
 
-	return log.String(l.msgKey, msg)
+	// TODO 尝试用对象池优化
+	record := l.newRecord(level, msg, args)
+
+	if err := l.handler.Handle(ctx, record); err != nil {
+		global.HandleError("l.handler.Handle", err)
+	}
 }
 
-// Debug returns a Log with debug level if debug level is enabled.
-func (l *Logger) Debug(msg string, params ...interface{}) *Log {
-	return l.log(debugLevel, msg, params...)
+func (l *Logger) Debug(msg string, args ...any) {
+	l.log(context.Background(), slog.LevelDebug, msg, args...)
 }
 
-// Info returns a Log with info level if info level is enabled.
-func (l *Logger) Info(msg string, params ...interface{}) *Log {
-	return l.log(infoLevel, msg, params...)
+func (l *Logger) Info(msg string, args ...any) {
+	l.log(context.Background(), slog.LevelInfo, msg, args...)
 }
 
-// Warn returns a Log with warn level if warn level is enabled.
-func (l *Logger) Warn(msg string, params ...interface{}) *Log {
-	return l.log(warnLevel, msg, params...)
+func (l *Logger) Warn(msg string, args ...any) {
+	l.log(context.Background(), slog.LevelWarn, msg, args...)
 }
 
-// Error returns a Log with error level if error level is enabled.
-// We think an error log should carry an error in most situations.
-// Pass a nil error if you really don't have an error to pass.
-func (l *Logger) Error(err error, msg string, params ...interface{}) *Log {
-	return l.log(errorLevel, msg, params...).WithError(err)
+func (l *Logger) Error(msg string, args ...any) {
+	l.log(context.Background(), slog.LevelError, msg, args...)
 }
 
-// Printf prints a log if print level is enabled.
-func (l *Logger) Printf(format string, params ...interface{}) {
-	l.log(printLevel, format, params...).Log()
+func (l *Logger) DebugContext(ctx context.Context, msg string, args ...any) {
+	l.log(ctx, slog.LevelDebug, msg, args...)
 }
 
-// Print prints a log if print level is enabled.
-func (l *Logger) Print(params ...interface{}) {
-	l.log(printLevel, fmt.Sprint(params...)).Log()
+func (l *Logger) InfoContext(ctx context.Context, msg string, args ...any) {
+	l.log(ctx, slog.LevelDebug, msg, args...)
 }
 
-// Println prints a log if print level is enabled.
-func (l *Logger) Println(params ...interface{}) {
-	l.log(printLevel, fmt.Sprintln(params...)).Log()
+func (l *Logger) WarnContext(ctx context.Context, msg string, args ...any) {
+	l.log(ctx, slog.LevelDebug, msg, args...)
 }
 
-// Sync syncs data storing in logger's writer.
-// You can use an option to sync automatically, see options.
-// Close a logger will also invoke Sync(), so you can use an option or Close() to sync instead.
-// However, you still need to sync manually if you want your logs to be stored immediately.
+func (l *Logger) ErrorContext(ctx context.Context, msg string, args ...any) {
+	l.log(ctx, slog.LevelDebug, msg, args...)
+}
+
 func (l *Logger) Sync() error {
-	var err error
-
-	if e := l.printWriter.Sync(); e != nil {
-		err = e
+	if syncer, ok := l.handler.(writer.Syncer); ok {
+		return syncer.Sync()
 	}
 
-	if e := l.errorWriter.Sync(); e != nil {
-		err = e
-	}
-
-	if e := l.warnWriter.Sync(); e != nil {
-		err = e
-	}
-
-	if e := l.infoWriter.Sync(); e != nil {
-		err = e
-	}
-
-	if e := l.debugWriter.Sync(); e != nil {
-		err = e
-	}
-
-	return err
+	return nil
 }
 
-// Close closes logger and releases resources.
-// It will sync data and set level to offLevel.
-// It will invoke close() if writer is io.Closer.
-// So, it is recommended for you to invoke it habitually.
 func (l *Logger) Close() error {
-	l.level = offLevel // uint8 is safe-concurrent in assignment, but may cause dirty read?
-
 	if err := l.Sync(); err != nil {
 		return err
 	}
 
-	if err := l.printWriter.Close(); err != nil {
-		return err
+	if closer, ok := l.handler.(io.Closer); ok {
+		return closer.Close()
 	}
 
-	if err := l.errorWriter.Close(); err != nil {
-		return err
-	}
-
-	if err := l.warnWriter.Close(); err != nil {
-		return err
-	}
-
-	if err := l.infoWriter.Close(); err != nil {
-		return err
-	}
-
-	return l.debugWriter.Close()
+	return nil
 }

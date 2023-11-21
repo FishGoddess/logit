@@ -17,13 +17,12 @@ package config
 import (
 	"testing"
 
-	"github.com/FishGoddess/logit"
 	"github.com/FishGoddess/logit/support/global"
 )
 
 // go test -v -cover -run=^TestConfigOptions$
 func TestConfigOptions(t *testing.T) {
-	cfg := Config{
+	_ = Config{
 		Level:         LevelDebug,
 		TimeKey:       "log.time",
 		LevelKey:      "log.level",
@@ -86,14 +85,4 @@ func TestConfigOptions(t *testing.T) {
 			BatchCount: 1024,
 		},
 	}
-
-	opts, err := cfg.Options()
-	if err != nil {
-		t.Error(err)
-	}
-
-	logger := logit.NewLogger(opts...)
-	defer logger.Close()
-
-	logger.Info("My mother is a config").Any("config", cfg).Log()
 }

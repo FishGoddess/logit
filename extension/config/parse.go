@@ -23,7 +23,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/FishGoddess/logit"
 	"github.com/FishGoddess/logit/core/appender"
 	"github.com/FishGoddess/logit/core/writer"
 	"github.com/FishGoddess/logit/extension/file"
@@ -67,26 +66,6 @@ func mkdir(path string, mode os.FileMode) error {
 
 func open(path string, mode os.FileMode) (*os.File, error) {
 	return global.OpenFile(path, mode)
-}
-
-// parseLevel parses level option from level.
-func parseLevel(level string) (logit.Option, error) {
-	switch strings.ToLower(level) {
-	case LevelDebug:
-		return logit.Options().WithDebugLevel(), nil
-	case LevelInfo:
-		return logit.Options().WithInfoLevel(), nil
-	case LevelWarn:
-		return logit.Options().WithWarnLevel(), nil
-	case LevelError:
-		return logit.Options().WithErrorLevel(), nil
-	case LevelPrint:
-		return logit.Options().WithPrintLevel(), nil
-	case LevelOff:
-		return logit.Options().WithOffLevel(), nil
-	default:
-		return nil, fmt.Errorf("level %s unknown", level)
-	}
 }
 
 // parseTimeFormat parses the format of time.

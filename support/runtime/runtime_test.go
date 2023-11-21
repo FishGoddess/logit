@@ -37,7 +37,7 @@ func TestCaller(t *testing.T) {
 		t.Errorf("runtime.Caller failed")
 	}
 
-	file, line, function := Caller(1)
+	_, file, line, function := Caller(1)
 	if file != correctFile {
 		t.Errorf("Caller returns wrong file %s", file)
 	}

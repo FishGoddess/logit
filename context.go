@@ -31,7 +31,8 @@ func FromContextWithKey(ctx context.Context, key interface{}) *Logger {
 	if logger, ok := ctx.Value(key).(*Logger); ok {
 		return logger
 	}
-	return globalLogger
+
+	return New()
 }
 
 // NewContext wraps context with logger and returns a new context.
