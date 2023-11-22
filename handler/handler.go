@@ -12,12 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-/*
-Package logit provides an easy way to use foundation for your logging operations.
-*/
-package logit // import "github.com/FishGoddess/logit"
+package handler
 
-const (
-	// Version is the version string representation of logit.
-	Version = "v1.5.0-alpha"
-)
+import "log/slog"
+
+func newDefaultHandlerOptions() *slog.HandlerOptions {
+	return &slog.HandlerOptions{
+		AddSource:   false,
+		Level:       slog.LevelDebug,
+		ReplaceAttr: nil,
+	}
+}

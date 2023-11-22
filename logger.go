@@ -18,15 +18,20 @@ import (
 	"context"
 	"io"
 	"log/slog"
+	"os"
+	"runtime"
 
-	"github.com/FishGoddess/logit/core/writer"
-	"github.com/FishGoddess/logit/support/global"
-	"github.com/FishGoddess/logit/support/runtime"
+	"github.com/FishGoddess/logit/defaults"
+	"github.com/FishGoddess/logit/io/writer"
 )
 
 const (
 	keyBad = "!BADKEY"
 	keyPID = "pid"
+)
+
+var (
+	pid = os.Getpid()
 )
 
 type Logger struct {
@@ -114,16 +119,16 @@ func (l *Logger) Enabled(ctx context.Context, level slog.Level) bool {
 }
 
 func (l *Logger) newRecord(level slog.Level, msg string, args []any) slog.Record {
-	now := global.CurrentTime()
+	now := defaults.CurrentTime()
 
 	var pc uintptr
 	if l.withSource {
-		pc, _, _, _ = runtime.Caller(global.CallerDepth)
+		pc, _, _, _ = runtime.Caller(defaults.CallerDepth)
 	}
 
 	record := slog.NewRecord(now, level, msg, pc)
 	if l.withPID {
-		record.AddAttrs(slog.Int(keyPID, runtime.PID()))
+		record.AddAttrs(slog.Int(keyPID, pid))
 	}
 
 	attrs := l.newAttrs(args)
@@ -145,7 +150,7 @@ func (l *Logger) log(ctx context.Context, level slog.Level, msg string, args ...
 	record := l.newRecord(level, msg, args)
 
 	if err := l.handler.Handle(ctx, record); err != nil {
-		global.HandleError("l.handler.Handle", err)
+		defaults.HandleError("Logger.handler.Handle", err)
 	}
 }
 
