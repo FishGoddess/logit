@@ -31,8 +31,10 @@ const (
 type ByteSize = uint64
 
 // parseByteSize parse size with given unit information.
-func parseByteSize(size string, trimUnit string, unitSize ByteSize, bitUnit bool) (ByteSize, error) {
-	n, err := strconv.ParseUint(strings.TrimSuffix(size, trimUnit), 10, 64)
+func parseByteSize(size string, unit string, unitSize ByteSize, bitUnit bool) (ByteSize, error) {
+	size = strings.TrimSuffix(size, unit)
+
+	n, err := strconv.ParseUint(size, 10, 64)
 	if err != nil {
 		return 0, err
 	}
@@ -52,7 +54,7 @@ func parseByteSize(size string, trimUnit string, unitSize ByteSize, bitUnit bool
 func ParseByteSize(size string) (ByteSize, error) {
 	size = strings.TrimSpace(size)
 	if size == "" {
-		return 0, errors.New("logit: parse byte size from empty string")
+		return 0, errors.New("logit: parse byte size from an empty string")
 	}
 
 	bitUnit := false

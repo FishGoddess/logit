@@ -60,7 +60,6 @@ func newBufferWriter(writer io.Writer, bufferSize size.ByteSize) *bufferWriter {
 		writer:        writer,
 		maxBufferSize: bufferSize,
 		buffer:        bytes.NewBuffer(make([]byte, 0, bufferSize+minBufferSize)),
-		lock:          sync.Mutex{},
 	}
 }
 
@@ -120,7 +119,8 @@ func (bw *bufferWriter) Write(p []byte) (n int, err error) {
 	// This p is too large, so we write it directly to avoid copying.
 	tooLarge := size.ByteSize(len(p)) >= bw.maxBufferSize
 	if tooLarge {
-		bw.sync() // Sync before writing to keep the sequence between writes.
+		// Sync before writing to keep the sequence between writes.
+		bw.sync()
 		return bw.writer.Write(p)
 	}
 

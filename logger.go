@@ -41,14 +41,15 @@ type Logger struct {
 	withPID    bool
 }
 
-func New(opts ...Option) *Logger {
-	conf := newDefaultConfig()
-	conf.Accept(opts...)
+func New(conf *Config) *Logger {
+	if conf == nil {
+		conf = NewConfig()
+	}
 
 	logger := &Logger{
 		handler:    conf.NewHandler(),
-		withSource: conf.withSource,
-		withPID:    conf.withPID,
+		withSource: conf.WithSource,
+		withPID:    conf.WithPID,
 	}
 
 	return logger
@@ -188,6 +189,21 @@ func (l *Logger) WarnContext(ctx context.Context, msg string, args ...any) {
 func (l *Logger) ErrorContext(ctx context.Context, msg string, args ...any) {
 	l.log(ctx, slog.LevelDebug, msg, args...)
 }
+
+// // Printf prints a log if print level is enabled.
+// func (l *Logger) Printf(format string, params ...interface{}) {
+// 	l.log(printLevel, format, params...).Log()
+// }
+//
+// // Print prints a log if print level is enabled.
+// func (l *Logger) Print(params ...interface{}) {
+// 	l.log(printLevel, fmt.Sprint(params...)).Log()
+// }
+//
+// // Println prints a log if print level is enabled.
+// func (l *Logger) Println(params ...interface{}) {
+// 	l.log(printLevel, fmt.Sprintln(params...)).Log()
+// }
 
 func (l *Logger) Sync() error {
 	if syncer, ok := l.handler.(writer.Syncer); ok {

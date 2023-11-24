@@ -29,6 +29,7 @@ func TestWrapWriter(t *testing.T) {
 
 	writer.Write([]byte("abc"))
 	writer.Sync()
+
 	if buffer.String() != "abc" {
 		t.Errorf("writing abc but found %s in buffer", buffer.String())
 	}
@@ -47,16 +48,14 @@ func TestWrapWriter(t *testing.T) {
 func TestWrapWriterClose(t *testing.T) {
 	writer := newWrapWriter(os.Stdout)
 	for i := 0; i < 10; i++ {
-		err := writer.Close()
-		if err != nil {
+		if err := writer.Close(); err != nil {
 			t.Error(err)
 		}
 	}
 
 	writer = newWrapWriter(os.Stderr)
 	for i := 0; i < 10; i++ {
-		err := writer.Close()
-		if err != nil {
+		if err := writer.Close(); err != nil {
 			t.Error(err)
 		}
 	}

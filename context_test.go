@@ -22,7 +22,7 @@ import (
 // go test -v -cover -run=^TestNewContextWithKey$
 func TestNewContextWithKey(t *testing.T) {
 	key := "key"
-	logger := New()
+	logger := New(nil)
 	ctx := NewContextWithKey(context.Background(), key, logger)
 
 	value := ctx.Value(key)
@@ -50,7 +50,7 @@ func TestFromContextWithKey(t *testing.T) {
 		t.Error("logger shouldn't be nil")
 	}
 
-	logger = New()
+	logger = New(nil)
 	contextLogger := FromContextWithKey(context.WithValue(ctx, key, logger), key)
 	if contextLogger != logger {
 		t.Errorf("contextLogger %+v != logger %+v", contextLogger, logger)
@@ -59,7 +59,7 @@ func TestFromContextWithKey(t *testing.T) {
 
 // go test -v -cover -run=^TestNewContext$
 func TestNewContext(t *testing.T) {
-	logger := New()
+	logger := New(nil)
 	ctx := NewContext(context.Background(), logger)
 
 	value := ctx.Value(contextKey{})
@@ -86,7 +86,7 @@ func TestFromContext(t *testing.T) {
 		t.Error("logger shouldn't be nil")
 	}
 
-	logger = New()
+	logger = New(nil)
 	contextLogger := FromContext(context.WithValue(ctx, contextKey{}, logger))
 	if contextLogger != logger {
 		t.Errorf("contextLogger %+v != logger %+v", contextLogger, logger)

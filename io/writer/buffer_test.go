@@ -33,6 +33,7 @@ func TestBufferWriter(t *testing.T) {
 
 	writer.Write([]byte("abc"))
 	writer.Sync()
+
 	if buffer.String() != "abc" {
 		t.Errorf("writing abc but found %s in buffer", buffer.String())
 	}
@@ -51,16 +52,14 @@ func TestBufferWriter(t *testing.T) {
 func TestBufferWriterClose(t *testing.T) {
 	writer := newBufferWriter(os.Stdout, 4096)
 	for i := 0; i < 10; i++ {
-		err := writer.Close()
-		if err != nil {
+		if err := writer.Close(); err != nil {
 			t.Error(err)
 		}
 	}
 
 	writer = newBufferWriter(os.Stderr, 4096)
 	for i := 0; i < 10; i++ {
-		err := writer.Close()
-		if err != nil {
+		if err := writer.Close(); err != nil {
 			t.Error(err)
 		}
 	}

@@ -31,6 +31,7 @@ func TestBatchWriter(t *testing.T) {
 
 	writer.Write([]byte("abc"))
 	writer.Sync()
+
 	if buffer.String() != "abc" {
 		t.Errorf("writing abc but found %s in buffer", buffer.String())
 	}
@@ -84,16 +85,14 @@ func TestBatchWriterCount(t *testing.T) {
 func TestBatchWriterClose(t *testing.T) {
 	writer := newBatchWriter(os.Stdout, 10)
 	for i := 0; i < 10; i++ {
-		err := writer.Close()
-		if err != nil {
+		if err := writer.Close(); err != nil {
 			t.Error(err)
 		}
 	}
 
 	writer = newBatchWriter(os.Stderr, 10)
 	for i := 0; i < 10; i++ {
-		err := writer.Close()
-		if err != nil {
+		if err := writer.Close(); err != nil {
 			t.Error(err)
 		}
 	}

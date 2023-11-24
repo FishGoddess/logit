@@ -33,6 +33,7 @@ func (ww *wrapWriter) Sync() error {
 	if syncer, ok := ww.writer.(Syncer); ok && notStdoutAndStderr(ww.writer) {
 		return syncer.Sync()
 	}
+
 	return nil
 }
 
@@ -46,5 +47,6 @@ func (ww *wrapWriter) Close() error {
 	if closer, ok := ww.writer.(io.Closer); ok && notStdoutAndStderr(ww.writer) {
 		return closer.Close()
 	}
+
 	return nil
 }

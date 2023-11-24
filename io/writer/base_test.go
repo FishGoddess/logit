@@ -33,6 +33,7 @@ func TestNotStdoutAndStderr(t *testing.T) {
 // go test -v -cover -run=^TestWrapped$
 func TestWrapped(t *testing.T) {
 	writer := Wrap(os.Stdout)
+
 	if _, ok := writer.(*wrapWriter); !ok {
 		t.Error("Wrap returns a non-wrapWriter instance")
 	}
@@ -41,6 +42,7 @@ func TestWrapped(t *testing.T) {
 // go test -v -cover -run=^TestBuffer$
 func TestBuffer(t *testing.T) {
 	writer := Buffer(os.Stdout)
+
 	if _, ok := writer.(*bufferWriter); !ok {
 		t.Error("Buffer returns a non-bufferWriter instance")
 	}
