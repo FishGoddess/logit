@@ -13,13 +13,3 @@
 // limitations under the License.
 
 package logit
-
-import "testing"
-
-func TestLogger(t *testing.T) {
-	logger := New(WithSource(), WithPID())
-	defer logger.Close()
-
-	logger.Debug("new version of logit", "version", "1.5.0-alpha", "date", 20231122)
-	logger.Error("new version of logit", "version", "1.5.0-alpha", "date", 20231122)
-}

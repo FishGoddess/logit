@@ -60,15 +60,16 @@ func (l *Logger) clone() *Logger {
 }
 
 func (l *Logger) squeezeAttr(args []any) (slog.Attr, []any) {
+	// len of args must be > 0
 	switch arg := args[0].(type) {
+	case slog.Attr:
+		return arg, args[1:]
 	case string:
 		if len(args) <= 1 {
 			return slog.String(keyBad, arg), nil
 		}
 
 		return slog.Any(arg, args[1]), args[2:]
-	case slog.Attr:
-		return arg, args[1:]
 	default:
 		return slog.Any(keyBad, arg), args[1:]
 	}
@@ -123,7 +124,9 @@ func (l *Logger) newRecord(level slog.Level, msg string, args []any) slog.Record
 
 	var pc uintptr
 	if l.withSource {
-		pc, _, _, _ = runtime.Caller(defaults.CallerDepth)
+		var pcs [1]uintptr
+		runtime.Callers(defaults.CallerDepth, pcs[:])
+		pc = pcs[0]
 	}
 
 	record := slog.NewRecord(now, level, msg, pc)

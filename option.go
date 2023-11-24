@@ -17,50 +17,7 @@ package logit
 import (
 	"io"
 	"log/slog"
-	"os"
 )
-
-type config struct {
-	level  slog.Level
-	writer io.Writer
-
-	newHandler  func(writer io.Writer, opts *slog.HandlerOptions) slog.Handler
-	replaceAttr func(groups []string, attr slog.Attr) slog.Attr
-
-	withSource bool
-	withPID    bool
-}
-
-func newDefaultConfig() config {
-	newTextHandler := func(writer io.Writer, opts *slog.HandlerOptions) slog.Handler {
-		return slog.NewTextHandler(writer, opts)
-	}
-
-	return config{
-		level:       slog.LevelDebug,
-		writer:      os.Stdout,
-		newHandler:  newTextHandler,
-		replaceAttr: nil,
-		withSource:  false,
-		withPID:     false,
-	}
-}
-
-func (c *config) Accept(opts ...Option) {
-	for _, opt := range opts {
-		opt(c)
-	}
-}
-
-func (c *config) NewHandler() slog.Handler {
-	opts := &slog.HandlerOptions{
-		AddSource:   c.withSource,
-		Level:       c.level,
-		ReplaceAttr: c.replaceAttr,
-	}
-
-	return c.newHandler(c.writer, opts)
-}
 
 type Option func(conf *config)
 
@@ -94,11 +51,11 @@ func WithNewHandler(newHandler func(writer io.Writer, opts *slog.HandlerOptions)
 	}
 }
 
-func WithJsonHandler() Option {
-	newJsonHandler := func(writer io.Writer, opts *slog.HandlerOptions) slog.Handler {
-		return slog.NewJSONHandler(writer, opts)
-	}
+func WithTextHandler() Option {
+	return WithNewHandler(newTextHandler)
+}
 
+func WithJsonHandler() Option {
 	return WithNewHandler(newJsonHandler)
 }
 
