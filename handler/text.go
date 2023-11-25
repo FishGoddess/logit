@@ -24,13 +24,9 @@ type TextHandler struct {
 	handler slog.Handler
 }
 
-func NewTextHandler(writer io.Writer, opts *slog.HandlerOptions) slog.Handler {
-	if opts == nil {
-		opts = newDefaultHandlerOptions()
-	}
-
+func newTextHandler(w io.Writer, opts *slog.HandlerOptions) *TextHandler {
 	handler := &TextHandler{
-		handler: slog.NewTextHandler(writer, opts),
+		handler: slog.NewTextHandler(w, opts),
 	}
 
 	return handler

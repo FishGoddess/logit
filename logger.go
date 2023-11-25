@@ -41,18 +41,45 @@ type Logger struct {
 	withPID    bool
 }
 
-func New(conf *Config) *Logger {
+func NewLoggerWithConfig(conf *Config) *Logger {
 	if conf == nil {
-		conf = NewConfig()
+		panic("logit: new with a nil config")
+	}
+
+	handler, err := conf.NewHandler()
+	if err != nil {
+		panic(err)
 	}
 
 	logger := &Logger{
-		handler:    conf.NewHandler(),
+		handler:    handler,
 		withSource: conf.WithSource,
 		withPID:    conf.WithPID,
 	}
 
 	return logger
+}
+
+func NewDevelopLogger() *Logger {
+	conf := NewDefaultConfig()
+	conf.Level = "debug"
+	conf.Writer.Target = "file"
+	conf.File.Rotate = true
+	conf.WithSource = true
+
+	return NewLoggerWithConfig(conf)
+}
+
+func NewProductionLogger() *Logger {
+	conf := NewDefaultConfig()
+	conf.Level = "info"
+	conf.Writer.Target = "file"
+	conf.Writer.Mode = "batch"
+	conf.Writer.BatchSize = 16
+	conf.Writer.AutoSync = "10s"
+	conf.File.Rotate = true
+
+	return NewLoggerWithConfig(conf)
 }
 
 func (l *Logger) clone() *Logger {

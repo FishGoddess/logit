@@ -24,13 +24,9 @@ type JsonHandler struct {
 	handler slog.Handler
 }
 
-func NewJsonHandler(writer io.Writer, opts *slog.HandlerOptions) slog.Handler {
-	if opts == nil {
-		opts = newDefaultHandlerOptions()
-	}
-
+func newJsonHandler(w io.Writer, opts *slog.HandlerOptions) *JsonHandler {
 	handler := &JsonHandler{
-		handler: slog.NewJSONHandler(writer, opts),
+		handler: slog.NewJSONHandler(w, opts),
 	}
 
 	return handler

@@ -14,12 +14,15 @@
 
 package handler
 
-import "log/slog"
+import (
+	"io"
+	"log/slog"
+)
 
-func newDefaultHandlerOptions() *slog.HandlerOptions {
-	return &slog.HandlerOptions{
-		AddSource:   false,
-		Level:       slog.LevelDebug,
-		ReplaceAttr: nil,
-	}
+func Text(w io.Writer, opts *slog.HandlerOptions) slog.Handler {
+	return newTextHandler(w, opts)
+}
+
+func Json(w io.Writer, opts *slog.HandlerOptions) slog.Handler {
+	return newJsonHandler(w, opts)
 }

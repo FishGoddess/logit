@@ -17,7 +17,7 @@ package logit
 import "testing"
 
 func TestLogger(t *testing.T) {
-	logger := New(nil)
+	logger := NewDevelopLogger()
 	defer logger.Close()
 
 	logger.Debug("new version of logit", "version", "1.5.0-alpha", "date", 20231122)

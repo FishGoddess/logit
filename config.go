@@ -15,11 +15,8 @@
 package logit
 
 import (
-	"io"
 	"log/slog"
 	"os"
-
-	"github.com/FishGoddess/logit/handler"
 )
 
 type WriterConfig struct {
@@ -92,7 +89,10 @@ type Config struct {
 	Level string `json:"level" yaml:"level" toml:"level" bson:"level"`
 
 	// Handler is how the handler handles the logs.
-	// Values: "text", "json".
+	// Values: "text", "json", "slog.text", "slog.json".
+	// These handlers with "slog" prefix are from slog package of Go.
+	// We recommend you to use our faster handlers, and feel free if you want to use slog's handlers.
+	// Also, you can register your handlers to logit, see RegisterHandler.
 	Handler string `json:"handler" yaml:"handler" toml:"handler" bson:"handler"`
 
 	// Writer is the config of writer.
@@ -111,7 +111,7 @@ type Config struct {
 	replaceAttr func(groups []string, attr slog.Attr) slog.Attr
 }
 
-func NewConfig() *Config {
+func NewDefaultConfig() *Config {
 	conf := &Config{
 		Level:   "debug",
 		Handler: "text",
@@ -132,22 +132,8 @@ func NewConfig() *Config {
 			MaxBackups: 100,
 		},
 		WithSource: false,
-		WithPID:    false,
+		WithPID:    true,
 	}
-
-	return conf
-}
-
-func NewProductionConfig() *Config {
-	conf := NewConfig()
-	conf.Level = "info"
-	conf.Writer.Target = "file"
-	conf.Writer.Mode = "batch"
-	conf.Writer.BatchSize = 16
-	conf.Writer.AutoSync = "10s"
-	conf.File.Rotate = true
-	conf.WithSource = true
-	conf.WithPID = true
 
 	return conf
 }
@@ -157,26 +143,17 @@ func (c *Config) WithReplaceAttr(replaceAttr func(groups []string, attr slog.Att
 	return c
 }
 
-func (c *Config) NewHandler() slog.Handler {
+func (c *Config) newHandlerOptions() *slog.HandlerOptions {
 	opts := &slog.HandlerOptions{
 		Level:       parseLevel(c.Level),
 		AddSource:   c.WithSource,
 		ReplaceAttr: c.replaceAttr,
 	}
 
-	// TODO 做成注册模式，支持注册 handler，默认注册 text 和 json 还有标准库的两个
-	// TODO 解析 writer 和 file 的配置，创建对应的实例
-	if c.Handler == "json" {
-		return newJsonHandler(os.Stdout, opts)
-	}
-
-	return newTextHandler(os.Stdout, opts)
+	return opts
 }
 
-func newTextHandler(writer io.Writer, opts *slog.HandlerOptions) slog.Handler {
-	return handler.NewTextHandler(writer, opts)
-}
-
-func newJsonHandler(writer io.Writer, opts *slog.HandlerOptions) slog.Handler {
-	return handler.NewJsonHandler(writer, opts)
+func (c *Config) NewHandler() (slog.Handler, error) {
+	opts := c.newHandlerOptions()
+	return newHandler(c.Handler, os.Stdout, opts)
 }
