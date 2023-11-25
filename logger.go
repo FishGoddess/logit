@@ -43,7 +43,7 @@ type Logger struct {
 
 func NewLoggerWithConfig(conf *Config) *Logger {
 	if conf == nil {
-		panic("logit: new with a nil config")
+		conf = NewDefaultConfig()
 	}
 
 	handler, err := conf.NewHandler()

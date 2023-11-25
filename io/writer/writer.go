@@ -18,7 +18,6 @@ import (
 	"io"
 	"os"
 
-	"github.com/FishGoddess/logit/defaults"
 	"github.com/FishGoddess/logit/io/size"
 )
 
@@ -47,8 +46,8 @@ func Wrap(writer io.Writer) Writer {
 	return newWrapWriter(writer)
 }
 
-// BufferWithSize wraps io.writer with buffer Writer of bufferSize.
-func BufferWithSize(writer io.Writer, bufferSize size.ByteSize) Writer {
+// Buffer wraps io.writer with buffer writer of bufferSize.
+func Buffer(writer io.Writer, bufferSize size.ByteSize) Writer {
 	if bw, ok := writer.(*bufferWriter); ok {
 		return bw
 	}
@@ -56,21 +55,11 @@ func BufferWithSize(writer io.Writer, bufferSize size.ByteSize) Writer {
 	return newBufferWriter(writer, bufferSize)
 }
 
-// Buffer wraps writer to Buffer Writer with default buffer size.
-func Buffer(writer io.Writer) Writer {
-	return BufferWithSize(writer, defaults.WriterBufferSize)
-}
-
-// BatchWithCount wraps io.writer with batch Writer of batchCount.
-func BatchWithCount(writer io.Writer, batchCount uint) Writer {
+// Batch wraps io.writer with batch writer of batchSize.
+func Batch(writer io.Writer, batchSize uint) Writer {
 	if bw, ok := writer.(*batchWriter); ok {
 		return bw
 	}
 
-	return newBatchWriter(writer, batchCount)
-}
-
-// Batch wraps writer to Batch Writer with default batch count.
-func Batch(writer io.Writer) Writer {
-	return BatchWithCount(writer, defaults.WriterBatchCount)
+	return newBatchWriter(writer, batchSize)
 }

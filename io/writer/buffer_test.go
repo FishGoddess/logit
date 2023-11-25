@@ -27,8 +27,7 @@ import (
 func TestBufferWriter(t *testing.T) {
 	buffer := bytes.NewBuffer(make([]byte, 0, 4096))
 
-	writer := newBufferWriter(buffer, defaults.WriterBufferSize)
-	writer.AutoSync(time.Millisecond)
+	writer := newBufferWriter(buffer, defaults.BufferSize)
 	defer writer.Close()
 
 	writer.Write([]byte("abc"))
@@ -41,6 +40,7 @@ func TestBufferWriter(t *testing.T) {
 	writer.Write([]byte("123"))
 	writer.Write([]byte(".!?"))
 	writer.Write([]byte("+-*/"))
+	writer.Close()
 	time.Sleep(time.Second)
 
 	if buffer.String() != "abc123.!?+-*/" {

@@ -26,7 +26,6 @@ func TestBatchWriter(t *testing.T) {
 	buffer := bytes.NewBuffer(make([]byte, 0, 4096))
 
 	writer := newBatchWriter(buffer, 10)
-	writer.AutoSync(time.Millisecond)
 	defer writer.Close()
 
 	writer.Write([]byte("abc"))
@@ -39,6 +38,7 @@ func TestBatchWriter(t *testing.T) {
 	writer.Write([]byte("123"))
 	writer.Write([]byte(".!?"))
 	writer.Write([]byte("+-*/"))
+	writer.Close()
 	time.Sleep(time.Second)
 
 	if buffer.String() != "abc123.!?+-*/" {

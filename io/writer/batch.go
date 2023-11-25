@@ -19,15 +19,14 @@ import (
 	"fmt"
 	"io"
 	"sync"
-	"time"
 
 	"github.com/FishGoddess/logit/defaults"
 )
 
 const (
-	// minBatchCount is the min count of batch.
-	// A panic will happen if batch count is smaller than it.
-	minBatchCount = 1
+	// minBatchSize is the min size of batch.
+	// A panic will happen if batch size is smaller than it.
+	minBatchSize = 1
 )
 
 // batchWriter is a writer having a buffer inside to reduce times of writing underlying writer.
@@ -51,18 +50,18 @@ type batchWriter struct {
 	lock sync.Mutex
 }
 
-// newBatchWriter returns a new batch writer of this writer with specified batchCount.
-// Notice that batchCount must be larger than minBatchCount or a panic will happen. See minBatchCount.
-func newBatchWriter(writer io.Writer, batchCount uint) *batchWriter {
-	if batchCount < minBatchCount {
-		panic(fmt.Errorf("logit: batchCount %d < minBatchCount %d", batchCount, minBatchCount))
+// newBatchWriter returns a new batch writer of this writer with specified batchSize.
+// Notice that batchSize must be larger than minBatchCount or a panic will happen. See minBatchCount.
+func newBatchWriter(writer io.Writer, batchSize uint) *batchWriter {
+	if batchSize < minBatchSize {
+		panic(fmt.Errorf("logit: batchSize %d < minBatchSize %d", batchSize, minBatchSize))
 	}
 
 	return &batchWriter{
 		writer:         writer,
-		maxBatches:     batchCount,
+		maxBatches:     batchSize,
 		currentBatches: 0,
-		buffer:         bytes.NewBuffer(make([]byte, 0, defaults.WriterBufferSize)),
+		buffer:         bytes.NewBuffer(make([]byte, 0, defaults.BufferSize)),
 	}
 }
 
@@ -90,28 +89,6 @@ func (bw *batchWriter) Sync() error {
 	}
 
 	return nil
-}
-
-// AutoSync starts a goroutine to sync data automatically.
-// It returns a channel for stopping this goroutine.
-func (bw *batchWriter) AutoSync(frequency time.Duration) chan<- struct{} {
-	stopCh := make(chan struct{}, 1)
-
-	go func() {
-		ticker := time.NewTicker(frequency)
-		defer ticker.Stop()
-
-		for {
-			select {
-			case <-ticker.C:
-				bw.Sync()
-			case <-stopCh:
-				return
-			}
-		}
-	}()
-
-	return stopCh
 }
 
 // Write writes p to buffer and syncs data to underlying writer first if it needs.

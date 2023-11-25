@@ -19,7 +19,6 @@ import (
 	"fmt"
 	"io"
 	"sync"
-	"time"
 
 	"github.com/FishGoddess/logit/io/size"
 )
@@ -27,7 +26,7 @@ import (
 const (
 	// minBufferSize is the min size of buffer.
 	// A panic will happen if buffer size is smaller than it.
-	minBufferSize = 2 * size.B
+	minBufferSize = 4 * size.B
 )
 
 // bufferWriter is a writer having a buffer inside to reduce times of writing underlying writer.
@@ -87,28 +86,6 @@ func (bw *bufferWriter) Sync() error {
 	}
 
 	return nil
-}
-
-// AutoSync starts a goroutine to sync data automatically.
-// It returns a channel for stopping this goroutine.
-func (bw *bufferWriter) AutoSync(frequency time.Duration) chan<- struct{} {
-	stopCh := make(chan struct{}, 1)
-
-	go func() {
-		ticker := time.NewTicker(frequency)
-		defer ticker.Stop()
-
-		for {
-			select {
-			case <-ticker.C:
-				bw.Sync()
-			case <-stopCh:
-				return
-			}
-		}
-	}()
-
-	return stopCh
 }
 
 // Write writes p to buffer and syncs data to underlying writer first if it needs.

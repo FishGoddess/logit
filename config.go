@@ -15,8 +15,19 @@
 package logit
 
 import (
+	"fmt"
+	"io"
 	"log/slog"
 	"os"
+	"path/filepath"
+	"strconv"
+	"strings"
+	"time"
+
+	"github.com/FishGoddess/logit/defaults"
+	"github.com/FishGoddess/logit/io/file"
+	"github.com/FishGoddess/logit/io/size"
+	"github.com/FishGoddess/logit/io/writer"
 )
 
 type WriterConfig struct {
@@ -51,18 +62,18 @@ type WriterConfig struct {
 }
 
 type FileConfig struct {
-	// Name is the filename (or prefix) of log file.
-	Name string `json:"name" yaml:"name" toml:"name" bson:"name"`
-
-	// Rotate is log file should split and backup when satisfy some conditions.
-	// It's useful in production so we recommend you to set it to true.
-	Rotate bool `json:"rotate" yaml:"rotate" toml:"rotate" bson:"rotate"`
+	// Path is the path (or prefix) of log file.
+	Path string `json:"path" yaml:"path" toml:"path" bson:"path"`
 
 	// Mode is the permission bits of log files.
 	Mode os.FileMode `json:"mode" yaml:"mode" toml:"mode" bson:"mode"`
 
 	// DirMode is the permission bits of directory storing log files.
 	DirMode os.FileMode `json:"dir_mode" yaml:"dir_mode" toml:"dir_mode" bson:"dir_mode"`
+
+	// Rotate is log file should split and backup when satisfy some conditions.
+	// It's useful in production so we recommend you to set it to true.
+	Rotate bool `json:"rotate" yaml:"rotate" toml:"rotate" bson:"rotate"`
 
 	// MaxSize is the max size of a log file.
 	// If size of data in one output operation is bigger than this value, then file will rotate before writing,
@@ -123,7 +134,7 @@ func NewDefaultConfig() *Config {
 			AutoSync:   "30s",
 		},
 		File: FileConfig{
-			Name:       "logit.log",
+			Path:       "./logit.log",
 			Rotate:     false,
 			Mode:       0644,
 			DirMode:    0755,
@@ -143,6 +154,118 @@ func (c *Config) WithReplaceAttr(replaceAttr func(groups []string, attr slog.Att
 	return c
 }
 
+func (c *Config) parseTimeDuration(s string) (time.Duration, error) {
+	if strings.HasSuffix(s, "d") || strings.HasSuffix(s, "D") {
+		s = strings.TrimSuffix(s, "d")
+		s = strings.TrimSuffix(s, "D")
+
+		days, err := strconv.ParseInt(s, 10, 64)
+		if err != nil {
+			return 0, err
+		}
+
+		return time.Duration(days) * defaults.Day, nil
+	}
+
+	return time.ParseDuration(s)
+}
+
+func (c *Config) newFile() (io.Writer, error) {
+	if c.File.Rotate {
+		opts := []file.Option{
+			file.WithMode(c.File.Mode),
+			file.WithDirMode(c.File.DirMode),
+			file.WithTimeFormat("20060102150405"),
+		}
+
+		if c.File.MaxSize != "" {
+			maxSize, err := size.ParseByteSize(c.File.MaxSize)
+			if err != nil {
+				return nil, err
+			}
+
+			opts = append(opts, file.WithMaxSize(maxSize))
+		}
+
+		if c.File.MaxAge != "" {
+			maxAge, err := c.parseTimeDuration(c.File.MaxAge)
+			if err != nil {
+				return nil, err
+			}
+
+			opts = append(opts, file.WithMaxAge(maxAge))
+		}
+
+		if c.File.MaxBackups > 0 {
+			opts = append(opts, file.WithMaxBackups(c.File.MaxBackups))
+		}
+
+		return file.New(c.File.Path)
+	}
+
+	dir := filepath.Dir(c.File.Path)
+	if err := os.MkdirAll(dir, c.File.DirMode); err != nil {
+		return nil, err
+	}
+
+	return defaults.OpenFile(c.File.Path, c.File.Mode)
+}
+
+func (c *Config) newWriter() (io.Writer, error) {
+	var w writer.Writer
+
+	switch c.Writer.Target {
+	case "stdout":
+		w = os.Stdout
+	case "stderr":
+		w = os.Stderr
+	case "file":
+		f, err := c.newFile()
+		if err != nil {
+			return nil, err
+		}
+
+		w = writer.Wrap(f)
+	default:
+		return nil, fmt.Errorf("writer target %s invalid", c.Writer.Target)
+	}
+
+	switch c.Writer.Mode {
+	case "direct":
+		break
+	case "buffer":
+		bufferSize, err := size.ParseByteSize(c.Writer.BufferSize)
+		if err != nil {
+			return nil, err
+		}
+
+		w = writer.Buffer(w, bufferSize)
+	case "batch":
+		w = writer.Batch(w, c.Writer.BatchSize)
+	default:
+		return nil, fmt.Errorf("writer mode %s invalid", c.Writer.Mode)
+	}
+
+	if c.Writer.AutoSync != "" {
+		frequency, err := time.ParseDuration(c.Writer.AutoSync)
+		if err != nil {
+			return nil, err
+		}
+
+		go func() {
+			for {
+				time.Sleep(frequency)
+
+				if err := w.Sync(); err != nil {
+					defaults.HandleError("writer.sync", err)
+				}
+			}
+		}()
+	}
+
+	return w, nil
+}
+
 func (c *Config) newHandlerOptions() *slog.HandlerOptions {
 	opts := &slog.HandlerOptions{
 		Level:       parseLevel(c.Level),
@@ -154,6 +277,11 @@ func (c *Config) newHandlerOptions() *slog.HandlerOptions {
 }
 
 func (c *Config) NewHandler() (slog.Handler, error) {
+	w, err := c.newWriter()
+	if err != nil {
+		return nil, err
+	}
+
 	opts := c.newHandlerOptions()
-	return newHandler(c.Handler, os.Stdout, opts)
+	return newHandler(c.Handler, w, opts)
 }

@@ -23,6 +23,9 @@ import (
 )
 
 const (
+	// Day is one day in time.Duration.
+	Day = 24 * time.Hour
+
 	// UnixTimeFormat is time format of unix.
 	UnixTimeFormat = ""
 )
@@ -31,23 +34,26 @@ var (
 	// CallerDepth is the depth of caller.
 	// See runtime.Caller.
 	CallerDepth = 4
+)
 
+var (
 	// LogSize is the pre-malloc size of a new log.
 	// If your logs are extremely long, such as 4000 bytes/log, you can set it to 4KB to avoid re-malloc.
 	LogSize = 512 * size.B
 
-	// WriterBufferSize is the default size of buffer writer.
-	WriterBufferSize = 64 * size.KB
+	// BufferSize is the default size of buffer in writer.
+	BufferSize = 64 * size.KB
+)
 
-	// WriterBatchCount is the default count of batch writer.
-	WriterBatchCount = uint(128)
-
+var (
 	// TimeLocation is the location of time.
 	TimeLocation = time.Local
 
 	// CurrentTime returns the current time with time.Time.
 	CurrentTime = time.Now
+)
 
+var (
 	// MarshalToJson marshals v to json bytes.
 	// If you want to use your own way to marshal, change it to your own marshal function.
 	MarshalToJson = json.Marshal

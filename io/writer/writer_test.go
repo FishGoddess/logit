@@ -41,7 +41,7 @@ func TestWrapped(t *testing.T) {
 
 // go test -v -cover -run=^TestBuffer$
 func TestBuffer(t *testing.T) {
-	writer := Buffer(os.Stdout)
+	writer := Buffer(os.Stdout, 1024)
 
 	if _, ok := writer.(*bufferWriter); !ok {
 		t.Error("Buffer returns a non-bufferWriter instance")
@@ -50,7 +50,7 @@ func TestBuffer(t *testing.T) {
 
 // go test -v -cover -run=^TestBufferWithSize$
 func TestBufferWithSize(t *testing.T) {
-	writer := BufferWithSize(os.Stdout, 1024)
+	writer := Buffer(os.Stdout, 1024)
 
 	bw, ok := writer.(*bufferWriter)
 	if !ok {
