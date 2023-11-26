@@ -17,8 +17,6 @@ package writer
 import (
 	"io"
 	"os"
-
-	"github.com/FishGoddess/logit/io/size"
 )
 
 // Syncer is an interface that syncs data to somewhere.
@@ -39,7 +37,7 @@ func notStdoutAndStderr(w io.Writer) bool {
 
 // Wrap wraps io.writer to Writer.
 func Wrap(writer io.Writer) Writer {
-	if w, ok := writer.(*wrapWriter); ok {
+	if w, ok := writer.(Writer); ok {
 		return w
 	}
 
@@ -47,7 +45,7 @@ func Wrap(writer io.Writer) Writer {
 }
 
 // Buffer wraps io.writer with buffer writer of bufferSize.
-func Buffer(writer io.Writer, bufferSize size.ByteSize) Writer {
+func Buffer(writer io.Writer, bufferSize uint64) Writer {
 	if bw, ok := writer.(*bufferWriter); ok {
 		return bw
 	}
@@ -56,7 +54,7 @@ func Buffer(writer io.Writer, bufferSize size.ByteSize) Writer {
 }
 
 // Batch wraps io.writer with batch writer of batchSize.
-func Batch(writer io.Writer, batchSize uint) Writer {
+func Batch(writer io.Writer, batchSize uint64) Writer {
 	if bw, ok := writer.(*batchWriter); ok {
 		return bw
 	}

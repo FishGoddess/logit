@@ -12,13 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package file
+package rotate
 
 import (
 	"os"
 	"time"
-
-	"github.com/FishGoddess/logit/io/size"
 )
 
 // Option will set something to config.
@@ -51,7 +49,7 @@ func WithTimeFormat(format string) Option {
 }
 
 // WithMaxSize sets max size to config.
-func WithMaxSize(size size.ByteSize) Option {
+func WithMaxSize(size uint64) Option {
 	return func(c *config) {
 		c.maxSize = size
 	}

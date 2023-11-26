@@ -20,30 +20,30 @@ import (
 	"log/slog"
 )
 
-type JsonHandler struct {
+type jsonHandler struct {
 	handler slog.Handler
 }
 
-func newJsonHandler(w io.Writer, opts *slog.HandlerOptions) *JsonHandler {
-	handler := &JsonHandler{
+func NewJsonHandler(w io.Writer, opts *slog.HandlerOptions) slog.Handler {
+	handler := &jsonHandler{
 		handler: slog.NewJSONHandler(w, opts),
 	}
 
 	return handler
 }
 
-func (th *JsonHandler) WithGroup(name string) slog.Handler {
+func (th *jsonHandler) WithGroup(name string) slog.Handler {
 	return th.handler.WithGroup(name)
 }
 
-func (th *JsonHandler) WithAttrs(attrs []slog.Attr) slog.Handler {
+func (th *jsonHandler) WithAttrs(attrs []slog.Attr) slog.Handler {
 	return th.handler.WithAttrs(attrs)
 }
 
-func (th *JsonHandler) Enabled(ctx context.Context, level slog.Level) bool {
+func (th *jsonHandler) Enabled(ctx context.Context, level slog.Level) bool {
 	return th.handler.Enabled(ctx, level)
 }
 
-func (th *JsonHandler) Handle(ctx context.Context, record slog.Record) error {
+func (th *jsonHandler) Handle(ctx context.Context, record slog.Record) error {
 	return th.handler.Handle(ctx, record)
 }

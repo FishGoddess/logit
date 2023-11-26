@@ -36,10 +36,10 @@ type batchWriter struct {
 	writer io.Writer
 
 	// maxBatches is the max count of batch.
-	maxBatches uint
+	maxBatches uint64
 
 	// currentBatches is the current count of batch.
-	currentBatches uint
+	currentBatches uint64
 
 	// buffer is for keeping data together and writing them one time.
 	// Data won't be written to underlying writer if batch count is less than max batch count, so you can pre-write them by Sync() if you need.
@@ -52,7 +52,7 @@ type batchWriter struct {
 
 // newBatchWriter returns a new batch writer of this writer with specified batchSize.
 // Notice that batchSize must be larger than minBatchCount or a panic will happen. See minBatchCount.
-func newBatchWriter(writer io.Writer, batchSize uint) *batchWriter {
+func newBatchWriter(writer io.Writer, batchSize uint64) *batchWriter {
 	if batchSize < minBatchSize {
 		panic(fmt.Errorf("logit: batchSize %d < minBatchSize %d", batchSize, minBatchSize))
 	}

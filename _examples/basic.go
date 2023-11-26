@@ -12,4 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package handler
+package main
+
+import "github.com/FishGoddess/logit"
+
+func main() {
+	logger := logit.Builder().MustBuild()
+	defer logger.Close()
+
+	logger.Debug("new version of logit", "version", "1.5.0-alpha", "date", 20231122)
+	logger.Error("new version of logit", "version", "1.5.0-alpha", "date", 20231122)
+}

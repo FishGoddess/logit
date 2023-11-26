@@ -12,13 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package file
+package rotate
 
 import (
 	"testing"
 	"time"
-
-	"github.com/FishGoddess/logit/io/size"
 )
 
 // go test -v -cover -run=^TestWithMode$
@@ -71,10 +69,10 @@ func TestWithMaxSize(t *testing.T) {
 	c := newDefaultConfig()
 	c.maxSize = 0
 
-	WithMaxSize(4 * size.KB).Apply(&c)
+	WithMaxSize(4 * 1024).Apply(&c)
 
 	want := newDefaultConfig()
-	want.maxSize = 4 * size.KB
+	want.maxSize = 4 * 1024
 
 	if c != want {
 		t.Errorf("c %+v != want %+v", c, want)

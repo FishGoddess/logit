@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package logit
+package config
 
 import (
 	"fmt"
@@ -24,10 +24,9 @@ import (
 	"strings"
 	"time"
 
+	"github.com/FishGoddess/logit/core/rotate"
+	"github.com/FishGoddess/logit/core/writer"
 	"github.com/FishGoddess/logit/defaults"
-	"github.com/FishGoddess/logit/io/file"
-	"github.com/FishGoddess/logit/io/size"
-	"github.com/FishGoddess/logit/io/writer"
 )
 
 type WriterConfig struct {
@@ -51,7 +50,7 @@ type WriterConfig struct {
 
 	// BatchSize is the size of a batch.
 	// Only available when mode is "batch".
-	BatchSize uint `json:"batch_size" yaml:"batch_size" toml:"batch_size" bson:"batch_size"`
+	BatchSize uint64 `json:"batch_size" yaml:"batch_size" toml:"batch_size" bson:"batch_size"`
 
 	// AutoSync is the frequency of syncing.
 	// An empty string means syncing is manual.
@@ -172,19 +171,19 @@ func (c *Config) parseTimeDuration(s string) (time.Duration, error) {
 
 func (c *Config) newFile() (io.Writer, error) {
 	if c.File.Rotate {
-		opts := []file.Option{
-			file.WithMode(c.File.Mode),
-			file.WithDirMode(c.File.DirMode),
-			file.WithTimeFormat("20060102150405"),
+		opts := []rotate.Option{
+			rotate.WithMode(c.File.Mode),
+			rotate.WithDirMode(c.File.DirMode),
+			rotate.WithTimeFormat("20060102150405"),
 		}
 
 		if c.File.MaxSize != "" {
-			maxSize, err := size.ParseByteSize(c.File.MaxSize)
+			maxSize, err := parseByteSize(c.File.MaxSize)
 			if err != nil {
 				return nil, err
 			}
 
-			opts = append(opts, file.WithMaxSize(maxSize))
+			opts = append(opts, rotate.WithMaxSize(maxSize))
 		}
 
 		if c.File.MaxAge != "" {
@@ -193,14 +192,14 @@ func (c *Config) newFile() (io.Writer, error) {
 				return nil, err
 			}
 
-			opts = append(opts, file.WithMaxAge(maxAge))
+			opts = append(opts, rotate.WithMaxAge(maxAge))
 		}
 
 		if c.File.MaxBackups > 0 {
-			opts = append(opts, file.WithMaxBackups(c.File.MaxBackups))
+			opts = append(opts, rotate.WithMaxBackups(c.File.MaxBackups))
 		}
 
-		return file.New(c.File.Path)
+		return rotate.New(c.File.Path, opts...)
 	}
 
 	dir := filepath.Dir(c.File.Path)
@@ -234,7 +233,7 @@ func (c *Config) newWriter() (io.Writer, error) {
 	case "direct":
 		break
 	case "buffer":
-		bufferSize, err := size.ParseByteSize(c.Writer.BufferSize)
+		bufferSize, err := parseByteSize(c.Writer.BufferSize)
 		if err != nil {
 			return nil, err
 		}
@@ -264,24 +263,4 @@ func (c *Config) newWriter() (io.Writer, error) {
 	}
 
 	return w, nil
-}
-
-func (c *Config) newHandlerOptions() *slog.HandlerOptions {
-	opts := &slog.HandlerOptions{
-		Level:       parseLevel(c.Level),
-		AddSource:   c.WithSource,
-		ReplaceAttr: c.replaceAttr,
-	}
-
-	return opts
-}
-
-func (c *Config) NewHandler() (slog.Handler, error) {
-	w, err := c.newWriter()
-	if err != nil {
-		return nil, err
-	}
-
-	opts := c.newHandlerOptions()
-	return newHandler(c.Handler, w, opts)
 }

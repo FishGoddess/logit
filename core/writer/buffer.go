@@ -19,14 +19,12 @@ import (
 	"fmt"
 	"io"
 	"sync"
-
-	"github.com/FishGoddess/logit/io/size"
 )
 
 const (
 	// minBufferSize is the min size of buffer.
 	// A panic will happen if buffer size is smaller than it.
-	minBufferSize = 4 * size.B
+	minBufferSize = 4
 )
 
 // bufferWriter is a writer having a buffer inside to reduce times of writing underlying writer.
@@ -36,7 +34,7 @@ type bufferWriter struct {
 	writer io.Writer
 
 	// maxBufferSize is the max size of buffer.
-	maxBufferSize size.ByteSize
+	maxBufferSize uint64
 
 	// buffer is for keeping data together and writing them one time.
 	// Data won't be written to underlying writer if buffer doesn't full, so you can pre-write them by Sync() if you need.
@@ -50,7 +48,7 @@ type bufferWriter struct {
 // newBufferWriter returns a new buffer writer of this writer with specified bufferSize.
 // Notice that bufferSize must be larger than minBufferSize or a panic will happen. See minBufferSize.
 // The size we want to use is bufferSize, but we add more bytes to it for avoiding buffer growing up.
-func newBufferWriter(writer io.Writer, bufferSize size.ByteSize) *bufferWriter {
+func newBufferWriter(writer io.Writer, bufferSize uint64) *bufferWriter {
 	if bufferSize <= minBufferSize {
 		panic(fmt.Errorf("bufferSize %d <= minBufferSize %d", bufferSize, minBufferSize))
 	}
@@ -94,7 +92,8 @@ func (bw *bufferWriter) Write(p []byte) (n int, err error) {
 	defer bw.lock.Unlock()
 
 	// This p is too large, so we write it directly to avoid copying.
-	tooLarge := size.ByteSize(len(p)) >= bw.maxBufferSize
+	needBufferSize := len(p)
+	tooLarge := uint64(needBufferSize) >= bw.maxBufferSize
 	if tooLarge {
 		// Sync before writing to keep the sequence between writes.
 		bw.sync()
@@ -102,7 +101,8 @@ func (bw *bufferWriter) Write(p []byte) (n int, err error) {
 	}
 
 	// The remaining buffer is not enough, sync data to write this p.
-	notEnough := size.ByteSize(bw.buffer.Len()+len(p)) >= bw.maxBufferSize
+	needBufferSize = bw.buffer.Len() + len(p)
+	notEnough := uint64(needBufferSize) >= bw.maxBufferSize
 	if notEnough {
 		bw.sync()
 	}

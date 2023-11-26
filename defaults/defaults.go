@@ -18,8 +18,6 @@ import (
 	"encoding/json"
 	"os"
 	"time"
-
-	"github.com/FishGoddess/logit/io/size"
 )
 
 const (
@@ -39,10 +37,10 @@ var (
 var (
 	// LogSize is the pre-malloc size of a new log.
 	// If your logs are extremely long, such as 4000 bytes/log, you can set it to 4KB to avoid re-malloc.
-	LogSize = 512 * size.B
+	LogSize uint64 = 512
 
-	// BufferSize is the default size of buffer in writer.
-	BufferSize = 64 * size.KB
+	// BufferSize is the default size of buffers.
+	BufferSize uint64 = 64 * 1024
 )
 
 var (
@@ -51,6 +49,14 @@ var (
 
 	// CurrentTime returns the current time with time.Time.
 	CurrentTime = time.Now
+)
+
+var (
+	// FileMode is the permission bits
+	FileMode os.FileMode = 0644
+
+	// FileDirMode is the permission bits of directory.
+	FileDirMode os.FileMode = 0755
 )
 
 var (

@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package file
+package rotate
 
 import (
 	"fmt"
@@ -22,28 +22,24 @@ import (
 	"sync"
 
 	"github.com/FishGoddess/logit/defaults"
-	"github.com/FishGoddess/logit/io/size"
 )
 
 // File is a file which supports rotating automatically.
 // It has max size and file will rotate if size exceeds max size.
 // It has max age and max backups, so rotated files will be controlled in quantity which is beneficial to space.
 type File struct {
-	// config stores all configurations of file.
 	config
-
-	// path is the path of file.
 	path string
 
 	// size is the current size of writing in file.
-	size size.ByteSize
+	size uint64
 
 	file *os.File
 	ch   chan struct{}
 	lock sync.Mutex
 }
 
-// New returns a new file.
+// New returns a new rotate file.
 func New(path string, opts ...Option) (*File, error) {
 	f := newFile(path, opts)
 
@@ -186,7 +182,7 @@ func (f *File) openNewFile() error {
 	}
 
 	f.file = file
-	f.size = size.ByteSize(info.Size())
+	f.size = uint64(info.Size())
 
 	return nil
 }
@@ -251,13 +247,13 @@ func (f *File) Write(p []byte) (n int, err error) {
 	f.lock.Lock()
 	defer f.lock.Unlock()
 
-	writeSize := size.ByteSize(len(p))
+	writeSize := uint64(len(p))
 	if f.size+writeSize > f.maxSize {
 		f.rotate() // Ignore rotating error so this p won't be discarded.
 	}
 
 	n, err = f.file.Write(p)
-	f.size += size.ByteSize(n)
+	f.size += uint64(n)
 
 	return n, err
 }

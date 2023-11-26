@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package logit
+package config
 
 import (
 	"fmt"
@@ -21,29 +21,20 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/FishGoddess/logit/handler"
+	"github.com/FishGoddess/logit"
+	"github.com/FishGoddess/logit/core/handler"
 )
 
 var (
-	newHandlers = map[string]NewHandlerFunc{
-		"text":      newTextHandler,
-		"json":      newJsonHandler,
+	newHandlers = map[string]logit.NewHandlerFunc{
+		"text":      handler.NewTextHandler,
+		"json":      handler.NewJsonHandler,
 		"slog.text": newSlogTextHandler,
 		"slog.json": newSlogJsonHandler,
 	}
 
 	newHandlersLock sync.RWMutex
 )
-
-type NewHandlerFunc func(w io.Writer, opts *slog.HandlerOptions) slog.Handler
-
-func newTextHandler(w io.Writer, opts *slog.HandlerOptions) slog.Handler {
-	return handler.Text(w, opts)
-}
-
-func newJsonHandler(w io.Writer, opts *slog.HandlerOptions) slog.Handler {
-	return handler.Json(w, opts)
-}
 
 func newSlogTextHandler(w io.Writer, opts *slog.HandlerOptions) slog.Handler {
 	return slog.NewTextHandler(w, opts)
@@ -70,7 +61,7 @@ func newHandler(name string, w io.Writer, opts *slog.HandlerOptions) (slog.Handl
 	return nil, fmt.Errorf("logit: handler %s not found, available handlers are %s", name, handlerNames.String())
 }
 
-func RegisterHandler(name string, newHandler NewHandlerFunc) error {
+func RegisterHandler(name string, newHandler logit.NewHandlerFunc) error {
 	newHandlersLock.Lock()
 	defer newHandlersLock.Unlock()
 

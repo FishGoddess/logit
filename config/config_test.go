@@ -12,17 +12,4 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package handler
-
-import (
-	"io"
-	"log/slog"
-)
-
-func Text(w io.Writer, opts *slog.HandlerOptions) slog.Handler {
-	return newTextHandler(w, opts)
-}
-
-func Json(w io.Writer, opts *slog.HandlerOptions) slog.Handler {
-	return newJsonHandler(w, opts)
-}
+package config

@@ -16,13 +16,14 @@ package logit
 
 import (
 	"context"
+	"fmt"
 	"io"
 	"log/slog"
 	"os"
 	"runtime"
 
+	"github.com/FishGoddess/logit/core/writer"
 	"github.com/FishGoddess/logit/defaults"
-	"github.com/FishGoddess/logit/io/writer"
 )
 
 const (
@@ -39,47 +40,6 @@ type Logger struct {
 
 	withSource bool
 	withPID    bool
-}
-
-func NewLoggerWithConfig(conf *Config) *Logger {
-	if conf == nil {
-		conf = NewDefaultConfig()
-	}
-
-	handler, err := conf.NewHandler()
-	if err != nil {
-		panic(err)
-	}
-
-	logger := &Logger{
-		handler:    handler,
-		withSource: conf.WithSource,
-		withPID:    conf.WithPID,
-	}
-
-	return logger
-}
-
-func NewDevelopLogger() *Logger {
-	conf := NewDefaultConfig()
-	conf.Level = "debug"
-	conf.Writer.Target = "file"
-	conf.File.Rotate = true
-	conf.WithSource = true
-
-	return NewLoggerWithConfig(conf)
-}
-
-func NewProductionLogger() *Logger {
-	conf := NewDefaultConfig()
-	conf.Level = "info"
-	conf.Writer.Target = "file"
-	conf.Writer.Mode = "batch"
-	conf.Writer.BatchSize = 16
-	conf.Writer.AutoSync = "10s"
-	conf.File.Rotate = true
-
-	return NewLoggerWithConfig(conf)
 }
 
 func (l *Logger) clone() *Logger {
@@ -186,51 +146,54 @@ func (l *Logger) log(ctx context.Context, level slog.Level, msg string, args ...
 }
 
 func (l *Logger) Debug(msg string, args ...any) {
-	l.log(context.Background(), slog.LevelDebug, msg, args...)
+	l.log(context.Background(), levelDebug, msg, args...)
 }
 
 func (l *Logger) Info(msg string, args ...any) {
-	l.log(context.Background(), slog.LevelInfo, msg, args...)
+	l.log(context.Background(), levelInfo, msg, args...)
 }
 
 func (l *Logger) Warn(msg string, args ...any) {
-	l.log(context.Background(), slog.LevelWarn, msg, args...)
+	l.log(context.Background(), levelWarn, msg, args...)
 }
 
 func (l *Logger) Error(msg string, args ...any) {
-	l.log(context.Background(), slog.LevelError, msg, args...)
+	l.log(context.Background(), levelError, msg, args...)
 }
 
 func (l *Logger) DebugContext(ctx context.Context, msg string, args ...any) {
-	l.log(ctx, slog.LevelDebug, msg, args...)
+	l.log(ctx, levelDebug, msg, args...)
 }
 
 func (l *Logger) InfoContext(ctx context.Context, msg string, args ...any) {
-	l.log(ctx, slog.LevelDebug, msg, args...)
+	l.log(ctx, levelInfo, msg, args...)
 }
 
 func (l *Logger) WarnContext(ctx context.Context, msg string, args ...any) {
-	l.log(ctx, slog.LevelDebug, msg, args...)
+	l.log(ctx, levelWarn, msg, args...)
 }
 
 func (l *Logger) ErrorContext(ctx context.Context, msg string, args ...any) {
-	l.log(ctx, slog.LevelDebug, msg, args...)
+	l.log(ctx, levelError, msg, args...)
 }
 
-// // Printf prints a log if print level is enabled.
-// func (l *Logger) Printf(format string, params ...interface{}) {
-// 	l.log(printLevel, format, params...).Log()
-// }
-//
-// // Print prints a log if print level is enabled.
-// func (l *Logger) Print(params ...interface{}) {
-// 	l.log(printLevel, fmt.Sprint(params...)).Log()
-// }
-//
-// // Println prints a log if print level is enabled.
-// func (l *Logger) Println(params ...interface{}) {
-// 	l.log(printLevel, fmt.Sprintln(params...)).Log()
-// }
+// Printf prints a log if print level is enabled.
+func (l *Logger) Printf(format string, params ...interface{}) {
+	msg := fmt.Sprintf(format, params...)
+	l.log(context.Background(), levelPrint, msg)
+}
+
+// Print prints a log if print level is enabled.
+func (l *Logger) Print(params ...interface{}) {
+	msg := fmt.Sprint(params...)
+	l.log(context.Background(), levelPrint, msg)
+}
+
+// Println prints a log if print level is enabled.
+func (l *Logger) Println(params ...interface{}) {
+	msg := fmt.Sprintln(params...)
+	l.log(context.Background(), levelPrint, msg)
+}
 
 func (l *Logger) Sync() error {
 	if syncer, ok := l.handler.(writer.Syncer); ok {

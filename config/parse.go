@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package size
+package config
 
 import (
 	"errors"
@@ -21,17 +21,14 @@ import (
 )
 
 const (
-	B ByteSize = 1 << (10 * iota)
+	B = 1 << (10 * iota)
 	KB
 	MB
 	GB
 )
 
-// ByteSize is size of byte.
-type ByteSize = uint64
-
 // parseByteSize parse size with given unit information.
-func parseByteSize(size string, unit string, unitSize ByteSize, bitUnit bool) (ByteSize, error) {
+func parseByteSizeWithUnit(size string, unit string, unitSize uint64, bitUnit bool) (uint64, error) {
 	size = strings.TrimSuffix(size, unit)
 
 	n, err := strconv.ParseUint(size, 10, 64)
@@ -46,12 +43,12 @@ func parseByteSize(size string, unit string, unitSize ByteSize, bitUnit bool) (B
 	return n * unitSize, nil
 }
 
-// ParseByteSize parses byte size in string.
-// You should add unit in your size string, like 4MB, 512K, 64.
+// parseByteSize parses byte size in string.
+// You should add unit in your size string, like "4MB", "512K", "64".
 // The unit will be byte if size string is just a number.
 // General units is GB, G, MB, M, KB, K, B and you can see all of them is byte unit.
-// If your size string is like 64kb, the result parsed will be 8KB (64kb = 8KB).
-func ParseByteSize(size string) (ByteSize, error) {
+// If your size string is like "64kb", the result parsed will be 8KB (64kb = 8KB).
+func parseByteSize(size string) (uint64, error) {
 	size = strings.TrimSpace(size)
 	if size == "" {
 		return 0, errors.New("logit: parse byte size from an empty string")
@@ -67,16 +64,16 @@ func ParseByteSize(size string) (ByteSize, error) {
 
 	size = strings.ToUpper(size)
 	if strings.HasSuffix(size, "G") {
-		return parseByteSize(size, "G", GB, bitUnit)
+		return parseByteSizeWithUnit(size, "G", GB, bitUnit)
 	}
 
 	if strings.HasSuffix(size, "M") {
-		return parseByteSize(size, "M", MB, bitUnit)
+		return parseByteSizeWithUnit(size, "M", MB, bitUnit)
 	}
 
 	if strings.HasSuffix(size, "K") {
-		return parseByteSize(size, "K", KB, bitUnit)
+		return parseByteSizeWithUnit(size, "K", KB, bitUnit)
 	}
 
-	return parseByteSize(size, "", B, bitUnit)
+	return parseByteSizeWithUnit(size, "", B, bitUnit)
 }

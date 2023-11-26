@@ -12,19 +12,26 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package logit
+package rotate
 
 import (
-	"log/slog"
+	"testing"
 )
 
-const (
-	levelDebug Level = slog.LevelDebug
-	levelInfo  Level = slog.LevelInfo
-	levelWarn  Level = slog.LevelWarn
-	levelError Level = slog.LevelError
-	levelPrint Level = levelError + 1
-	levelOff   Level = levelError + 2
-)
+// go test -v -cover -run=^TestNewDefaultConfig$
+func TestNewDefaultConfig(t *testing.T) {
+	c := newDefaultConfig()
 
-type Level = slog.Level
+	want := config{
+		mode:       0644,
+		dirMode:    0755,
+		timeFormat: "20060102150405",
+		maxSize:    256 * 1024 * 1024,
+		maxAge:     0,
+		maxBackups: 0,
+	}
+
+	if c != want {
+		t.Errorf("c %+v != want %+v", c, want)
+	}
+}

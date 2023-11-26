@@ -20,30 +20,30 @@ import (
 	"log/slog"
 )
 
-type TextHandler struct {
+type textHandler struct {
 	handler slog.Handler
 }
 
-func newTextHandler(w io.Writer, opts *slog.HandlerOptions) *TextHandler {
-	handler := &TextHandler{
+func NewTextHandler(w io.Writer, opts *slog.HandlerOptions) slog.Handler {
+	handler := &textHandler{
 		handler: slog.NewTextHandler(w, opts),
 	}
 
 	return handler
 }
 
-func (th *TextHandler) WithGroup(name string) slog.Handler {
+func (th *textHandler) WithGroup(name string) slog.Handler {
 	return th.handler.WithGroup(name)
 }
 
-func (th *TextHandler) WithAttrs(attrs []slog.Attr) slog.Handler {
+func (th *textHandler) WithAttrs(attrs []slog.Attr) slog.Handler {
 	return th.handler.WithAttrs(attrs)
 }
 
-func (th *TextHandler) Enabled(ctx context.Context, level slog.Level) bool {
+func (th *textHandler) Enabled(ctx context.Context, level slog.Level) bool {
 	return th.handler.Enabled(ctx, level)
 }
 
-func (th *TextHandler) Handle(ctx context.Context, record slog.Record) error {
+func (th *textHandler) Handle(ctx context.Context, record slog.Record) error {
 	return th.handler.Handle(ctx, record)
 }

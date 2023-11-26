@@ -12,13 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package file
+package rotate
 
 import (
 	"os"
 	"time"
-
-	"github.com/FishGoddess/logit/io/size"
 )
 
 // config stores some fields of file.
@@ -35,7 +33,7 @@ type config struct {
 	// maxSize is the max size of file.
 	// If size of data in one write is bigger than maxSize, then file will rotate and write it,
 	// which means file and its backup may bigger than maxSize in size.
-	maxSize size.ByteSize
+	maxSize uint64
 
 	// maxAge is the time that backup will live.
 	// All backups reach maxAge will be removed automatically.
@@ -51,7 +49,7 @@ func newDefaultConfig() config {
 		mode:       0644,
 		dirMode:    0755,
 		timeFormat: "20060102150405",
-		maxSize:    256 * size.MB,
+		maxSize:    256 * 1024 * 1024,
 		maxAge:     0,
 		maxBackups: 0,
 	}
