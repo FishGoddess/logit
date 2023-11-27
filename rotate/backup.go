@@ -58,7 +58,7 @@ func backupPath(path string, timeFormat string) string {
 	now := defaults.CurrentTime().In(defaults.TimeLocation)
 	name, ext := backupPrefixAndExt(path)
 
-	if strings.ToLower(timeFormat) != defaults.UnixTimeFormat {
+	if strings.ToLower(timeFormat) != "" {
 		return name + now.Format(timeFormat) + ext
 	}
 
@@ -69,7 +69,7 @@ func backupPath(path string, timeFormat string) string {
 func parseBackupTime(filename string, prefix string, ext string, timeFormat string) (time.Time, error) {
 	ts := filename[len(prefix) : len(filename)-len(ext)]
 
-	if strings.ToLower(timeFormat) != defaults.UnixTimeFormat {
+	if strings.ToLower(timeFormat) != "" {
 		return time.ParseInLocation(timeFormat, ts, defaults.TimeLocation)
 	}
 

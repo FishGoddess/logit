@@ -18,6 +18,7 @@ import (
 	"errors"
 	"strconv"
 	"strings"
+	"time"
 )
 
 const (
@@ -76,4 +77,20 @@ func parseByteSize(size string) (uint64, error) {
 	}
 
 	return parseByteSizeWithUnit(size, "", B, bitUnit)
+}
+
+func parseTimeDuration(s string) (time.Duration, error) {
+	if strings.HasSuffix(s, "d") || strings.HasSuffix(s, "D") {
+		s = strings.TrimSuffix(s, "d")
+		s = strings.TrimSuffix(s, "D")
+
+		days, err := strconv.ParseInt(s, 10, 64)
+		if err != nil {
+			return 0, err
+		}
+
+		return time.Duration(days) * 24 * time.Hour, nil
+	}
+
+	return time.ParseDuration(s)
 }

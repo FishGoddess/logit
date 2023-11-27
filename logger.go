@@ -23,8 +23,8 @@ import (
 	"runtime"
 	"time"
 
-	"github.com/FishGoddess/logit/core/writer"
 	"github.com/FishGoddess/logit/defaults"
+	"github.com/FishGoddess/logit/writer"
 )
 
 const (

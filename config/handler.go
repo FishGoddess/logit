@@ -22,7 +22,7 @@ import (
 	"sync"
 
 	"github.com/FishGoddess/logit"
-	"github.com/FishGoddess/logit/core/handler"
+	"github.com/FishGoddess/logit/handler"
 )
 
 var (

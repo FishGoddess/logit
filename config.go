@@ -20,8 +20,8 @@ import (
 	"os"
 	"time"
 
-	"github.com/FishGoddess/logit/core/handler"
-	"github.com/FishGoddess/logit/core/writer"
+	"github.com/FishGoddess/logit/handler"
+	"github.com/FishGoddess/logit/writer"
 )
 
 var (

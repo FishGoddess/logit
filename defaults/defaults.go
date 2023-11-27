@@ -20,14 +20,6 @@ import (
 	"time"
 )
 
-const (
-	// Day is one day in time.Duration.
-	Day = 24 * time.Hour
-
-	// UnixTimeFormat is time format of unix.
-	UnixTimeFormat = ""
-)
-
 var (
 	// CallerDepth is the depth of caller.
 	// See runtime.Caller.

@@ -19,10 +19,10 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/FishGoddess/logit/core/handler"
-	"github.com/FishGoddess/logit/core/rotate"
-	"github.com/FishGoddess/logit/core/writer"
 	"github.com/FishGoddess/logit/defaults"
+	"github.com/FishGoddess/logit/handler"
+	"github.com/FishGoddess/logit/rotate"
+	"github.com/FishGoddess/logit/writer"
 )
 
 type Option func(conf *config)
