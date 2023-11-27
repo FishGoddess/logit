@@ -26,6 +26,8 @@ const (
 	KB
 	MB
 	GB
+
+	Day = 24 * time.Hour
 )
 
 // parseByteSize parse size with given unit information.
@@ -89,7 +91,7 @@ func parseTimeDuration(s string) (time.Duration, error) {
 			return 0, err
 		}
 
-		return time.Duration(days) * 24 * time.Hour, nil
+		return time.Duration(days) * Day, nil
 	}
 
 	return time.ParseDuration(s)

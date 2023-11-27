@@ -24,7 +24,7 @@ import (
 const (
 	// minBufferSize is the min size of buffer.
 	// A panic will happen if buffer size is smaller than it.
-	minBufferSize = 4
+	minBufferSize = 16
 )
 
 // bufferWriter is a writer having a buffer inside to reduce times of writing underlying writer.
@@ -49,8 +49,8 @@ type bufferWriter struct {
 // Notice that bufferSize must be larger than minBufferSize or a panic will happen. See minBufferSize.
 // The size we want to use is bufferSize, but we add more bytes to it for avoiding buffer growing up.
 func newBufferWriter(writer io.Writer, bufferSize uint64) *bufferWriter {
-	if bufferSize <= minBufferSize {
-		panic(fmt.Errorf("bufferSize %d <= minBufferSize %d", bufferSize, minBufferSize))
+	if bufferSize < minBufferSize {
+		panic(fmt.Errorf("bufferSize %d < minBufferSize %d", bufferSize, minBufferSize))
 	}
 
 	return &bufferWriter{

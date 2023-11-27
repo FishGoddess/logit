@@ -17,6 +17,13 @@ package rotate
 import (
 	"os"
 	"time"
+
+	"github.com/FishGoddess/logit/defaults"
+)
+
+const (
+	MB  = 1024 * 1024
+	Day = 24 * time.Hour
 )
 
 // config stores some fields of file.
@@ -46,11 +53,11 @@ type config struct {
 // newDefaultConfig returns a default config.
 func newDefaultConfig() config {
 	return config{
-		mode:       0644,
-		dirMode:    0755,
+		mode:       defaults.FileMode,
+		dirMode:    defaults.FileDirMode,
 		timeFormat: "20060102150405",
-		maxSize:    256 * 1024 * 1024,   // 256 MB
-		maxAge:     90 * 24 * time.Hour, // 90 days
+		maxSize:    256 * MB,
+		maxAge:     90 * Day,
 		maxBackups: 100,
 	}
 }
