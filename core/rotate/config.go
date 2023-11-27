@@ -49,8 +49,8 @@ func newDefaultConfig() config {
 		mode:       0644,
 		dirMode:    0755,
 		timeFormat: "20060102150405",
-		maxSize:    256 * 1024 * 1024,
-		maxAge:     0,
-		maxBackups: 0,
+		maxSize:    256 * 1024 * 1024,   // 256 MB
+		maxAge:     90 * 24 * time.Hour, // 90 days
+		maxBackups: 100,
 	}
 }

@@ -21,6 +21,7 @@ import (
 	"log/slog"
 	"os"
 	"runtime"
+	"time"
 
 	"github.com/FishGoddess/logit/core/writer"
 	"github.com/FishGoddess/logit/defaults"
@@ -40,6 +41,72 @@ type Logger struct {
 
 	withSource bool
 	withPID    bool
+
+	syncDuration time.Duration
+}
+
+// New creates a logger with given options or panics if failed.
+// If you don't want to panic on failing, use NewGracefully instead.
+func New(opts ...Option) *Logger {
+	logger, err := NewGracefully(opts...)
+	if err != nil {
+		panic(err)
+	}
+
+	return logger
+}
+
+// NewProduction creates a logger with production options we think and given options you like.
+// We recommend you to use some options in production, so we provide this way to create a logger.
+func NewProduction(opts ...Option) *Logger {
+	usingOpts := []Option{
+		WithInfoLevel(), WithSource(), WithPID(),
+		WithBatch(16), WithRotateFile("./logit.log"),
+	}
+
+	usingOpts = append(usingOpts, opts...)
+	return New(usingOpts...)
+}
+
+// NewGracefully creates a logger with given options or returns an error if failed.
+// It's a more graceful way to create a logger than New function.
+func NewGracefully(opts ...Option) (*Logger, error) {
+	conf := newDefaultConfig()
+
+	for _, opt := range opts {
+		opt.applyTo(conf)
+	}
+
+	handler, err := conf.handler()
+	if err != nil {
+		return nil, err
+	}
+
+	logger := &Logger{
+		handler:      handler,
+		withSource:   conf.withSource,
+		withPID:      conf.withPID,
+		syncDuration: conf.syncDuration,
+	}
+
+	logger.runSyncTask()
+	return logger, nil
+}
+
+func (l *Logger) runSyncTask() {
+	if l.syncDuration <= 0 {
+		return
+	}
+
+	go func() {
+		for {
+			time.Sleep(l.syncDuration)
+
+			if err := l.Sync(); err != nil {
+				defaults.HandleError("Logger.Sync", err)
+			}
+		}
+	}()
 }
 
 func (l *Logger) clone() *Logger {
