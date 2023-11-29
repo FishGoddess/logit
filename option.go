@@ -32,6 +32,19 @@ func (o Option) applyTo(conf *config) {
 	o(conf)
 }
 
+// ProductionOptions returns some options that we think they are useful in production.
+// We recommend you to use them, so we provide this convenient way to create such a logger.
+// The logger using these options will use rotate file and batch writer.
+// Also, source and pid will be carried in all logs.
+func ProductionOptions() []Option {
+	opts := []Option{
+		WithInfoLevel(), WithSource(), WithPID(),
+		WithBatch(16), WithRotateFile("./logit.log"),
+	}
+
+	return opts
+}
+
 // WithDebugLevel sets debug level to config.
 func WithDebugLevel() Option {
 	return func(conf *config) {

@@ -45,10 +45,10 @@ type Logger struct {
 	syncDuration time.Duration
 }
 
-// New creates a logger with given options or panics if failed.
-// If you don't want to panic on failing, use NewGracefully instead.
-func New(opts ...Option) *Logger {
-	logger, err := NewGracefully(opts...)
+// NewLogger creates a logger with given options or panics if failed.
+// If you don't want to panic on failing, use NewLoggerGracefully instead.
+func NewLogger(opts ...Option) *Logger {
+	logger, err := NewLoggerGracefully(opts...)
 	if err != nil {
 		panic(err)
 	}
@@ -56,9 +56,9 @@ func New(opts ...Option) *Logger {
 	return logger
 }
 
-// NewGracefully creates a logger with given options or returns an error if failed.
-// It's a more graceful way to create a logger than New function.
-func NewGracefully(opts ...Option) (*Logger, error) {
+// NewLoggerGracefully creates a logger with given options or returns an error if failed.
+// It's a more graceful way to create a logger than NewLogger function.
+func NewLoggerGracefully(opts ...Option) (*Logger, error) {
 	conf := newDefaultConfig()
 
 	for _, opt := range opts {

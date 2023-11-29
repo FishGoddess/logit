@@ -2,10 +2,10 @@
 
 ### v1.5.x
 
-* [*] 考虑结合 Go1.21 新加的 slog 包，做一些生产化的适配和功能
-* [*] 增加 context 适配功能
-* [*] 增加 Production 现成配置，搭配 Option 方便使用
-* [ ] 完善 Logger 相关的单元测试
+* [x] 考虑结合 Go1.21 新加的 slog 包，做一些生产化的适配和功能
+* [x] 增加 context 适配功能
+* [x] 增加 Production 现成配置，搭配 Option 方便使用
+* [x] 完善 Logger 相关的单元测试
 * [ ] 调整 writer 包代码，完善单元测试
 * [ ] 调整 rotate 包代码，完善单元测试
 * [ ] 完善 config 包功能和单元测试

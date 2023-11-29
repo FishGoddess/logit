@@ -23,7 +23,7 @@ import (
 var defaultLogger atomic.Value
 
 func init() {
-	SetDefault(New())
+	SetDefault(NewLogger())
 }
 
 // SetDefault sets logger as the default logger.
@@ -95,18 +95,4 @@ func Print(args ...interface{}) {
 func Println(args ...interface{}) {
 	msg := fmt.Sprintln(args...)
 	Default().log(context.Background(), LevelPrint, msg)
-}
-
-// NewProduction creates a logger with production options we think and given options you want.
-// We recommend you to use some options in production, so we provide this convenient way to create a logger.
-// It will create a logger using rotate file and batch writer.
-// Also, source and pid is useful at most time.
-func NewProduction(opts ...Option) *Logger {
-	usingOpts := []Option{
-		WithInfoLevel(), WithSource(), WithPID(),
-		WithBatch(16), WithRotateFile("./logit.log"),
-	}
-
-	usingOpts = append(usingOpts, opts...)
-	return New(usingOpts...)
 }

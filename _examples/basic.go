@@ -17,7 +17,7 @@ package main
 import "github.com/FishGoddess/logit"
 
 func main() {
-	logger := logit.New()
+	logger := logit.NewLogger()
 	defer logger.Close()
 
 	logger.Debug("new version of logit", "version", "1.5.0-alpha", "date", 20231122)

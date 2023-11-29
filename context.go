@@ -31,8 +31,7 @@ func FromContextWithKey(ctx context.Context, key interface{}) *Logger {
 		return logger
 	}
 
-	// TODO 返回 default logger
-	return New()
+	return Default()
 }
 
 // NewContext wraps context with logger and returns a new context.
