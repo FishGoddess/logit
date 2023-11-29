@@ -30,12 +30,12 @@ func TestNotStdoutAndStderr(t *testing.T) {
 	}
 }
 
-// go test -v -cover -run=^TestWrapped$
-func TestWrapped(t *testing.T) {
+// go test -v -cover -run=^TestWrap$
+func TestWrap(t *testing.T) {
 	writer := Wrap(os.Stdout)
 
 	if _, ok := writer.(Writer); !ok {
-		t.Fatal("Wrap returns a non-Writer instance")
+		t.Fatalf("writer type %T is wrong", writer)
 	}
 }
 
@@ -44,20 +44,20 @@ func TestBuffer(t *testing.T) {
 	writer := Buffer(os.Stdout, 1024)
 
 	if _, ok := writer.(*bufferWriter); !ok {
-		t.Fatal("Buffer returns a non-bufferWriter instance")
+		t.Fatalf("writer type %T is wrong", writer)
 	}
 }
 
-// go test -v -cover -run=^TestBufferWithSize$
-func TestBufferWithSize(t *testing.T) {
-	writer := Buffer(os.Stdout, 1024)
+// go test -v -cover -run=^TestBatch$
+func TestBatch(t *testing.T) {
+	writer := Batch(os.Stdout, 16)
 
-	bw, ok := writer.(*bufferWriter)
+	bw, ok := writer.(*batchWriter)
 	if !ok {
-		t.Fatal("Buffer returns a non-bufferWriter instance")
+		t.Fatalf("writer type %T is wrong", writer)
 	}
 
-	if bw.maxBufferSize != 1024 {
-		t.Fatalf("bw.maxBufferSize %d is wrong", bw.maxBufferSize)
+	if bw.maxBatches != 16 {
+		t.Fatalf("bw.maxBatches %d is wrong", bw.maxBatches)
 	}
 }
