@@ -27,12 +27,12 @@ func TestNewContextWithKey(t *testing.T) {
 
 	value := ctx.Value(key)
 	if value == nil {
-		t.Error("ctx.Value returns nil")
+		t.Error("value == nil")
 	}
 
 	contextLogger, ok := value.(*Logger)
 	if !ok {
-		t.Errorf("value %T isn't *Logger", value)
+		t.Errorf("value type %T is wrong", value)
 	}
 
 	if contextLogger != logger {
@@ -48,7 +48,7 @@ func TestFromContextWithKey(t *testing.T) {
 	logger := FromContextWithKey(ctx, key)
 
 	if logger == nil {
-		t.Error("logger shouldn't be nil")
+		t.Error("logger == nil")
 	}
 
 	logger = New()
@@ -66,12 +66,12 @@ func TestNewContext(t *testing.T) {
 
 	value := ctx.Value(contextKey{})
 	if value == nil {
-		t.Error("ctx.Value returns nil")
+		t.Error("value == nil")
 	}
 
 	contextLogger, ok := value.(*Logger)
 	if !ok {
-		t.Errorf("value %T isn't *Logger", value)
+		t.Errorf("value type %T is wrong", value)
 	}
 
 	if contextLogger != logger {
@@ -85,7 +85,7 @@ func TestFromContext(t *testing.T) {
 	logger := FromContext(ctx)
 
 	if logger == nil {
-		t.Error("logger shouldn't be nil")
+		t.Error("logger == nil")
 	}
 
 	logger = New()

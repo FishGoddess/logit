@@ -18,7 +18,6 @@ import (
 	"context"
 )
 
-// contextKey is the type of context key.
 type contextKey struct{}
 
 // NewContextWithKey wraps context with logger of key and returns a new context.
@@ -26,7 +25,7 @@ func NewContextWithKey(ctx context.Context, key interface{}, logger *Logger) con
 	return context.WithValue(ctx, key, logger)
 }
 
-// FromContextWithKey gets logger from context with key and returns a discard logger if missing.
+// FromContextWithKey gets logger from context of key and returns the default logger if missed.
 func FromContextWithKey(ctx context.Context, key interface{}) *Logger {
 	if logger, ok := ctx.Value(key).(*Logger); ok {
 		return logger
@@ -41,7 +40,7 @@ func NewContext(ctx context.Context, logger *Logger) context.Context {
 	return NewContextWithKey(ctx, contextKey{}, logger)
 }
 
-// FromContext gets logger from context and returns a discard logger if missing.
+// FromContext gets logger from context and returns the default logger if missed.
 func FromContext(ctx context.Context) *Logger {
 	return FromContextWithKey(ctx, contextKey{})
 }

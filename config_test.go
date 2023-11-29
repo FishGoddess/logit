@@ -16,9 +16,17 @@ package logit
 
 import (
 	"fmt"
+	"io"
 	"log/slog"
+	"os"
 	"testing"
 )
+
+type testConfigHandler struct {
+	slog.TextHandler
+	w    io.Writer
+	opts slog.HandlerOptions
+}
 
 // go test -v -cover -run=^TestConfigHandlerOptions$
 func TestConfigHandlerOptions(t *testing.T) {
@@ -32,8 +40,8 @@ func TestConfigHandlerOptions(t *testing.T) {
 
 	opts := conf.handlerOptions()
 
-	if opts.Level != conf.level {
-		t.Errorf("opts.Level %v != conf.level %v", opts.Level, conf.level)
+	if opts.Level != conf.level.Peel() {
+		t.Errorf("opts.Level %v != conf.level %v", opts.Level, conf.level.Peel())
 	}
 
 	if opts.AddSource != conf.withSource {
@@ -42,5 +50,52 @@ func TestConfigHandlerOptions(t *testing.T) {
 
 	if fmt.Sprintf("%p", opts.ReplaceAttr) != fmt.Sprintf("%p", conf.replaceAttr) {
 		t.Errorf("opts.ReplaceAttr %p != conf.replaceAttr %p", opts.ReplaceAttr, conf.replaceAttr)
+	}
+}
+
+// go test -v -cover -run=^TestConfigHandler$
+func TestConfigHandler(t *testing.T) {
+	replaceAttr := func(groups []string, attr slog.Attr) slog.Attr { return attr }
+
+	conf := &config{
+		level:       levelWarn,
+		withSource:  true,
+		replaceAttr: replaceAttr,
+
+		newWriter: func() (io.Writer, error) {
+			return os.Stderr, nil
+		},
+		newHandler: func(w io.Writer, opts *slog.HandlerOptions) slog.Handler {
+			return &testConfigHandler{
+				w:    w,
+				opts: *opts,
+			}
+		},
+	}
+
+	handler, err := conf.handler()
+	if err != nil {
+		t.Error(err)
+	}
+
+	tcHandler, ok := handler.(*testConfigHandler)
+	if !ok {
+		t.Errorf("handler type %T is wrong", handler)
+	}
+
+	if tcHandler.w != os.Stderr {
+		t.Errorf("tcHandler.w %p != os.Stderr %p", tcHandler.w, os.Stderr)
+	}
+
+	if tcHandler.opts.Level != conf.level.Peel() {
+		t.Errorf("tcHandler.opts.Level %v != conf.level %v", tcHandler.opts.Level, conf.level.Peel())
+	}
+
+	if tcHandler.opts.AddSource != conf.withSource {
+		t.Errorf("tcHandler.opts.AddSource %v != conf.withSource %v", tcHandler.opts.AddSource, conf.withSource)
+	}
+
+	if fmt.Sprintf("%p", tcHandler.opts.ReplaceAttr) != fmt.Sprintf("%p", conf.replaceAttr) {
+		t.Errorf("tcHandler.opts.ReplaceAttr %p != conf.replaceAttr %p", tcHandler.opts.ReplaceAttr, conf.replaceAttr)
 	}
 }

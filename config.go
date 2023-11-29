@@ -15,6 +15,7 @@
 package logit
 
 import (
+	"errors"
 	"io"
 	"log/slog"
 	"os"
@@ -72,7 +73,7 @@ func newDefaultConfig() *config {
 
 func (c *config) handlerOptions() *slog.HandlerOptions {
 	opts := &slog.HandlerOptions{
-		Level:       c.level,
+		Level:       c.level.Peel(),
 		AddSource:   c.withSource,
 		ReplaceAttr: c.replaceAttr,
 	}
@@ -81,14 +82,25 @@ func (c *config) handlerOptions() *slog.HandlerOptions {
 }
 
 func (c *config) handler() (slog.Handler, error) {
+	if c.newWriter == nil {
+		return nil, errors.New("logit: newWriter in config is nil")
+	}
+
+	if c.newHandler == nil {
+		return nil, errors.New("logit: newHandler in config is nil")
+	}
+
 	w, err := c.newWriter()
 	if err != nil {
 		return nil, err
 	}
 
-	ww := c.wrapWriter(w)
+	if c.wrapWriter != nil {
+		w = c.wrapWriter(w)
+	}
+
 	opts := c.handlerOptions()
-	handler := c.newHandler(ww, opts)
+	handler := c.newHandler(w, opts)
 
 	return handler, nil
 }

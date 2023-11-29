@@ -195,8 +195,10 @@ func (l *Logger) newRecord(level slog.Level, msg string, args []any) slog.Record
 	return record
 }
 
-func (l *Logger) log(ctx context.Context, level slog.Level, msg string, args ...any) {
-	if !l.Enabled(ctx, level) {
+func (l *Logger) log(ctx context.Context, level Level, msg string, args ...any) {
+	slogLevel := level.Peel()
+
+	if !l.Enabled(ctx, slogLevel) {
 		return
 	}
 
@@ -205,7 +207,7 @@ func (l *Logger) log(ctx context.Context, level slog.Level, msg string, args ...
 	}
 
 	// TODO 尝试用对象池优化
-	record := l.newRecord(level, msg, args)
+	record := l.newRecord(slogLevel, msg, args)
 
 	if err := l.handler.Handle(ctx, record); err != nil {
 		defaults.HandleError("Logger.handler.Handle", err)
