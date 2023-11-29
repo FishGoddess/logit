@@ -27,12 +27,12 @@ func TestLevelPeel(t *testing.T) {
 		level Level
 		want  slog.Level
 	}{
-		{name: "debug", level: levelDebug, want: slog.LevelDebug},
-		{name: "info", level: levelInfo, want: slog.LevelInfo},
-		{name: "warn", level: levelWarn, want: slog.LevelWarn},
-		{name: "error", level: levelError, want: slog.LevelError},
-		{name: "print", level: levelPrint, want: slog.Level(levelPrint)},
-		{name: "off", level: levelOff, want: slog.Level(levelOff)},
+		{name: "debug", level: LevelDebug, want: slog.LevelDebug},
+		{name: "info", level: LevelInfo, want: slog.LevelInfo},
+		{name: "warn", level: LevelWarn, want: slog.LevelWarn},
+		{name: "error", level: LevelError, want: slog.LevelError},
+		{name: "print", level: LevelPrint, want: slog.Level(LevelPrint)},
+		{name: "off", level: LevelOff, want: slog.Level(LevelOff)},
 	}
 
 	for _, tt := range tests {
@@ -51,12 +51,12 @@ func TestLevelString(t *testing.T) {
 		level Level
 		want  string
 	}{
-		{name: "debug", level: levelDebug, want: "debug"},
-		{name: "info", level: levelInfo, want: "info"},
-		{name: "warn", level: levelWarn, want: "warn"},
-		{name: "error", level: levelError, want: "error"},
-		{name: "print", level: levelPrint, want: "print"},
-		{name: "off", level: levelOff, want: "off"},
+		{name: "debug", level: LevelDebug, want: "debug"},
+		{name: "info", level: LevelInfo, want: "info"},
+		{name: "warn", level: LevelWarn, want: "warn"},
+		{name: "error", level: LevelError, want: "error"},
+		{name: "print", level: LevelPrint, want: "print"},
+		{name: "off", level: LevelOff, want: "off"},
 		{name: "unknown", level: 1997, want: "unknown"},
 	}
 
@@ -77,12 +77,12 @@ func TestParseLevel(t *testing.T) {
 		want    Level
 		wantErr bool
 	}{
-		{name: "debug", str: "debug", want: levelDebug, wantErr: false},
-		{name: "info", str: "info", want: levelInfo, wantErr: false},
-		{name: "warn", str: "warn", want: levelWarn, wantErr: false},
-		{name: "error", str: "error", want: levelError, wantErr: false},
-		{name: "print", str: "print", want: levelPrint, wantErr: false},
-		{name: "off", str: "off", want: levelOff, wantErr: false},
+		{name: "debug", str: "debug", want: LevelDebug, wantErr: false},
+		{name: "info", str: "info", want: LevelInfo, wantErr: false},
+		{name: "warn", str: "warn", want: LevelWarn, wantErr: false},
+		{name: "error", str: "error", want: LevelError, wantErr: false},
+		{name: "print", str: "print", want: LevelPrint, wantErr: false},
+		{name: "off", str: "off", want: LevelOff, wantErr: false},
 		{name: "unknown", str: "unknown", want: 0, wantErr: true},
 	}
 

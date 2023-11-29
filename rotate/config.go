@@ -15,10 +15,7 @@
 package rotate
 
 import (
-	"os"
 	"time"
-
-	"github.com/FishGoddess/logit/defaults"
 )
 
 const (
@@ -28,12 +25,6 @@ const (
 
 // config stores some fields of file.
 type config struct {
-	// mode is the permission mode of file.
-	mode os.FileMode
-
-	// dirMode is the permission mode of file directory.
-	dirMode os.FileMode
-
 	// timeFormat is the time format of backup path.
 	timeFormat string
 
@@ -53,8 +44,6 @@ type config struct {
 // newDefaultConfig returns a default config.
 func newDefaultConfig() config {
 	return config{
-		mode:       defaults.FileMode,
-		dirMode:    defaults.FileDirMode,
 		timeFormat: "20060102150405",
 		maxSize:    256 * MB,
 		maxAge:     90 * Day,

@@ -21,26 +21,26 @@ import (
 )
 
 const (
-	levelDebug = Level(slog.LevelDebug)
-	levelInfo  = Level(slog.LevelInfo)
-	levelWarn  = Level(slog.LevelWarn)
-	levelError = Level(slog.LevelError)
+	LevelDebug = Level(slog.LevelDebug)
+	LevelInfo  = Level(slog.LevelInfo)
+	LevelWarn  = Level(slog.LevelWarn)
+	LevelError = Level(slog.LevelError)
 
-	// levelPrint is for some logging methods which are compatible with log package in Go.
-	levelPrint Level = levelError + 1
+	// LevelPrint is for some logging methods which are compatible with log package in Go.
+	LevelPrint Level = LevelError + 1
 
-	// levelOff is for disabling logging.
-	levelOff Level = levelError + 2
+	// LevelOff is for disabling logging.
+	LevelOff Level = LevelError + 2
 )
 
 var (
 	levels = map[Level]string{
-		levelDebug: "debug",
-		levelInfo:  "info",
-		levelWarn:  "warn",
-		levelError: "error",
-		levelPrint: "print",
-		levelOff:   "off",
+		LevelDebug: "debug",
+		LevelInfo:  "info",
+		LevelWarn:  "warn",
+		LevelError: "error",
+		LevelPrint: "print",
+		LevelOff:   "off",
 	}
 )
 

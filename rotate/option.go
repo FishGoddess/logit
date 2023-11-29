@@ -15,7 +15,6 @@
 package rotate
 
 import (
-	"os"
 	"time"
 )
 
@@ -25,20 +24,6 @@ type Option func(c *config)
 // Apply applies option to config.
 func (o Option) Apply(c *config) {
 	o(c)
-}
-
-// WithMode sets mode to config.
-func WithMode(mode os.FileMode) Option {
-	return func(c *config) {
-		c.mode = mode
-	}
-}
-
-// WithDirMode sets dir mode to config.
-func WithDirMode(mode os.FileMode) Option {
-	return func(c *config) {
-		c.dirMode = mode
-	}
 }
 
 // WithTimeFormat sets time format to config.

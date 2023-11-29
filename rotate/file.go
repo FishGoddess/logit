@@ -73,11 +73,12 @@ func newFile(path string, opts []Option) *File {
 }
 
 func (f *File) mkdir() error {
-	return os.MkdirAll(filepath.Dir(f.path), f.dirMode)
+	dir := filepath.Dir(f.path)
+	return defaults.OpenFileDir(dir, defaults.FileDirMode)
 }
 
 func (f *File) open() (*os.File, error) {
-	return defaults.OpenFile(f.path, f.mode)
+	return defaults.OpenFile(f.path, defaults.FileMode)
 }
 
 func (f *File) listBackups() ([]backup, error) {

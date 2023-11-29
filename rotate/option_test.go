@@ -19,36 +19,6 @@ import (
 	"time"
 )
 
-// go test -v -cover -run=^TestWithMode$
-func TestWithMode(t *testing.T) {
-	c := newDefaultConfig()
-	c.mode = 0
-
-	WithMode(0600).Apply(&c)
-
-	want := newDefaultConfig()
-	want.mode = 0600
-
-	if c != want {
-		t.Errorf("c %+v != want %+v", c, want)
-	}
-}
-
-// go test -v -cover -run=^TestWithDirMode$
-func TestWithDirMode(t *testing.T) {
-	c := newDefaultConfig()
-	c.dirMode = 0
-
-	WithDirMode(0700).Apply(&c)
-
-	want := newDefaultConfig()
-	want.dirMode = 0700
-
-	if c != want {
-		t.Errorf("c %+v != want %+v", c, want)
-	}
-}
-
 // go test -v -cover -run=^TestWithTimeFormat$
 func TestWithTimeFormat(t *testing.T) {
 	c := newDefaultConfig()

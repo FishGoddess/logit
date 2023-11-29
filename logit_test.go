@@ -12,24 +12,4 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package rotate
-
-import (
-	"testing"
-)
-
-// go test -v -cover -run=^TestNewDefaultConfig$
-func TestNewDefaultConfig(t *testing.T) {
-	c := newDefaultConfig()
-
-	want := config{
-		timeFormat: "20060102150405",
-		maxSize:    256 * 1024 * 1024,
-		maxAge:     0,
-		maxBackups: 0,
-	}
-
-	if c != want {
-		t.Errorf("c %+v != want %+v", c, want)
-	}
-}
+package logit

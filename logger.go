@@ -56,18 +56,6 @@ func New(opts ...Option) *Logger {
 	return logger
 }
 
-// NewProduction creates a logger with production options we think and given options you like.
-// We recommend you to use some options in production, so we provide this way to create a logger.
-func NewProduction(opts ...Option) *Logger {
-	usingOpts := []Option{
-		WithInfoLevel(), WithSource(), WithPID(),
-		WithBatch(16), WithRotateFile("./logit.log"),
-	}
-
-	usingOpts = append(usingOpts, opts...)
-	return New(usingOpts...)
-}
-
 // NewGracefully creates a logger with given options or returns an error if failed.
 // It's a more graceful way to create a logger than New function.
 func NewGracefully(opts ...Option) (*Logger, error) {
@@ -140,6 +128,9 @@ func (l *Logger) newAttrs(args []any) (attrs []slog.Attr) {
 	return attrs
 }
 
+// With returns a new logger with args.
+// All logs from the new logger will carry the given args.
+// See slog.Handler.WithAttrs.
 func (l *Logger) With(args ...any) *Logger {
 	if len(args) <= 0 {
 		return l
@@ -152,9 +143,13 @@ func (l *Logger) With(args ...any) *Logger {
 
 	newLogger := l.clone()
 	newLogger.handler = l.handler.WithAttrs(attrs)
+
 	return newLogger
 }
 
+// WithGroup returns a new logger with group name.
+// All logs from the new logger will be grouped by the name.
+// See slog.Handler.WithGroup.
 func (l *Logger) WithGroup(name string) *Logger {
 	if name == "" {
 		return l
@@ -162,19 +157,21 @@ func (l *Logger) WithGroup(name string) *Logger {
 
 	newLogger := l.clone()
 	newLogger.handler = l.handler.WithGroup(name)
+
 	return newLogger
 
 }
 
-func (l *Logger) Enabled(ctx context.Context, level slog.Level) bool {
+// Enabled reports whether the logger should ignore logs whose level is lower.
+func (l *Logger) Enabled(ctx context.Context, level Level) bool {
 	if ctx == nil {
 		ctx = context.Background()
 	}
 
-	return l.handler.Enabled(ctx, level)
+	return l.handler.Enabled(ctx, level.Peel())
 }
 
-func (l *Logger) newRecord(level slog.Level, msg string, args []any) slog.Record {
+func (l *Logger) newRecord(level Level, msg string, args []any) slog.Record {
 	now := defaults.CurrentTime()
 
 	var pc uintptr
@@ -184,7 +181,7 @@ func (l *Logger) newRecord(level slog.Level, msg string, args []any) slog.Record
 		pc = pcs[0]
 	}
 
-	record := slog.NewRecord(now, level, msg, pc)
+	record := slog.NewRecord(now, level.Peel(), msg, pc)
 	if l.withPID {
 		record.AddAttrs(slog.Int(keyPID, pid))
 	}
@@ -196,9 +193,7 @@ func (l *Logger) newRecord(level slog.Level, msg string, args []any) slog.Record
 }
 
 func (l *Logger) log(ctx context.Context, level Level, msg string, args ...any) {
-	slogLevel := level.Peel()
-
-	if !l.Enabled(ctx, slogLevel) {
+	if !l.Enabled(ctx, level) {
 		return
 	}
 
@@ -207,63 +202,75 @@ func (l *Logger) log(ctx context.Context, level Level, msg string, args ...any) 
 	}
 
 	// TODO 尝试用对象池优化
-	record := l.newRecord(slogLevel, msg, args)
+	record := l.newRecord(level, msg, args)
 
 	if err := l.handler.Handle(ctx, record); err != nil {
 		defaults.HandleError("Logger.handler.Handle", err)
 	}
 }
 
+// Debug logs a log with msg and args in debug level.
 func (l *Logger) Debug(msg string, args ...any) {
-	l.log(context.Background(), levelDebug, msg, args...)
+	l.log(context.Background(), LevelDebug, msg, args...)
 }
 
+// Info logs a log with msg and args in info level.
 func (l *Logger) Info(msg string, args ...any) {
-	l.log(context.Background(), levelInfo, msg, args...)
+	l.log(context.Background(), LevelInfo, msg, args...)
 }
 
+// Warn logs a log with msg and args in warn level.
 func (l *Logger) Warn(msg string, args ...any) {
-	l.log(context.Background(), levelWarn, msg, args...)
+	l.log(context.Background(), LevelWarn, msg, args...)
 }
 
+// Error logs a log with msg and args in error level.
 func (l *Logger) Error(msg string, args ...any) {
-	l.log(context.Background(), levelError, msg, args...)
+	l.log(context.Background(), LevelError, msg, args...)
 }
 
+// DebugContext logs a log with ctx, msg and args in debug level.
 func (l *Logger) DebugContext(ctx context.Context, msg string, args ...any) {
-	l.log(ctx, levelDebug, msg, args...)
+	l.log(ctx, LevelDebug, msg, args...)
 }
 
+// InfoContext logs a log with ctx, msg and args in info level.
 func (l *Logger) InfoContext(ctx context.Context, msg string, args ...any) {
-	l.log(ctx, levelInfo, msg, args...)
+	l.log(ctx, LevelInfo, msg, args...)
 }
 
+// WarnContext logs a log with ctx, msg and args in warn level.
 func (l *Logger) WarnContext(ctx context.Context, msg string, args ...any) {
-	l.log(ctx, levelWarn, msg, args...)
+	l.log(ctx, LevelWarn, msg, args...)
 }
 
+// ErrorContext logs a log with ctx, msg and args in error level.
 func (l *Logger) ErrorContext(ctx context.Context, msg string, args ...any) {
-	l.log(ctx, levelError, msg, args...)
+	l.log(ctx, LevelError, msg, args...)
 }
 
-// Printf prints a log if print level is enabled.
-func (l *Logger) Printf(format string, params ...interface{}) {
-	msg := fmt.Sprintf(format, params...)
-	l.log(context.Background(), levelPrint, msg)
+// Printf logs a log with format and args in print level.
+// It a old-school way to log.
+func (l *Logger) Printf(format string, args ...interface{}) {
+	msg := fmt.Sprintf(format, args...)
+	l.log(context.Background(), LevelPrint, msg)
 }
 
-// Print prints a log if print level is enabled.
-func (l *Logger) Print(params ...interface{}) {
-	msg := fmt.Sprint(params...)
-	l.log(context.Background(), levelPrint, msg)
+// Print logs a log with args in print level.
+// It a old-school way to log.
+func (l *Logger) Print(args ...interface{}) {
+	msg := fmt.Sprint(args...)
+	l.log(context.Background(), LevelPrint, msg)
 }
 
-// Println prints a log if print level is enabled.
-func (l *Logger) Println(params ...interface{}) {
-	msg := fmt.Sprintln(params...)
-	l.log(context.Background(), levelPrint, msg)
+// Println logs a log with args in print level.
+// It a old-school way to log.
+func (l *Logger) Println(args ...interface{}) {
+	msg := fmt.Sprintln(args...)
+	l.log(context.Background(), LevelPrint, msg)
 }
 
+// Sync syncs the logger and returns an error if failed.
 func (l *Logger) Sync() error {
 	if syncer, ok := l.handler.(writer.Syncer); ok {
 		return syncer.Sync()
@@ -272,6 +279,7 @@ func (l *Logger) Sync() error {
 	return nil
 }
 
+// Close closes the logger and returns an error if failed.
 func (l *Logger) Close() error {
 	if err := l.Sync(); err != nil {
 		return err

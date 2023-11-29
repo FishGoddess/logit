@@ -52,14 +52,21 @@ var (
 )
 
 var (
-	// MarshalToJson marshals v to json bytes.
-	// If you want to use your own way to marshal, change it to your own marshal function.
-	MarshalToJson = json.Marshal
-
 	// OpenFile opens a file of path with given mode.
 	OpenFile = func(path string, mode os.FileMode) (*os.File, error) {
 		return os.OpenFile(path, os.O_CREATE|os.O_APPEND|os.O_WRONLY, mode)
 	}
+
+	// OpenFileDir opens a dir of path with given mode.
+	OpenFileDir = func(path string, mode os.FileMode) error {
+		return os.MkdirAll(path, mode)
+	}
+)
+
+var (
+	// MarshalToJson marshals v to json bytes.
+	// If you want to use your own way to marshal, change it to your own marshal function.
+	MarshalToJson = json.Marshal
 
 	// HandleError handles an error passed to it.
 	// You can collect all errors and count them for reporting.

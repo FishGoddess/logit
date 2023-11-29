@@ -58,7 +58,7 @@ func newDefaultConfig() *config {
 	}
 
 	conf := &config{
-		level:        levelDebug,
+		level:        LevelDebug,
 		newWriter:    newWriter,
 		wrapWriter:   writer.Wrap,
 		newHandler:   handler.NewTextHandler,
