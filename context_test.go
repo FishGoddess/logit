@@ -27,16 +27,16 @@ func TestNewContextWithKey(t *testing.T) {
 
 	value := ctx.Value(key)
 	if value == nil {
-		t.Error("value == nil")
+		t.Fatal("value == nil")
 	}
 
 	contextLogger, ok := value.(*Logger)
 	if !ok {
-		t.Errorf("value type %T is wrong", value)
+		t.Fatalf("value type %T is wrong", value)
 	}
 
 	if contextLogger != logger {
-		t.Errorf("contextLogger %+v != logger %+v", contextLogger, logger)
+		t.Fatalf("contextLogger %+v != logger %+v", contextLogger, logger)
 	}
 }
 
@@ -48,14 +48,14 @@ func TestFromContextWithKey(t *testing.T) {
 	logger := FromContextWithKey(ctx, key)
 
 	if logger == nil {
-		t.Error("logger == nil")
+		t.Fatal("logger == nil")
 	}
 
 	logger = New()
 	contextLogger := FromContextWithKey(context.WithValue(ctx, key, logger), key)
 
 	if contextLogger != logger {
-		t.Errorf("contextLogger %+v != logger %+v", contextLogger, logger)
+		t.Fatalf("contextLogger %+v != logger %+v", contextLogger, logger)
 	}
 }
 
@@ -66,16 +66,16 @@ func TestNewContext(t *testing.T) {
 
 	value := ctx.Value(contextKey{})
 	if value == nil {
-		t.Error("value == nil")
+		t.Fatal("value == nil")
 	}
 
 	contextLogger, ok := value.(*Logger)
 	if !ok {
-		t.Errorf("value type %T is wrong", value)
+		t.Fatalf("value type %T is wrong", value)
 	}
 
 	if contextLogger != logger {
-		t.Errorf("contextLogger %+v != logger %+v", contextLogger, logger)
+		t.Fatalf("contextLogger %+v != logger %+v", contextLogger, logger)
 	}
 }
 
@@ -85,13 +85,13 @@ func TestFromContext(t *testing.T) {
 	logger := FromContext(ctx)
 
 	if logger == nil {
-		t.Error("logger == nil")
+		t.Fatal("logger == nil")
 	}
 
 	logger = New()
 	contextLogger := FromContext(context.WithValue(ctx, contextKey{}, logger))
 
 	if contextLogger != logger {
-		t.Errorf("contextLogger %+v != logger %+v", contextLogger, logger)
+		t.Fatalf("contextLogger %+v != logger %+v", contextLogger, logger)
 	}
 }

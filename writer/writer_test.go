@@ -22,11 +22,11 @@ import (
 // go test -v -cover -run=^TestNotStdoutAndStderr$
 func TestNotStdoutAndStderr(t *testing.T) {
 	if notStdoutAndStderr(os.Stdout) {
-		t.Error("notStdoutAndStderr(os.Stdout) returns true")
+		t.Fatal("notStdoutAndStderr(os.Stdout) returns true")
 	}
 
 	if notStdoutAndStderr(os.Stderr) {
-		t.Error("notStdoutAndStderr(os.Stderr) returns true")
+		t.Fatal("notStdoutAndStderr(os.Stderr) returns true")
 	}
 }
 
@@ -34,8 +34,8 @@ func TestNotStdoutAndStderr(t *testing.T) {
 func TestWrapped(t *testing.T) {
 	writer := Wrap(os.Stdout)
 
-	if _, ok := writer.(*wrapWriter); !ok {
-		t.Error("Wrap returns a non-wrapWriter instance")
+	if _, ok := writer.(Writer); !ok {
+		t.Fatal("Wrap returns a non-Writer instance")
 	}
 }
 
@@ -44,7 +44,7 @@ func TestBuffer(t *testing.T) {
 	writer := Buffer(os.Stdout, 1024)
 
 	if _, ok := writer.(*bufferWriter); !ok {
-		t.Error("Buffer returns a non-bufferWriter instance")
+		t.Fatal("Buffer returns a non-bufferWriter instance")
 	}
 }
 
@@ -54,10 +54,10 @@ func TestBufferWithSize(t *testing.T) {
 
 	bw, ok := writer.(*bufferWriter)
 	if !ok {
-		t.Error("Buffer returns a non-bufferWriter instance")
+		t.Fatal("Buffer returns a non-bufferWriter instance")
 	}
 
 	if bw.maxBufferSize != 1024 {
-		t.Errorf("bw.maxBufferSize %d is wrong", bw.maxBufferSize)
+		t.Fatalf("bw.maxBufferSize %d is wrong", bw.maxBufferSize)
 	}
 }

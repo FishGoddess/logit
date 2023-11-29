@@ -25,11 +25,11 @@ import (
 func TestBackupBefore(t *testing.T) {
 	b := backup{t: time.Unix(2, 0)}
 	if b.before(time.Unix(1, 0)) {
-		t.Errorf("b.before(time.Unix(1, 0)) returns false")
+		t.Fatalf("b.before(time.Unix(1, 0)) returns false")
 	}
 
 	if b.before(time.Unix(2, 0)) {
-		t.Errorf("b.before(time.Unix(2, 0)) returns false")
+		t.Fatalf("b.before(time.Unix(2, 0)) returns false")
 	}
 }
 
@@ -42,7 +42,7 @@ func TestSortBackups(t *testing.T) {
 	sortBackups(backups)
 	for i, backup := range backups {
 		if backup.t.Unix() != int64(i) {
-			t.Errorf("backup.t.Unix() %d != int64(i) %d", backup.t.Unix(), int64(i))
+			t.Fatalf("backup.t.Unix() %d != int64(i) %d", backup.t.Unix(), int64(i))
 		}
 	}
 }
@@ -51,11 +51,11 @@ func TestSortBackups(t *testing.T) {
 func TestBackupPrefixAndExt(t *testing.T) {
 	prefix, ext := backupPrefixAndExt("test.log")
 	if prefix != "test"+backupSeparator {
-		t.Errorf("prefix %s != 'test'+backupSeparator %s", prefix, "test"+backupSeparator)
+		t.Fatalf("prefix %s != 'test'+backupSeparator %s", prefix, "test"+backupSeparator)
 	}
 
 	if ext != ".log" {
-		t.Errorf("ext %s != '.log'", ext)
+		t.Fatalf("ext %s != '.log'", ext)
 	}
 }
 
@@ -70,7 +70,7 @@ func TestBackupPath(t *testing.T) {
 	path := backupPath("test.log", "20060102150405")
 
 	if path != "test.19700101000001.log" {
-		t.Errorf("path %s != 'test.19700101080001.log'", path)
+		t.Fatalf("path %s != 'test.19700101080001.log'", path)
 	}
 }
 
@@ -85,10 +85,10 @@ func TestParseBackupTime(t *testing.T) {
 
 	backupTime, err := parseBackupTime(filename, prefix, ext, timeFormat)
 	if err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 
 	if backupTime.Unix() != 1 {
-		t.Errorf("backupTime.Unix() %d != 1", backupTime.Unix())
+		t.Fatalf("backupTime.Unix() %d != 1", backupTime.Unix())
 	}
 }

@@ -30,7 +30,7 @@ func TestWithTimeFormat(t *testing.T) {
 	want.timeFormat = "20060102"
 
 	if c != want {
-		t.Errorf("c %+v != want %+v", c, want)
+		t.Fatalf("c %+v != want %+v", c, want)
 	}
 }
 
@@ -45,7 +45,7 @@ func TestWithMaxSize(t *testing.T) {
 	want.maxSize = 4 * 1024
 
 	if c != want {
-		t.Errorf("c %+v != want %+v", c, want)
+		t.Fatalf("c %+v != want %+v", c, want)
 	}
 }
 
@@ -60,7 +60,7 @@ func TestWithMaxAge(t *testing.T) {
 	want.maxAge = 24 * time.Hour
 
 	if c != want {
-		t.Errorf("c %+v != want %+v", c, want)
+		t.Fatalf("c %+v != want %+v", c, want)
 	}
 }
 
@@ -75,6 +75,6 @@ func TestWithMaxBackups(t *testing.T) {
 	want.maxBackups = 30
 
 	if c != want {
-		t.Errorf("c %+v != want %+v", c, want)
+		t.Fatalf("c %+v != want %+v", c, want)
 	}
 }

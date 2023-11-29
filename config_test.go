@@ -41,15 +41,15 @@ func TestConfigHandlerOptions(t *testing.T) {
 	opts := conf.handlerOptions()
 
 	if opts.Level != conf.level.Peel() {
-		t.Errorf("opts.Level %v != conf.level %v", opts.Level, conf.level.Peel())
+		t.Fatalf("opts.Level %v != conf.level %v", opts.Level, conf.level.Peel())
 	}
 
 	if opts.AddSource != conf.withSource {
-		t.Errorf("opts.AddSource %v != conf.withSource %v", opts.AddSource, conf.withSource)
+		t.Fatalf("opts.AddSource %v != conf.withSource %v", opts.AddSource, conf.withSource)
 	}
 
 	if fmt.Sprintf("%p", opts.ReplaceAttr) != fmt.Sprintf("%p", conf.replaceAttr) {
-		t.Errorf("opts.ReplaceAttr %p != conf.replaceAttr %p", opts.ReplaceAttr, conf.replaceAttr)
+		t.Fatalf("opts.ReplaceAttr %p != conf.replaceAttr %p", opts.ReplaceAttr, conf.replaceAttr)
 	}
 }
 
@@ -75,27 +75,27 @@ func TestConfigHandler(t *testing.T) {
 
 	handler, err := conf.handler()
 	if err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 
 	tcHandler, ok := handler.(*testConfigHandler)
 	if !ok {
-		t.Errorf("handler type %T is wrong", handler)
+		t.Fatalf("handler type %T is wrong", handler)
 	}
 
 	if tcHandler.w != os.Stderr {
-		t.Errorf("tcHandler.w %p != os.Stderr %p", tcHandler.w, os.Stderr)
+		t.Fatalf("tcHandler.w %p != os.Stderr %p", tcHandler.w, os.Stderr)
 	}
 
 	if tcHandler.opts.Level != conf.level.Peel() {
-		t.Errorf("tcHandler.opts.Level %v != conf.level %v", tcHandler.opts.Level, conf.level.Peel())
+		t.Fatalf("tcHandler.opts.Level %v != conf.level %v", tcHandler.opts.Level, conf.level.Peel())
 	}
 
 	if tcHandler.opts.AddSource != conf.withSource {
-		t.Errorf("tcHandler.opts.AddSource %v != conf.withSource %v", tcHandler.opts.AddSource, conf.withSource)
+		t.Fatalf("tcHandler.opts.AddSource %v != conf.withSource %v", tcHandler.opts.AddSource, conf.withSource)
 	}
 
 	if fmt.Sprintf("%p", tcHandler.opts.ReplaceAttr) != fmt.Sprintf("%p", conf.replaceAttr) {
-		t.Errorf("tcHandler.opts.ReplaceAttr %p != conf.replaceAttr %p", tcHandler.opts.ReplaceAttr, conf.replaceAttr)
+		t.Fatalf("tcHandler.opts.ReplaceAttr %p != conf.replaceAttr %p", tcHandler.opts.ReplaceAttr, conf.replaceAttr)
 	}
 }

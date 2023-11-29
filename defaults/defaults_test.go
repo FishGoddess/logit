@@ -23,20 +23,20 @@ import (
 func TestMarshalToJson(t *testing.T) {
 	marshaled, err := MarshalToJson([]int{1, 2, 3})
 	if err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 
 	if string(marshaled) != "[1,2,3]" {
-		t.Errorf("string(marshaled) %s != [1,2,3]", marshaled)
+		t.Fatalf("string(marshaled) %s != [1,2,3]", marshaled)
 	}
 
 	marshaled, err = MarshalToJson(map[string]interface{}{"key": 666, "str": "abc"})
 	if err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 
 	if string(marshaled) != "{\"key\":666,\"str\":\"abc\"}" {
-		t.Errorf("string(marshaled) %v != {\"key\":666,\"str\":\"abc\"}", marshaled)
+		t.Fatalf("string(marshaled) %v != {\"key\":666,\"str\":\"abc\"}", marshaled)
 	}
 }
 
@@ -44,7 +44,7 @@ func TestMarshalToJson(t *testing.T) {
 func TestHandleError(t *testing.T) {
 	defer func() {
 		if r := recover(); r != nil {
-			t.Error(r)
+			t.Fatal(r)
 		}
 	}()
 

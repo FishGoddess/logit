@@ -38,7 +38,7 @@ func TestLevelPeel(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			if got := tt.level.Peel(); !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("Level.Peel() = %v, want %v", got, tt.want)
+				t.Fatalf("Level.Peel() = %v, want %v", got, tt.want)
 			}
 		})
 	}
@@ -63,7 +63,7 @@ func TestLevelString(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			if got := tt.level.String(); got != tt.want {
-				t.Errorf("Level.String() = %v, want %v", got, tt.want)
+				t.Fatalf("Level.String() = %v, want %v", got, tt.want)
 			}
 		})
 	}
@@ -91,12 +91,12 @@ func TestParseLevel(t *testing.T) {
 			got, err := ParseLevel(tt.str)
 
 			if (err != nil) != tt.wantErr {
-				t.Errorf("ParseLevel() error = %v, wantErr %v", err, tt.wantErr)
+				t.Fatalf("ParseLevel() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
 
 			if got != tt.want {
-				t.Errorf("ParseLevel() = %v, want %v", got, tt.want)
+				t.Fatalf("ParseLevel() = %v, want %v", got, tt.want)
 			}
 		})
 	}

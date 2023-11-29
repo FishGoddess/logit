@@ -38,20 +38,20 @@ func TestNew(t *testing.T) {
 	data := []byte("水不要鱼")
 	n, err := f.Write(data)
 	if err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 
 	if n != len(data) {
-		t.Errorf("n %d != len(data) %d", n, len(data))
+		t.Fatalf("n %d != len(data) %d", n, len(data))
 	}
 
 	read, err := ioutil.ReadFile(path)
 	if err != nil {
-		t.Errorf("ReadFile error: %v", err)
+		t.Fatalf("ReadFile error: %v", err)
 	}
 
 	if string(read) != string(data) {
-		t.Errorf("string(read) %s != string(data) %s", read, data)
+		t.Fatalf("string(read) %s != string(data) %s", read, data)
 	}
 }
 
@@ -74,21 +74,21 @@ func TestNewExisting(t *testing.T) {
 	data := []byte("FishGoddess")
 	n, err := f.Write(data)
 	if err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 
 	if n != len(data) {
-		t.Errorf("n %d != len(data) %d", n, len(data))
+		t.Fatalf("n %d != len(data) %d", n, len(data))
 	}
 
 	read, err := ioutil.ReadFile(path)
 	if err != nil {
-		t.Errorf("ReadFile error: %v", err)
+		t.Fatalf("ReadFile error: %v", err)
 	}
 
 	want := "水不要鱼FishGoddess"
 	if string(read) != want {
-		t.Errorf("string(read) %s != want %s", read, want)
+		t.Fatalf("string(read) %s != want %s", read, want)
 	}
 }
 
@@ -123,59 +123,59 @@ func TestFileRotate(t *testing.T) {
 	data := []byte("test")
 	n, err := f.Write(data)
 	if err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 
 	if n != len(data) {
-		t.Errorf("n %d != len(data) %d", n, len(data))
+		t.Fatalf("n %d != len(data) %d", n, len(data))
 	}
 
 	read, err := ioutil.ReadFile(path)
 	if err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 
 	if string(read) != string(data) {
-		t.Errorf("string(read) %s != string(data) %s", read, data)
+		t.Fatalf("string(read) %s != string(data) %s", read, data)
 	}
 
 	count := countFiles(dir)
 	if count != 1 {
-		t.Errorf("count %d != 1", count)
+		t.Fatalf("count %d != 1", count)
 	}
 
 	data = []byte("burst")
 	n, err = f.Write(data)
 	if err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 
 	if n != len(data) {
-		t.Errorf("n %d != len(data) %d", n, len(data))
+		t.Fatalf("n %d != len(data) %d", n, len(data))
 	}
 
 	data = []byte("!!!")
 	n, err = f.Write(data)
 	if err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 
 	if n != len(data) {
-		t.Errorf("n %d != len(data) %d", n, len(data))
+		t.Fatalf("n %d != len(data) %d", n, len(data))
 	}
 
 	read, err = ioutil.ReadFile(path)
 	if err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 
 	if string(read) != "!!!" {
-		t.Errorf("string(read) %s != '!!!'", read)
+		t.Fatalf("string(read) %s != '!!!'", read)
 	}
 
 	count = countFiles(dir)
 	if count != 3 {
-		t.Errorf("count %d != 3", count)
+		t.Fatalf("count %d != 3", count)
 	}
 
 	second = 3
@@ -188,13 +188,13 @@ func TestFileRotate(t *testing.T) {
 		var bs []byte
 		bs, err = ioutil.ReadFile(backupPath(path, f.timeFormat))
 		if err != nil {
-			t.Error(err)
+			t.Fatal(err)
 		}
 
 		read = append(read, bs...)
 	}
 
 	if string(read) != "!!!bursttest" {
-		t.Errorf("string(read) %s != '!!!bursttest'", read)
+		t.Fatalf("string(read) %s != '!!!bursttest'", read)
 	}
 }

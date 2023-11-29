@@ -24,12 +24,12 @@ func TestNewDefaultConfig(t *testing.T) {
 
 	want := config{
 		timeFormat: "20060102150405",
-		maxSize:    256 * 1024 * 1024,
-		maxAge:     0,
-		maxBackups: 0,
+		maxSize:    256 * MB,
+		maxAge:     90 * Day,
+		maxBackups: 100,
 	}
 
 	if c != want {
-		t.Errorf("c %+v != want %+v", c, want)
+		t.Fatalf("c %+v != want %+v", c, want)
 	}
 }

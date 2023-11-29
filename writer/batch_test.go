@@ -32,7 +32,7 @@ func TestBatchWriter(t *testing.T) {
 	writer.Sync()
 
 	if buffer.String() != "abc" {
-		t.Errorf("writing abc but found %s in buffer", buffer.String())
+		t.Fatalf("writing abc but found %s in buffer", buffer.String())
 	}
 
 	writer.Write([]byte("123"))
@@ -42,7 +42,7 @@ func TestBatchWriter(t *testing.T) {
 	time.Sleep(time.Second)
 
 	if buffer.String() != "abc123.!?+-*/" {
-		t.Errorf("writing abc123.!?+-*/ but found %s in buffer", buffer.String())
+		t.Fatalf("writing abc123.!?+-*/ but found %s in buffer", buffer.String())
 	}
 }
 
@@ -58,12 +58,12 @@ func TestBatchWriterCount(t *testing.T) {
 	}
 
 	if buffer.String() != "" {
-		t.Errorf("buffer.String() %s != ''", buffer.String())
+		t.Fatalf("buffer.String() %s != ''", buffer.String())
 	}
 
 	writer.Sync()
 	if buffer.String() != "1111111111" {
-		t.Errorf("buffer.String() %s != '1111111111'", buffer.String())
+		t.Fatalf("buffer.String() %s != '1111111111'", buffer.String())
 	}
 
 	buffer.Reset()
@@ -72,12 +72,12 @@ func TestBatchWriterCount(t *testing.T) {
 	}
 
 	if buffer.String() != "1111111111" {
-		t.Errorf("buffer.String() %s != '1111111111'", buffer.String())
+		t.Fatalf("buffer.String() %s != '1111111111'", buffer.String())
 	}
 
 	writer.Sync()
 	if buffer.String() != "111111111111" {
-		t.Errorf("buffer.String() %s != '111111111111'", buffer.String())
+		t.Fatalf("buffer.String() %s != '111111111111'", buffer.String())
 	}
 }
 
@@ -86,14 +86,14 @@ func TestBatchWriterClose(t *testing.T) {
 	writer := newBatchWriter(os.Stdout, 10)
 	for i := 0; i < 10; i++ {
 		if err := writer.Close(); err != nil {
-			t.Error(err)
+			t.Fatal(err)
 		}
 	}
 
 	writer = newBatchWriter(os.Stderr, 10)
 	for i := 0; i < 10; i++ {
 		if err := writer.Close(); err != nil {
-			t.Error(err)
+			t.Fatal(err)
 		}
 	}
 }
