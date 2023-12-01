@@ -35,15 +35,6 @@ func notStdoutAndStderr(w io.Writer) bool {
 	return w != os.Stdout && w != os.Stderr
 }
 
-// Wrap wraps io.writer to Writer.
-func Wrap(writer io.Writer) Writer {
-	if w, ok := writer.(Writer); ok {
-		return w
-	}
-
-	return newWrapWriter(writer)
-}
-
 // Buffer wraps io.writer with buffer writer of bufferSize.
 func Buffer(writer io.Writer, bufferSize uint64) Writer {
 	if bw, ok := writer.(*bufferWriter); ok {

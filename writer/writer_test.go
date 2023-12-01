@@ -30,15 +30,6 @@ func TestNotStdoutAndStderr(t *testing.T) {
 	}
 }
 
-// go test -v -cover -run=^TestWrap$
-func TestWrap(t *testing.T) {
-	writer := Wrap(os.Stdout)
-
-	if _, ok := writer.(Writer); !ok {
-		t.Fatalf("writer type %T is wrong", writer)
-	}
-}
-
 // go test -v -cover -run=^TestBuffer$
 func TestBuffer(t *testing.T) {
 	writer := Buffer(os.Stdout, 1024)

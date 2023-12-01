@@ -60,7 +60,7 @@ func newDefaultConfig() *config {
 	conf := &config{
 		level:        LevelDebug,
 		newWriter:    newWriter,
-		wrapWriter:   writer.Wrap,
+		wrapWriter:   nil,
 		newHandler:   handler.NewTextHandler,
 		replaceAttr:  nil,
 		withSource:   false,
