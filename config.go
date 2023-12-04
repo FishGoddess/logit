@@ -38,7 +38,7 @@ type NewHandlerFunc func(w io.Writer, opts *slog.HandlerOptions) slog.Handler
 type ReplaceAttrFunc func(groups []string, attr slog.Attr) slog.Attr
 
 type config struct {
-	level Level
+	level slog.Level
 
 	newWriter  func() (io.Writer, error)
 	wrapWriter func(io.Writer) writer.Writer
@@ -58,7 +58,7 @@ func newDefaultConfig() *config {
 	}
 
 	conf := &config{
-		level:        LevelDebug,
+		level:        levelDebug,
 		newWriter:    newWriter,
 		wrapWriter:   nil,
 		newHandler:   handler.NewTextHandler,
@@ -73,7 +73,7 @@ func newDefaultConfig() *config {
 
 func (c *config) handlerOptions() *slog.HandlerOptions {
 	opts := &slog.HandlerOptions{
-		Level:       c.level.Peel(),
+		Level:       c.level,
 		AddSource:   c.withSource,
 		ReplaceAttr: c.replaceAttr,
 	}

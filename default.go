@@ -38,61 +38,61 @@ func Default() *Logger {
 
 // Debug logs a log with msg and args in debug level.
 func Debug(msg string, args ...any) {
-	Default().log(context.Background(), LevelDebug, msg, args...)
+	Default().log(context.Background(), levelDebug, msg, args...)
 }
 
 // Info logs a log with msg and args in info level.
 func Info(msg string, args ...any) {
-	Default().log(context.Background(), LevelInfo, msg, args...)
+	Default().log(context.Background(), levelInfo, msg, args...)
 }
 
 // Warn logs a log with msg and args in warn level.
 func Warn(msg string, args ...any) {
-	Default().log(context.Background(), LevelWarn, msg, args...)
+	Default().log(context.Background(), levelWarn, msg, args...)
 }
 
 // Error logs a log with msg and args in error level.
 func Error(msg string, args ...any) {
-	Default().log(context.Background(), LevelError, msg, args...)
+	Default().log(context.Background(), levelError, msg, args...)
 }
 
 // DebugContext logs a log with ctx, msg and args in debug level.
 func DebugContext(ctx context.Context, msg string, args ...any) {
-	Default().log(ctx, LevelDebug, msg, args...)
+	Default().log(ctx, levelDebug, msg, args...)
 }
 
 // InfoContext logs a log with ctx, msg and args in info level.
 func InfoContext(ctx context.Context, msg string, args ...any) {
-	Default().log(ctx, LevelInfo, msg, args...)
+	Default().log(ctx, levelInfo, msg, args...)
 }
 
 // WarnContext logs a log with ctx, msg and args in warn level.
 func WarnContext(ctx context.Context, msg string, args ...any) {
-	Default().log(ctx, LevelWarn, msg, args...)
+	Default().log(ctx, levelWarn, msg, args...)
 }
 
 // ErrorContext logs a log with ctx, msg and args in error level.
 func ErrorContext(ctx context.Context, msg string, args ...any) {
-	Default().log(ctx, LevelError, msg, args...)
+	Default().log(ctx, levelError, msg, args...)
 }
 
 // Printf logs a log with format and args in print level.
 // It a old-school way to log.
 func Printf(format string, args ...interface{}) {
 	msg := fmt.Sprintf(format, args...)
-	Default().log(context.Background(), LevelPrint, msg)
+	Default().log(context.Background(), levelPrint, msg)
 }
 
 // Print logs a log with args in print level.
 // It a old-school way to log.
 func Print(args ...interface{}) {
 	msg := fmt.Sprint(args...)
-	Default().log(context.Background(), LevelPrint, msg)
+	Default().log(context.Background(), levelPrint, msg)
 }
 
 // Println logs a log with args in print level.
 // It a old-school way to log.
 func Println(args ...interface{}) {
 	msg := fmt.Sprintln(args...)
-	Default().log(context.Background(), LevelPrint, msg)
+	Default().log(context.Background(), levelPrint, msg)
 }

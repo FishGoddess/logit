@@ -26,60 +26,60 @@ import (
 
 // go test -v -cover -run=^TestWithDebugLevel$
 func TestWithDebugLevel(t *testing.T) {
-	conf := &config{level: LevelError}
+	conf := &config{level: levelError}
 	WithDebugLevel().applyTo(conf)
 
-	if conf.level != LevelDebug {
+	if conf.level != levelDebug {
 		t.Fatalf("conf.level %+v != LevelDebug", conf.level)
 	}
 }
 
 // go test -v -cover -run=^TestWithInfoLevel$
 func TestWithInfoLevel(t *testing.T) {
-	conf := &config{level: LevelError}
+	conf := &config{level: levelError}
 	WithInfoLevel().applyTo(conf)
 
-	if conf.level != LevelInfo {
+	if conf.level != levelInfo {
 		t.Fatalf("conf.level %+v != LevelInfo", conf.level)
 	}
 }
 
 // go test -v -cover -run=^TestWithWarnLevel$
 func TestWithWarnLevel(t *testing.T) {
-	conf := &config{level: LevelError}
+	conf := &config{level: levelError}
 	WithWarnLevel().applyTo(conf)
 
-	if conf.level != LevelWarn {
+	if conf.level != levelWarn {
 		t.Fatalf("conf.level %+v != LevelWarn", conf.level)
 	}
 }
 
 // go test -v -cover -run=^TestWithErrorLevel$
 func TestWithErrorLevel(t *testing.T) {
-	conf := &config{level: LevelDebug}
+	conf := &config{level: levelDebug}
 	WithErrorLevel().applyTo(conf)
 
-	if conf.level != LevelError {
+	if conf.level != levelError {
 		t.Fatalf("conf.level %+v != LevelError", conf.level)
 	}
 }
 
 // go test -v -cover -run=^TestWithPrintLevel$
 func TestWithPrintLevel(t *testing.T) {
-	conf := &config{level: LevelError}
+	conf := &config{level: levelError}
 	WithPrintLevel().applyTo(conf)
 
-	if conf.level != LevelPrint {
+	if conf.level != levelPrint {
 		t.Fatalf("conf.level %+v != LevelPrint", conf.level)
 	}
 }
 
 // go test -v -cover -run=^TestWithOffLevel$
 func TestWithOffLevel(t *testing.T) {
-	conf := &config{level: LevelError}
+	conf := &config{level: levelError}
 	WithOffLevel().applyTo(conf)
 
-	if conf.level != LevelOff {
+	if conf.level != levelOff {
 		t.Fatalf("conf.level %+v != LevelOff", conf.level)
 	}
 }

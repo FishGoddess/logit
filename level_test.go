@@ -16,54 +16,29 @@ package logit
 
 import (
 	"log/slog"
-	"reflect"
 	"testing"
 )
 
-// go test -v -cover -run=^TestLevelPeel$
-func TestLevelPeel(t *testing.T) {
+// go test -v -cover -run=^TestStringifyLevel$
+func TestStringifyLevel(t *testing.T) {
 	tests := []struct {
 		name  string
-		level Level
-		want  slog.Level
-	}{
-		{name: "debug", level: LevelDebug, want: slog.LevelDebug},
-		{name: "info", level: LevelInfo, want: slog.LevelInfo},
-		{name: "warn", level: LevelWarn, want: slog.LevelWarn},
-		{name: "error", level: LevelError, want: slog.LevelError},
-		{name: "print", level: LevelPrint, want: slog.Level(LevelPrint)},
-		{name: "off", level: LevelOff, want: slog.Level(LevelOff)},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			if got := tt.level.Peel(); !reflect.DeepEqual(got, tt.want) {
-				t.Fatalf("Level.Peel() = %v, want %v", got, tt.want)
-			}
-		})
-	}
-}
-
-// go test -v -cover -run=^TestLevelString$
-func TestLevelString(t *testing.T) {
-	tests := []struct {
-		name  string
-		level Level
+		level slog.Level
 		want  string
 	}{
-		{name: "debug", level: LevelDebug, want: "debug"},
-		{name: "info", level: LevelInfo, want: "info"},
-		{name: "warn", level: LevelWarn, want: "warn"},
-		{name: "error", level: LevelError, want: "error"},
-		{name: "print", level: LevelPrint, want: "print"},
-		{name: "off", level: LevelOff, want: "off"},
+		{name: "debug", level: levelDebug, want: "debug"},
+		{name: "info", level: levelInfo, want: "info"},
+		{name: "warn", level: levelWarn, want: "warn"},
+		{name: "error", level: levelError, want: "error"},
+		{name: "print", level: levelPrint, want: "print"},
+		{name: "off", level: levelOff, want: "off"},
 		{name: "unknown", level: 1997, want: "unknown"},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := tt.level.String(); got != tt.want {
-				t.Fatalf("Level.String() = %v, want %v", got, tt.want)
+			if got := stringifyLevel(tt.level); got != tt.want {
+				t.Fatalf("stringifyLevel(tt.level) = %v, want %v", got, tt.want)
 			}
 		})
 	}
@@ -74,15 +49,15 @@ func TestParseLevel(t *testing.T) {
 	tests := []struct {
 		name    string
 		str     string
-		want    Level
+		want    slog.Level
 		wantErr bool
 	}{
-		{name: "debug", str: "debug", want: LevelDebug, wantErr: false},
-		{name: "info", str: "info", want: LevelInfo, wantErr: false},
-		{name: "warn", str: "warn", want: LevelWarn, wantErr: false},
-		{name: "error", str: "error", want: LevelError, wantErr: false},
-		{name: "print", str: "print", want: LevelPrint, wantErr: false},
-		{name: "off", str: "off", want: LevelOff, wantErr: false},
+		{name: "debug", str: "debug", want: levelDebug, wantErr: false},
+		{name: "info", str: "info", want: levelInfo, wantErr: false},
+		{name: "warn", str: "warn", want: levelWarn, wantErr: false},
+		{name: "error", str: "error", want: levelError, wantErr: false},
+		{name: "print", str: "print", want: levelPrint, wantErr: false},
+		{name: "off", str: "off", want: levelOff, wantErr: false},
 		{name: "unknown", str: "unknown", want: 0, wantErr: true},
 	}
 

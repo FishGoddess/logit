@@ -35,35 +35,35 @@ func (o Option) applyTo(conf *config) {
 // WithDebugLevel sets debug level to config.
 func WithDebugLevel() Option {
 	return func(conf *config) {
-		conf.level = LevelDebug
+		conf.level = levelDebug
 	}
 }
 
 // WithInfoLevel sets info level to config.
 func WithInfoLevel() Option {
 	return func(conf *config) {
-		conf.level = LevelInfo
+		conf.level = levelInfo
 	}
 }
 
 // WithWarnLevel sets warn level to config.
 func WithWarnLevel() Option {
 	return func(conf *config) {
-		conf.level = LevelWarn
+		conf.level = levelWarn
 	}
 }
 
 // WithErrorLevel sets error level to config.
 func WithErrorLevel() Option {
 	return func(conf *config) {
-		conf.level = LevelError
+		conf.level = levelError
 	}
 }
 
 // WithPrintLevel sets print level to config.
 func WithPrintLevel() Option {
 	return func(conf *config) {
-		conf.level = LevelPrint
+		conf.level = levelPrint
 	}
 }
 
@@ -71,7 +71,7 @@ func WithPrintLevel() Option {
 // All logs will be discarded.
 func WithOffLevel() Option {
 	return func(conf *config) {
-		conf.level = LevelOff
+		conf.level = levelOff
 	}
 }
 

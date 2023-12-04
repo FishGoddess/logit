@@ -162,16 +162,41 @@ func (l *Logger) WithGroup(name string) *Logger {
 
 }
 
-// Enabled reports whether the logger should ignore logs whose level is lower.
-func (l *Logger) Enabled(ctx context.Context, level Level) bool {
+// enabled reports whether the logger should ignore logs whose level is lower.
+func (l *Logger) enabled(ctx context.Context, level slog.Level) bool {
 	if ctx == nil {
 		ctx = context.Background()
 	}
 
-	return l.handler.Enabled(ctx, level.Peel())
+	return l.handler.Enabled(ctx, level)
 }
 
-func (l *Logger) newRecord(level Level, msg string, args []any) slog.Record {
+// DebugEnabled reports whether the logger should ignore logs whose level is lower than debug.
+func (l *Logger) DebugEnabled(ctx context.Context) bool {
+	return l.enabled(ctx, levelDebug)
+}
+
+// InfoEnabled reports whether the logger should ignore logs whose level is lower than info.
+func (l *Logger) InfoEnabled(ctx context.Context) bool {
+	return l.enabled(ctx, levelInfo)
+}
+
+// WarnEnabled reports whether the logger should ignore logs whose level is lower than warn.
+func (l *Logger) WarnEnabled(ctx context.Context) bool {
+	return l.enabled(ctx, levelWarn)
+}
+
+// ErrorEnabled reports whether the logger should ignore logs whose level is lower than error.
+func (l *Logger) ErrorEnabled(ctx context.Context) bool {
+	return l.enabled(ctx, levelError)
+}
+
+// PrintEnabled reports whether the logger should ignore logs whose level is lower than print.
+func (l *Logger) PrintEnabled(ctx context.Context) bool {
+	return l.enabled(ctx, levelPrint)
+}
+
+func (l *Logger) newRecord(level slog.Level, msg string, args []any) slog.Record {
 	now := defaults.CurrentTime()
 
 	var pc uintptr
@@ -181,7 +206,7 @@ func (l *Logger) newRecord(level Level, msg string, args []any) slog.Record {
 		pc = pcs[0]
 	}
 
-	record := slog.NewRecord(now, level.Peel(), msg, pc)
+	record := slog.NewRecord(now, level, msg, pc)
 	if l.withPID {
 		record.AddAttrs(slog.Int(keyPID, pid))
 	}
@@ -192,8 +217,8 @@ func (l *Logger) newRecord(level Level, msg string, args []any) slog.Record {
 	return record
 }
 
-func (l *Logger) log(ctx context.Context, level Level, msg string, args ...any) {
-	if !l.Enabled(ctx, level) {
+func (l *Logger) log(ctx context.Context, level slog.Level, msg string, args ...any) {
+	if !l.handler.Enabled(ctx, level) {
 		return
 	}
 
@@ -211,63 +236,63 @@ func (l *Logger) log(ctx context.Context, level Level, msg string, args ...any) 
 
 // Debug logs a log with msg and args in debug level.
 func (l *Logger) Debug(msg string, args ...any) {
-	l.log(context.Background(), LevelDebug, msg, args...)
+	l.log(context.Background(), levelDebug, msg, args...)
 }
 
 // Info logs a log with msg and args in info level.
 func (l *Logger) Info(msg string, args ...any) {
-	l.log(context.Background(), LevelInfo, msg, args...)
+	l.log(context.Background(), levelInfo, msg, args...)
 }
 
 // Warn logs a log with msg and args in warn level.
 func (l *Logger) Warn(msg string, args ...any) {
-	l.log(context.Background(), LevelWarn, msg, args...)
+	l.log(context.Background(), levelWarn, msg, args...)
 }
 
 // Error logs a log with msg and args in error level.
 func (l *Logger) Error(msg string, args ...any) {
-	l.log(context.Background(), LevelError, msg, args...)
+	l.log(context.Background(), levelError, msg, args...)
 }
 
 // DebugContext logs a log with ctx, msg and args in debug level.
 func (l *Logger) DebugContext(ctx context.Context, msg string, args ...any) {
-	l.log(ctx, LevelDebug, msg, args...)
+	l.log(ctx, levelDebug, msg, args...)
 }
 
 // InfoContext logs a log with ctx, msg and args in info level.
 func (l *Logger) InfoContext(ctx context.Context, msg string, args ...any) {
-	l.log(ctx, LevelInfo, msg, args...)
+	l.log(ctx, levelInfo, msg, args...)
 }
 
 // WarnContext logs a log with ctx, msg and args in warn level.
 func (l *Logger) WarnContext(ctx context.Context, msg string, args ...any) {
-	l.log(ctx, LevelWarn, msg, args...)
+	l.log(ctx, levelWarn, msg, args...)
 }
 
 // ErrorContext logs a log with ctx, msg and args in error level.
 func (l *Logger) ErrorContext(ctx context.Context, msg string, args ...any) {
-	l.log(ctx, LevelError, msg, args...)
+	l.log(ctx, levelError, msg, args...)
 }
 
 // Printf logs a log with format and args in print level.
 // It a old-school way to log.
 func (l *Logger) Printf(format string, args ...interface{}) {
 	msg := fmt.Sprintf(format, args...)
-	l.log(context.Background(), LevelPrint, msg)
+	l.log(context.Background(), levelPrint, msg)
 }
 
 // Print logs a log with args in print level.
 // It a old-school way to log.
 func (l *Logger) Print(args ...interface{}) {
 	msg := fmt.Sprint(args...)
-	l.log(context.Background(), LevelPrint, msg)
+	l.log(context.Background(), levelPrint, msg)
 }
 
 // Println logs a log with args in print level.
 // It a old-school way to log.
 func (l *Logger) Println(args ...interface{}) {
 	msg := fmt.Sprintln(args...)
-	l.log(context.Background(), LevelPrint, msg)
+	l.log(context.Background(), levelPrint, msg)
 }
 
 // Sync syncs the logger and returns an error if failed.

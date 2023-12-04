@@ -21,41 +21,32 @@ import (
 )
 
 const (
-	LevelDebug = Level(slog.LevelDebug)
-	LevelInfo  = Level(slog.LevelInfo)
-	LevelWarn  = Level(slog.LevelWarn)
-	LevelError = Level(slog.LevelError)
+	levelDebug = slog.LevelDebug
+	levelInfo  = slog.LevelInfo
+	levelWarn  = slog.LevelWarn
+	levelError = slog.LevelError
 
-	// LevelPrint is for some logging methods which are compatible with log package in Go.
-	LevelPrint Level = LevelError + 1
+	// levelPrint is for some logging methods which are compatible with log package in Go.
+	levelPrint = levelError + 1
 
-	// LevelOff is for disabling logging.
-	LevelOff Level = LevelError + 2
+	// levelOff is for disabling logging.
+	levelOff = levelError + 2
 )
 
 var (
-	levels = map[Level]string{
-		LevelDebug: "debug",
-		LevelInfo:  "info",
-		LevelWarn:  "warn",
-		LevelError: "error",
-		LevelPrint: "print",
-		LevelOff:   "off",
+	levels = map[slog.Level]string{
+		levelDebug: "debug",
+		levelInfo:  "info",
+		levelWarn:  "warn",
+		levelError: "error",
+		levelPrint: "print",
+		levelOff:   "off",
 	}
 )
 
-// Level is an alias to slog.Level.
-// We extends level in order to fit our logging methods.
-type Level slog.Level
-
-// Peel returns the level in slog.Level form.
-func (l Level) Peel() slog.Level {
-	return slog.Level(l)
-}
-
-// String returns the string form of level.
-func (l Level) String() string {
-	if name, ok := levels[l]; ok {
+// stringifyLevel returns the string form of level.
+func stringifyLevel(level slog.Level) string {
+	if name, ok := levels[level]; ok {
 		return name
 	}
 
@@ -63,7 +54,7 @@ func (l Level) String() string {
 }
 
 // ParseLevel parses str to level and returns an error if failed.
-func ParseLevel(str string) (Level, error) {
+func ParseLevel(str string) (slog.Level, error) {
 	str = strings.ToLower(str)
 
 	for level, name := range levels {

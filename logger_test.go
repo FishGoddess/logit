@@ -144,27 +144,27 @@ func TestLoggerEnabled(t *testing.T) {
 	ctx := context.Background()
 	logger := NewLogger(WithErrorLevel())
 
-	if logger.Enabled(ctx, LevelDebug) {
+	if logger.enabled(ctx, levelDebug) {
 		t.Fatal("logger enabled debug")
 	}
 
-	if logger.Enabled(ctx, LevelInfo) {
+	if logger.enabled(ctx, levelInfo) {
 		t.Fatal("logger enabled info")
 	}
 
-	if logger.Enabled(ctx, LevelWarn) {
+	if logger.enabled(ctx, levelWarn) {
 		t.Fatal("logger enabled warn")
 	}
 
-	if !logger.Enabled(ctx, LevelError) {
+	if !logger.enabled(ctx, levelError) {
 		t.Fatal("logger enabled error")
 	}
 
-	if !logger.Enabled(ctx, LevelPrint) {
+	if !logger.enabled(ctx, levelPrint) {
 		t.Fatal("logger enabled print")
 	}
 
-	if !logger.Enabled(ctx, LevelOff) {
+	if !logger.enabled(ctx, levelOff) {
 		t.Fatal("logger enabled off")
 	}
 }

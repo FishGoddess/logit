@@ -33,15 +33,15 @@ func TestConfigHandlerOptions(t *testing.T) {
 	replaceAttr := func(groups []string, attr slog.Attr) slog.Attr { return attr }
 
 	conf := &config{
-		level:       LevelWarn,
+		level:       levelWarn,
 		withSource:  true,
 		replaceAttr: replaceAttr,
 	}
 
 	opts := conf.handlerOptions()
 
-	if opts.Level != conf.level.Peel() {
-		t.Fatalf("opts.Level %v != conf.level %v", opts.Level, conf.level.Peel())
+	if opts.Level != conf.level {
+		t.Fatalf("opts.Level %v != conf.level %v", opts.Level, conf.level)
 	}
 
 	if opts.AddSource != conf.withSource {
@@ -58,7 +58,7 @@ func TestConfigHandler(t *testing.T) {
 	replaceAttr := func(groups []string, attr slog.Attr) slog.Attr { return attr }
 
 	conf := &config{
-		level:       LevelWarn,
+		level:       levelWarn,
 		withSource:  true,
 		replaceAttr: replaceAttr,
 
@@ -87,8 +87,8 @@ func TestConfigHandler(t *testing.T) {
 		t.Fatalf("tcHandler.w %p != os.Stderr %p", tcHandler.w, os.Stderr)
 	}
 
-	if tcHandler.opts.Level != conf.level.Peel() {
-		t.Fatalf("tcHandler.opts.Level %v != conf.level %v", tcHandler.opts.Level, conf.level.Peel())
+	if tcHandler.opts.Level != conf.level {
+		t.Fatalf("tcHandler.opts.Level %v != conf.level %v", tcHandler.opts.Level, conf.level)
 	}
 
 	if tcHandler.opts.AddSource != conf.withSource {
