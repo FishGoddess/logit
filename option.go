@@ -16,6 +16,7 @@ package logit
 
 import (
 	"io"
+	"log/slog"
 	"os"
 	"path/filepath"
 
@@ -35,43 +36,28 @@ func (o Option) applyTo(conf *config) {
 // WithDebugLevel sets debug level to config.
 func WithDebugLevel() Option {
 	return func(conf *config) {
-		conf.level = levelDebug
+		conf.level = slog.LevelDebug
 	}
 }
 
 // WithInfoLevel sets info level to config.
 func WithInfoLevel() Option {
 	return func(conf *config) {
-		conf.level = levelInfo
+		conf.level = slog.LevelInfo
 	}
 }
 
 // WithWarnLevel sets warn level to config.
 func WithWarnLevel() Option {
 	return func(conf *config) {
-		conf.level = levelWarn
+		conf.level = slog.LevelWarn
 	}
 }
 
 // WithErrorLevel sets error level to config.
 func WithErrorLevel() Option {
 	return func(conf *config) {
-		conf.level = levelError
-	}
-}
-
-// WithPrintLevel sets print level to config.
-func WithPrintLevel() Option {
-	return func(conf *config) {
-		conf.level = levelPrint
-	}
-}
-
-// WithOffLevel sets off level to config.
-// All logs will be discarded.
-func WithOffLevel() Option {
-	return func(conf *config) {
-		conf.level = levelOff
+		conf.level = slog.LevelError
 	}
 }
 

@@ -16,6 +16,7 @@ package logit
 
 import (
 	"bytes"
+	"log/slog"
 	"os"
 	"path/filepath"
 	"testing"
@@ -26,61 +27,41 @@ import (
 
 // go test -v -cover -run=^TestWithDebugLevel$
 func TestWithDebugLevel(t *testing.T) {
-	conf := &config{level: levelError}
+	conf := &config{level: slog.LevelError}
 	WithDebugLevel().applyTo(conf)
 
-	if conf.level != levelDebug {
-		t.Fatalf("conf.level %+v != LevelDebug", conf.level)
+	if conf.level != slog.LevelDebug {
+		t.Fatalf("conf.level %+v != slog.LevelDebug", conf.level)
 	}
 }
 
 // go test -v -cover -run=^TestWithInfoLevel$
 func TestWithInfoLevel(t *testing.T) {
-	conf := &config{level: levelError}
+	conf := &config{level: slog.LevelError}
 	WithInfoLevel().applyTo(conf)
 
-	if conf.level != levelInfo {
-		t.Fatalf("conf.level %+v != LevelInfo", conf.level)
+	if conf.level != slog.LevelInfo {
+		t.Fatalf("conf.level %+v != slog.LevelInfo", conf.level)
 	}
 }
 
 // go test -v -cover -run=^TestWithWarnLevel$
 func TestWithWarnLevel(t *testing.T) {
-	conf := &config{level: levelError}
+	conf := &config{level: slog.LevelError}
 	WithWarnLevel().applyTo(conf)
 
-	if conf.level != levelWarn {
-		t.Fatalf("conf.level %+v != LevelWarn", conf.level)
+	if conf.level != slog.LevelWarn {
+		t.Fatalf("conf.level %+v != slog.LevelWarn", conf.level)
 	}
 }
 
 // go test -v -cover -run=^TestWithErrorLevel$
 func TestWithErrorLevel(t *testing.T) {
-	conf := &config{level: levelDebug}
+	conf := &config{level: slog.LevelDebug}
 	WithErrorLevel().applyTo(conf)
 
-	if conf.level != levelError {
-		t.Fatalf("conf.level %+v != LevelError", conf.level)
-	}
-}
-
-// go test -v -cover -run=^TestWithPrintLevel$
-func TestWithPrintLevel(t *testing.T) {
-	conf := &config{level: levelError}
-	WithPrintLevel().applyTo(conf)
-
-	if conf.level != levelPrint {
-		t.Fatalf("conf.level %+v != LevelPrint", conf.level)
-	}
-}
-
-// go test -v -cover -run=^TestWithOffLevel$
-func TestWithOffLevel(t *testing.T) {
-	conf := &config{level: levelError}
-	WithOffLevel().applyTo(conf)
-
-	if conf.level != levelOff {
-		t.Fatalf("conf.level %+v != LevelOff", conf.level)
+	if conf.level != slog.LevelError {
+		t.Fatalf("conf.level %+v != slog.LevelError", conf.level)
 	}
 }
 

@@ -19,46 +19,6 @@ import (
 	"testing"
 )
 
-// go test -v -cover -run=^TestNewContextWithKey$
-func TestNewContextWithKey(t *testing.T) {
-	key := "key"
-	logger := NewLogger()
-	ctx := NewContextWithKey(context.Background(), key, logger)
-
-	value := ctx.Value(key)
-	if value == nil {
-		t.Fatal("value == nil")
-	}
-
-	contextLogger, ok := value.(*Logger)
-	if !ok {
-		t.Fatalf("value type %T is wrong", value)
-	}
-
-	if contextLogger != logger {
-		t.Fatalf("contextLogger %+v != logger %+v", contextLogger, logger)
-	}
-}
-
-// go test -v -cover -run=^TestFromContextWithKey$
-func TestFromContextWithKey(t *testing.T) {
-	ctx := context.Background()
-
-	key := "key"
-	logger := FromContextWithKey(ctx, key)
-
-	if logger == nil {
-		t.Fatal("logger == nil")
-	}
-
-	logger = NewLogger()
-	contextLogger := FromContextWithKey(context.WithValue(ctx, key, logger), key)
-
-	if contextLogger != logger {
-		t.Fatalf("contextLogger %+v != logger %+v", contextLogger, logger)
-	}
-}
-
 // go test -v -cover -run=^TestNewContext$
 func TestNewContext(t *testing.T) {
 	logger := NewLogger()

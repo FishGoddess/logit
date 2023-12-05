@@ -16,6 +16,7 @@ package defaults
 
 import (
 	"encoding/json"
+	"log/slog"
 	"os"
 	"time"
 )
@@ -24,6 +25,9 @@ var (
 	// CallerDepth is the depth of caller.
 	// See runtime.Caller.
 	CallerDepth = 4
+
+	// LevelPrint is the level used for printing logs.
+	LevelPrint = slog.LevelInfo
 )
 
 var (

@@ -33,7 +33,7 @@ func TestConfigHandlerOptions(t *testing.T) {
 	replaceAttr := func(groups []string, attr slog.Attr) slog.Attr { return attr }
 
 	conf := &config{
-		level:       levelWarn,
+		level:       slog.LevelWarn,
 		withSource:  true,
 		replaceAttr: replaceAttr,
 	}
@@ -58,7 +58,7 @@ func TestConfigHandler(t *testing.T) {
 	replaceAttr := func(groups []string, attr slog.Attr) slog.Attr { return attr }
 
 	conf := &config{
-		level:       levelWarn,
+		level:       slog.LevelWarn,
 		withSource:  true,
 		replaceAttr: replaceAttr,
 

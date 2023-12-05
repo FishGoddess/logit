@@ -20,26 +20,16 @@ import (
 
 type contextKey struct{}
 
-// NewContextWithKey wraps context with logger of key and returns a new context.
-func NewContextWithKey(ctx context.Context, key interface{}, logger *Logger) context.Context {
-	return context.WithValue(ctx, key, logger)
-}
-
-// FromContextWithKey gets logger from context of key and returns the default logger if missed.
-func FromContextWithKey(ctx context.Context, key interface{}) *Logger {
-	if logger, ok := ctx.Value(key).(*Logger); ok {
-		return logger
-	}
-
-	return Default()
-}
-
 // NewContext wraps context with logger and returns a new context.
 func NewContext(ctx context.Context, logger *Logger) context.Context {
-	return NewContextWithKey(ctx, contextKey{}, logger)
+	return context.WithValue(ctx, contextKey{}, logger)
 }
 
 // FromContext gets logger from context and returns the default logger if missed.
 func FromContext(ctx context.Context) *Logger {
-	return FromContextWithKey(ctx, contextKey{})
+	if logger, ok := ctx.Value(contextKey{}).(*Logger); ok {
+		return logger
+	}
+
+	return Default()
 }
