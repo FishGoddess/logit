@@ -21,11 +21,29 @@ import (
 	"time"
 )
 
+// go test -v -cover -run=^TestBatch$
+func TestBatch(t *testing.T) {
+	writer := Batch(os.Stdout, 16)
+
+	if writer == nil {
+		t.Fatal("writer == nil")
+	}
+
+	if writer.maxBatches != 16 {
+		t.Fatalf("writer.maxBatches %d is wrong", writer.maxBatches)
+	}
+
+	newWriter := Batch(writer, 64)
+	if newWriter != writer {
+		t.Fatal("newWriter is wrong")
+	}
+}
+
 // go test -v -cover -run=^TestBatchWriter$
 func TestBatchWriter(t *testing.T) {
 	buffer := bytes.NewBuffer(make([]byte, 0, 4096))
 
-	writer := newBatchWriter(buffer, 10)
+	writer := Batch(buffer, 10)
 	defer writer.Close()
 
 	writer.Write([]byte("abc"))
@@ -46,11 +64,11 @@ func TestBatchWriter(t *testing.T) {
 	}
 }
 
-// go test -v -cover -run=^TestBatchWriterCount$
-func TestBatchWriterCount(t *testing.T) {
+// go test -v -cover -run=^TestBatchWriterSize$
+func TestBatchWriterSize(t *testing.T) {
 	buffer := bytes.NewBuffer(make([]byte, 0, 4096))
 
-	writer := newBatchWriter(buffer, 10)
+	writer := Batch(buffer, 10)
 	defer writer.Close()
 
 	for i := 0; i < 10; i++ {
@@ -83,14 +101,14 @@ func TestBatchWriterCount(t *testing.T) {
 
 // go test -v -cover -run=^TestBatchWriterClose$
 func TestBatchWriterClose(t *testing.T) {
-	writer := newBatchWriter(os.Stdout, 10)
+	writer := Batch(os.Stdout, 10)
 	for i := 0; i < 10; i++ {
 		if err := writer.Close(); err != nil {
 			t.Fatal(err)
 		}
 	}
 
-	writer = newBatchWriter(os.Stderr, 10)
+	writer = Batch(os.Stderr, 10)
 	for i := 0; i < 10; i++ {
 		if err := writer.Close(); err != nil {
 			t.Fatal(err)

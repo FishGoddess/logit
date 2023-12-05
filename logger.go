@@ -24,7 +24,6 @@ import (
 	"time"
 
 	"github.com/FishGoddess/logit/defaults"
-	"github.com/FishGoddess/logit/writer"
 )
 
 const (
@@ -297,7 +296,7 @@ func (l *Logger) Println(args ...interface{}) {
 
 // Sync syncs the logger and returns an error if failed.
 func (l *Logger) Sync() error {
-	if syncer, ok := l.handler.(writer.Syncer); ok {
+	if syncer, ok := l.handler.(Syncer); ok {
 		return syncer.Sync()
 	}
 

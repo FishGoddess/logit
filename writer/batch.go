@@ -29,9 +29,9 @@ const (
 	minBatchSize = 1
 )
 
-// batchWriter is a writer having a buffer inside to reduce times of writing underlying writer.
+// BatchWriter is a writer having a buffer inside to reduce times of writing underlying writer.
 // You can set batch count or use it with default batch count. Any writer implemented io.Writer can be used by it.
-type batchWriter struct {
+type BatchWriter struct {
 	// writer is the underlying writer to write data.
 	writer io.Writer
 
@@ -43,56 +43,35 @@ type batchWriter struct {
 
 	// buffer is for keeping data together and writing them one time.
 	// Data won't be written to underlying writer if batch count is less than max batch count, so you can pre-write them by Sync() if you need.
-	// Also, we provide a way to sync data automatically, see batchWriter.AutoSync.
 	buffer *bytes.Buffer
 
 	// lock is for safe concurrency.
 	lock sync.Mutex
 }
 
-// newBatchWriter returns a new batch writer of this writer with specified batchSize.
-// Notice that batchSize must be larger than minBatchCount or a panic will happen. See minBatchCount.
-func newBatchWriter(writer io.Writer, batchSize uint64) *batchWriter {
+// Batch returns a new batch writer of writer with specified batchSize.
+// Notice that batchSize must be larger than minBatchCount or a panic will happen. See minBatchSize.
+func Batch(writer io.Writer, batchSize uint64) *BatchWriter {
 	if batchSize < minBatchSize {
 		panic(fmt.Errorf("logit: batchSize %d < minBatchSize %d", batchSize, minBatchSize))
 	}
 
-	return &batchWriter{
+	if bw, ok := writer.(*BatchWriter); ok {
+		return bw
+	}
+
+	bw := &BatchWriter{
 		writer:         writer,
 		maxBatches:     batchSize,
 		currentBatches: 0,
 		buffer:         bytes.NewBuffer(make([]byte, 0, defaults.BufferSize)),
 	}
-}
 
-// sync writes data in buffer to underlying writer.
-func (bw *batchWriter) sync() error {
-	if _, err := bw.buffer.WriteTo(bw.writer); err != nil {
-		return err
-	}
-
-	if syncer, ok := bw.writer.(Syncer); ok && notStdoutAndStderr(bw.writer) {
-		return syncer.Sync()
-	}
-
-	return nil
-}
-
-// Sync writes data in buffer to underlying writer if buffer has data.
-// It's safe in concurrency.
-func (bw *batchWriter) Sync() error {
-	bw.lock.Lock()
-	defer bw.lock.Unlock()
-
-	if bw.buffer.Len() > 0 {
-		return bw.sync()
-	}
-
-	return nil
+	return bw
 }
 
 // Write writes p to buffer and syncs data to underlying writer first if it needs.
-func (bw *batchWriter) Write(p []byte) (n int, err error) {
+func (bw *BatchWriter) Write(p []byte) (n int, err error) {
 	bw.lock.Lock()
 	defer bw.lock.Unlock()
 
@@ -105,8 +84,35 @@ func (bw *batchWriter) Write(p []byte) (n int, err error) {
 	return bw.buffer.Write(p)
 }
 
+// sync writes data in buffer to underlying writer.
+func (bw *BatchWriter) sync() error {
+	if _, err := bw.buffer.WriteTo(bw.writer); err != nil {
+		return err
+	}
+
+	syncer, ok := bw.writer.(interface{ Sync() error })
+	if ok && notStdoutAndStderr(bw.writer) {
+		return syncer.Sync()
+	}
+
+	return nil
+}
+
+// Sync writes data in buffer to underlying writer if buffer has data.
+// It's safe in concurrency.
+func (bw *BatchWriter) Sync() error {
+	bw.lock.Lock()
+	defer bw.lock.Unlock()
+
+	if bw.buffer.Len() > 0 {
+		return bw.sync()
+	}
+
+	return nil
+}
+
 // Close syncs data and closes underlying writer if writer implements io.Closer.
-func (bw *batchWriter) Close() error {
+func (bw *BatchWriter) Close() error {
 	bw.lock.Lock()
 	defer bw.lock.Unlock()
 

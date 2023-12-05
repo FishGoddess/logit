@@ -12,14 +12,4 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package writer
-
-import (
-	"io"
-	"os"
-)
-
-// notStdoutAndStderr returns true if w isn't stdout and stderr.
-func notStdoutAndStderr(w io.Writer) bool {
-	return w != os.Stdout && w != os.Stderr
-}
+package logit

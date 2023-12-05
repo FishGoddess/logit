@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package handler
+package logit
 
 import (
 	"context"
@@ -20,30 +20,30 @@ import (
 	"log/slog"
 )
 
-type textHandler struct {
+type jsonHandler struct {
 	handler slog.Handler
 }
 
-func NewTextHandler(w io.Writer, opts *slog.HandlerOptions) slog.Handler {
-	handler := &textHandler{
-		handler: slog.NewTextHandler(w, opts),
+func NewJsonHandler(w io.Writer, opts *slog.HandlerOptions) slog.Handler {
+	handler := &jsonHandler{
+		handler: slog.NewJSONHandler(w, opts),
 	}
 
 	return handler
 }
 
-func (th *textHandler) WithGroup(name string) slog.Handler {
+func (th *jsonHandler) WithGroup(name string) slog.Handler {
 	return th.handler.WithGroup(name)
 }
 
-func (th *textHandler) WithAttrs(attrs []slog.Attr) slog.Handler {
+func (th *jsonHandler) WithAttrs(attrs []slog.Attr) slog.Handler {
 	return th.handler.WithAttrs(attrs)
 }
 
-func (th *textHandler) Enabled(ctx context.Context, level slog.Level) bool {
+func (th *jsonHandler) Enabled(ctx context.Context, level slog.Level) bool {
 	return th.handler.Enabled(ctx, level)
 }
 
-func (th *textHandler) Handle(ctx context.Context, record slog.Record) error {
+func (th *jsonHandler) Handle(ctx context.Context, record slog.Record) error {
 	return th.handler.Handle(ctx, record)
 }

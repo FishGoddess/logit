@@ -23,11 +23,29 @@ import (
 	"github.com/FishGoddess/logit/defaults"
 )
 
+// go test -v -cover -run=^TestBuffer$
+func TestBuffer(t *testing.T) {
+	writer := Buffer(os.Stdout, 1024)
+
+	if writer == nil {
+		t.Fatal("writer == nil")
+	}
+
+	if writer.maxBufferSize != 1024 {
+		t.Fatalf("writer.maxBufferSize %d is wrong", writer.maxBufferSize)
+	}
+
+	newWriter := Buffer(writer, 4096)
+	if newWriter != writer {
+		t.Fatal("newWriter is wrong")
+	}
+}
+
 // go test -v -cover -run=^TestBufferWriter$
 func TestBufferWriter(t *testing.T) {
 	buffer := bytes.NewBuffer(make([]byte, 0, 4096))
 
-	writer := newBufferWriter(buffer, defaults.BufferSize)
+	writer := Buffer(buffer, defaults.BufferSize)
 	defer writer.Close()
 
 	writer.Write([]byte("abc"))
@@ -50,14 +68,14 @@ func TestBufferWriter(t *testing.T) {
 
 // go test -v -cover -run=^TestBufferWriterClose$
 func TestBufferWriterClose(t *testing.T) {
-	writer := newBufferWriter(os.Stdout, 4096)
+	writer := Buffer(os.Stdout, 4096)
 	for i := 0; i < 10; i++ {
 		if err := writer.Close(); err != nil {
 			t.Fatal(err)
 		}
 	}
 
-	writer = newBufferWriter(os.Stderr, 4096)
+	writer = Buffer(os.Stderr, 4096)
 	for i := 0; i < 10; i++ {
 		if err := writer.Close(); err != nil {
 			t.Fatal(err)

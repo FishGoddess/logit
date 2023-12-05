@@ -16,6 +16,8 @@ package logit
 
 import (
 	"bytes"
+	"fmt"
+	"io"
 	"log/slog"
 	"os"
 	"path/filepath"
@@ -190,7 +192,7 @@ func TestWithBuffer(t *testing.T) {
 	buffer := bytes.NewBuffer(make([]byte, 0, 128))
 	w := conf.wrapWriter(buffer)
 
-	ww, ok := w.(writer.Writer)
+	ww, ok := w.(*writer.BufferWriter)
 	if !ok {
 		t.Fatalf("writer type %T is wrong", w)
 	}
@@ -234,14 +236,14 @@ func TestWithBatch(t *testing.T) {
 	buffer := bytes.NewBuffer(make([]byte, 0, 256))
 	w := conf.wrapWriter(buffer)
 
-	ww, ok := w.(writer.Writer)
+	bw, ok := w.(*writer.BatchWriter)
 	if !ok {
 		t.Fatalf("writer type %T is wrong", w)
 	}
 
 	text := string(make([]byte, 4))
 	for i := 0; i < 15; i++ {
-		if _, err := ww.Write([]byte(text)); err != nil {
+		if _, err := bw.Write([]byte(text)); err != nil {
 			t.Fatal(err)
 		}
 	}
@@ -252,7 +254,7 @@ func TestWithBatch(t *testing.T) {
 	}
 
 	for i := 0; i < 15; i++ {
-		if _, err := ww.Write([]byte(text)); err != nil {
+		if _, err := bw.Write([]byte(text)); err != nil {
 			t.Fatal(err)
 		}
 	}
@@ -267,7 +269,7 @@ func TestWithBatch(t *testing.T) {
 		t.Fatalf("string(data) %s != want %s", string(data), want)
 	}
 
-	if err := ww.Sync(); err != nil {
+	if err := bw.Sync(); err != nil {
 		t.Fatal(err)
 	}
 
@@ -278,6 +280,30 @@ func TestWithBatch(t *testing.T) {
 
 	if string(data) != want {
 		t.Fatalf("string(data) %s != want %s", string(data), want)
+	}
+}
+
+// go test -v -cover -run=^TestWithHandler$
+func TestWithHandler(t *testing.T) {
+	newHandler := func(w io.Writer, opts *slog.HandlerOptions) slog.Handler { return nil }
+
+	conf := &config{newHandler: nil}
+	WithHandler(newHandler).applyTo(conf)
+
+	if fmt.Sprintf("%p", conf.newHandler) != fmt.Sprintf("%p", newHandler) {
+		t.Fatal("conf.newHandler is wrong")
+	}
+}
+
+// go test -v -cover -run=^TestWithReplaceAttr$
+func TestWithReplaceAttr(t *testing.T) {
+	replaceAttr := func(groups []string, attr slog.Attr) slog.Attr { return slog.Attr{} }
+
+	conf := &config{replaceAttr: nil}
+	WithReplaceAttr(replaceAttr).applyTo(conf)
+
+	if fmt.Sprintf("%p", conf.replaceAttr) != fmt.Sprintf("%p", replaceAttr) {
+		t.Fatal("conf.replaceAttr is wrong")
 	}
 }
 

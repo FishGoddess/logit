@@ -21,7 +21,6 @@ import (
 	"path/filepath"
 
 	"github.com/FishGoddess/logit/defaults"
-	"github.com/FishGoddess/logit/handler"
 	"github.com/FishGoddess/logit/rotate"
 	"github.com/FishGoddess/logit/writer"
 )
@@ -138,7 +137,7 @@ func WithRotateFile(path string, opts ...rotate.Option) Option {
 // You should specify a buffer size in bytes.
 // The remained data in buffer may discard if you kill the process without syncing or closing the logger.
 func WithBuffer(bufferSize uint64) Option {
-	wrapWriter := func(w io.Writer) writer.Writer {
+	wrapWriter := func(w io.Writer) Writer {
 		return writer.Buffer(w, bufferSize)
 	}
 
@@ -151,7 +150,7 @@ func WithBuffer(bufferSize uint64) Option {
 // You should specify a batch size in count.
 // The remained logs in batch may discard if you kill the process without syncing or closing the logger.
 func WithBatch(batchSize uint64) Option {
-	wrapWriter := func(w io.Writer) writer.Writer {
+	wrapWriter := func(w io.Writer) Writer {
 		return writer.Batch(w, batchSize)
 	}
 
@@ -163,7 +162,7 @@ func WithBatch(batchSize uint64) Option {
 // WithHandler sets handler to config.
 // It's a function returning a slog.Handler instance.
 // You can return slog's handlers or your customizing handlers by this function.
-func WithHandler(newHandler NewHandlerFunc) Option {
+func WithHandler(newHandler func(w io.Writer, opts *slog.HandlerOptions) slog.Handler) Option {
 	return func(conf *config) {
 		conf.newHandler = newHandler
 	}
@@ -172,14 +171,21 @@ func WithHandler(newHandler NewHandlerFunc) Option {
 // WithTextHandler sets text handler to config.
 func WithTextHandler() Option {
 	return func(conf *config) {
-		conf.newHandler = handler.NewTextHandler
+		conf.newHandler = NewTextHandler
 	}
 }
 
 // WithJsonHandler sets json handler to config.
 func WithJsonHandler() Option {
 	return func(conf *config) {
-		conf.newHandler = handler.NewJsonHandler
+		conf.newHandler = NewJsonHandler
+	}
+}
+
+// WithReplaceAttr sets replaceAttr to config.
+func WithReplaceAttr(replaceAttr func(groups []string, attr slog.Attr) slog.Attr) Option {
+	return func(conf *config) {
+		conf.replaceAttr = replaceAttr
 	}
 }
 

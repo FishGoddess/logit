@@ -12,4 +12,18 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package handler
+package logit
+
+import "io"
+
+// Syncer is an interface that syncs data to somewhere.
+type Syncer interface {
+	Sync() error
+}
+
+// Writer is an interface which have sync, write and close functions.
+type Writer interface {
+	io.Writer
+	Syncer
+	io.Closer
+}

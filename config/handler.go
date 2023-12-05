@@ -22,27 +22,28 @@ import (
 	"sync"
 
 	"github.com/FishGoddess/logit"
-	"github.com/FishGoddess/logit/handler"
 )
 
 var (
-	newHandlers = map[string]logit.NewHandlerFunc{
-		"text":      handler.NewTextHandler,
-		"json":      handler.NewJsonHandler,
-		"slog.text": newSlogTextHandler,
-		"slog.json": newSlogJsonHandler,
+	newHandlers = map[string]NewHandlerFunc{
+		"text": func(w io.Writer, opts *slog.HandlerOptions) slog.Handler {
+			return logit.NewTextHandler(w, opts)
+		},
+		"json": func(w io.Writer, opts *slog.HandlerOptions) slog.Handler {
+			return logit.NewJsonHandler(w, opts)
+		},
+		"slog.text": func(w io.Writer, opts *slog.HandlerOptions) slog.Handler {
+			return slog.NewTextHandler(w, opts)
+		},
+		"slog.json": func(w io.Writer, opts *slog.HandlerOptions) slog.Handler {
+			return slog.NewJSONHandler(w, opts)
+		},
 	}
 
 	newHandlersLock sync.RWMutex
 )
 
-func newSlogTextHandler(w io.Writer, opts *slog.HandlerOptions) slog.Handler {
-	return slog.NewTextHandler(w, opts)
-}
-
-func newSlogJsonHandler(w io.Writer, opts *slog.HandlerOptions) slog.Handler {
-	return slog.NewJSONHandler(w, opts)
-}
+type NewHandlerFunc func(w io.Writer, opts *slog.HandlerOptions) slog.Handler
 
 func newHandler(name string, w io.Writer, opts *slog.HandlerOptions) (slog.Handler, error) {
 	newHandlersLock.RLock()
@@ -61,7 +62,7 @@ func newHandler(name string, w io.Writer, opts *slog.HandlerOptions) (slog.Handl
 	return nil, fmt.Errorf("logit: handler %s not found, available handlers are %s", name, handlerNames.String())
 }
 
-func RegisterHandler(name string, newHandler logit.NewHandlerFunc) error {
+func RegisterHandler(name string, newHandler NewHandlerFunc) error {
 	newHandlersLock.Lock()
 	defer newHandlersLock.Unlock()
 

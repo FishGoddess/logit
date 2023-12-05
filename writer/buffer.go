@@ -27,9 +27,9 @@ const (
 	minBufferSize = 16
 )
 
-// bufferWriter is a writer having a buffer inside to reduce times of writing underlying writer.
+// BufferWriter is a writer having a buffer inside to reduce times of writing underlying writer.
 // You can set buffer size or use it with default buffer size. Any writer implemented io.Writer can be used by it.
-type bufferWriter struct {
+type BufferWriter struct {
 	// writer is the underlying writer to write data.
 	writer io.Writer
 
@@ -38,56 +38,35 @@ type bufferWriter struct {
 
 	// buffer is for keeping data together and writing them one time.
 	// Data won't be written to underlying writer if buffer doesn't full, so you can pre-write them by Sync() if you need.
-	// Also, we provide a way to sync data automatically, see bufferWriter.AutoSync.
 	buffer *bytes.Buffer
 
 	// lock is for safe concurrency.
 	lock sync.Mutex
 }
 
-// newBufferWriter returns a new buffer writer of this writer with specified bufferSize.
+// Buffer returns a new buffer writer of writer with specified bufferSize.
 // Notice that bufferSize must be larger than minBufferSize or a panic will happen. See minBufferSize.
 // The size we want to use is bufferSize, but we add more bytes to it for avoiding buffer growing up.
-func newBufferWriter(writer io.Writer, bufferSize uint64) *bufferWriter {
+func Buffer(writer io.Writer, bufferSize uint64) *BufferWriter {
 	if bufferSize < minBufferSize {
 		panic(fmt.Errorf("bufferSize %d < minBufferSize %d", bufferSize, minBufferSize))
 	}
 
-	return &bufferWriter{
+	if bw, ok := writer.(*BufferWriter); ok {
+		return bw
+	}
+
+	bw := &BufferWriter{
 		writer:        writer,
 		maxBufferSize: bufferSize,
 		buffer:        bytes.NewBuffer(make([]byte, 0, bufferSize+minBufferSize)),
 	}
-}
 
-// sync writes data in buffer to underlying writer.
-func (bw *bufferWriter) sync() error {
-	if _, err := bw.buffer.WriteTo(bw.writer); err != nil {
-		return err
-	}
-
-	if syncer, ok := bw.writer.(Syncer); ok && notStdoutAndStderr(bw.writer) {
-		return syncer.Sync()
-	}
-
-	return nil
-}
-
-// Sync writes data in buffer to underlying writer if buffer has data.
-// It's safe in concurrency.
-func (bw *bufferWriter) Sync() error {
-	bw.lock.Lock()
-	defer bw.lock.Unlock()
-
-	if bw.buffer.Len() > 0 {
-		return bw.sync()
-	}
-
-	return nil
+	return bw
 }
 
 // Write writes p to buffer and syncs data to underlying writer first if it needs.
-func (bw *bufferWriter) Write(p []byte) (n int, err error) {
+func (bw *BufferWriter) Write(p []byte) (n int, err error) {
 	bw.lock.Lock()
 	defer bw.lock.Unlock()
 
@@ -110,8 +89,35 @@ func (bw *bufferWriter) Write(p []byte) (n int, err error) {
 	return bw.buffer.Write(p)
 }
 
+// sync writes data in buffer to underlying writer.
+func (bw *BufferWriter) sync() error {
+	if _, err := bw.buffer.WriteTo(bw.writer); err != nil {
+		return err
+	}
+
+	syncer, ok := bw.writer.(interface{ Sync() error })
+	if ok && notStdoutAndStderr(bw.writer) {
+		return syncer.Sync()
+	}
+
+	return nil
+}
+
+// Sync writes data in buffer to underlying writer if buffer has data.
+// It's safe in concurrency.
+func (bw *BufferWriter) Sync() error {
+	bw.lock.Lock()
+	defer bw.lock.Unlock()
+
+	if bw.buffer.Len() > 0 {
+		return bw.sync()
+	}
+
+	return nil
+}
+
 // Close syncs data and closes underlying writer if writer implements io.Closer.
-func (bw *bufferWriter) Close() error {
+func (bw *BufferWriter) Close() error {
 	bw.lock.Lock()
 	defer bw.lock.Unlock()
 

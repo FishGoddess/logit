@@ -20,31 +20,16 @@ import (
 	"log/slog"
 	"os"
 	"time"
-
-	"github.com/FishGoddess/logit/handler"
-	"github.com/FishGoddess/logit/writer"
 )
-
-var (
-	_ NewHandlerFunc = handler.NewTextHandler
-	_ NewHandlerFunc = handler.NewJsonHandler
-)
-
-// NewHandlerFunc is a function creating a slog.Handler instance with w and opts.
-type NewHandlerFunc func(w io.Writer, opts *slog.HandlerOptions) slog.Handler
-
-// ReplaceAttrFunc is a function replacing attr of groups.
-// See slog.HandlerOptions.ReplaceAttr.
-type ReplaceAttrFunc func(groups []string, attr slog.Attr) slog.Attr
 
 type config struct {
 	level slog.Level
 
 	newWriter  func() (io.Writer, error)
-	wrapWriter func(io.Writer) writer.Writer
+	wrapWriter func(io.Writer) Writer
 
-	newHandler  NewHandlerFunc
-	replaceAttr ReplaceAttrFunc
+	newHandler  func(w io.Writer, opts *slog.HandlerOptions) slog.Handler
+	replaceAttr func(groups []string, attr slog.Attr) slog.Attr
 
 	withSource bool
 	withPID    bool
@@ -61,7 +46,7 @@ func newDefaultConfig() *config {
 		level:        slog.LevelDebug,
 		newWriter:    newWriter,
 		wrapWriter:   nil,
-		newHandler:   handler.NewTextHandler,
+		newHandler:   NewTextHandler,
 		replaceAttr:  nil,
 		withSource:   false,
 		withPID:      false,

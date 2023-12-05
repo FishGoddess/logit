@@ -29,26 +29,3 @@ func TestNotStdoutAndStderr(t *testing.T) {
 		t.Fatal("notStdoutAndStderr(os.Stderr) returns true")
 	}
 }
-
-// go test -v -cover -run=^TestBuffer$
-func TestBuffer(t *testing.T) {
-	writer := Buffer(os.Stdout, 1024)
-
-	if _, ok := writer.(*bufferWriter); !ok {
-		t.Fatalf("writer type %T is wrong", writer)
-	}
-}
-
-// go test -v -cover -run=^TestBatch$
-func TestBatch(t *testing.T) {
-	writer := Batch(os.Stdout, 16)
-
-	bw, ok := writer.(*batchWriter)
-	if !ok {
-		t.Fatalf("writer type %T is wrong", writer)
-	}
-
-	if bw.maxBatches != 16 {
-		t.Fatalf("bw.maxBatches %d is wrong", bw.maxBatches)
-	}
-}
