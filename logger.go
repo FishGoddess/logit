@@ -217,15 +217,15 @@ func (l *Logger) newRecord(level slog.Level, msg string, args []any) slog.Record
 }
 
 func (l *Logger) log(ctx context.Context, level slog.Level, msg string, args ...any) {
-	if ctx == nil {
-		ctx = context.Background()
-	}
-
 	if !l.handler.Enabled(ctx, level) {
 		return
 	}
 
-	// TODO 尝试用对象池优化
+	if ctx == nil {
+		ctx = context.Background()
+	}
+
+	// The record may be put on heap, not stack?
 	record := l.newRecord(level, msg, args)
 
 	if err := l.handler.Handle(ctx, record); err != nil {
