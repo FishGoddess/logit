@@ -18,7 +18,6 @@ import (
 	"fmt"
 	"io"
 	"log/slog"
-	"strings"
 	"sync"
 
 	"github.com/FishGoddess/logit"
@@ -43,25 +42,21 @@ var (
 	newHandlersLock sync.RWMutex
 )
 
+// NewHandlerFunc is a function for creating slog.Handler with w and opts.
 type NewHandlerFunc func(w io.Writer, opts *slog.HandlerOptions) slog.Handler
 
-func newHandler(name string, w io.Writer, opts *slog.HandlerOptions) (slog.Handler, error) {
+func pickNewHandler(name string) (NewHandlerFunc, error) {
 	newHandlersLock.RLock()
 	defer newHandlersLock.RUnlock()
 
 	if newHandler, ok := newHandlers[name]; ok {
-		return newHandler(w, opts), nil
+		return newHandler, nil
 	}
 
-	var handlerNames strings.Builder
-	for name := range newHandlers {
-		handlerNames.WriteString(name)
-		handlerNames.WriteString(",")
-	}
-
-	return nil, fmt.Errorf("logit: handler %s not found, available handlers are %s", name, handlerNames.String())
+	return nil, fmt.Errorf("logit: handler %s unknown", name)
 }
 
+// RegisterHandler registers newHandler with name to logit.
 func RegisterHandler(name string, newHandler NewHandlerFunc) error {
 	newHandlersLock.Lock()
 	defer newHandlersLock.Unlock()

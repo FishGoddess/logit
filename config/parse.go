@@ -30,7 +30,6 @@ const (
 	Day = 24 * time.Hour
 )
 
-// parseByteSize parse size with given unit information.
 func parseByteSizeWithUnit(size string, unit string, unitSize uint64, bitUnit bool) (uint64, error) {
 	size = strings.TrimSuffix(size, unit)
 

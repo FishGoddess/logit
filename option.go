@@ -19,6 +19,7 @@ import (
 	"log/slog"
 	"os"
 	"path/filepath"
+	"time"
 
 	"github.com/FishGoddess/logit/defaults"
 	"github.com/FishGoddess/logit/rotate"
@@ -202,6 +203,14 @@ func WithSource() Option {
 func WithPID() Option {
 	return func(conf *config) {
 		conf.withPID = true
+	}
+}
+
+// WithSyncTimer sets a sync timer duration to config.
+// It will call Sync() so it depends on the handler used by logger.
+func WithSyncTimer(d time.Duration) Option {
+	return func(conf *config) {
+		conf.syncTimer = d
 	}
 }
 

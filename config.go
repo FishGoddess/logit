@@ -34,7 +34,7 @@ type config struct {
 	withSource bool
 	withPID    bool
 
-	syncDuration time.Duration
+	syncTimer time.Duration
 }
 
 func newDefaultConfig() *config {
@@ -43,14 +43,14 @@ func newDefaultConfig() *config {
 	}
 
 	conf := &config{
-		level:        slog.LevelDebug,
-		newWriter:    newWriter,
-		wrapWriter:   nil,
-		newHandler:   NewTextHandler,
-		replaceAttr:  nil,
-		withSource:   false,
-		withPID:      false,
-		syncDuration: 0,
+		level:       slog.LevelDebug,
+		newWriter:   newWriter,
+		wrapWriter:  nil,
+		newHandler:  NewTextHandler,
+		replaceAttr: nil,
+		withSource:  false,
+		withPID:     false,
+		syncTimer:   0,
 	}
 
 	return conf

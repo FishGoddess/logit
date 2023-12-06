@@ -13,3 +13,33 @@
 // limitations under the License.
 
 package config
+
+import (
+	"fmt"
+	"io"
+	"log/slog"
+	"testing"
+)
+
+// go test -v -cover -run=^TestRegisterHandler$
+func TestRegisterHandler(t *testing.T) {
+	if err := RegisterHandler("text", nil); err == nil {
+		t.Fatal("register an existed handler func should be failed")
+	}
+
+	handler := "new"
+	newHandlerFunc := func(w io.Writer, opts *slog.HandlerOptions) slog.Handler { return nil }
+
+	if err := RegisterHandler(handler, newHandlerFunc); err != nil {
+		t.Fatal(err)
+	}
+
+	newHandler, ok := newHandlers[handler]
+	if !ok {
+		t.Fatalf("handler %s not found", handler)
+	}
+
+	if fmt.Sprintf("%p", newHandler) != fmt.Sprintf("%p", newHandlerFunc) {
+		t.Fatal("newHandler registered is wrong")
+	}
+}

@@ -22,6 +22,7 @@ import (
 	"os"
 	"path/filepath"
 	"testing"
+	"time"
 
 	"github.com/FishGoddess/logit/rotate"
 	"github.com/FishGoddess/logit/writer"
@@ -324,5 +325,15 @@ func TestWithPID(t *testing.T) {
 
 	if !conf.withPID {
 		t.Fatal("conf.withPID is wrong")
+	}
+}
+
+// go test -v -cover -run=^TestWithSyncTimer$
+func TestWithSyncTimer(t *testing.T) {
+	conf := &config{syncTimer: 0}
+	WithSyncTimer(time.Minute).applyTo(conf)
+
+	if conf.syncTimer != time.Minute {
+		t.Fatal("conf.syncTimer is wrong")
 	}
 }

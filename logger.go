@@ -40,8 +40,6 @@ type Logger struct {
 
 	withSource bool
 	withPID    bool
-
-	syncDuration time.Duration
 }
 
 // NewLogger creates a logger with given options or panics if failed.
@@ -70,30 +68,30 @@ func NewLoggerGracefully(opts ...Option) (*Logger, error) {
 	}
 
 	logger := &Logger{
-		handler:      handler,
-		withSource:   conf.withSource,
-		withPID:      conf.withPID,
-		syncDuration: conf.syncDuration,
+		handler:    handler,
+		withSource: conf.withSource,
+		withPID:    conf.withPID,
 	}
 
-	logger.runSyncTask()
+	if conf.syncTimer > 0 {
+		go logger.runSyncTimer(conf.syncTimer)
+	}
+
 	return logger, nil
 }
 
-func (l *Logger) runSyncTask() {
-	if l.syncDuration <= 0 {
-		return
-	}
+func (l *Logger) runSyncTimer(d time.Duration) {
+	timer := time.NewTimer(d)
+	defer timer.Stop()
 
-	go func() {
-		for {
-			time.Sleep(l.syncDuration)
-
+	for {
+		select {
+		case <-timer.C:
 			if err := l.Sync(); err != nil {
 				defaults.HandleError("Logger.Sync", err)
 			}
 		}
-	}()
+	}
 }
 
 func (l *Logger) clone() *Logger {
