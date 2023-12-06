@@ -24,6 +24,7 @@ import (
 // go test -v -cover -run=^TestBackupBefore$
 func TestBackupBefore(t *testing.T) {
 	b := backup{t: time.Unix(2, 0)}
+
 	if b.before(time.Unix(1, 0)) {
 		t.Fatalf("b.before(time.Unix(1, 0)) returns false")
 	}
@@ -36,10 +37,15 @@ func TestBackupBefore(t *testing.T) {
 // go test -v -cover -run=^TestSortBackups$
 func TestSortBackups(t *testing.T) {
 	backups := []backup{
-		{t: time.Unix(2, 0)}, {t: time.Unix(1, 0)}, {t: time.Unix(4, 0)}, {t: time.Unix(0, 0)}, {t: time.Unix(3, 0)},
+		{t: time.Unix(2, 0)},
+		{t: time.Unix(1, 0)},
+		{t: time.Unix(4, 0)},
+		{t: time.Unix(0, 0)},
+		{t: time.Unix(3, 0)},
 	}
 
 	sortBackups(backups)
+
 	for i, backup := range backups {
 		if backup.t.Unix() != int64(i) {
 			t.Fatalf("backup.t.Unix() %d != int64(i) %d", backup.t.Unix(), int64(i))
@@ -50,33 +56,36 @@ func TestSortBackups(t *testing.T) {
 // go test -v -cover -run=^TestBackupPrefixAndExt$
 func TestBackupPrefixAndExt(t *testing.T) {
 	prefix, ext := backupPrefixAndExt("test.log")
-	if prefix != "test"+backupSeparator {
-		t.Fatalf("prefix %s != 'test'+backupSeparator %s", prefix, "test"+backupSeparator)
+
+	want := "test" + backupSeparator
+	if prefix != want {
+		t.Fatalf("prefix %s != want %s", prefix, want)
 	}
 
-	if ext != ".log" {
-		t.Fatalf("ext %s != '.log'", ext)
+	want = ".log"
+	if ext != want {
+		t.Fatalf("ext %s != want %s", ext, want)
 	}
 }
 
 // go test -v -cover -run=^TestBackupPath$
 func TestBackupPath(t *testing.T) {
-	defaults.TimeLocation = time.UTC
-
 	defaults.CurrentTime = func() time.Time {
-		return time.Unix(1, 0)
+		return time.Unix(1, 0).In(time.UTC)
 	}
 
 	path := backupPath("test.log", "20060102150405")
-
-	if path != "test.19700101000001.log" {
-		t.Fatalf("path %s != 'test.19700101080001.log'", path)
+	want := "test.19700101000001.log"
+	if path != want {
+		t.Fatalf("path %s != want %s", path, want)
 	}
 }
 
 // go test -v -cover -run=^TestParseBackupTime$
 func TestParseBackupTime(t *testing.T) {
-	defaults.TimeLocation = time.UTC
+	defaults.CurrentTime = func() time.Time {
+		return time.Now().In(time.UTC)
+	}
 
 	filename := "test.19700101000001.log"
 	prefix := "test."

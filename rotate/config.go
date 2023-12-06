@@ -23,30 +23,28 @@ const (
 	Day = 24 * time.Hour
 )
 
-// config stores some fields of file.
 type config struct {
 	// timeFormat is the time format of backup path.
 	timeFormat string
 
 	// maxSize is the max size of file.
 	// If size of data in one write is bigger than maxSize, then file will rotate and write it,
-	// which means file and its backup may bigger than maxSize in size.
+	// which means file and its backup may be bigger than maxSize in size.
 	maxSize uint64
 
-	// maxAge is the time that backup will live.
-	// All backups reach maxAge will be removed automatically.
+	// maxAge is how long that backup will live.
+	// All backups reached maxAge will be cleaned automatically.
 	maxAge time.Duration
 
 	// maxBackups is the max count of backups.
-	maxBackups int
+	maxBackups uint32
 }
 
-// newDefaultConfig returns a default config.
 func newDefaultConfig() config {
 	return config{
 		timeFormat: "20060102150405",
-		maxSize:    256 * MB,
-		maxAge:     90 * Day,
-		maxBackups: 100,
+		maxSize:    128 * MB,
+		maxAge:     60 * Day,
+		maxBackups: 90,
 	}
 }

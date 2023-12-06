@@ -18,7 +18,6 @@ import (
 	"path/filepath"
 	"sort"
 	"strconv"
-	"strings"
 	"time"
 
 	"github.com/FishGoddess/logit/defaults"
@@ -28,49 +27,44 @@ const (
 	backupSeparator = "."
 )
 
-// backup is the backup of file.
 type backup struct {
 	path string
 	t    time.Time
 }
 
-// before returns if b.t is earlier than t.
 func (b backup) before(t time.Time) bool {
 	return b.t.Before(t)
 }
 
-// sortBackups sorts backups.
 func sortBackups(backups []backup) {
 	sort.Slice(backups, func(i, j int) bool {
 		return backups[i].before(backups[j].t)
 	})
 }
 
-// backupPrefixAndExt returns the prefix and ext of path in backup form.
-func backupPrefixAndExt(path string) (string, string) {
-	ext := filepath.Ext(path)
-	prefix := path[:len(path)-len(ext)] + backupSeparator
+func backupPrefixAndExt(path string) (prefix string, ext string) {
+	ext = filepath.Ext(path)
+	prefix = path[:len(path)-len(ext)] + backupSeparator
+
 	return prefix, ext
 }
 
-// backupPath returns the backup path of path with time format.
 func backupPath(path string, timeFormat string) string {
-	now := defaults.CurrentTime().In(defaults.TimeLocation)
+	now := defaults.CurrentTime()
 	name, ext := backupPrefixAndExt(path)
 
-	if strings.ToLower(timeFormat) != "" {
+	if timeFormat != "" {
 		return name + now.Format(timeFormat) + ext
 	}
 
 	return name + strconv.FormatInt(now.Unix(), 10) + ext
 }
 
-// parseBackupTime parses backup time from filename and given time format.
 func parseBackupTime(filename string, prefix string, ext string, timeFormat string) (time.Time, error) {
 	ts := filename[len(prefix) : len(filename)-len(ext)]
 
-	if strings.ToLower(timeFormat) != "" {
-		return time.ParseInLocation(timeFormat, ts, defaults.TimeLocation)
+	if timeFormat != "" {
+		return time.Parse(timeFormat, ts)
 	}
 
 	seconds, err := strconv.ParseInt(ts, 10, 64)
@@ -78,5 +72,5 @@ func parseBackupTime(filename string, prefix string, ext string, timeFormat stri
 		return time.Time{}, err
 	}
 
-	return time.Unix(seconds, 0).In(defaults.TimeLocation), nil
+	return time.Unix(seconds, 0), nil
 }

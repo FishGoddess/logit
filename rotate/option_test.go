@@ -24,7 +24,7 @@ func TestWithTimeFormat(t *testing.T) {
 	c := newDefaultConfig()
 	c.timeFormat = ""
 
-	WithTimeFormat("20060102").Apply(&c)
+	WithTimeFormat("20060102").apply(&c)
 
 	want := newDefaultConfig()
 	want.timeFormat = "20060102"
@@ -39,7 +39,7 @@ func TestWithMaxSize(t *testing.T) {
 	c := newDefaultConfig()
 	c.maxSize = 0
 
-	WithMaxSize(4 * 1024).Apply(&c)
+	WithMaxSize(4 * 1024).apply(&c)
 
 	want := newDefaultConfig()
 	want.maxSize = 4 * 1024
@@ -54,7 +54,7 @@ func TestWithMaxAge(t *testing.T) {
 	c := newDefaultConfig()
 	c.maxAge = 0
 
-	WithMaxAge(24 * time.Hour).Apply(&c)
+	WithMaxAge(24 * time.Hour).apply(&c)
 
 	want := newDefaultConfig()
 	want.maxAge = 24 * time.Hour
@@ -69,7 +69,7 @@ func TestWithMaxBackups(t *testing.T) {
 	c := newDefaultConfig()
 	c.maxBackups = 0
 
-	WithMaxBackups(30).Apply(&c)
+	WithMaxBackups(30).apply(&c)
 
 	want := newDefaultConfig()
 	want.maxBackups = 30

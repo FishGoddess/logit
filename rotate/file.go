@@ -26,7 +26,7 @@ import (
 
 // File is a file which supports rotating automatically.
 // It has max size and file will rotate if size exceeds max size.
-// It has max age and max backups, so rotated files will be controlled in quantity which is beneficial to space.
+// It has max age and max backups, so rotated files will be cleaned which is beneficial to space.
 type File struct {
 	config
 	path string
@@ -36,6 +36,7 @@ type File struct {
 
 	file *os.File
 	ch   chan struct{}
+
 	lock sync.Mutex
 }
 
@@ -60,7 +61,7 @@ func newFile(path string, opts []Option) *File {
 	c := newDefaultConfig()
 
 	for _, opt := range opts {
-		opt.Apply(&c)
+		opt.apply(&c)
 	}
 
 	f := &File{
@@ -110,6 +111,7 @@ func (f *File) listBackups() ([]backup, error) {
 
 		t, err := parseBackupTime(filename, prefix, ext, f.timeFormat)
 		if err != nil {
+			defaults.HandleError("rotate.parseBackupTime", err)
 			continue
 		}
 
@@ -127,7 +129,8 @@ func (f *File) removeStaleBackups(backups []backup) {
 	staleBackups := make(map[string]struct{}, 16)
 
 	if f.maxBackups > 0 {
-		for i := 0; i < len(backups)-f.maxBackups; i++ {
+		exceeds := len(backups) - int(f.maxBackups)
+		for i := 0; i < exceeds; i++ {
 			staleBackups[backups[i].path] = struct{}{}
 		}
 	}
@@ -223,11 +226,8 @@ func (f *File) closeOldFile() (err error) {
 	}
 
 	fileClosed = true
-	if err = os.Rename(f.path, backupPath); err != nil {
-		return err
-	}
-
-	return nil
+	err = os.Rename(f.path, backupPath)
+	return err
 }
 
 func (f *File) rotate() error {
@@ -250,7 +250,10 @@ func (f *File) Write(p []byte) (n int, err error) {
 
 	writeSize := uint64(len(p))
 	if f.size+writeSize > f.maxSize {
-		f.rotate() // Ignore rotating error so this p won't be discarded.
+		// Ignore rotating error so this p won't be discarded.
+		if rotateErr := f.rotate(); rotateErr != nil {
+			defaults.HandleError("File.rotate", rotateErr)
+		}
 	}
 
 	n, err = f.file.Write(p)

@@ -15,7 +15,6 @@
 package rotate
 
 import (
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"testing"
@@ -45,7 +44,7 @@ func TestNew(t *testing.T) {
 		t.Fatalf("n %d != len(data) %d", n, len(data))
 	}
 
-	read, err := ioutil.ReadFile(path)
+	read, err := os.ReadFile(path)
 	if err != nil {
 		t.Fatalf("ReadFile error: %v", err)
 	}
@@ -59,7 +58,7 @@ func TestNew(t *testing.T) {
 func TestNewExisting(t *testing.T) {
 	path := filepath.Join(t.TempDir(), t.Name())
 
-	err := ioutil.WriteFile(path, []byte("水不要鱼"), 0644)
+	err := os.WriteFile(path, []byte("水不要鱼"), 0644)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -81,7 +80,7 @@ func TestNewExisting(t *testing.T) {
 		t.Fatalf("n %d != len(data) %d", n, len(data))
 	}
 
-	read, err := ioutil.ReadFile(path)
+	read, err := os.ReadFile(path)
 	if err != nil {
 		t.Fatalf("ReadFile error: %v", err)
 	}
@@ -130,7 +129,7 @@ func TestFileRotate(t *testing.T) {
 		t.Fatalf("n %d != len(data) %d", n, len(data))
 	}
 
-	read, err := ioutil.ReadFile(path)
+	read, err := os.ReadFile(path)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -164,7 +163,7 @@ func TestFileRotate(t *testing.T) {
 		t.Fatalf("n %d != len(data) %d", n, len(data))
 	}
 
-	read, err = ioutil.ReadFile(path)
+	read, err = os.ReadFile(path)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -186,7 +185,7 @@ func TestFileRotate(t *testing.T) {
 
 	for second > 1 {
 		var bs []byte
-		bs, err = ioutil.ReadFile(backupPath(path, f.timeFormat))
+		bs, err = os.ReadFile(backupPath(path, f.timeFormat))
 		if err != nil {
 			t.Fatal(err)
 		}

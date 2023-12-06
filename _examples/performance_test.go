@@ -20,14 +20,13 @@ import (
 	"os"
 	"path/filepath"
 	"testing"
-	"time"
 
 	"github.com/FishGoddess/logit"
 	"github.com/FishGoddess/logit/defaults"
-	"github.com/rs/zerolog"
-	"github.com/sirupsen/logrus"
-	"go.uber.org/zap"
-	"go.uber.org/zap/zapcore"
+	//"github.com/rs/zerolog"
+	//"github.com/sirupsen/logrus"
+	//"go.uber.org/zap"
+	//"go.uber.org/zap/zapcore"
 )
 
 /*
@@ -141,61 +140,61 @@ func BenchmarkSlogLoggerJsonHandler(b *testing.B) {
 	}
 }
 
-// go test -v ./_examples/performance_test.go -bench=^BenchmarkZeroLogLogger$ -benchtime=1s
-func BenchmarkZeroLogLogger(b *testing.B) {
-	zerolog.TimeFieldFormat = timeFormat
-	logger := zerolog.New(io.Discard).Level(zerolog.InfoLevel).With().Timestamp().Logger()
-
-	b.ReportAllocs()
-	b.StartTimer()
-
-	for i := 0; i < b.N; i++ {
-		logger.Info().Str("trace", "xxx").Int("id", 123).Float64("pi", 3.14).Msg("info...")
-	}
-}
-
-// go test -v ./_examples/performance_test.go -bench=^BenchmarkZapLogger$ -benchtime=1s
-func BenchmarkZapLogger(b *testing.B) {
-	config := zap.NewProductionEncoderConfig()
-	config.EncodeTime = func(t time.Time, enc zapcore.PrimitiveArrayEncoder) {
-		enc.AppendString(t.Format(timeFormat))
-	}
-
-	encoder := zapcore.NewJSONEncoder(config)
-	nopWriteSyncer := zapcore.AddSync(io.Discard)
-	core := zapcore.NewCore(encoder, nopWriteSyncer, zapcore.InfoLevel)
-
-	logger := zap.New(core)
-	defer logger.Sync()
-
-	logTask := func() {
-		logger.Info("info...", zap.String("trace", "abcxxx"), zap.Int("id", 123), zap.Float64("pi", 3.14))
-	}
-
-	b.ReportAllocs()
-	b.StartTimer()
-
-	for i := 0; i < b.N; i++ {
-		logTask()
-	}
-}
-
-// go test -v ./_examples/performance_test.go -bench=^BenchmarkLogrusLogger$ -benchtime=1s
-func BenchmarkLogrusLogger(b *testing.B) {
-	logger := logrus.New()
-	logger.SetOutput(io.Discard)
-	logger.SetLevel(logrus.InfoLevel)
-	logger.SetFormatter(&logrus.JSONFormatter{
-		TimestampFormat: timeFormat,
-	})
-
-	b.ReportAllocs()
-	b.StartTimer()
-
-	for i := 0; i < b.N; i++ {
-		logger.WithFields(map[string]interface{}{"trace": "xxx", "id": 123, "pi": 3.14}).Info("info...")
-	}
-}
+// // go test -v ./_examples/performance_test.go -bench=^BenchmarkZeroLogLogger$ -benchtime=1s
+// func BenchmarkZeroLogLogger(b *testing.B) {
+// 	zerolog.TimeFieldFormat = timeFormat
+// 	logger := zerolog.New(io.Discard).Level(zerolog.InfoLevel).With().Timestamp().Logger()
+//
+// 	b.ReportAllocs()
+// 	b.StartTimer()
+//
+// 	for i := 0; i < b.N; i++ {
+// 		logger.Info().Str("trace", "xxx").Int("id", 123).Float64("pi", 3.14).Msg("info...")
+// 	}
+// }
+//
+// // go test -v ./_examples/performance_test.go -bench=^BenchmarkZapLogger$ -benchtime=1s
+// func BenchmarkZapLogger(b *testing.B) {
+// 	config := zap.NewProductionEncoderConfig()
+// 	config.EncodeTime = func(t time.Time, enc zapcore.PrimitiveArrayEncoder) {
+// 		enc.AppendString(t.Format(timeFormat))
+// 	}
+//
+// 	encoder := zapcore.NewJSONEncoder(config)
+// 	nopWriteSyncer := zapcore.AddSync(io.Discard)
+// 	core := zapcore.NewCore(encoder, nopWriteSyncer, zapcore.InfoLevel)
+//
+// 	logger := zap.New(core)
+// 	defer logger.Sync()
+//
+// 	logTask := func() {
+// 		logger.Info("info...", zap.String("trace", "abcxxx"), zap.Int("id", 123), zap.Float64("pi", 3.14))
+// 	}
+//
+// 	b.ReportAllocs()
+// 	b.StartTimer()
+//
+// 	for i := 0; i < b.N; i++ {
+// 		logTask()
+// 	}
+// }
+//
+// // go test -v ./_examples/performance_test.go -bench=^BenchmarkLogrusLogger$ -benchtime=1s
+// func BenchmarkLogrusLogger(b *testing.B) {
+// 	logger := logrus.New()
+// 	logger.SetOutput(io.Discard)
+// 	logger.SetLevel(logrus.InfoLevel)
+// 	logger.SetFormatter(&logrus.JSONFormatter{
+// 		TimestampFormat: timeFormat,
+// 	})
+//
+// 	b.ReportAllocs()
+// 	b.StartTimer()
+//
+// 	for i := 0; i < b.N; i++ {
+// 		logger.WithFields(map[string]interface{}{"trace": "xxx", "id": 123, "pi": 3.14}).Info("info...")
+// 	}
+// }
 
 // *******************************************************************************
 
@@ -290,69 +289,69 @@ func BenchmarkSlogFile(b *testing.B) {
 	}
 }
 
-// go test -v ./_examples/performance_test.go -bench=^BenchmarkZeroLogFile$ -benchtime=1s
-func BenchmarkZeroLogFile(b *testing.B) {
-	path := filepath.Join(b.TempDir(), b.Name())
-
-	file, _ := openFile(path)
-	defer file.Close()
-
-	zerolog.TimeFieldFormat = timeFormat
-	logger := zerolog.New(file).Level(zerolog.InfoLevel).With().Timestamp().Logger()
-
-	b.ReportAllocs()
-	b.StartTimer()
-
-	for i := 0; i < b.N; i++ {
-		logger.Info().Str("trace", "xxx").Int("id", 123).Float64("pi", 3.14).Msg("info...")
-	}
-}
-
-// go test -v ./_examples/performance_test.go -bench=^BenchmarkZapFile$ -benchtime=1s
-func BenchmarkZapFile(b *testing.B) {
-	path := filepath.Join(b.TempDir(), b.Name())
-
-	file, _ := openFile(path)
-	defer file.Close()
-
-	config := zap.NewProductionEncoderConfig()
-	config.EncodeTime = func(t time.Time, enc zapcore.PrimitiveArrayEncoder) {
-		enc.AppendString(t.Format(timeFormat))
-	}
-
-	encoder := zapcore.NewJSONEncoder(config)
-	writeSyncer := zapcore.AddSync(file)
-	core := zapcore.NewCore(encoder, writeSyncer, zapcore.InfoLevel)
-
-	logger := zap.New(core)
-	defer logger.Sync()
-
-	b.ReportAllocs()
-	b.StartTimer()
-
-	for i := 0; i < b.N; i++ {
-		logger.Info("info...", zap.String("trace", "xxx"), zap.Int("id", 123), zap.Float64("pi", 3.14))
-	}
-}
-
-// go test -v ./_examples/performance_test.go -bench=^BenchmarkLogrusFile$ -benchtime=1s
-func BenchmarkLogrusFile(b *testing.B) {
-	path := filepath.Join(b.TempDir(), b.Name())
-
-	file, _ := openFile(path)
-	defer file.Close()
-
-	logger := logrus.New()
-	logger.SetOutput(file)
-	logger.SetLevel(logrus.InfoLevel)
-	logger.SetFormatter(&logrus.JSONFormatter{
-		TimestampFormat: timeFormat,
-	})
-
-	b.ReportAllocs()
-	b.StartTimer()
-
-	for i := 0; i < b.N; i++ {
-		logger.WithFields(map[string]interface{}{"trace": "xxx", "id": 123, "pi": 3.14}).Info("info...")
-	}
-}
+// // go test -v ./_examples/performance_test.go -bench=^BenchmarkZeroLogFile$ -benchtime=1s
+// func BenchmarkZeroLogFile(b *testing.B) {
+// 	path := filepath.Join(b.TempDir(), b.Name())
+//
+// 	file, _ := openFile(path)
+// 	defer file.Close()
+//
+// 	zerolog.TimeFieldFormat = timeFormat
+// 	logger := zerolog.New(file).Level(zerolog.InfoLevel).With().Timestamp().Logger()
+//
+// 	b.ReportAllocs()
+// 	b.StartTimer()
+//
+// 	for i := 0; i < b.N; i++ {
+// 		logger.Info().Str("trace", "xxx").Int("id", 123).Float64("pi", 3.14).Msg("info...")
+// 	}
+// }
+//
+// // go test -v ./_examples/performance_test.go -bench=^BenchmarkZapFile$ -benchtime=1s
+// func BenchmarkZapFile(b *testing.B) {
+// 	path := filepath.Join(b.TempDir(), b.Name())
+//
+// 	file, _ := openFile(path)
+// 	defer file.Close()
+//
+// 	config := zap.NewProductionEncoderConfig()
+// 	config.EncodeTime = func(t time.Time, enc zapcore.PrimitiveArrayEncoder) {
+// 		enc.AppendString(t.Format(timeFormat))
+// 	}
+//
+// 	encoder := zapcore.NewJSONEncoder(config)
+// 	writeSyncer := zapcore.AddSync(file)
+// 	core := zapcore.NewCore(encoder, writeSyncer, zapcore.InfoLevel)
+//
+// 	logger := zap.New(core)
+// 	defer logger.Sync()
+//
+// 	b.ReportAllocs()
+// 	b.StartTimer()
+//
+// 	for i := 0; i < b.N; i++ {
+// 		logger.Info("info...", zap.String("trace", "xxx"), zap.Int("id", 123), zap.Float64("pi", 3.14))
+// 	}
+// }
+//
+// // go test -v ./_examples/performance_test.go -bench=^BenchmarkLogrusFile$ -benchtime=1s
+// func BenchmarkLogrusFile(b *testing.B) {
+// 	path := filepath.Join(b.TempDir(), b.Name())
+//
+// 	file, _ := openFile(path)
+// 	defer file.Close()
+//
+// 	logger := logrus.New()
+// 	logger.SetOutput(file)
+// 	logger.SetLevel(logrus.InfoLevel)
+// 	logger.SetFormatter(&logrus.JSONFormatter{
+// 		TimestampFormat: timeFormat,
+// 	})
+//
+// 	b.ReportAllocs()
+// 	b.StartTimer()
+//
+// 	for i := 0; i < b.N; i++ {
+// 		logger.WithFields(map[string]interface{}{"trace": "xxx", "id": 123, "pi": 3.14}).Info("info...")
+// 	}
+// }

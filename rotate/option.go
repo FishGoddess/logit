@@ -18,11 +18,10 @@ import (
 	"time"
 )
 
-// Option will set something to config.
+// Option sets some fields to config.
 type Option func(c *config)
 
-// Apply applies option to config.
-func (o Option) Apply(c *config) {
+func (o Option) apply(c *config) {
 	o(c)
 }
 
@@ -48,12 +47,8 @@ func WithMaxAge(age time.Duration) Option {
 }
 
 // WithMaxBackups sets max backups to config.
-func WithMaxBackups(count int) Option {
+func WithMaxBackups(backups uint32) Option {
 	return func(c *config) {
-		if count < 0 {
-			count = 0
-		}
-
-		c.maxBackups = count
+		c.maxBackups = backups
 	}
 }

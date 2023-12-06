@@ -24,9 +24,9 @@ func TestNewDefaultConfig(t *testing.T) {
 
 	want := config{
 		timeFormat: "20060102150405",
-		maxSize:    256 * MB,
-		maxAge:     90 * Day,
-		maxBackups: 100,
+		maxSize:    128 * MB,
+		maxAge:     60 * Day,
+		maxBackups: 90,
 	}
 
 	if c != want {

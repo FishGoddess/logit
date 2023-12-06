@@ -40,9 +40,6 @@ var (
 )
 
 var (
-	// TimeLocation is the location of time.
-	TimeLocation = time.Local
-
 	// CurrentTime returns the current time with time.Time.
 	CurrentTime = time.Now
 )
