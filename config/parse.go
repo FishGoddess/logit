@@ -40,7 +40,7 @@ func parseByteSizeWithUnit(size string, unit string, unitSize uint64, bitUnit bo
 	}
 
 	if bitUnit {
-		return n / 8 * unitSize, nil
+		return n * unitSize / 8, nil
 	}
 
 	return n * unitSize, nil

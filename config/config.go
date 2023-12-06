@@ -14,10 +14,6 @@
 
 package config
 
-import (
-	"os"
-)
-
 type WriterConfig struct {
 	// Target is where the writer writes logs.
 	// Values: "stdout", "stderr", "file".
@@ -40,24 +36,11 @@ type WriterConfig struct {
 	// BatchSize is the size of a batch.
 	// Only available when mode is "batch".
 	BatchSize uint64 `json:"batch_size" yaml:"batch_size" toml:"batch_size" bson:"batch_size"`
-
-	// AutoSync is the frequency of syncing.
-	// An empty string means syncing is manual.
-	// You can use common words like "5m" or "60s".
-	// See time.Duration and time.ParseDuration.
-	// Only available when mode is "buffer" or "batch".
-	AutoSync string `json:"auto_sync" yaml:"auto_sync" toml:"auto_sync" bson:"auto_sync"`
 }
 
 type FileConfig struct {
 	// Path is the path (or prefix) of log file.
 	Path string `json:"path" yaml:"path" toml:"path" bson:"path"`
-
-	// Mode is the permission bits of log files.
-	Mode os.FileMode `json:"mode" yaml:"mode" toml:"mode" bson:"mode"`
-
-	// DirMode is the permission bits of directory storing log files.
-	DirMode os.FileMode `json:"dir_mode" yaml:"dir_mode" toml:"dir_mode" bson:"dir_mode"`
 
 	// Rotate is log file should split and backup when satisfy some conditions.
 	// It's useful in production so we recommend you to set it to true.
@@ -79,12 +62,12 @@ type FileConfig struct {
 
 	// MaxBackups is the max count of file backups.
 	// Only available when rotate is true.
-	MaxBackups int `json:"max_backups" yaml:"max_backups" toml:"max_backups" bson:"max_backups"`
+	MaxBackups uint32 `json:"max_backups" yaml:"max_backups" toml:"max_backups" bson:"max_backups"`
 }
 
 type Config struct {
 	// Level is the level of logger.
-	// Values: debug, info, warn, error, print, off.
+	// Values: debug, info, warn, error.
 	Level string `json:"level" yaml:"level" toml:"level" bson:"level"`
 
 	// Handler is how the handler handles the logs.
@@ -106,4 +89,10 @@ type Config struct {
 
 	// WithPID adds pid to logs if true.
 	WithPID bool `json:"with_pid" yaml:"with_pid" toml:"with_pid" bson:"with_pid"`
+
+	// AutoSync is the frequency of syncing.
+	// An empty string means syncing is manual.
+	// You can use common words like "5m" or "60s".
+	// See time.Duration and time.ParseDuration.
+	AutoSync string `json:"auto_sync" yaml:"auto_sync" toml:"auto_sync" bson:"auto_sync"`
 }
