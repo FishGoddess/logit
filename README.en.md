@@ -12,8 +12,8 @@ applications.
 
 ### 🥇 Features
 
-* Modularization design, easy to extend your logger with appender and writer.
-* Level-based logging, and there are five levels to use: debug, info, warn, error, print, off.
+* Based on Handler in Go, and provide a better performance.
+* Level-based logging, and there are four levels to use: debug, info, warn, error.
 * Key-Value structured log supports, also supporting format.
 * Support logging as Text/Json string, by using provided appender.
 * Asynchronous write back supports, providing high-performance Buffer writer to avoid IO accessing.
@@ -39,84 +39,18 @@ $ go get -u github.com/FishGoddess/logit
 ```go
 package main
 
-import (
-	"context"
-	"io"
-	"os"
-
-	"github.com/FishGoddess/logit"
-)
+import "github.com/FishGoddess/logit"
 
 func main() {
-	// Create a new logger for use.
-	// Default level is debug, so all logs will be logged.
-	// Invoke Close() isn't necessary in all situations.
-	// If logger's writer has buffer or something like that, it's better to invoke Close() for syncing buffer or something else.
+	// Use default logger to log.
+	logit.Info("hello from logit", "key", 123)
+
+	// Use a new logger to log.
 	logger := logit.NewLogger()
-	//defer logger.Close()
+	defer logger.Close()
 
-	// Then, you can log anything you want.
-	// Remember, logs will be ignored if their level is smaller than logger's level.
-	// Log() will do some finishing work, so this invocation is necessary.
-	logger.Debug("This is a debug message").Log()
-	logger.Info("This is an info message").Log()
-	logger.Warn("This is a warn message").Log()
-	logger.Error(nil, "This is an error message").Log()
-	logger.Error(nil, "This is a %s message, with format", "error").Log() // Format with params.
-
-	// As you know, we provide some levels: debug, info, warn, error, off.
-	// The lowest is debug and the highest is off.
-	// If you want to change the level of your logger, do it at creating.
-	logger = logit.NewLogger(logit.Options().WithWarnLevel())
-	logger.Debug("This is a debug message, but ignored").Log()
-	logger.Info("This is an info message, but ignored").Log()
-	logger.Warn("This is a warn message, not ignored").Log()
-	logger.Error(nil, "This is an error message, not ignored").Log()
-
-	// Also, we provide some "old school" log method :)
-	// (Don't mistake~ I love old school~)
-	logger.Printf("This is a log %s, and it's for compatibility", "printed")
-	logger.Print("This is a log printed, and it's for compatibility", 123)
-	logger.Println("This is a log printed, and it's for compatibility", 666)
-
-	// If you want to log with some fields, try this:
-	user := struct {
-		ID   int64  `json:"id"`
-		Name string `json:"name"`
-		Age  int    `json:"age"`
-	}{
-		ID:   666,
-		Name: "FishGoddess",
-		Age:  3,
-	}
-
-	logger.Warn("This is a structured message").Any("user", user).Json("userJson", user).Log()
-	logger.Error(io.EOF, "This is a structured message").Int("trace", 123).Log()
-
-	// You may notice logit.Options() which returns an options list.
-	// Here is some of them:
-	options := logit.Options()
-	options.WithCaller()                          // Let logs carry caller information.
-	options.WithLevelKey("lvl")                   // Change logger's level key to "lvl".
-	options.WithWriter(os.Stderr)                 // Change logger's writer to os.Stderr without buffer or batch.
-	options.WithBufferWriter(os.Stderr)           // Change logger's writer to os.Stderr with buffer.
-	options.WithBatchWriter(os.Stderr)            // Change logger's writer to os.Stderr with batch.
-	options.WithErrorWriter(os.Stderr)            // Change logger's error writer to os.Stderr without buffer or batch.
-	options.WithTimeFormat("2006-01-02 15:04:05") // Change the format of time (Only the log's time will apply it).
-
-	// You can bind context with logger and use it as long as you can get the context.
-	ctx := logit.NewContext(context.Background(), logger)
-	logger = logit.FromContext(ctx)
-	logger.Info("Logger from context").Log()
-
-	// You can initialize the global logger if you don't want to use an independent logger.
-	logger = logit.NewLogger()
-	logit.SetGlobal(logger)
-	logit.Info("Info from logit").Log()
-
-	// Actually, we recommend you to call logger.SetToGlobal to set one logger to global if you need.
-	logger = logit.NewLogger().SetToGlobal()
-	logit.Println("Println from logit")
+	logger.Debug("new version of logit", "version", "1.5.0-alpha", "date", 20231122)
+	logger.Error("new version of logit", "version", "1.5.0-alpha", "date", 20231122)
 }
 ```
 
@@ -129,24 +63,32 @@ $ make bench
 $ make benchfile
 ```
 
-| test case(output to memory) | times ran (large is better) | ns/op (small is better) | B/op                            | allocs/op                     |
-|-----------------------------|-----------------------------|-------------------------|---------------------------------|-------------------------------|
-| **logit**                   | **707851**                  | **&nbsp; 1704 ns/op**   | **&nbsp; &nbsp; &nbsp; 0 B/op** | **&nbsp; &nbsp; 0 allocs/op** |
-| zerolog                     | 706714                      | &nbsp; 1585 ns/op       | &nbsp; &nbsp; &nbsp; 0 B/op     | &nbsp; &nbsp; 0 allocs/op     |
-| zap                         | 389608                      | &nbsp; 4688 ns/op       | &nbsp; 865 B/op                 | &nbsp; &nbsp; 8 allocs/op     |
-| logrus                      | &nbsp; 69789                | 17142 ns/op             | 8885 B/op                       | 136 allocs/op                 |
+```bash
+goos: linux
+goarch: amd64
+cpu: AMD EPYC 7K62 48-Core Processor
 
-| test case(output to file) | times ran (large is better) | ns/op (small is better) | B/op                            | allocs/op                                 |
-|---------------------------|-----------------------------|-------------------------|---------------------------------|-------------------------------------------|
-| **logit**                 | **636033**                  | **&nbsp; 1822 ns/op**   | **&nbsp; &nbsp; &nbsp; 0 B/op** | **&nbsp; &nbsp; 0 allocs/op**             |
-| **logit-withoutBuffer**   | **354542**                  | **&nbsp; 3502 ns/op**   | **&nbsp; &nbsp; &nbsp; 0 B/op** | **&nbsp; &nbsp; 0             allows/op** |
-| zerolog                   | 354676                      | &nbsp; 3440 ns/op       | &nbsp; &nbsp; &nbsp; 0 B/op     | &nbsp; &nbsp; 0 allocs/op                 |
-| zap                       | 195354                      | &nbsp; 6843 ns/op       | &nbsp; 865 B/op                 | &nbsp; &nbsp; 8 allocs/op                 |
-| logrus                    | &nbsp; 58030                | 21088 ns/op             | 8885 B/op                       | 136 allocs/op                             |
+BenchmarkLogitLoggerTextHandler-2         826736              1355 ns/op             288 B/op          3 allocs/op
+BenchmarkLogitLoggerJsonHandler-2         661110              1714 ns/op             408 B/op          6 allocs/op
+BenchmarkLogitLoggerPrint-2               725862              1601 ns/op              48 B/op          1 allocs/op
+BenchmarkSlogLoggerTextHandler-2          725522              1629 ns/op               0 B/op          0 allocs/op
+BenchmarkSlogLoggerJsonHandler-2          583214              2030 ns/op             120 B/op          3 allocs/op
+BenchmarkZeroLogLogger-2                 1929276               613 ns/op               0 B/op          0 allocs/op
+BenchmarkZapLogger-2                      976855              1168 ns/op             216 B/op          2 allocs/op
+BenchmarkLogrusLogger-2                   231723              4927 ns/op            2080 B/op         32 allocs/op
 
-> Benchmark file：[_examples/performance_test.go](./_examples/performance_test.go)
->
-> Environment：R7-5800X CPU@3.8GHZ, 32GB RAM, 512GB SSD, Linux/Manjaro
+BenchmarkLogitFile-2                      455092              2645 ns/op             288 B/op          3 allocs/op
+BenchmarkLogitFileWithBuffer-2            818455              1479 ns/op             288 B/op          3 allocs/op
+BenchmarkLogitFileWithBatch-2             832921              1435 ns/op             288 B/op          3 allocs/op
+BenchmarkSlogFile-2                       407590              2944 ns/op               0 B/op          0 allocs/op
+BenchmarkZeroLogFile-2                    634375              1810 ns/op               0 B/op          0 allocs/op
+BenchmarkZapFile-2                        382790              2641 ns/op             216 B/op          2 allocs/op
+BenchmarkLogrusFile-2                     174944              6491 ns/op            2080 B/op         32 allocs/op
+```
+
+> Notice: WithBuffer and WithBatch are using buffer writer and batch writer.
+
+> Benchmarks: [_examples/performance_test.go](./_examples/performance_test.go)
 
 ### 👥 Contributing
 

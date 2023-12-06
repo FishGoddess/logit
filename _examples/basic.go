@@ -17,6 +17,10 @@ package main
 import "github.com/FishGoddess/logit"
 
 func main() {
+	// Use default logger to log.
+	logit.Info("hello from logit", "key", 123)
+
+	// Use a new logger to log.
 	logger := logit.NewLogger()
 	defer logger.Close()
 

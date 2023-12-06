@@ -11,14 +11,13 @@
 
 ### 🥇 功能特性
 
-* 独特的日志模块设计，使用 appender 和 writer 装载特定的模块，实现扩展功能。
-* 支持日志级别控制，一共有五个日志级别，分别是 debug，info，warn，error，print 和 off。
+* 兼容标准库 Handler 的扩展设计，并且提供了更高的性能。
+* 支持日志级别控制，一共有四个日志级别，分别是 debug，info，warn，error。
 * 支持键值对形式的结构化日志记录，同时对格式化操作也有支持。
 * 支持以 Text/Json 形式输出日志信息，方便对日志进行解析。
 * 支持异步回写日志，提供高性能缓冲写出器模块，减少 IO 的访问次数。
 * 提供调优使用的全局配置，对一些高级配置更贴合实际业务的需求。
-* 分级别追加日志数据，分级别写出日志数据，推荐将 error 级别的日志单独处理和存储。
-* 加入 Context 机制，更优雅地使用日志，并支持业务域划分。
+* 加入 Context 机制，更优雅地使用日志，并支持业务分组划分。
 * 支持拦截器模式，可以从 context 注入外部常量或变量，简化日志输出流程。
 * 支持错误监控，可以很方便地进行错误统计和告警。
 * 支持日志按大小自动分割，并支持按照时间和数量自动清理。
@@ -37,84 +36,18 @@ $ go get -u github.com/FishGoddess/logit
 ```go
 package main
 
-import (
-	"context"
-	"io"
-	"os"
-
-	"github.com/FishGoddess/logit"
-)
+import "github.com/FishGoddess/logit"
 
 func main() {
-	// Create a new logger for use.
-	// Default level is debug, so all logs will be logged.
-	// Invoke Close() isn't necessary in all situations.
-	// If logger's writer has buffer or something like that, it's better to invoke Close() for syncing buffer or something else.
+	// Use default logger to log.
+	logit.Info("hello from logit", "key", 123)
+
+	// Use a new logger to log.
 	logger := logit.NewLogger()
-	//defer logger.Close()
+	defer logger.Close()
 
-	// Then, you can log anything you want.
-	// Remember, logs will be ignored if their level is smaller than logger's level.
-	// Log() will do some finishing work, so this invocation is necessary.
-	logger.Debug("This is a debug message").Log()
-	logger.Info("This is an info message").Log()
-	logger.Warn("This is a warn message").Log()
-	logger.Error(nil, "This is an error message").Log()
-	logger.Error(nil, "This is a %s message, with format", "error").Log() // Format with params.
-
-	// As you know, we provide some levels: debug, info, warn, error, off.
-	// The lowest is debug and the highest is off.
-	// If you want to change the level of your logger, do it at creating.
-	logger = logit.NewLogger(logit.Options().WithWarnLevel())
-	logger.Debug("This is a debug message, but ignored").Log()
-	logger.Info("This is an info message, but ignored").Log()
-	logger.Warn("This is a warn message, not ignored").Log()
-	logger.Error(nil, "This is an error message, not ignored").Log()
-
-	// Also, we provide some "old school" log method :)
-	// (Don't mistake~ I love old school~)
-	logger.Printf("This is a log %s, and it's for compatibility", "printed")
-	logger.Print("This is a log printed, and it's for compatibility", 123)
-	logger.Println("This is a log printed, and it's for compatibility", 666)
-
-	// If you want to log with some fields, try this:
-	user := struct {
-		ID   int64  `json:"id"`
-		Name string `json:"name"`
-		Age  int    `json:"age"`
-	}{
-		ID:   666,
-		Name: "FishGoddess",
-		Age:  3,
-	}
-
-	logger.Warn("This is a structured message").Any("user", user).Json("userJson", user).Log()
-	logger.Error(io.EOF, "This is a structured message").Int("trace", 123).Log()
-
-	// You may notice logit.Options() which returns an options list.
-	// Here is some of them:
-	options := logit.Options()
-	options.WithCaller()                          // Let logs carry caller information.
-	options.WithLevelKey("lvl")                   // Change logger's level key to "lvl".
-	options.WithWriter(os.Stderr)                 // Change logger's writer to os.Stderr without buffer or batch.
-	options.WithBufferWriter(os.Stderr)           // Change logger's writer to os.Stderr with buffer.
-	options.WithBatchWriter(os.Stderr)            // Change logger's writer to os.Stderr with batch.
-	options.WithErrorWriter(os.Stderr)            // Change logger's error writer to os.Stderr without buffer or batch.
-	options.WithTimeFormat("2006-01-02 15:04:05") // Change the format of time (Only the log's time will apply it).
-
-	// You can bind context with logger and use it as long as you can get the context.
-	ctx := logit.NewContext(context.Background(), logger)
-	logger = logit.FromContext(ctx)
-	logger.Info("Logger from context").Log()
-
-	// You can initialize the global logger if you don't want to use an independent logger.
-	logger = logit.NewLogger()
-	logit.SetGlobal(logger)
-	logit.Info("Info from logit").Log()
-
-	// Actually, we recommend you to call logger.SetToGlobal to set one logger to global if you need.
-	logger = logit.NewLogger().SetToGlobal()
-	logit.Println("Println from logit")
+	logger.Debug("new version of logit", "version", "1.5.0-alpha", "date", 20231122)
+	logger.Error("new version of logit", "version", "1.5.0-alpha", "date", 20231122)
 }
 ```
 
@@ -127,24 +60,32 @@ $ make bench
 $ make benchfile
 ```
 
-| 测试（输出到内存） | 单位时间内运行次数 (越大越好) | 每个操作消耗时间 (越小越好)       | B/op (越小越好)                     | allocs/op (越小越好)              |
-|-----------|------------------|-----------------------|---------------------------------|-------------------------------|
-| **logit** | **707851**       | **&nbsp; 1704 ns/op** | **&nbsp; &nbsp; &nbsp; 0 B/op** | **&nbsp; &nbsp; 0 allocs/op** |
-| zerolog   | 706714           | &nbsp; 1585 ns/op     | &nbsp; &nbsp; &nbsp; 0 B/op     | &nbsp; &nbsp; 0 allocs/op     |
-| zap       | 389608           | &nbsp; 4688 ns/op     | &nbsp; 865 B/op                 | &nbsp; &nbsp; 8 allocs/op     |
-| logrus    | &nbsp; 69789     | 17142 ns/op           | 8885 B/op                       | 136 allocs/op                 |
+```bash
+goos: linux
+goarch: amd64
+cpu: AMD EPYC 7K62 48-Core Processor
 
-| 测试（输出到文件）     | 单位时间内运行次数 (越大越好) | 每个操作消耗时间 (越小越好)       | B/op (越小越好)                     | allocs/op (越小越好)              |
-|---------------|------------------|-----------------------|---------------------------------|-------------------------------|
-| **logit**     | **636033**       | **&nbsp; 1822 ns/op** | **&nbsp; &nbsp; &nbsp; 0 B/op** | **&nbsp; &nbsp; 0 allocs/op** |
-| **logit-不缓冲** | **354542**       | **&nbsp; 3502 ns/op** | **&nbsp; &nbsp; &nbsp; 0 B/op** | **&nbsp; &nbsp; 0 allocs/op** |
-| zerolog       | 354676           | &nbsp; 3440 ns/op     | &nbsp; &nbsp; &nbsp; 0 B/op     | &nbsp; &nbsp; 0 allocs/op     |
-| zap           | 195354           | &nbsp; 6843 ns/op     | &nbsp; 865 B/op                 | &nbsp; &nbsp; 8 allocs/op     |
-| logrus        | &nbsp; 58030     | 21088 ns/op           | 8885 B/op                       | 136 allocs/op                 |
+BenchmarkLogitLoggerTextHandler-2         826736              1355 ns/op             288 B/op          3 allocs/op
+BenchmarkLogitLoggerJsonHandler-2         661110              1714 ns/op             408 B/op          6 allocs/op
+BenchmarkLogitLoggerPrint-2               725862              1601 ns/op              48 B/op          1 allocs/op
+BenchmarkSlogLoggerTextHandler-2          725522              1629 ns/op               0 B/op          0 allocs/op
+BenchmarkSlogLoggerJsonHandler-2          583214              2030 ns/op             120 B/op          3 allocs/op
+BenchmarkZeroLogLogger-2                 1929276               613 ns/op               0 B/op          0 allocs/op
+BenchmarkZapLogger-2                      976855              1168 ns/op             216 B/op          2 allocs/op
+BenchmarkLogrusLogger-2                   231723              4927 ns/op            2080 B/op         32 allocs/op
+
+BenchmarkLogitFile-2                      455092              2645 ns/op             288 B/op          3 allocs/op
+BenchmarkLogitFileWithBuffer-2            818455              1479 ns/op             288 B/op          3 allocs/op
+BenchmarkLogitFileWithBatch-2             832921              1435 ns/op             288 B/op          3 allocs/op
+BenchmarkSlogFile-2                       407590              2944 ns/op               0 B/op          0 allocs/op
+BenchmarkZeroLogFile-2                    634375              1810 ns/op               0 B/op          0 allocs/op
+BenchmarkZapFile-2                        382790              2641 ns/op             216 B/op          2 allocs/op
+BenchmarkLogrusFile-2                     174944              6491 ns/op            2080 B/op         32 allocs/op
+```
+
+> 注：WithBuffer 和 WithBatch 分别是使用了缓冲器和批量写入的方式进行测试。
 
 > 测试文件：[_examples/performance_test.go](./_examples/performance_test.go)
->
-> 测试环境：R7-5800X CPU@3.8GHZ，32GB RAM，512GB SSD，Linux/Manjaro
 
 ### 👥 贡献者
 
