@@ -96,7 +96,7 @@ func countFiles(dir string) int {
 	return len(files)
 }
 
-// go test -v -cover -run=^TestFileRotate$
+// go test -v -cover -count=1 -run=^TestFileRotate$
 func TestFileRotate(t *testing.T) {
 	second := int64(0)
 	defaults.CurrentTime = func() time.Time {
@@ -183,16 +183,13 @@ func TestFileRotate(t *testing.T) {
 		return time.Unix(second, 0)
 	}
 
+	var bs []byte
 	for second > 1 {
-		var bs []byte
-
 		backup := backupPath(path, f.timeFormat)
-		bs, err = os.ReadFile(backup)
-		if err != nil {
+		if bs, err = os.ReadFile(backup); err != nil {
 			t.Fatal(err)
 		}
 
-		t.Log(backup, ":", string(bs))
 		read = append(read, bs...)
 	}
 
