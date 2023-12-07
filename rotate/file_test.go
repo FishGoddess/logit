@@ -185,11 +185,14 @@ func TestFileRotate(t *testing.T) {
 
 	for second > 1 {
 		var bs []byte
-		bs, err = os.ReadFile(backupPath(path, f.timeFormat))
+
+		backup := backupPath(path, f.timeFormat)
+		bs, err = os.ReadFile(backup)
 		if err != nil {
 			t.Fatal(err)
 		}
 
+		t.Log(backup, ":", string(bs))
 		read = append(read, bs...)
 	}
 
