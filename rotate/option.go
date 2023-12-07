@@ -25,13 +25,6 @@ func (o Option) apply(c *config) {
 	o(c)
 }
 
-// WithTimeFormat sets time format to config.
-func WithTimeFormat(format string) Option {
-	return func(c *config) {
-		c.timeFormat = format
-	}
-}
-
 // WithMaxSize sets max size to config.
 func WithMaxSize(size uint64) Option {
 	return func(c *config) {

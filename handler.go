@@ -27,3 +27,15 @@ type Writer interface {
 	Syncer
 	io.Closer
 }
+
+type nilSyncer struct{}
+
+func (nilSyncer) Sync() error {
+	return nil
+}
+
+type nilCloser struct{}
+
+func (nilCloser) Close() error {
+	return nil
+}

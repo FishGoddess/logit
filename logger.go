@@ -37,6 +37,8 @@ var (
 
 type Logger struct {
 	handler slog.Handler
+	syncer  Syncer
+	closer  io.Closer
 
 	withSource bool
 	withPID    bool
@@ -62,13 +64,15 @@ func NewLoggerGracefully(opts ...Option) (*Logger, error) {
 		opt.applyTo(conf)
 	}
 
-	handler, err := conf.handler()
+	handler, syncer, closer, err := conf.handler()
 	if err != nil {
 		return nil, err
 	}
 
 	logger := &Logger{
 		handler:    handler,
+		syncer:     syncer,
+		closer:     closer,
 		withSource: conf.withSource,
 		withPID:    conf.withPID,
 	}
@@ -194,8 +198,6 @@ func (l *Logger) PrintEnabled(ctx context.Context) bool {
 }
 
 func (l *Logger) newRecord(level slog.Level, msg string, args []any) slog.Record {
-	now := defaults.CurrentTime()
-
 	var pc uintptr
 	if l.withSource {
 		var pcs [1]uintptr
@@ -203,7 +205,9 @@ func (l *Logger) newRecord(level slog.Level, msg string, args []any) slog.Record
 		pc = pcs[0]
 	}
 
+	now := defaults.CurrentTime()
 	record := slog.NewRecord(now, level, msg, pc)
+
 	if l.withPID {
 		record.AddAttrs(slog.Int(keyPID, pid))
 	}
@@ -223,7 +227,6 @@ func (l *Logger) log(ctx context.Context, level slog.Level, msg string, args ...
 		ctx = context.Background()
 	}
 
-	// The record may be put on heap, not stack?
 	record := l.newRecord(level, msg, args)
 
 	if err := l.handler.Handle(ctx, record); err != nil {
@@ -294,11 +297,7 @@ func (l *Logger) Println(args ...interface{}) {
 
 // Sync syncs the logger and returns an error if failed.
 func (l *Logger) Sync() error {
-	if syncer, ok := l.handler.(Syncer); ok {
-		return syncer.Sync()
-	}
-
-	return nil
+	return l.syncer.Sync()
 }
 
 // Close closes the logger and returns an error if failed.
@@ -307,9 +306,5 @@ func (l *Logger) Close() error {
 		return err
 	}
 
-	if closer, ok := l.handler.(io.Closer); ok {
-		return closer.Close()
-	}
-
-	return nil
+	return l.closer.Close()
 }

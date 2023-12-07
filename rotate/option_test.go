@@ -19,21 +19,6 @@ import (
 	"time"
 )
 
-// go test -v -cover -run=^TestWithTimeFormat$
-func TestWithTimeFormat(t *testing.T) {
-	c := newDefaultConfig()
-	c.timeFormat = ""
-
-	WithTimeFormat("20060102").apply(&c)
-
-	want := newDefaultConfig()
-	want.timeFormat = "20060102"
-
-	if c != want {
-		t.Fatalf("c %+v != want %+v", c, want)
-	}
-}
-
 // go test -v -cover -run=^TestWithMaxSize$
 func TestWithMaxSize(t *testing.T) {
 	c := newDefaultConfig()

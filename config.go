@@ -56,6 +56,30 @@ func newDefaultConfig() *config {
 	return conf
 }
 
+func (c *config) newSyncer(handler slog.Handler, writer io.Writer) Syncer {
+	if syncer, ok := handler.(Syncer); ok {
+		return syncer
+	}
+
+	if syncer, ok := writer.(Syncer); ok {
+		return syncer
+	}
+
+	return nilSyncer{}
+}
+
+func (c *config) newCloser(handler slog.Handler, writer io.Writer) io.Closer {
+	if closer, ok := handler.(io.Closer); ok {
+		return closer
+	}
+
+	if closer, ok := writer.(io.Closer); ok {
+		return closer
+	}
+
+	return nilCloser{}
+}
+
 func (c *config) handlerOptions() *slog.HandlerOptions {
 	opts := &slog.HandlerOptions{
 		Level:       c.level,
@@ -66,26 +90,28 @@ func (c *config) handlerOptions() *slog.HandlerOptions {
 	return opts
 }
 
-func (c *config) handler() (slog.Handler, error) {
+func (c *config) handler() (slog.Handler, Syncer, io.Closer, error) {
 	if c.newWriter == nil {
-		return nil, errors.New("logit: newWriter in config is nil")
+		return nil, nil, nil, errors.New("logit: newWriter in config is nil")
 	}
 
 	if c.newHandler == nil {
-		return nil, errors.New("logit: newHandler in config is nil")
+		return nil, nil, nil, errors.New("logit: newHandler in config is nil")
 	}
 
-	w, err := c.newWriter()
+	writer, err := c.newWriter()
 	if err != nil {
-		return nil, err
+		return nil, nil, nil, err
 	}
 
 	if c.wrapWriter != nil {
-		w = c.wrapWriter(w)
+		writer = c.wrapWriter(writer)
 	}
 
 	opts := c.handlerOptions()
-	handler := c.newHandler(w, opts)
+	handler := c.newHandler(writer, opts)
+	syncer := c.newSyncer(handler, writer)
+	closer := c.newCloser(handler, writer)
 
-	return handler, nil
+	return handler, syncer, closer, nil
 }

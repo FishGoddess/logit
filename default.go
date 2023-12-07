@@ -16,8 +16,11 @@ package logit
 
 import (
 	"context"
+	"fmt"
 	"log/slog"
 	"sync/atomic"
+
+	"github.com/FishGoddess/logit/defaults"
 )
 
 var defaultLogger atomic.Value
@@ -74,4 +77,25 @@ func WarnContext(ctx context.Context, msg string, args ...any) {
 // ErrorContext logs a log with ctx, msg and args in error level.
 func ErrorContext(ctx context.Context, msg string, args ...any) {
 	Default().log(ctx, slog.LevelError, msg, args...)
+}
+
+// Printf logs a log with format and args in print level.
+// It a old-school way to log.
+func Printf(format string, args ...interface{}) {
+	msg := fmt.Sprintf(format, args...)
+	Default().log(context.Background(), defaults.LevelPrint, msg)
+}
+
+// Print logs a log with args in print level.
+// It a old-school way to log.
+func Print(args ...interface{}) {
+	msg := fmt.Sprint(args...)
+	Default().log(context.Background(), defaults.LevelPrint, msg)
+}
+
+// Println logs a log with args in print level.
+// It a old-school way to log.
+func Println(args ...interface{}) {
+	msg := fmt.Sprintln(args...)
+	Default().log(context.Background(), defaults.LevelPrint, msg)
 }

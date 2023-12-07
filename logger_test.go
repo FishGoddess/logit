@@ -162,6 +162,7 @@ func TestLoggerEnabled(t *testing.T) {
 }
 
 func removeTimeAndSource(str string) string {
+	str = strings.ReplaceAll(str, "\n", " ")
 	strs := strings.Split(str, " ")
 
 	var removed strings.Builder

@@ -73,9 +73,17 @@ func TestConfigHandler(t *testing.T) {
 		},
 	}
 
-	handler, err := conf.handler()
+	handler, syncer, closer, err := conf.handler()
 	if err != nil {
 		t.Fatal(err)
+	}
+
+	if syncer == nil {
+		t.Fatal("syncer is nil")
+	}
+
+	if closer == nil {
+		t.Fatal("closer is nil")
 	}
 
 	tcHandler, ok := handler.(*testConfigHandler)

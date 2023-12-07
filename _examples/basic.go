@@ -14,16 +14,49 @@
 
 package main
 
-import "github.com/FishGoddess/logit"
+import (
+	"fmt"
+
+	"github.com/FishGoddess/logit"
+)
 
 func main() {
 	// Use default logger to log.
+	// By default, logs will be output to stdout.
 	logit.Info("hello from logit", "key", 123)
 
 	// Use a new logger to log.
+	// By default, logs will be output to stdout.
 	logger := logit.NewLogger()
-	defer logger.Close()
 
 	logger.Debug("new version of logit", "version", "1.5.0-alpha", "date", 20231122)
 	logger.Error("new version of logit", "version", "1.5.0-alpha", "date", 20231122)
+
+	// Yep, I know you want to output logs to a file, try WithFile option.
+	// The path in WithFile is where the log file will be stored.
+	// Also, it's a good choice to call logger.Close() when program shutdown.
+	logger = logit.NewLogger(logit.WithFile("./logit.log"))
+	defer logger.Close()
+
+	logger.Info("check where I'm logged", "file", "logit.log")
+
+	// What if I want to use default logger and output logs to a file? Try SetDefault.
+	// It sets a logger to default and you can use it by package function or Default().
+	logit.SetDefault(logger)
+
+	logit.Warn("this is from default logger", "pi", 3.14, "default", true)
+	logit.Default().Warn("this is from default logger, too", "pi", 3.14, "default", true)
+
+	// If you want to change level of logger to info, try WithInfoLevel.
+	// Other levels is similar to info level.
+	logger = logit.NewLogger(logit.WithInfoLevel())
+
+	logger.Debug("debug logs will be ignored")
+	logger.Info("info logs can be logged")
+
+	// Don't want to panic when new a logger? Try NewLoggerGracefully.
+	logger, err := logit.NewLoggerGracefully(logit.WithFile(""))
+	if err != nil {
+		fmt.Println("new logger gracefully failed:", err)
+	}
 }
