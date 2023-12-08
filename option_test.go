@@ -28,7 +28,7 @@ import (
 	"github.com/FishGoddess/logit/writer"
 )
 
-// go test -v -cover -run=^TestWithDebugLevel$
+// go test -v -cover -count=1 -test.cpu=1 -run=^TestWithDebugLevel$
 func TestWithDebugLevel(t *testing.T) {
 	conf := &config{level: slog.LevelError}
 	WithDebugLevel().applyTo(conf)
@@ -38,7 +38,7 @@ func TestWithDebugLevel(t *testing.T) {
 	}
 }
 
-// go test -v -cover -run=^TestWithInfoLevel$
+// go test -v -cover -count=1 -test.cpu=1 -run=^TestWithInfoLevel$
 func TestWithInfoLevel(t *testing.T) {
 	conf := &config{level: slog.LevelError}
 	WithInfoLevel().applyTo(conf)
@@ -48,7 +48,7 @@ func TestWithInfoLevel(t *testing.T) {
 	}
 }
 
-// go test -v -cover -run=^TestWithWarnLevel$
+// go test -v -cover -count=1 -test.cpu=1 -run=^TestWithWarnLevel$
 func TestWithWarnLevel(t *testing.T) {
 	conf := &config{level: slog.LevelError}
 	WithWarnLevel().applyTo(conf)
@@ -58,7 +58,7 @@ func TestWithWarnLevel(t *testing.T) {
 	}
 }
 
-// go test -v -cover -run=^TestWithErrorLevel$
+// go test -v -cover -count=1 -test.cpu=1 -run=^TestWithErrorLevel$
 func TestWithErrorLevel(t *testing.T) {
 	conf := &config{level: slog.LevelDebug}
 	WithErrorLevel().applyTo(conf)
@@ -68,7 +68,7 @@ func TestWithErrorLevel(t *testing.T) {
 	}
 }
 
-// go test -v -cover -run=^TestWithWriter$
+// go test -v -cover -count=1 -test.cpu=1 -run=^TestWithWriter$
 func TestWithWriter(t *testing.T) {
 	conf := &config{newWriter: nil}
 	WithWriter(os.Stdout).applyTo(conf)
@@ -83,7 +83,7 @@ func TestWithWriter(t *testing.T) {
 	}
 }
 
-// go test -v -cover -run=^TestWithStdout$
+// go test -v -cover -count=1 -test.cpu=1 -run=^TestWithStdout$
 func TestWithStdout(t *testing.T) {
 	conf := &config{newWriter: nil}
 	WithStdout().applyTo(conf)
@@ -98,7 +98,7 @@ func TestWithStdout(t *testing.T) {
 	}
 }
 
-// go test -v -cover -run=^TestWithStderr$
+// go test -v -cover -count=1 -test.cpu=1 -run=^TestWithStderr$
 func TestWithStderr(t *testing.T) {
 	conf := &config{newWriter: nil}
 	WithStderr().applyTo(conf)
@@ -113,7 +113,7 @@ func TestWithStderr(t *testing.T) {
 	}
 }
 
-// go test -v -cover -run=^TestWithFile$
+// go test -v -cover -count=1 -test.cpu=1 -run=^TestWithFile$
 func TestWithFile(t *testing.T) {
 	path := filepath.Join(t.TempDir(), t.Name())
 
@@ -149,7 +149,7 @@ func TestWithFile(t *testing.T) {
 	}
 }
 
-// go test -v -cover -run=^TestWithRotateFile$
+// go test -v -cover -count=1 -test.cpu=1 -run=^TestWithRotateFile$
 func TestWithRotateFile(t *testing.T) {
 	path := filepath.Join(t.TempDir(), t.Name())
 
@@ -185,7 +185,7 @@ func TestWithRotateFile(t *testing.T) {
 	}
 }
 
-// go test -v -cover -run=^TestWithBuffer$
+// go test -v -cover -count=1 -test.cpu=1 -run=^TestWithBuffer$
 func TestWithBuffer(t *testing.T) {
 	conf := &config{wrapWriter: nil}
 	WithBuffer(64).applyTo(conf)
@@ -229,7 +229,7 @@ func TestWithBuffer(t *testing.T) {
 	}
 }
 
-// go test -v -cover -run=^TestWithBatch$
+// go test -v -cover -count=1 -test.cpu=1 -run=^TestWithBatch$
 func TestWithBatch(t *testing.T) {
 	conf := &config{wrapWriter: nil}
 	WithBatch(16).applyTo(conf)
@@ -284,7 +284,7 @@ func TestWithBatch(t *testing.T) {
 	}
 }
 
-// go test -v -cover -run=^TestWithHandler$
+// go test -v -cover -count=1 -test.cpu=1 -run=^TestWithHandler$
 func TestWithHandler(t *testing.T) {
 	newHandler := func(w io.Writer, opts *slog.HandlerOptions) slog.Handler { return nil }
 
@@ -296,7 +296,7 @@ func TestWithHandler(t *testing.T) {
 	}
 }
 
-// go test -v -cover -run=^TestWithReplaceAttr$
+// go test -v -cover -count=1 -test.cpu=1 -run=^TestWithReplaceAttr$
 func TestWithReplaceAttr(t *testing.T) {
 	replaceAttr := func(groups []string, attr slog.Attr) slog.Attr { return slog.Attr{} }
 
@@ -308,7 +308,7 @@ func TestWithReplaceAttr(t *testing.T) {
 	}
 }
 
-// go test -v -cover -run=^TestWithSource$
+// go test -v -cover -count=1 -test.cpu=1 -run=^TestWithSource$
 func TestWithSource(t *testing.T) {
 	conf := &config{withSource: false}
 	WithSource().applyTo(conf)
@@ -318,7 +318,7 @@ func TestWithSource(t *testing.T) {
 	}
 }
 
-// go test -v -cover -run=^TestWithPID$
+// go test -v -cover -count=1 -test.cpu=1 -run=^TestWithPID$
 func TestWithPID(t *testing.T) {
 	conf := &config{withPID: false}
 	WithPID().applyTo(conf)
@@ -328,7 +328,7 @@ func TestWithPID(t *testing.T) {
 	}
 }
 
-// go test -v -cover -run=^TestWithSyncTimer$
+// go test -v -cover -count=1 -test.cpu=1 -run=^TestWithSyncTimer$
 func TestWithSyncTimer(t *testing.T) {
 	conf := &config{syncTimer: 0}
 	WithSyncTimer(time.Minute).applyTo(conf)

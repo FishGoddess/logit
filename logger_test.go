@@ -29,7 +29,7 @@ type testLoggerHandler struct {
 	opts slog.HandlerOptions
 }
 
-// go test -v -cover -run=^TestNewLogger$
+// go test -v -cover -count=1 -test.cpu=1 -run=^TestNewLogger$
 func TestNewLogger(t *testing.T) {
 	handler := &testLoggerHandler{}
 
@@ -43,7 +43,7 @@ func TestNewLogger(t *testing.T) {
 	}
 }
 
-// go test -v -cover -run=^TestLoggerClone$
+// go test -v -cover -count=1 -test.cpu=1 -run=^TestLoggerClone$
 func TestLoggerClone(t *testing.T) {
 	logger := NewLogger()
 	newLogger := logger.clone()
@@ -57,7 +57,7 @@ func TestLoggerClone(t *testing.T) {
 	}
 }
 
-// go test -v -cover -run=^TestLoggerNewAttrs$
+// go test -v -cover -count=1 -test.cpu=1 -run=^TestLoggerNewAttrs$
 func TestLoggerNewAttrs(t *testing.T) {
 	logger := NewLogger()
 
@@ -91,7 +91,7 @@ func TestLoggerNewAttrs(t *testing.T) {
 	}
 }
 
-// go test -v -cover -run=^TestLoggerWith$
+// go test -v -cover -count=1 -test.cpu=1 -run=^TestLoggerWith$
 func TestLoggerWith(t *testing.T) {
 	logger := NewLogger()
 	newLogger := logger.With()
@@ -115,7 +115,7 @@ func TestLoggerWith(t *testing.T) {
 	}
 }
 
-// go test -v -cover -run=^TestLoggerWithGroup$
+// go test -v -cover -count=1 -test.cpu=1 -run=^TestLoggerWithGroup$
 func TestLoggerWithGroup(t *testing.T) {
 	logger := NewLogger()
 	newLogger := logger.WithGroup("")
@@ -139,7 +139,7 @@ func TestLoggerWithGroup(t *testing.T) {
 	}
 }
 
-// go test -v -cover -run=^TestLoggerEnabled$
+// go test -v -cover -count=1 -test.cpu=1 -run=^TestLoggerEnabled$
 func TestLoggerEnabled(t *testing.T) {
 	ctx := context.Background()
 	logger := NewLogger(WithErrorLevel())
@@ -182,7 +182,7 @@ func removeTimeAndSource(str string) string {
 	return removed.String()
 }
 
-// go test -v -cover -run=^TestLogger$
+// go test -v -cover -count=1 -test.cpu=1 -run=^TestLogger$
 func TestLogger(t *testing.T) {
 	newHandler := func(w io.Writer, opts *slog.HandlerOptions) slog.Handler {
 		return slog.NewTextHandler(w, opts)

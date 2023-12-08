@@ -19,7 +19,7 @@ import (
 	"testing"
 )
 
-// go test -v -cover -run=^TestNotStdoutAndStderr$
+// go test -v -cover -count=1 -test.cpu=1 -run=^TestNotStdoutAndStderr$
 func TestNotStdoutAndStderr(t *testing.T) {
 	if notStdoutAndStderr(os.Stdout) {
 		t.Fatal("notStdoutAndStderr(os.Stdout) returns true")

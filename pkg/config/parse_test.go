@@ -19,7 +19,7 @@ import (
 	"time"
 )
 
-// go test -v -cover -run=^TestParseByteSize$
+// go test -v -cover -count=1 -test.cpu=1 -run=^TestParseByteSize$
 func TestParseByteSize(t *testing.T) {
 	tests := []struct {
 		name    string
@@ -69,7 +69,7 @@ func TestParseByteSize(t *testing.T) {
 	}
 }
 
-// go test -v -cover -run=^TestParseTimeDuration$
+// go test -v -cover -count=1 -test.cpu=1 -run=^TestParseTimeDuration$
 func TestParseTimeDuration(t *testing.T) {
 	tests := []struct {
 		name    string

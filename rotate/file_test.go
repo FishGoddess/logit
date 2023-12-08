@@ -23,7 +23,7 @@ import (
 	"github.com/FishGoddess/logit/defaults"
 )
 
-// go test -v -cover -run=^TestNew$
+// go test -v -cover -count=1 -test.cpu=1 -run=^TestNew$
 func TestNew(t *testing.T) {
 	path := filepath.Join(t.TempDir(), t.Name())
 
@@ -54,7 +54,7 @@ func TestNew(t *testing.T) {
 	}
 }
 
-// go test -v -cover -run=^TestNewExisting$
+// go test -v -cover -count=1 -test.cpu=1 -run=^TestNewExisting$
 func TestNewExisting(t *testing.T) {
 	path := filepath.Join(t.TempDir(), t.Name())
 

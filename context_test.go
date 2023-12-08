@@ -19,7 +19,7 @@ import (
 	"testing"
 )
 
-// go test -v -cover -run=^TestNewContext$
+// go test -v -cover -count=1 -test.cpu=1 -run=^TestNewContext$
 func TestNewContext(t *testing.T) {
 	logger := NewLogger()
 	ctx := NewContext(context.Background(), logger)
@@ -39,7 +39,7 @@ func TestNewContext(t *testing.T) {
 	}
 }
 
-// go test -v -cover -run=^TestFromContext$
+// go test -v -cover -count=1 -test.cpu=1 -run=^TestFromContext$
 func TestFromContext(t *testing.T) {
 	ctx := context.Background()
 	logger := FromContext(ctx)

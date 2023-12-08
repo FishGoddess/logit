@@ -45,7 +45,7 @@ var (
 // NewHandlerFunc is a function for creating slog.Handler with w and opts.
 type NewHandlerFunc func(w io.Writer, opts *slog.HandlerOptions) slog.Handler
 
-func pickNewHandler(name string) (NewHandlerFunc, error) {
+func pickHandler(name string) (NewHandlerFunc, error) {
 	newHandlersLock.RLock()
 	defer newHandlersLock.RUnlock()
 

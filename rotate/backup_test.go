@@ -21,7 +21,7 @@ import (
 	"github.com/FishGoddess/logit/defaults"
 )
 
-// go test -v -cover -run=^TestBackupBefore$
+// go test -v -cover -count=1 -test.cpu=1 -run=^TestBackupBefore$
 func TestBackupBefore(t *testing.T) {
 	b := backup{t: time.Unix(2, 0)}
 
@@ -34,7 +34,7 @@ func TestBackupBefore(t *testing.T) {
 	}
 }
 
-// go test -v -cover -run=^TestSortBackups$
+// go test -v -cover -count=1 -test.cpu=1 -run=^TestSortBackups$
 func TestSortBackups(t *testing.T) {
 	backups := []backup{
 		{t: time.Unix(2, 0)},
@@ -53,7 +53,7 @@ func TestSortBackups(t *testing.T) {
 	}
 }
 
-// go test -v -cover -run=^TestBackupPrefixAndExt$
+// go test -v -cover -count=1 -test.cpu=1 -run=^TestBackupPrefixAndExt$
 func TestBackupPrefixAndExt(t *testing.T) {
 	prefix, ext := backupPrefixAndExt("test.log")
 
@@ -68,7 +68,7 @@ func TestBackupPrefixAndExt(t *testing.T) {
 	}
 }
 
-// go test -v -cover -run=^TestBackupPath$
+// go test -v -cover -count=1 -test.cpu=1 -run=^TestBackupPath$
 func TestBackupPath(t *testing.T) {
 	defaults.CurrentTime = func() time.Time {
 		return time.Unix(1, 0).In(time.UTC)
@@ -81,7 +81,7 @@ func TestBackupPath(t *testing.T) {
 	}
 }
 
-// go test -v -cover -run=^TestParseBackupTime$
+// go test -v -cover -count=1 -test.cpu=1 -run=^TestParseBackupTime$
 func TestParseBackupTime(t *testing.T) {
 	defaults.CurrentTime = func() time.Time {
 		return time.Now().In(time.UTC)

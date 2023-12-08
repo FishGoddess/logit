@@ -28,7 +28,7 @@ type testConfigHandler struct {
 	opts slog.HandlerOptions
 }
 
-// go test -v -cover -run=^TestConfigHandlerOptions$
+// go test -v -cover -count=1 -test.cpu=1 -run=^TestConfigHandlerOptions$
 func TestConfigHandlerOptions(t *testing.T) {
 	replaceAttr := func(groups []string, attr slog.Attr) slog.Attr { return attr }
 
@@ -53,7 +53,7 @@ func TestConfigHandlerOptions(t *testing.T) {
 	}
 }
 
-// go test -v -cover -run=^TestConfigHandler$
+// go test -v -cover -count=1 -test.cpu=1 -run=^TestConfigHandler$
 func TestConfigHandler(t *testing.T) {
 	replaceAttr := func(groups []string, attr slog.Attr) slog.Attr { return attr }
 

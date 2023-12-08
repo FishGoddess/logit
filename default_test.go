@@ -22,7 +22,7 @@ import (
 	"testing"
 )
 
-// go test -v -cover -run=^TestSetDefault$
+// go test -v -cover -count=1 -test.cpu=1 -run=^TestSetDefault$
 func TestSetDefault(t *testing.T) {
 	defaultLogger.Store(NewLogger())
 
@@ -39,7 +39,7 @@ func TestSetDefault(t *testing.T) {
 	}
 }
 
-// go test -v -cover -run=^TestDefault$
+// go test -v -cover -count=1 -test.cpu=1 -run=^TestDefault$
 func TestDefault(t *testing.T) {
 	logger := NewLogger()
 	defaultLogger.Store(logger)
@@ -50,7 +50,7 @@ func TestDefault(t *testing.T) {
 	}
 }
 
-// go test -v -cover -run=^TestDefaultLogger$
+// go test -v -cover -count=1 -test.cpu=1 -run=^TestDefaultLogger$
 func TestDefaultLogger(t *testing.T) {
 	newHandler := func(w io.Writer, opts *slog.HandlerOptions) slog.Handler {
 		return slog.NewTextHandler(w, opts)

@@ -19,7 +19,7 @@ import (
 	"time"
 )
 
-// go test -v -cover -run=^TestWithMaxSize$
+// go test -v -cover -count=1 -test.cpu=1 -run=^TestWithMaxSize$
 func TestWithMaxSize(t *testing.T) {
 	c := newDefaultConfig()
 	c.maxSize = 0
@@ -34,7 +34,7 @@ func TestWithMaxSize(t *testing.T) {
 	}
 }
 
-// go test -v -cover -run=^TestWithMaxAge$
+// go test -v -cover -count=1 -test.cpu=1 -run=^TestWithMaxAge$
 func TestWithMaxAge(t *testing.T) {
 	c := newDefaultConfig()
 	c.maxAge = 0
@@ -49,7 +49,7 @@ func TestWithMaxAge(t *testing.T) {
 	}
 }
 
-// go test -v -cover -run=^TestWithMaxBackups$
+// go test -v -cover -count=1 -test.cpu=1 -run=^TestWithMaxBackups$
 func TestWithMaxBackups(t *testing.T) {
 	c := newDefaultConfig()
 	c.maxBackups = 0

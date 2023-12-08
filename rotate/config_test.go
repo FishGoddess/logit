@@ -18,7 +18,7 @@ import (
 	"testing"
 )
 
-// go test -v -cover -run=^TestNewDefaultConfig$
+// go test -v -cover -count=1 -test.cpu=1 -run=^TestNewDefaultConfig$
 func TestNewDefaultConfig(t *testing.T) {
 	c := newDefaultConfig()
 

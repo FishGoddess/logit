@@ -220,7 +220,7 @@ func (c *Config) appendHandlerOptions(opts []logit.Option) ([]logit.Option, erro
 
 	handler := strings.ToLower(c.Handler)
 
-	newHandler, err := pickNewHandler(handler)
+	newHandler, err := pickHandler(handler)
 	if err != nil {
 		return nil, err
 	}

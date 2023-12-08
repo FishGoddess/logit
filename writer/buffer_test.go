@@ -23,7 +23,7 @@ import (
 	"github.com/FishGoddess/logit/defaults"
 )
 
-// go test -v -cover -run=^TestBuffer$
+// go test -v -cover -count=1 -test.cpu=1 -run=^TestBuffer$
 func TestBuffer(t *testing.T) {
 	writer := Buffer(os.Stdout, 1024)
 
@@ -41,7 +41,7 @@ func TestBuffer(t *testing.T) {
 	}
 }
 
-// go test -v -cover -run=^TestBufferWriter$
+// go test -v -cover -count=1 -test.cpu=1 -run=^TestBufferWriter$
 func TestBufferWriter(t *testing.T) {
 	buffer := bytes.NewBuffer(make([]byte, 0, 4096))
 
@@ -66,7 +66,7 @@ func TestBufferWriter(t *testing.T) {
 	}
 }
 
-// go test -v -cover -run=^TestBufferWriterClose$
+// go test -v -cover -count=1 -test.cpu=1 -run=^TestBufferWriterClose$
 func TestBufferWriterClose(t *testing.T) {
 	writer := Buffer(os.Stdout, 4096)
 	for i := 0; i < 10; i++ {

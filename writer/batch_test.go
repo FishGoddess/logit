@@ -21,7 +21,7 @@ import (
 	"time"
 )
 
-// go test -v -cover -run=^TestBatch$
+// go test -v -cover -count=1 -test.cpu=1 -run=^TestBatch$
 func TestBatch(t *testing.T) {
 	writer := Batch(os.Stdout, 16)
 
@@ -39,7 +39,7 @@ func TestBatch(t *testing.T) {
 	}
 }
 
-// go test -v -cover -run=^TestBatchWriter$
+// go test -v -cover -count=1 -test.cpu=1 -run=^TestBatchWriter$
 func TestBatchWriter(t *testing.T) {
 	buffer := bytes.NewBuffer(make([]byte, 0, 4096))
 
@@ -64,7 +64,7 @@ func TestBatchWriter(t *testing.T) {
 	}
 }
 
-// go test -v -cover -run=^TestBatchWriterSize$
+// go test -v -cover -count=1 -test.cpu=1 -run=^TestBatchWriterSize$
 func TestBatchWriterSize(t *testing.T) {
 	buffer := bytes.NewBuffer(make([]byte, 0, 4096))
 
@@ -99,7 +99,7 @@ func TestBatchWriterSize(t *testing.T) {
 	}
 }
 
-// go test -v -cover -run=^TestBatchWriterClose$
+// go test -v -cover -count=1 -test.cpu=1 -run=^TestBatchWriterClose$
 func TestBatchWriterClose(t *testing.T) {
 	writer := Batch(os.Stdout, 10)
 	for i := 0; i < 10; i++ {
