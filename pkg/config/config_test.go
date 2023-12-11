@@ -12,24 +12,4 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package logit
-
-import (
-	"context"
-)
-
-type contextKey struct{}
-
-// NewContext wraps context with logger and returns a new context.
-func NewContext(ctx context.Context, logger *Logger) context.Context {
-	return context.WithValue(ctx, contextKey{}, logger)
-}
-
-// FromContext gets logger from context and returns the default logger if missed.
-func FromContext(ctx context.Context) *Logger {
-	if logger, ok := ctx.Value(contextKey{}).(*Logger); ok {
-		return logger
-	}
-
-	return Default()
-}
+package config

@@ -1,4 +1,4 @@
-// Copyright 2022 FishGoddess. All Rights Reserved.
+// Copyright 2023 FishGoddess. All Rights Reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -15,41 +15,103 @@
 package logit
 
 import (
-	"github.com/FishGoddess/logit/support/global"
+	"errors"
+	"io"
+	"log/slog"
+	"os"
+	"time"
 )
 
-// config stores all configurations used in Logger.
 type config struct {
-	level       level  // The level of a logger.
-	withPID     bool   // Logs will carry pid if withPID is true.
-	withCaller  bool   // Logs will carry caller information if withCaller is true.
-	msgKey      string // The key of message in a log.
-	timeKey     string // The key of time in a log.
-	levelKey    string // The key of level in a log.
-	pidKey      string // The key of pid in a log.
-	fileKey     string // The key of caller's file in a log.
-	lineKey     string // The key of caller's line in a log.
-	funcKey     string // The key of caller's function in a log.
-	errorKey    string // The key of error in a log.
-	timeFormat  string // The format of time in a log.
-	callerDepth int    // The depth of caller.
+	level slog.Level
+
+	newWriter  func() (io.Writer, error)
+	wrapWriter func(io.Writer) Writer
+
+	newHandler  func(w io.Writer, opts *slog.HandlerOptions) slog.Handler
+	replaceAttr func(groups []string, attr slog.Attr) slog.Attr
+
+	withSource bool
+	withPID    bool
+
+	syncTimer time.Duration
 }
 
-// newDefaultConfig returns a default config.
-func newDefaultConfig() config {
-	return config{
-		level:       debugLevel,
-		withPID:     false,
-		withCaller:  false,
-		msgKey:      "log.msg",
-		timeKey:     "log.time",
-		levelKey:    "log.level",
-		pidKey:      "log.pid",
-		fileKey:     "log.file",
-		lineKey:     "log.line",
-		funcKey:     "log.func",
-		errorKey:    "log.err",
-		timeFormat:  "2006-01-02 15:04:05",
-		callerDepth: global.CallerDepth,
+func newDefaultConfig() *config {
+	newWriter := func() (io.Writer, error) {
+		return os.Stdout, nil
 	}
+
+	conf := &config{
+		level:       slog.LevelDebug,
+		newWriter:   newWriter,
+		wrapWriter:  nil,
+		newHandler:  NewTextHandler,
+		replaceAttr: nil,
+		withSource:  false,
+		withPID:     false,
+		syncTimer:   0,
+	}
+
+	return conf
+}
+
+func (c *config) newSyncer(handler slog.Handler, writer io.Writer) Syncer {
+	if syncer, ok := handler.(Syncer); ok {
+		return syncer
+	}
+
+	if syncer, ok := writer.(Syncer); ok {
+		return syncer
+	}
+
+	return nilSyncer{}
+}
+
+func (c *config) newCloser(handler slog.Handler, writer io.Writer) io.Closer {
+	if closer, ok := handler.(io.Closer); ok {
+		return closer
+	}
+
+	if closer, ok := writer.(io.Closer); ok {
+		return closer
+	}
+
+	return nilCloser{}
+}
+
+func (c *config) handlerOptions() *slog.HandlerOptions {
+	opts := &slog.HandlerOptions{
+		Level:       c.level,
+		AddSource:   c.withSource,
+		ReplaceAttr: c.replaceAttr,
+	}
+
+	return opts
+}
+
+func (c *config) handler() (slog.Handler, Syncer, io.Closer, error) {
+	if c.newWriter == nil {
+		return nil, nil, nil, errors.New("logit: newWriter in config is nil")
+	}
+
+	if c.newHandler == nil {
+		return nil, nil, nil, errors.New("logit: newHandler in config is nil")
+	}
+
+	writer, err := c.newWriter()
+	if err != nil {
+		return nil, nil, nil, err
+	}
+
+	if c.wrapWriter != nil {
+		writer = c.wrapWriter(writer)
+	}
+
+	opts := c.handlerOptions()
+	handler := c.newHandler(writer, opts)
+	syncer := c.newSyncer(handler, writer)
+	closer := c.newCloser(handler, writer)
+
+	return handler, syncer, closer, nil
 }

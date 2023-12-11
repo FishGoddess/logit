@@ -1,4 +1,4 @@
-// Copyright 2022 FishGoddess. All Rights Reserved.
+// Copyright 2023 FishGoddess. All Rights Reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -19,76 +19,39 @@ import (
 	"testing"
 )
 
-// go test -v -cover -run=^TestNewContextWithKey$
-func TestNewContextWithKey(t *testing.T) {
-	key := "key"
-	logger := NewLogger()
-	ctx := NewContextWithKey(context.Background(), key, logger)
-
-	value := ctx.Value(key)
-	if value == nil {
-		t.Error("ctx.Value returns nil")
-	}
-
-	contextLogger, ok := value.(*Logger)
-	if !ok {
-		t.Errorf("value %T isn't *Logger", value)
-	}
-
-	if contextLogger != logger {
-		t.Errorf("contextLogger %+v != logger %+v", contextLogger, logger)
-	}
-}
-
-// go test -v -cover -run=^TestFromContextWithKey$
-func TestFromContextWithKey(t *testing.T) {
-	ctx := context.Background()
-
-	key := "key"
-	logger := FromContextWithKey(ctx, key)
-	if logger == nil {
-		t.Error("logger shouldn't be nil")
-	}
-
-	logger = NewLogger()
-	contextLogger := FromContextWithKey(context.WithValue(ctx, key, logger), key)
-	if contextLogger != logger {
-		t.Errorf("contextLogger %+v != logger %+v", contextLogger, logger)
-	}
-}
-
-// go test -v -cover -run=^TestNewContext$
+// go test -v -cover -count=1 -test.cpu=1 -run=^TestNewContext$
 func TestNewContext(t *testing.T) {
 	logger := NewLogger()
 	ctx := NewContext(context.Background(), logger)
 
 	value := ctx.Value(contextKey{})
 	if value == nil {
-		t.Error("ctx.Value returns nil")
+		t.Fatal("value == nil")
 	}
 
 	contextLogger, ok := value.(*Logger)
 	if !ok {
-		t.Errorf("value %T isn't *Logger", value)
+		t.Fatalf("value type %T is wrong", value)
 	}
 
 	if contextLogger != logger {
-		t.Errorf("contextLogger %+v != logger %+v", contextLogger, logger)
+		t.Fatalf("contextLogger %+v != logger %+v", contextLogger, logger)
 	}
 }
 
-// go test -v -cover -run=^TestFromContext$
+// go test -v -cover -count=1 -test.cpu=1 -run=^TestFromContext$
 func TestFromContext(t *testing.T) {
 	ctx := context.Background()
-
 	logger := FromContext(ctx)
+
 	if logger == nil {
-		t.Error("logger shouldn't be nil")
+		t.Fatal("logger == nil")
 	}
 
 	logger = NewLogger()
 	contextLogger := FromContext(context.WithValue(ctx, contextKey{}, logger))
+
 	if contextLogger != logger {
-		t.Errorf("contextLogger %+v != logger %+v", contextLogger, logger)
+		t.Fatalf("contextLogger %+v != logger %+v", contextLogger, logger)
 	}
 }

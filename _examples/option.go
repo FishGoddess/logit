@@ -1,4 +1,4 @@
-// Copyright 2022 FishGoddess. All Rights Reserved.
+// Copyright 2023 FishGoddess. All Rights Reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -16,81 +16,46 @@ package main
 
 import (
 	"os"
-	"time"
 
 	"github.com/FishGoddess/logit"
-	"github.com/FishGoddess/logit/core/appender"
-	"github.com/FishGoddess/logit/support/global"
 )
 
 func main() {
-	// We provide some options for you.
-	options := logit.Options()
-	options.WithDebugLevel()
-	options.WithInfoLevel()
-	options.WithWarnLevel()
-	options.WithErrorLevel()
-	options.WithAppender(appender.Text())
-	options.WithDebugAppender(appender.Text())
-	options.WithInfoAppender(appender.Text())
-	options.WithWarnAppender(appender.Text())
-	options.WithErrorAppender(appender.Text())
-	options.WithPrintAppender(appender.Text())
-	options.WithWriter(os.Stderr)
-	options.WithBufferWriter(os.Stdout)
-	options.WithBatchWriter(os.Stdout)
-	options.WithDebugWriter(os.Stderr)
-	options.WithInfoWriter(os.Stderr)
-	options.WithWarnWriter(os.Stderr)
-	options.WithErrorWriter(os.Stderr)
-	options.WithPrintWriter(os.Stderr)
-	options.WithPID()
-	options.WithCaller()
-	options.WithMsgKey("msg")
-	options.WithTimeKey("time")
-	options.WithLevelKey("level")
-	options.WithPIDKey("pid")
-	options.WithFileKey("file")
-	options.WithLineKey("line")
-	options.WithFuncKey("func")
-	options.WithErrorKey("err")
-	options.WithTimeFormat(global.UnixTimeFormat) // UnixTimeFormat means time will be logged as unix time, an int64 number.
-	options.WithCallerDepth(3)                    // Set caller depth to 3 so the log will get the third depth caller.
-	options.WithInterceptors()
+	// As you can see, NewLogger can use some options to create a logger.
+	logger := logit.NewLogger(logit.WithDebugLevel())
+	logger.Debug("debug log")
 
-	// Remember, these options is only used for creating a logger.
-	logger := logit.NewLogger(
-		options.WithPID(),
-		options.WithWriter(os.Stdout),
-		options.WithTimeFormat("2006/01/02 15:04:05"),
-		options.WithCaller(),
-		options.WithCallerDepth(4),
-		// ...
-	)
+	// We provide some options for different scenes and all options have prefix "With".
+	// Change logger level:
+	logit.WithDebugLevel()
+	logit.WithInfoLevel()
+	logit.WithWarnLevel()
+	logit.WithDebugLevel()
 
+	// Change logger handler:
+	logit.WithHandler(nil)
+	logit.WithTextHandler()
+	logit.WithJsonHandler()
+
+	// Change handler writer:
+	logit.WithWriter(os.Stdout)
+	logit.WithStdout()
+	logit.WithStderr()
+	logit.WithFile("")
+	logit.WithRotateFile("")
+
+	// Some useful flags:
+	logit.WithSource()
+	logit.WithPID()
+
+	// More options can be found in logit package which have prefix "With".
+	// What's more? We provide a options pack that we think it's useful in production.
+	// It outputs logs to a rotate file using batch write, so you should call Sync() or Close() when shutdown.
+	opts := logit.ProductionOptions()
+
+	logger = logit.NewLogger(opts...)
 	defer logger.Close()
-	logger.Info("check options").Log()
 
-	// You can use many options at the same time, but some of them is exclusive.
-	// So only the last one in order will take effect if you use them at the same time.
-	logit.NewLogger(
-		options.WithDebugLevel(),
-		options.WithInfoLevel(),
-		options.WithWarnLevel(),
-		options.WithErrorLevel(), // The level of logger is error.
-	)
-
-	// You can customize an option for your logger.
-	// Actually, Option is just a function like func(logger *Logger).
-	// So you can do what you want in creating a logger.
-	syncOption := func(logger *logit.Logger) {
-		go func() {
-			select {
-			case <-time.Tick(time.Second):
-				logger.Sync()
-			}
-		}()
-	}
-
-	logit.NewLogger(syncOption)
+	logger.Info("log from production options")
+	logger.Error("error log from production options")
 }

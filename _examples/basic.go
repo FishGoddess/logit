@@ -1,4 +1,4 @@
-// Copyright 2022 FishGoddess. All Rights Reserved.
+// Copyright 2023 FishGoddess. All Rights Reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -15,81 +15,48 @@
 package main
 
 import (
-	"context"
-	"io"
-	"os"
+	"fmt"
 
 	"github.com/FishGoddess/logit"
 )
 
 func main() {
-	// Create a new logger for use.
-	// Default level is debug, so all logs will be logged.
-	// Invoke Close() isn't necessary in all situations.
-	// If logger's writer has buffer or something like that, it's better to invoke Close() for syncing buffer or something else.
+	// Use default logger to log.
+	// By default, logs will be output to stdout.
+	logit.Info("hello from logit", "key", 123)
+
+	// Use a new logger to log.
+	// By default, logs will be output to stdout.
 	logger := logit.NewLogger()
-	//defer logger.Close()
 
-	// Then, you can log anything you want.
-	// Remember, logs will be ignored if their level is smaller than logger's level.
-	// Log() will do some finishing work, so this invocation is necessary.
-	logger.Debug("This is a debug message").Log()
-	logger.Info("This is an info message").Log()
-	logger.Warn("This is a warn message").Log()
-	logger.Error(nil, "This is an error message").Log()
-	logger.Error(nil, "This is a %s message, with format", "error").Log() // Format with params.
+	logger.Debug("new version of logit", "version", "1.5.0-alpha", "date", 20231122)
+	logger.Error("new version of logit", "version", "1.5.0-alpha", "date", 20231122)
 
-	// As you know, we provide some levels: debug, info, warn, error, off.
-	// The lowest is debug and the highest is off.
-	// If you want to change the level of your logger, do it at creating.
-	logger = logit.NewLogger(logit.Options().WithWarnLevel())
-	logger.Debug("This is a debug message, but ignored").Log()
-	logger.Info("This is an info message, but ignored").Log()
-	logger.Warn("This is a warn message, not ignored").Log()
-	logger.Error(nil, "This is an error message, not ignored").Log()
+	// Yep, I know you want to output logs to a file, try WithFile option.
+	// The path in WithFile is where the log file will be stored.
+	// Also, it's a good choice to call logger.Close() when program shutdown.
+	logger = logit.NewLogger(logit.WithFile("./logit.log"))
+	defer logger.Close()
 
-	// Also, we provide some "old school" log method :)
-	// (Don't mistake~ I love old school~)
-	logger.Printf("This is a log %s, and it's for compatibility", "printed")
-	logger.Print("This is a log printed, and it's for compatibility", 123)
-	logger.Println("This is a log printed, and it's for compatibility", 666)
+	logger.Info("check where I'm logged", "file", "logit.log")
 
-	// If you want to log with some fields, try this:
-	user := struct {
-		ID   int64  `json:"id"`
-		Name string `json:"name"`
-		Age  int    `json:"age"`
-	}{
-		ID:   666,
-		Name: "FishGoddess",
-		Age:  3,
+	// What if I want to use default logger and output logs to a file? Try SetDefault.
+	// It sets a logger to default and you can use it by package function or Default().
+	logit.SetDefault(logger)
+
+	logit.Warn("this is from default logger", "pi", 3.14, "default", true)
+	logit.Default().Warn("this is from default logger, too", "pi", 3.14, "default", true)
+
+	// If you want to change level of logger to info, try WithInfoLevel.
+	// Other levels is similar to info level.
+	logger = logit.NewLogger(logit.WithInfoLevel())
+
+	logger.Debug("debug logs will be ignored")
+	logger.Info("info logs can be logged")
+
+	// Don't want to panic when new a logger? Try NewLoggerGracefully.
+	logger, err := logit.NewLoggerGracefully(logit.WithFile(""))
+	if err != nil {
+		fmt.Println("new logger gracefully failed:", err)
 	}
-
-	logger.Warn("This is a structured message").Any("user", user).Json("userJson", user).Log()
-	logger.Error(io.EOF, "This is a structured message").Int("trace", 123).Log()
-
-	// You may notice logit.Options() which returns an options list.
-	// Here is some of them:
-	options := logit.Options()
-	options.WithCaller()                          // Let logs carry caller information.
-	options.WithLevelKey("lvl")                   // Change logger's level key to "lvl".
-	options.WithWriter(os.Stderr)                 // Change logger's writer to os.Stderr without buffer or batch.
-	options.WithBufferWriter(os.Stderr)           // Change logger's writer to os.Stderr with buffer.
-	options.WithBatchWriter(os.Stderr)            // Change logger's writer to os.Stderr with batch.
-	options.WithErrorWriter(os.Stderr)            // Change logger's error writer to os.Stderr without buffer or batch.
-	options.WithTimeFormat("2006-01-02 15:04:05") // Change the format of time (Only the log's time will apply it).
-
-	// You can bind context with logger and use it as long as you can get the context.
-	ctx := logit.NewContext(context.Background(), logger)
-	logger = logit.FromContext(ctx)
-	logger.Info("Logger from context").Log()
-
-	// You can initialize the global logger if you don't want to use an independent logger.
-	logger = logit.NewLogger()
-	logit.SetGlobal(logger)
-	logit.Info("Info from logit").Log()
-
-	// Actually, we recommend you to call logger.SetToGlobal to set one logger to global if you need.
-	logger = logit.NewLogger().SetToGlobal()
-	logit.Println("Println from logit")
 }

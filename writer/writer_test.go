@@ -12,24 +12,20 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package logit
+package writer
 
 import (
-	"context"
+	"os"
+	"testing"
 )
 
-type contextKey struct{}
-
-// NewContext wraps context with logger and returns a new context.
-func NewContext(ctx context.Context, logger *Logger) context.Context {
-	return context.WithValue(ctx, contextKey{}, logger)
-}
-
-// FromContext gets logger from context and returns the default logger if missed.
-func FromContext(ctx context.Context) *Logger {
-	if logger, ok := ctx.Value(contextKey{}).(*Logger); ok {
-		return logger
+// go test -v -cover -count=1 -test.cpu=1 -run=^TestNotStdoutAndStderr$
+func TestNotStdoutAndStderr(t *testing.T) {
+	if notStdoutAndStderr(os.Stdout) {
+		t.Fatal("notStdoutAndStderr(os.Stdout) returns true")
 	}
 
-	return Default()
+	if notStdoutAndStderr(os.Stderr) {
+		t.Fatal("notStdoutAndStderr(os.Stderr) returns true")
+	}
 }

@@ -1,4 +1,4 @@
-// Copyright 2022 FishGoddess. All Rights Reserved.
+// Copyright 2023 FishGoddess. All Rights Reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -21,30 +21,30 @@ import (
 )
 
 func main() {
-	// By NewContext, you can bind a context with a logger and get it from context again.
-	// So you can use this logger from everywhere as long as you can get this context.
-	ctx := logit.NewContext(context.Background(), logit.NewLogger())
+	// We provide a way for getting logger from a context.
+	// By default, the default logger will be returned if there is no logit.Logger in context.
+	ctx := context.Background()
 
-	// FromContext returns the logger in context.
 	logger := logit.FromContext(ctx)
-	logger.Info("This is a message logged by logger from context").Log()
+	logger.Debug("logger from context debug")
 
-	// Actually, you also have a chance to specify the key of logger in context.
-	// It gives you a way to discriminate different businesses in using logger.
-	// For example, you can create two loggers for your two different usages and
-	// set them to a context with different key, so you can get each logger from context with each key.
-	businessOneKey := "businessOne"
-	logger = logit.NewLogger(logit.Options().WithMsgKey("businessOneMsg"))
-	ctx = logit.NewContextWithKey(context.Background(), businessOneKey, logger)
+	if logger == logit.Default() {
+		logger.Info("logger from context is default logger")
+	}
 
-	businessTwoKey := "businessTwo"
-	logger = logit.NewLogger(logit.Options().WithMsgKey("businessTwoMsg"))
-	ctx = logit.NewContextWithKey(ctx, businessTwoKey, logger)
+	// Use NewContext to set a logger to context.
+	// We use WithGroup here to make a difference to default logger.
+	logger = logit.NewLogger().WithGroup("context")
+	ctx = logit.NewContext(ctx, logger)
 
-	// Get different logger from the same context with different key.
-	logger = logit.FromContextWithKey(ctx, businessOneKey)
-	logger.Info("This is a message logged by logger from context with businessOneKey").Log()
+	// Then you can get the logger from context.
+	logger = logit.FromContext(ctx)
+	logger.Debug("logger from context debug", "key", "value")
 
-	logger = logit.FromContextWithKey(ctx, businessTwoKey)
-	logger.Info("This is a message logged by logger from context with businessTwoKey").Log()
+	// Maybe you have noticed logger has some methods with context.
+	// These methods will pass the context to underlying handler so that we can use it to process some logics.
+	logger.DebugContext(ctx, "debug context")
+	logger.InfoContext(ctx, "info context")
+	logger.WarnContext(ctx, "warn context")
+	logger.ErrorContext(ctx, "error context")
 }

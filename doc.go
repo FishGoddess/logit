@@ -1,4 +1,4 @@
-// Copyright 2022 FishGoddess. All Rights Reserved.
+// Copyright 2023 FishGoddess. All Rights Reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -17,536 +17,257 @@ Package logit provides an easy way to use foundation for your logging operations
 
 1. basic:
 
-// Create a new logger for use.
-	// Default level is debug, so all logs will be logged.
-	// Invoke Close() isn't necessary in all situations.
-	// If logger's writer has buffer or something like that, it's better to invoke Close() for syncing buffer or something else.
+	// Use default logger to log.
+	// By default, logs will be output to stdout.
+	logit.Info("hello from logit", "key", 123)
+
+	// Use a new logger to log.
+	// By default, logs will be output to stdout.
 	logger := logit.NewLogger()
-	//defer logger.Close()
 
-	// Then, you can log anything you want.
-	// Remember, logs will be ignored if their level is smaller than logger's level.
-	// Log() will do some finishing work, so this invocation is necessary.
-	logger.Debug("This is a debug message").Log()
-	logger.Info("This is an info message").Log()
-	logger.Warn("This is a warn message").Log()
-	logger.Error(nil, "This is an error message").Log()
-	logger.Error(nil, "This is a %s message, with format", "error").Log() // Format with params.
+	logger.Debug("new version of logit", "version", "1.5.0-alpha", "date", 20231122)
+	logger.Error("new version of logit", "version", "1.5.0-alpha", "date", 20231122)
 
-	// As you know, we provide some levels: debug, info, warn, error, off.
-	// The lowest is debug and the highest is off.
-	// If you want to change the level of your logger, do it at creating.
-	logger = logit.NewLogger(logit.Options().WithWarnLevel())
-	logger.Debug("This is a debug message, but ignored").Log()
-	logger.Info("This is an info message, but ignored").Log()
-	logger.Warn("This is a warn message, not ignored").Log()
-	logger.Error(nil, "This is an error message, not ignored").Log()
-
-	// Also, we provide some "old school" log method :)
-	// (Don't mistake~ I love old school~)
-	logger.Printf("This is a log %s, and it's for compatibility", "printed")
-	logger.Print("This is a log printed, and it's for compatibility", 123)
-	logger.Println("This is a log printed, and it's for compatibility", 666)
-
-	// If you want to log with some fields, try this:
-	user := struct {
-		ID   int64  `json:"id"`
-		Name string `json:"name"`
-		Age  int    `json:"age"`
-	}{
-		ID:   666,
-		Name: "FishGoddess",
-		Age:  3,
-	}
-
-	logger.Warn("This is a structured message").Any("user", user).Json("userJson", user).Log()
-	logger.Error(io.EOF, "This is a structured message").Int("trace", 123).Log()
-
-	// You may notice logit.Options() which returns an options list.
-	// Here is some of them:
-	options := logit.Options()
-	options.WithCaller()                          // Let logs carry caller information.
-	options.WithLevelKey("lvl")                   // Change logger's level key to "lvl".
-	options.WithWriter(os.Stderr)                 // Change logger's writer to os.Stderr without buffer or batch.
-	options.WithBufferWriter(os.Stderr)           // Change logger's writer to os.Stderr with buffer.
-	options.WithBatchWriter(os.Stderr)            // Change logger's writer to os.Stderr with batch.
-	options.WithErrorWriter(os.Stderr)            // Change logger's error writer to os.Stderr without buffer or batch.
-	options.WithTimeFormat("2006-01-02 15:04:05") // Change the format of time (Only the log's time will apply it).
-
-	// You can bind context with logger and use it as long as you can get the context.
-	ctx := logit.NewContext(context.Background(), logger)
-	logger = logit.FromContext(ctx)
-	logger.Info("Logger from context").Log()
-
-	// You can initialize the global logger if you don't want to use an independent logger.
-	logger = logit.NewLogger()
-	logit.SetGlobal(logger)
-	logit.Info("Info from logit").Log()
-
-	// Actually, we recommend you to call logger.SetToGlobal to set one logger to global if you need.
-	logger = logit.NewLogger().SetToGlobal()
-	logit.Println("Println from logit")
-
-2. option:
-
-	// We provide some options for you.
-	options := logit.Options()
-	options.WithDebugLevel()
-	options.WithInfoLevel()
-	options.WithWarnLevel()
-	options.WithErrorLevel()
-	options.WithAppender(appender.Text())
-	options.WithDebugAppender(appender.Text())
-	options.WithInfoAppender(appender.Text())
-	options.WithWarnAppender(appender.Text())
-	options.WithErrorAppender(appender.Text())
-	options.WithPrintAppender(appender.Text())
-	options.WithWriter(os.Stderr)
-	options.WithBufferWriter(os.Stdout)
-	options.WithBatchWriter(os.Stdout)
-	options.WithDebugWriter(os.Stderr)
-	options.WithInfoWriter(os.Stderr)
-	options.WithWarnWriter(os.Stderr)
-	options.WithErrorWriter(os.Stderr)
-	options.WithPrintWriter(os.Stderr)
-	options.WithPID()
-	options.WithCaller()
-	options.WithMsgKey("msg")
-	options.WithTimeKey("time")
-	options.WithLevelKey("level")
-	options.WithPIDKey("pid")
-	options.WithFileKey("file")
-	options.WithLineKey("line")
-	options.WithFuncKey("func")
-	options.WithErrorKey("err")
-	options.WithTimeFormat(global.UnixTimeFormat) // UnixTimeFormat means time will be logged as unix time, an int64 number.
-	options.WithCallerDepth(3)                    // Set caller depth to 3 so the log will get the third depth caller.
-	options.WithInterceptors()
-
-	// Remember, these options is only used for creating a logger.
-	logger := logit.NewLogger(
-		options.WithPID(),
-		options.WithWriter(os.Stdout),
-		options.WithTimeFormat("2006/01/02 15:04:05"),
-		options.WithCaller(),
-		options.WithCallerDepth(4),
-		// ...
-	)
-
+	// Yep, I know you want to output logs to a file, try WithFile option.
+	// The path in WithFile is where the log file will be stored.
+	// Also, it's a good choice to call logger.Close() when program shutdown.
+	logger = logit.NewLogger(logit.WithFile("./logit.log"))
 	defer logger.Close()
-	logger.Info("check options").Log()
 
-	// You can use many options at the same time, but some of them is exclusive.
-	// So only the last one in order will take effect if you use them at the same time.
-	logit.NewLogger(
-		options.WithDebugLevel(),
-		options.WithInfoLevel(),
-		options.WithWarnLevel(),
-		options.WithErrorLevel(), // The level of logger is error.
-	)
+	logger.Info("check where I'm logged", "file", "logit.log")
 
-	// You can customize an option for your logger.
-	// Actually, Option is just a function like func(logger *Logger).
-	// So you can do what you want in creating a logger.
-	syncOption := func(logger *logit.Logger) {
-		go func() {
-			select {
-			case <-time.Tick(time.Second):
-				logger.Sync()
-			}
-		}()
+	// What if I want to use default logger and output logs to a file? Try SetDefault.
+	// It sets a logger to default and you can use it by package function or Default().
+	logit.SetDefault(logger)
+
+	logit.Warn("this is from default logger", "pi", 3.14, "default", true)
+	logit.Default().Warn("this is from default logger, too", "pi", 3.14, "default", true)
+
+	// If you want to change level of logger to info, try WithInfoLevel.
+	// Other levels is similar to info level.
+	logger = logit.NewLogger(logit.WithInfoLevel())
+
+	logger.Debug("debug logs will be ignored")
+	logger.Info("info logs can be logged")
+
+	// Don't want to panic when new a logger? Try NewLoggerGracefully.
+	logger, err := logit.NewLoggerGracefully(logit.WithFile(""))
+	if err != nil {
+		fmt.Println("new logger gracefully failed:", err)
 	}
 
-	logit.NewLogger(syncOption)
+2. logger:
 
-3. appender:
+	// Default() will return the default logger.
+	// You can new a logger or just use the default logger.
+	logger := logit.Default()
+	logger.Info("nothing carried")
 
-	// We provide some ways to change the form of logs.
-	// Actually, appender is an interface with some common methods, see appender.Appender.
-	appender.Text()
-	appender.Json()
+	// Use With() to carry some args in logger.
+	// All logs output by this logger will carry these args.
+	logger = logger.With("carry", 666, "who", "me")
 
-	// Set appender to the one you want to use when creating a logger.
-	// Default appender is appender.Text().
+	logger.Info("see what are carried")
+	logger.Error("error carried", "err", io.EOF)
+
+	// Use WithGroup() to group args in logger.
+	// All logs output by this logger will group args.
+	logger = logger.WithGroup("xxx")
+
+	logger.Info("what group")
+	logger.Error("error group", "err", io.EOF)
+
+	// If you want to check if one level can be logged, try this:
+	if logger.DebugEnabled(context.Background()) {
+		logger.Debug("debug enabled")
+	}
+
+	// We provide some old-school logging methods.
+	// They are using info level by default.
+	// If you want to change the level, see defaults.LevelPrint.
+	logger.Printf("printf %s log", "formatted")
+	logger.Print("print log")
+	logger.Println("println log")
+
+	// Some useful method:
+	logger.Sync()
+	logger.Close()
+
+3. handler:
+
+	// By default, logit uses text handler to output logs.
 	logger := logit.NewLogger()
-	logger.Info("appender.Text()").Log()
+	logger.Info("default handler is text")
 
-	// You can switch appender to the other one, such appender.Json().
-	logger = logit.NewLogger(logit.Options().WithAppender(appender.Json()))
-	logger.Info("appender.Json()").Log()
+	// You can change it to other handlers by options.
+	// For example, use json handler:
+	logger = logit.NewLogger(logit.WithJsonHandler())
+	logger.Info("using json handler")
 
-	// Every level has its own appender, so you can append logs in different level with different appender.
-	logger = logit.NewLogger(
-		logit.Options().WithDebugAppender(appender.Text()),
-		logit.Options().WithInfoAppender(appender.Text()),
-		logit.Options().WithWarnAppender(appender.Json()),
-		logit.Options().WithErrorAppender(appender.Json()),
-	)
+	// Or you want to use slog's handlers in Go:
+	newHandler := func(w io.Writer, opts *slog.HandlerOptions) slog.Handler {
+		return slog.NewTextHandler(w, opts)
+	}
 
-	// Appender is an interface, so you can implement your own appender.
-	// However, we don't recommend you to do that.
-	// This interface may change in every version, so you will pay lots of extra attention to it.
-	// So you should implement it only if you really need to do.
+	logger = logit.NewLogger(logit.WithHandler(newHandler))
+	logger.Info("using slog text handler")
 
-	// appender.TextWith can let you configure the escaping flags of text appender.
-	// Default will escape keys and values.
-	logger = logit.NewLogger(logit.Options().WithAppender(appender.Text()))
-	logger.Info("appender.Text() try \t \b \n and see?").Byte("byte\n", '\n').Rune("rune\n", '\n').String("1\t2\b3\n4", "1\t2\b3\n4").Log()
-	logger.Info("appender.Text() try \t \b \n and see?").Bytes("bytes\n", []byte{'\t', '\b', '\n'}).Runes("runes\n", []rune{'\t', '\b', '\n'}).Strings("1\t2\b3\n4", []string{"1\t2\b3\n4"}).Log()
-
-	logger = logit.NewLogger(logit.Options().WithAppender(appender.TextWith(true, false)))
-	logger.Info("appender.TextWith(true, false) try \t \b \n and see?").Byte("byte\n", '\n').Rune("rune\n", '\n').String("1\t2\b3\n4", "1\t2\b3\n4").Log()
-	logger.Info("appender.TextWith(true, false) try \t \b \n and see?").Bytes("bytes\n", []byte{'\t', '\b', '\n'}).Runes("runes\n", []rune{'\t', '\b', '\n'}).Strings("1\t2\b3\n4", []string{"1\t2\b3\n4"}).Log()
-
-	logger = logit.NewLogger(logit.Options().WithAppender(appender.TextWith(false, true)))
-	logger.Info("appender.TextWith(false, true) try \t \b \n and see?").Byte("byte\n", '\n').Rune("rune\n", '\n').String("1\t2\b3\n4", "1\t2\b3\n4").Log()
-	logger.Info("appender.TextWith(false, true) try \t \b \n and see?").Bytes("bytes\n", []byte{'\t', '\b', '\n'}).Runes("runes\n", []rune{'\t', '\b', '\n'}).Strings("1\t2\b3\n4", []string{"1\t2\b3\n4"}).Log()
-
-	logger = logit.NewLogger(logit.Options().WithAppender(appender.TextWith(false, false)))
-	logger.Info("appender.TextWith(true, true) try \t \b \n and see?").Byte("byte\n", '\n').Rune("rune\n", '\n').String("1\t2\b3\n4", "1\t2\b3\n4").Log()
-	logger.Info("appender.TextWith(true, true) try \t \b \n and see?").Bytes("bytes\n", []byte{'\t', '\b', '\n'}).Runes("runes\n", []rune{'\t', '\b', '\n'}).Strings("1\t2\b3\n4", []string{"1\t2\b3\n4"}).Log()
+	// As you can see, our handler is slog's handler, so you can use any handlers implement this interface.
+	// Like slog's json handler, too:
+	newHandler = func(w io.Writer, opts *slog.HandlerOptions) slog.Handler {
+		return slog.NewJSONHandler(w, opts)
+	}
 
 4. writer:
 
-	// As you know, writer in logit is customized, not io.Writer.
-	// The reason why we create a new Writer interface is we want a sync-able writer.
-	// Then, we notice a sync-able writer also need a close method to sync all data in buffer when closing.
-	// So, a new Writer is born:
-	//
-	//     type Writer interface {
-	//	       Syncer
-	//	       io.WriteCloser
-	//     }
-	//
-	// In package writer, we provide some writers for you.
-	writer.Wrap(os.Stdout)   // Wrap io.Writer to writer.Writer.
-	writer.Buffer(os.Stderr) // Wrap io.Writer to writer.Writer with buffer, which needs invoking Sync() or Close().
-
-	// Use the writer without buffer.
-	logger := logit.NewLogger(logit.Options().WithWriter(os.Stdout))
-	logger.Info("WriterWithoutBuffer").Log()
-
-	// Use the writer with buffer, which is good for io.
-	logger = logit.NewLogger(logit.Options().WithBufferWriter(os.Stdout))
-	logger.Info("WriterWithBuffer").Log()
-	logger.Sync() // Remember syncing data or syncing by Close().
-	logger.Close()
-
-	// Use the writer with batch, which is also good for io.
-	logger = logit.NewLogger(logit.Options().WithBatchWriter(os.Stdout))
-	logger.Info("WriterWithBatch").Log()
-	logger.Sync() // Remember syncing data or syncing by Close().
-	logger.Close()
-
-	// Every level has its own appender so you can append logs in different level with different appender.
-	logger = logit.NewLogger(
-		logit.Options().WithBufferWriter(os.Stdout),
-		logit.Options().WithBatchWriter(os.Stdout),
-		logit.Options().WithWarnWriter(os.Stdout),
-		logit.Options().WithErrorWriter(os.Stdout),
-	)
-
-	// Let me explain buffer writer and batch writer.
-	// Both of them are base on a byte buffer and merge some writes to one write.
-	// Buffer writer will write data in buffer to underlying writer if bytes in buffer are too much.
-	// Batch writer will write data in buffer to underlying writer if writes to buffer are too much.
-	//
-	// Let's see something more interesting:
-	// A buffer writer with buffer size 16 KB and a batch writer with batch count 64, whose performance is better?
-	//
-	// 1. Assume one log is 512 Bytes and its size is fixed
-	// In buffer writer, it will merge 32 writes to 1 writes (16KB / 512Bytes);
-	// In batch writer, it will always merge 64 writes to 1 writes;
-	// Batch writer wins the game! Less writes means it's better to IO.
-	//
-	// 2. Assume one log is 128 Bytes and its size is fixed
-	// In buffer writer, it will merge 128 writes to 1 writes (16KB / 128Bytes);
-	// In batch writer, it will always merge 64 writes to 1 writes;
-	// Buffer writer wins the game! Less writes means it's better to IO.
-	//
-	// 3. How about one log is 256 Bytes and its size is fixed
-	// In buffer writer, it will merge 64 writes to 1 writes (16KB / 256Bytes);
-	// In batch writer, it will always merge 64 writes to 1 writes;
-	// They are the same in writing times.
-	//
-	// Based on what we mentioned above, we can tell the performance of buffer writer is depends on the size of log, and the batch writer is more stable.
-	// Actually, the size of logs in production isn't fixed-size, so batch writer may be a better choice.
-	// However, the buffer in batch writer is out of our control, so it may grow too large if our logs are too large.
-	writer.Buffer(os.Stdout)
-	writer.Batch(os.Stdout)
-	writer.BufferWithSize(os.Stdout, 16*size.KB)
-	writer.BatchWithCount(os.Stdout, 64)
-
-5. global:
-
-	// There are some global settings for optimizations, and you can set all of them in need.
-
-	// 1. LogMallocSize (The pre-malloc size of a new Log data)
-	// If your logs are extremely long, such as 4000 bytes, you can set it to 4096 to avoid re-malloc.
-	global.LogMallocSize = 4 * size.MB
-
-	// 2. WriterBufferSize (The default size of buffer writer)
-	// If your logs are extremely long, such as 16 KB, you can set it to 2048 to avoid re-malloc.
-	global.WriterBufferSize = 32 * size.KB
-
-	// 3. MarshalToJson (The marshal function which marshal interface{} to json data)
-	// Use std by default, and you can customize your marshal function.
-	global.MarshalToJson = json.Marshal
-
-	// After setting global settings, just use Logger as normal.
+	// A new logger outputs logs to stdout.
 	logger := logit.NewLogger()
+	logger.Debug("log to stdout")
+
+	// What if I want to output logs to stderr? Try WithStderr.
+	logger = logit.NewLogger(logit.WithStderr())
+	logger.Debug("log to stderr")
+
+	// Also, you can use WithWriter to specify your own writer.
+	logger = logit.NewLogger(logit.WithWriter(os.Stdout))
+	logger.Debug("log to writer")
+
+	// How to output logs to a file? Try WithFile and WithRotateFile.
+	// Rotate file is useful in production, see _examples/file.go.
+	logger = logit.NewLogger(logit.WithFile("logit.log"))
+	logger.Debug("log to file")
+
+	logger = logit.NewLogger(logit.WithRotateFile("logit.log"))
+	logger.Debug("log to rotate file")
+
+5. file:
+
+	// AS we know, you can use WithFile to output logs to a file.
+	logger := logit.NewLogger(logit.WithFile("logit.log"))
+	logger.Debug("debug to file")
+
+	// However, a single file stored all logs isn't enough in production.
+	// Sometimes we want a log file has a limit size and count of files not greater than a number.
+	// So we provide a rotate file to do this thing.
+	logger = logit.NewLogger(logit.WithRotateFile("logit.log"))
 	defer logger.Close()
 
-	logger.Info("set global settings").Uint64("LogMallocSize", global.LogMallocSize).Uint64("WriterBufferSize", global.WriterBufferSize).Log()
+	logger.Debug("debug to rotate file")
 
-6. context:
+	// Maybe you have noticed that WithRotateFile can pass some rotate.Option.
+	// These options are used to setup the rotate file.
+	opts := []rotate.Option{
+		rotate.WithMaxSize(128 * rotate.MB),
+		rotate.WithMaxAge(30 * rotate.Day),
+		rotate.WithMaxBackups(60),
+	}
 
-	// By NewContext, you can bind a context with a logger and get it from context again.
-	// So you can use this logger from everywhere as long as you can get this context.
-	ctx := logit.NewContext(context.Background(), logit.NewLogger())
+	logger = logit.NewLogger(logit.WithRotateFile("logit.log", opts...))
+	defer logger.Close()
 
-	// FromContext returns the logger in context.
+	logger.Debug("debug to rotate file with rotate options")
+
+	// See rotate.File if you want to use this magic in other scenes.
+	file, err := rotate.New("logit.log")
+	if err != nil {
+		panic(err)
+	}
+
+	defer file.Close()
+
+6. option:
+
+	// As you can see, NewLogger can use some options to create a logger.
+	logger := logit.NewLogger(logit.WithDebugLevel())
+	logger.Debug("debug log")
+
+	// We provide some options for different scenes and all options have prefix "With".
+	// Change logger level:
+	logit.WithDebugLevel()
+	logit.WithInfoLevel()
+	logit.WithWarnLevel()
+	logit.WithDebugLevel()
+
+	// Change logger handler:
+	logit.WithHandler(nil)
+	logit.WithTextHandler()
+	logit.WithJsonHandler()
+
+	// Change handler writer:
+	logit.WithWriter(os.Stdout)
+	logit.WithStdout()
+	logit.WithStderr()
+	logit.WithFile("")
+	logit.WithRotateFile("")
+
+	// Some useful flags:
+	logit.WithSource()
+	logit.WithPID()
+
+	// More options can be found in logit package which have prefix "With".
+	// What's more? We provide a options pack that we think it's useful in production.
+	// It outputs logs to a rotate file using batch write, so you should call Sync() or Close() when shutdown.
+	opts := logit.ProductionOptions()
+
+	logger = logit.NewLogger(opts...)
+	defer logger.Close()
+
+	logger.Info("log from production options")
+	logger.Error("error log from production options")
+
+7. context:
+
+	// We provide a way for getting logger from a context.
+	// By default, the default logger will be returned if there is no logit.Logger in context.
+	ctx := context.Background()
+
 	logger := logit.FromContext(ctx)
-	logger.Info("This is a message logged by logger from context").Log()
+	logger.Debug("logger from context debug")
 
-	// Actually, you also have a chance to specify the key of logger in context.
-	// It gives you a way to discriminate different businesses in using logger.
-	// For example, you can create two loggers for your two different usages and
-	// set them to a context with different key, so you can get each logger from context with each key.
-	businessOneKey := "businessOne"
-	logger = logit.NewLogger(logit.Options().WithMsgKey("businessOneMsg"))
-	ctx = logit.NewContextWithKey(context.Background(), businessOneKey, logger)
-
-	businessTwoKey := "businessTwo"
-	logger = logit.NewLogger(logit.Options().WithMsgKey("businessTwoMsg"))
-	ctx = logit.NewContextWithKey(ctx, businessTwoKey, logger)
-
-	// Get different logger from the same context with different key.
-	logger = logit.FromContextWithKey(ctx, businessOneKey)
-	logger.Info("This is a message logged by logger from context with businessOneKey").Log()
-
-	logger = logit.FromContextWithKey(ctx, businessTwoKey)
-	logger.Info("This is a message logged by logger from context with businessTwoKey").Log()
-
-7. caller:
-
-	// Let's create a logger without caller information.
-	logger := logit.NewLogger()
-	logger.Info("I am without caller").Log()
-
-	// We provide a way to add caller information to log even logger doesn't carry caller.
-	logger.Info("Invoke log.WithCaller()").WithCaller().Log()
-	logger.Close()
-
-	time.Sleep(time.Second)
-
-	// Now, let's create a logger with caller information.
-	logger = logit.NewLogger(logit.Options().WithCaller())
-	logger.Info("I am with caller").Log()
-
-	// We won't carry caller information twice or more if logger carries caller information already.
-	logger.Info("Invoke log.WithCaller() again").WithCaller().Log()
-	logger.Close()
-
-8. interceptor:
-
-	// serverInterceptor is the global interceptor applied to all logs.
-	func serverInterceptor(ctx context.Context, log *logit.Log) {
-		log.String("server", "logit.interceptor")
+	if logger == logit.Default() {
+		logger.Info("logger from context is default logger")
 	}
 
-	// traceInterceptor is the global interceptor applied to all logs.
-	func traceInterceptor(ctx context.Context, log *logit.Log) {
-		trace, ok := ctx.Value("trace").(string)
-		if !ok {
-			trace = "unknown trace"
-		}
+	// Use NewContext to set a logger to context.
+	// We use WithGroup here to make a difference to default logger.
+	logger = logit.NewLogger().WithGroup("context")
+	ctx = logit.NewContext(ctx, logger)
 
-		log.String("trace", trace)
+	// Then you can get the logger from context.
+	logger = logit.FromContext(ctx)
+	logger.Debug("logger from context debug", "key", "value")
+
+	// Maybe you have noticed logger has some methods with context.
+	// These methods will pass the context to underlying handler so that we can use it to process some logics.
+	logger.DebugContext(ctx, "debug context")
+	logger.InfoContext(ctx, "info context")
+	logger.WarnContext(ctx, "warn context")
+	logger.ErrorContext(ctx, "error context")
+
+8. default:
+
+	// We set a defaults package that setups all shared fields.
+	// For example, if you want to customize the time getter:
+	defaults.CurrentTime = func() time.Time {
+		// Return a fixed time for example.
+		return time.Unix(666, 0).In(time.Local)
 	}
 
-	// userInterceptor is the global interceptor applied to all logs.
-	func userInterceptor(ctx context.Context, log *logit.Log) {
-		user, ok := ctx.Value("user").(string)
-		if !ok {
-			user = "unknown user"
-		}
+	logit.Print("println log is info level")
 
-		log.String("user", user)
+	// If you want change the level of old-school logging methods:
+	defaults.LevelPrint = slog.LevelDebug
+
+	logit.Print("println log is debug level now")
+
+	// More fields see defaults package.
+	defaults.HandleError = func(label string, err error) {
+		fmt.Printf("%s: %+n\n", label, err)
 	}
-
-	// businessInterceptor is the log-level interceptor applied to one/some logs.
-	func businessInterceptor(ctx context.Context, log *logit.Log) {
-		business, ok := ctx.Value("business").(string)
-		if !ok {
-			business = "unknown business"
-		}
-
-		log.String("business", business)
-	}
-
-	// Use logit.Options().WithInterceptors to append some interceptors.
-	logger := logit.NewLogger(logit.Options().WithInterceptors(serverInterceptor, traceInterceptor, userInterceptor))
-	defer logger.Close()
-
-	// By default, context passed to interceptor is context.Background().
-	logger.Info("try interceptor - round one").Log()
-
-	// You can use WithContext to change context passed to interceptor.
-	ctx := context.WithValue(context.Background(), "trace", "666")
-	ctx = context.WithValue(ctx, "user", "FishGoddess")
-	logger.Info("try interceptor - round two").WithContext(ctx).Log()
-
-	// The interceptors appended to logger will apply to all logs.
-	// You can use Intercept to intercept one log rather than all logs.
-	logger.Info("try interceptor - round three").WithContext(ctx).Intercept(businessInterceptor).Log()
-
-	// Notice that WithContext should be called before Intercept if you want to pass this context to Intercept.
-	ctx = context.WithValue(ctx, "business", "logger")
-	logger.Info("try interceptor - round four").WithContext(ctx).Intercept(businessInterceptor).Log()
-
-	// Try LogX?
-	logger.Info("try interceptor - LogX").LogX(ctx)
-
-9. file:
-
-	func createFile(filePath string) *os.File {
-		f, err := os.OpenFile(filePath, os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0644)
-		if err != nil {
-			panic(err)
-		}
-
-		return f
-	}
-
-	// Logger will log everything to console by default.
-	logger := logit.NewLogger()
-	logger.Info("I log everything to console.").Log()
-
-	// You can use WithWriter to change writer in logger.
-	logger = logit.NewLogger(logit.Options().WithWriter(os.Stdout))
-	logger.Info("I also log everything to console.").Log()
-
-	// As we know, we always log everything to file in production.
-	logFile := filepath.Join(os.TempDir(), "test.log")
-	fmt.Println(logFile)
-
-	logger = logit.NewLogger(logit.Options().WithWriter(createFile(logFile)))
-	logger.Info("I log everything to file.").String("logFile", logFile).Log()
-	logger.Close()
-
-	// We provide some high-performance file for you. Try these:
-	logger = logit.NewLogger(logit.Options().WithBufferWriter(createFile(logFile)))
-	logger = logit.NewLogger(logit.Options().WithBatchWriter(createFile(logFile)))
-
-	// Or you can use the original writer package to create a writer configured by you.
-	writer.BufferWithSize(os.Stdout, 128*size.KB)
-	writer.BatchWithCount(os.Stdout, 256)
-
-	// Wait a minute, we also provide a powerful file for you!
-	// See extension/file/file.go.
-	// It will rotate file and clean backups automatically.
-	// You can set maxSize, maxAge and maxBackups by options.
-	logFile = filepath.Join(os.TempDir(), "test_powerful.log")
-
-	f, err := file.New(logFile)
-	if err != nil {
-		panic(err)
-	}
-
-	defer f.Close()
-
-	_, err = f.Write([]byte("xxx"))
-	if err != nil {
-		panic(err)
-	}
-
-10. error:
-
-	// uselessWriter is a demo writer to demonstrate the error handling function.
-	type uselessWriter struct{}
-
-	func (uw uselessWriter) Write(p []byte) (n int, err error) {
-		return 0, errors.New("always error in writing")
-	}
-
-	// You can specify a function to handle errors happens in logger.
-	// For example, you can count these errors and report them to team members by email.
-	global.HandleError = func(name string, err error) {
-		fmt.Printf("%s received an error: %+v\n", name, err)
-	}
-
-	// Let's log something to see what happen.
-	logger := logit.NewLogger(logit.Options().WithWriter(&uselessWriter{}))
-	logger.Info("See what happen?").Log()
-
-11. config:
-
-	// We provide a config which can be converted to option in logit.
-	// It has many tags in fields, such json, yaml, toml, which means you can use config file to create logger.
-	// You just need to define your config file then unmarshal your config file to this config.
-	// Of course, you can embed this struct to your application config struct!
-	cfg := config.Config{
-		Level:         config.LevelDebug,
-		TimeKey:       "x.time",
-		LevelKey:      "x.level",
-		MsgKey:        "x.msg",
-		PIDKey:        "x.pid",
-		FileKey:       "x.file",
-		LineKey:       "x.line",
-		FuncKey:       "x.func",
-		ErrorKey:      "x.err",
-		TimeFormat:    config.UnixTimeFormat,
-		WithPID:       true,
-		WithCaller:    true,
-		CallerDepth:   0,
-		AutoSync:      "10s",
-		Appender:      config.AppenderText,
-		DebugAppender: config.AppenderText,
-		InfoAppender:  config.AppenderText,
-		WarnAppender:  config.AppenderText,
-		ErrorAppender: config.AppenderText,
-		PrintAppender: config.AppenderJson,
-		Writer: config.WriterConfig{
-			Target:     config.WriterTargetStdout,
-			Mode:       config.WriterModeDirect,
-			BufferSize: "4MB",
-			BatchCount: 1024,
-			Filename:   "test.log",
-			DirMode:    0755,
-			FileMode:   0644,
-			TimeFormat: "20060102150405",
-			MaxSize:    "128MB",
-			MaxAge:     "30d",
-			MaxBackups: 32,
-		},
-		DebugWriter: config.WriterConfig{},
-		InfoWriter:  config.WriterConfig{},
-		WarnWriter:  config.WriterConfig{},
-		ErrorWriter: config.WriterConfig{},
-		PrintWriter: config.WriterConfig{},
-	}
-
-	// Once you got a config, use Options() to convert to option in logger.
-	opts, err := cfg.Options()
-	if err != nil {
-		panic(err)
-	}
-
-	fmt.Println(opts)
-
-	// Then you can create your logger by options.
-	// Amazing!
-	logger := logit.NewLogger(opts...)
-	defer logger.Close()
-
-	logger.Info("My mother is a config").Any("config", cfg).Log()
-	logger.Info("See logger").Any("logger", logger).Log()
-	logger.Error(io.EOF, "error message").Log()
 */
 package logit // import "github.com/FishGoddess/logit"
 
 const (
 	// Version is the version string representation of logit.
-	Version = "v1.2.1"
+	Version = "v1.5.0-alpha"
 )

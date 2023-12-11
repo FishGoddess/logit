@@ -12,24 +12,36 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package logit
+package rotate
 
 import (
-	"context"
+	"time"
 )
 
-type contextKey struct{}
+// Option sets some fields to config.
+type Option func(c *config)
 
-// NewContext wraps context with logger and returns a new context.
-func NewContext(ctx context.Context, logger *Logger) context.Context {
-	return context.WithValue(ctx, contextKey{}, logger)
+func (o Option) apply(c *config) {
+	o(c)
 }
 
-// FromContext gets logger from context and returns the default logger if missed.
-func FromContext(ctx context.Context) *Logger {
-	if logger, ok := ctx.Value(contextKey{}).(*Logger); ok {
-		return logger
+// WithMaxSize sets max size to config.
+func WithMaxSize(size uint64) Option {
+	return func(c *config) {
+		c.maxSize = size
 	}
+}
 
-	return Default()
+// WithMaxAge sets max age to config.
+func WithMaxAge(age time.Duration) Option {
+	return func(c *config) {
+		c.maxAge = age
+	}
+}
+
+// WithMaxBackups sets max backups to config.
+func WithMaxBackups(backups uint32) Option {
+	return func(c *config) {
+		c.maxBackups = backups
+	}
 }

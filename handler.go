@@ -14,22 +14,28 @@
 
 package logit
 
-import (
-	"context"
-)
+import "io"
 
-type contextKey struct{}
-
-// NewContext wraps context with logger and returns a new context.
-func NewContext(ctx context.Context, logger *Logger) context.Context {
-	return context.WithValue(ctx, contextKey{}, logger)
+// Syncer is an interface that syncs data to somewhere.
+type Syncer interface {
+	Sync() error
 }
 
-// FromContext gets logger from context and returns the default logger if missed.
-func FromContext(ctx context.Context) *Logger {
-	if logger, ok := ctx.Value(contextKey{}).(*Logger); ok {
-		return logger
-	}
+// Writer is an interface which have sync, write and close functions.
+type Writer interface {
+	io.Writer
+	Syncer
+	io.Closer
+}
 
-	return Default()
+type nilSyncer struct{}
+
+func (nilSyncer) Sync() error {
+	return nil
+}
+
+type nilCloser struct{}
+
+func (nilCloser) Close() error {
+	return nil
 }

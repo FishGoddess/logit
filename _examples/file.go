@@ -1,4 +1,4 @@
-// Copyright 2022 FishGoddess. All Rights Reserved.
+// Copyright 2023 FishGoddess. All Rights Reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -15,65 +15,41 @@
 package main
 
 import (
-	"fmt"
-	"os"
-	"path/filepath"
-
 	"github.com/FishGoddess/logit"
-	"github.com/FishGoddess/logit/core/writer"
-	"github.com/FishGoddess/logit/extension/file"
-	"github.com/FishGoddess/logit/support/size"
+	"github.com/FishGoddess/logit/rotate"
 )
 
-func createFile(filePath string) *os.File {
-	f, err := os.OpenFile(filePath, os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0644)
-	if err != nil {
-		panic(err)
-	}
-
-	return f
-}
-
 func main() {
-	// Logger will log everything to console by default.
-	logger := logit.NewLogger()
-	logger.Info("I log everything to console.").Log()
+	// AS we know, you can use WithFile to output logs to a file.
+	logger := logit.NewLogger(logit.WithFile("logit.log"))
+	logger.Debug("debug to file")
 
-	// You can use WithWriter to change writer in logger.
-	logger = logit.NewLogger(logit.Options().WithWriter(os.Stdout))
-	logger.Info("I also log everything to console.").Log()
+	// However, a single file stored all logs isn't enough in production.
+	// Sometimes we want a log file has a limit size and count of files not greater than a number.
+	// So we provide a rotate file to do this thing.
+	logger = logit.NewLogger(logit.WithRotateFile("logit.log"))
+	defer logger.Close()
 
-	// As we know, we always log everything to file in production.
-	logFile := filepath.Join(os.TempDir(), "test.log")
-	fmt.Println(logFile)
+	logger.Debug("debug to rotate file")
 
-	logger = logit.NewLogger(logit.Options().WithWriter(createFile(logFile)))
-	logger.Info("I log everything to file.").String("logFile", logFile).Log()
-	logger.Close()
+	// Maybe you have noticed that WithRotateFile can pass some rotate.Option.
+	// These options are used to setup the rotate file.
+	opts := []rotate.Option{
+		rotate.WithMaxSize(128 * rotate.MB),
+		rotate.WithMaxAge(30 * rotate.Day),
+		rotate.WithMaxBackups(60),
+	}
 
-	// We provide some high-performance file for you. Try these:
-	logger = logit.NewLogger(logit.Options().WithBufferWriter(createFile(logFile)))
-	logger = logit.NewLogger(logit.Options().WithBatchWriter(createFile(logFile)))
+	logger = logit.NewLogger(logit.WithRotateFile("logit.log", opts...))
+	defer logger.Close()
 
-	// Or you can use the original writer package to create a writer configured by you.
-	writer.BufferWithSize(os.Stdout, 128*size.KB)
-	writer.BatchWithCount(os.Stdout, 256)
+	logger.Debug("debug to rotate file with rotate options")
 
-	// Wait a minute, we also provide a powerful file for you!
-	// See extension/file/file.go.
-	// It will rotate file and clean backups automatically.
-	// You can set maxSize, maxAge and maxBackups by options.
-	logFile = filepath.Join(os.TempDir(), "test_powerful.log")
-
-	f, err := file.New(logFile)
+	// See rotate.File if you want to use this magic in other scenes.
+	file, err := rotate.New("logit.log")
 	if err != nil {
 		panic(err)
 	}
 
-	defer f.Close()
-
-	_, err = f.Write([]byte("xxx"))
-	if err != nil {
-		panic(err)
-	}
+	defer file.Close()
 }

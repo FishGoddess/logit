@@ -1,4 +1,4 @@
-// Copyright 2022 FishGoddess. All Rights Reserved.
+// Copyright 2023 FishGoddess. All Rights Reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -16,114 +16,212 @@ package logit
 
 import (
 	"bytes"
-	"errors"
+	"context"
+	"io"
+	"log/slog"
+	"strings"
 	"testing"
-
-	"github.com/FishGoddess/logit/core/appender"
-	"github.com/FishGoddess/logit/support/runtime"
 )
 
-// go test -v -cover -run=^TestNewLogger$
+type testLoggerHandler struct {
+	slog.TextHandler
+	w    io.Writer
+	opts slog.HandlerOptions
+}
+
+// go test -v -cover -count=1 -test.cpu=1 -run=^TestNewLogger$
 func TestNewLogger(t *testing.T) {
-	buffer := bytes.NewBuffer(make([]byte, 0, 1024))
+	handler := &testLoggerHandler{}
 
-	options := []Option{
-		Options().WithDebugLevel(),
-		Options().WithAppender(appender.Json()),
-		Options().WithWriter(buffer),
-		Options().WithCaller(),
-		Options().WithMsgKey("msg"),
-		Options().WithTimeKey(""),
-		Options().WithLevelKey("level"),
-		Options().WithPIDKey("pid"),
-		Options().WithFileKey("file"),
-		Options().WithLineKey("line"),
-		Options().WithFuncKey("func"),
-		Options().WithErrorKey("err"),
-		Options().WithTimeFormat("060102"),
+	newHandler := func(w io.Writer, opts *slog.HandlerOptions) slog.Handler {
+		return handler
 	}
 
-	logger := NewLogger(options...)
-	defer logger.Close()
-
-	logger.Debug("debug...").String("trace", "xxx").Int("id", 123).Float64("pi", 3.14).Any("any", map[string]interface{}{"a": 1, "b": "bbb"}).Log()
-	logger.Error(errors.New("我是错误"), "error...").Byte("b", 'a').Byte("es", '\n').Runes("words", []rune("我是中国人")).Log()
-	logger.Error(nil, "error with %d...", 666).String("trace", "xxx").Int("id", 123).Float64("pi", 3.14).Log()
-	logger.Warn("\"warn\"...\r\b\t\n").Strings("s\tb\nd\b", []string{"abc\r", "efg\n"}).Log()
-	logger.Info("info...").Bools("bools", []bool{true, false}).Bytes("bytes", []byte{'\b', '\t', 'a', 'b', 'c', '"', '\n'}).Int16s("int16s", []int16{123, 4567, 8901}).Float32s("float32s", []float32{3.14, 6.18}).Log()
-
-	file, _, _ := runtime.Caller(1)
-
-	logs := `{"level":"debug","file":"` + file + `","line":49,"func":"github.com/FishGoddess/logit.TestNewLogger","msg":"debug...","trace":"xxx","id":123,"pi":3.14,"any":{"a":1,"b":"bbb"}}
-{"level":"error","file":"` + file + `","line":50,"func":"github.com/FishGoddess/logit.TestNewLogger","msg":"error...","err":"我是错误","b":"a","es":"\n","words":["我","是","中","国","人"]}
-{"level":"error","file":"` + file + `","line":51,"func":"github.com/FishGoddess/logit.TestNewLogger","msg":"error with 666...","err":null,"trace":"xxx","id":123,"pi":3.14}
-{"level":"warn","file":"` + file + `","line":52,"func":"github.com/FishGoddess/logit.TestNewLogger","msg":"\"warn\"...\r\b\t\n","s\tb\nd\b":["abc\r","efg\n"]}
-{"level":"info","file":"` + file + `","line":53,"func":"github.com/FishGoddess/logit.TestNewLogger","msg":"info...","bools":[true,false],"bytes":["\b","\t","a","b","c","\"","\n"],"int16s":[123,4567,8901],"float32s":[3.140000104904175,6.179999828338623]}
-`
-
-	output := buffer.String()
-	if output != logs {
-		t.Errorf("logs %s is wrong with %s", output, logs)
+	logger := NewLogger(WithHandler(newHandler))
+	if logger.handler != handler {
+		t.Fatalf("logger.handler %+v != handler %+v", logger.handler, handler)
 	}
 }
 
-// go test -v -cover -run=^TestLoggerSetToGlobal$
-func TestLoggerSetToGlobal(t *testing.T) {
-	logger := NewLogger().SetToGlobal()
+// go test -v -cover -count=1 -test.cpu=1 -run=^TestLoggerClone$
+func TestLoggerClone(t *testing.T) {
+	logger := NewLogger()
+	newLogger := logger.clone()
 
-	if logger != globalLogger {
-		t.Errorf("logger %p != globalLogger %p", logger, globalLogger)
+	if logger == newLogger {
+		t.Fatalf("logger %+v == newLogger %+v", logger, newLogger)
 	}
 
-	if logger.callerDepth != globalLogger.callerDepth {
-		t.Errorf("logger.callerDepth %d != globalLogger.callerDepth %d", logger.callerDepth, globalLogger.callerDepth)
+	if logger.handler != newLogger.handler {
+		t.Fatalf("logger.handler %+v != newLogger.handler %+v", logger.handler, newLogger.handler)
 	}
 }
 
-// go test -v -cover -run=^TestLoggerPrintf$
-func TestLoggerPrintf(t *testing.T) {
-	buffer := bytes.NewBuffer(make([]byte, 0, 1024))
+// go test -v -cover -count=1 -test.cpu=1 -run=^TestLoggerNewAttrs$
+func TestLoggerNewAttrs(t *testing.T) {
+	logger := NewLogger()
 
-	options := Options()
+	args := []any{
+		"key1", 123, "key2", "456", slog.Bool("key3", true), 666, "key4",
+	}
+
+	attrs := logger.newAttrs(args)
+	if len(attrs) != 5 {
+		t.Fatalf("len(attrs) %d != 5", len(attrs))
+	}
+
+	if attrs[0].String() != "key1=123" {
+		t.Fatalf("attrs[0] %s is wrong", attrs[0])
+	}
+
+	if attrs[1].String() != "key2=456" {
+		t.Fatalf("attrs[1] %s is wrong", attrs[1])
+	}
+
+	if attrs[2].String() != "key3=true" {
+		t.Fatalf("attrs[2] %s is wrong", attrs[2])
+	}
+
+	if attrs[3].String() != keyBad+"=666" {
+		t.Fatalf("attrs[3] %s is wrong", attrs[3])
+	}
+
+	if attrs[4].String() != keyBad+"=key4" {
+		t.Fatalf("attrs[4] %s is wrong", attrs[4])
+	}
+}
+
+// go test -v -cover -count=1 -test.cpu=1 -run=^TestLoggerWith$
+func TestLoggerWith(t *testing.T) {
+	logger := NewLogger()
+	newLogger := logger.With()
+
+	if logger != newLogger {
+		t.Fatalf("logger %+v != newLogger %+v", logger, newLogger)
+	}
+
+	if logger.handler != newLogger.handler {
+		t.Fatalf("logger.handler %+v != newLogger.handler %+v", logger.handler, newLogger.handler)
+	}
+
+	newLogger = logger.With("key", 123)
+
+	if logger == newLogger {
+		t.Fatalf("logger %+v == newLogger %+v", logger, newLogger)
+	}
+
+	if logger.handler == newLogger.handler {
+		t.Fatalf("logger.handler %+v == newLogger.handler %+v", logger.handler, newLogger.handler)
+	}
+}
+
+// go test -v -cover -count=1 -test.cpu=1 -run=^TestLoggerWithGroup$
+func TestLoggerWithGroup(t *testing.T) {
+	logger := NewLogger()
+	newLogger := logger.WithGroup("")
+
+	if logger != newLogger {
+		t.Fatalf("logger %+v != newLogger %+v", logger, newLogger)
+	}
+
+	if logger.handler != newLogger.handler {
+		t.Fatalf("logger.handler %+v != newLogger.handler %+v", logger.handler, newLogger.handler)
+	}
+
+	newLogger = logger.WithGroup("xxx")
+
+	if logger == newLogger {
+		t.Fatalf("logger %+v == newLogger %+v", logger, newLogger)
+	}
+
+	if logger.handler == newLogger.handler {
+		t.Fatalf("logger.handler %+v == newLogger.handler %+v", logger.handler, newLogger.handler)
+	}
+}
+
+// go test -v -cover -count=1 -test.cpu=1 -run=^TestLoggerEnabled$
+func TestLoggerEnabled(t *testing.T) {
+	ctx := context.Background()
+	logger := NewLogger(WithErrorLevel())
+
+	if logger.enabled(ctx, slog.LevelDebug) {
+		t.Fatal("logger enabled debug")
+	}
+
+	if logger.enabled(ctx, slog.LevelInfo) {
+		t.Fatal("logger enabled info")
+	}
+
+	if logger.enabled(ctx, slog.LevelWarn) {
+		t.Fatal("logger enabled warn")
+	}
+
+	if !logger.enabled(ctx, slog.LevelError) {
+		t.Fatal("logger enabled error")
+	}
+}
+
+func removeTimeAndSource(str string) string {
+	str = strings.ReplaceAll(str, "\n", " ")
+	strs := strings.Split(str, " ")
+
+	var removed strings.Builder
+	for _, s := range strs {
+		if strings.HasPrefix(s, slog.TimeKey) {
+			continue
+		}
+
+		if strings.HasPrefix(s, slog.SourceKey) {
+			continue
+		}
+
+		removed.WriteString(s)
+		removed.WriteString(" ")
+	}
+
+	return removed.String()
+}
+
+// go test -v -cover -count=1 -test.cpu=1 -run=^TestLogger$
+func TestLogger(t *testing.T) {
+	newHandler := func(w io.Writer, opts *slog.HandlerOptions) slog.Handler {
+		return slog.NewTextHandler(w, opts)
+	}
+
+	ctx := context.Background()
+	buffer := bytes.NewBuffer(make([]byte, 0, 1024))
 	logger := NewLogger(
-		options.WithErrorLevel(),
-		options.WithAppender(appender.Json()),
-		options.WithWriter(buffer),
-		options.WithTimeKey(""),
+		WithDebugLevel(), WithHandler(newHandler), WithWriter(buffer), WithSource(), WithPID(),
 	)
 
-	logger.Printf("printf%d", 123)
-	logger.Print("print", 666)
-	logger.Println("println", 999)
+	logger.Debug("debug msg", "key1", 1)
+	logger.Info("info msg", "key2", 2)
+	logger.Warn("warn msg", "key3", 3)
+	logger.Error("error msg", "key4", 4)
 
-	output := buffer.String()
-	logs := `{"log.level":"print","log.msg":"printf123"}
-{"log.level":"print","log.msg":"print666"}
-{"log.level":"print","log.msg":"println 999\n"}
-`
-	if output != logs {
-		t.Errorf("logs %s is wrong with %s", output, logs)
-	}
-}
+	logger.DebugContext(ctx, "debug msg with context", "key5", 5)
+	logger.InfoContext(ctx, "info msg with context", "key6", 6)
+	logger.WarnContext(ctx, "warn msg with context", "key7", 7)
+	logger.ErrorContext(ctx, "error msg with context", "key8", 8)
 
-// go test -v -cover -run=^TestLoggerSync$
-func TestLoggerSync(t *testing.T) {
-	logger := NewLogger()
+	opts := &slog.HandlerOptions{AddSource: true, Level: slog.LevelDebug}
+	wantBuffer := bytes.NewBuffer(make([]byte, 0, 1024))
+	slogLogger := slog.New(newHandler(wantBuffer, opts)).With(keyPID, pid)
 
-	if err := logger.Sync(); err != nil {
-		t.Error(err)
-	}
-}
+	slogLogger.Debug("debug msg", "key1", 1)
+	slogLogger.Info("info msg", "key2", 2)
+	slogLogger.Warn("warn msg", "key3", 3)
+	slogLogger.Error("error msg", "key4", 4)
 
-// go test -v -cover -run=^TestLoggerClose$
-func TestLoggerClose(t *testing.T) {
-	logger := NewLogger()
+	slogLogger.DebugContext(ctx, "debug msg with context", "key5", 5)
+	slogLogger.InfoContext(ctx, "info msg with context", "key6", 6)
+	slogLogger.WarnContext(ctx, "warn msg with context", "key7", 7)
+	slogLogger.ErrorContext(ctx, "error msg with context", "key8", 8)
 
-	if err := logger.Close(); err != nil {
-		t.Error(err)
-	}
+	got := removeTimeAndSource(buffer.String())
+	want := removeTimeAndSource(wantBuffer.String())
 
-	if logger.level != offLevel {
-		t.Errorf("level of logger %+v is wrong", logger.level)
+	if got != want {
+		t.Fatalf("got %s != want %s", got, want)
 	}
 }

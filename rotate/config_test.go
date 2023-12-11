@@ -12,24 +12,24 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package logit
+package rotate
 
 import (
-	"context"
+	"testing"
 )
 
-type contextKey struct{}
+// go test -v -cover -count=1 -test.cpu=1 -run=^TestNewDefaultConfig$
+func TestNewDefaultConfig(t *testing.T) {
+	c := newDefaultConfig()
 
-// NewContext wraps context with logger and returns a new context.
-func NewContext(ctx context.Context, logger *Logger) context.Context {
-	return context.WithValue(ctx, contextKey{}, logger)
-}
-
-// FromContext gets logger from context and returns the default logger if missed.
-func FromContext(ctx context.Context) *Logger {
-	if logger, ok := ctx.Value(contextKey{}).(*Logger); ok {
-		return logger
+	want := config{
+		timeFormat: "20060102150405",
+		maxSize:    128 * MB,
+		maxAge:     60 * Day,
+		maxBackups: 90,
 	}
 
-	return Default()
+	if c != want {
+		t.Fatalf("c %+v != want %+v", c, want)
+	}
 }

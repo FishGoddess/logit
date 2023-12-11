@@ -1,13 +1,29 @@
 ## ✒ 未来版本的新特性 (Features in future versions)
 
-### v2
+### v1.8.x
 
-* [ ] 考虑结合 Go1.21 新加的 slog 包，做一些生产化的适配和功能
+* [ ] 融合 Go 官方设计的正式版本
+* [ ] 提高单元测试覆盖率到 90%
+
+### v1.5.x
+
+* [x] 考虑结合 Go1.21 新加的 slog 包，做一些生产化的适配和功能
+* [x] 增加 context 适配功能
+* [x] 增加 Production 现成配置，搭配 Option 方便使用
+* [x] 完善 Logger 相关的单元测试
+* [x] 调整 writer 包代码，完善单元测试
+* [x] 调整 rotate 包代码，完善单元测试
+* [x] 完善 config 包功能和单元测试
+* [x] 完善性能测试
+* [x] 完善示例代码
+* [ ] 提高单元测试覆盖率到 80%
+* [ ] 增加拦截器适配功能
+* [ ] 提高 handler 性能
 
 ### v1.2.x
 
-* [ ] 考虑增加类似于 scope 的机制，可以在 logit 中装载超过一个 global 的 logger
-* [ ] 考虑增加 Production 之类不同级别的现成配置 options，方便使用
+* [ ] ~~考虑增加类似于 scope 的机制，可以在 logit 中装载超过一个 global 的 logger~~
+* [ ] ~~考虑增加 Production 之类不同级别的现成配置 options，方便使用~~
 
 ### v1.1.x
 
