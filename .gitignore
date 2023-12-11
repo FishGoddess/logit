@@ -16,3 +16,4 @@ target/
 *.test
 *.out
 *.log
+*.prof

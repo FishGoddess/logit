@@ -222,11 +222,14 @@ func (l *Logger) newRecord(ctx context.Context, level slog.Level, msg string, ar
 		record.AddAttrs(slog.Int(keyPID, pid))
 	}
 
-	attrs := l.newAttrs(args)
-	record.AddAttrs(attrs...)
+	var attr slog.Attr
+	for len(args) > 0 {
+		attr, args = l.squeezeAttr(args)
+		record.AddAttrs(attr)
+	}
 
 	for _, resolve := range l.resolvers {
-		attrs = resolve(ctx)
+		attrs := resolve(ctx)
 		record.AddAttrs(attrs...)
 	}
 
