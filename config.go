@@ -34,6 +34,8 @@ type config struct {
 	withSource bool
 	withPID    bool
 
+	resolvers []AttrResolver
+
 	syncTimer time.Duration
 }
 
@@ -50,6 +52,7 @@ func newDefaultConfig() *config {
 		replaceAttr: nil,
 		withSource:  false,
 		withPID:     false,
+		resolvers:   nil,
 		syncTimer:   0,
 	}
 

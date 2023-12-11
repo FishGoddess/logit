@@ -1,12 +1,19 @@
 ## ✒ 历史版本的特性介绍 (Features in old versions)
 
-### v1.5.1-alpha (Coming soon)
+### v1.5.2-alpha (Coming soon)
 
 > 此版本发布于 2024-01-01
 
-* 提高单元测试覆盖率到 80%
-* 增加拦截器适配功能
-* 提高 handler 性能
+* 自定义 handler 来提高性能
+* 提高单元测试覆盖率到 70%
+
+### v1.5.1-alpha
+
+> 此版本发布于 2023-12-12
+
+* 增加属性解析器适配功能
+* Logger 性能提升接近 20%
+* TextHandler 零内存分配
 
 ### v1.5.0-alpha
 

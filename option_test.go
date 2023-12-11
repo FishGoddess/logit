@@ -16,6 +16,7 @@ package logit
 
 import (
 	"bytes"
+	"context"
 	"fmt"
 	"io"
 	"log/slog"
@@ -325,6 +326,32 @@ func TestWithPID(t *testing.T) {
 
 	if !conf.withPID {
 		t.Fatal("conf.withPID is wrong")
+	}
+}
+
+// go test -v -cover -count=1 -test.cpu=1 -run=^TestWithAttrResolvers$
+func TestWithAttrResolvers(t *testing.T) {
+	resolver1 := func(ctx context.Context) (attrs []slog.Attr) {
+		return nil
+	}
+
+	resolver2 := func(ctx context.Context) (attrs []slog.Attr) {
+		return nil
+	}
+
+	conf := &config{resolvers: nil}
+	WithAttrResolvers(resolver1, resolver2).applyTo(conf)
+
+	if len(conf.resolvers) != 2 {
+		t.Fatal("conf.resolver is wrong")
+	}
+
+	if fmt.Sprintf("%p", conf.resolvers[0]) != fmt.Sprintf("%p", resolver1) {
+		t.Fatal("conf.resolvers[0] is wrong")
+	}
+
+	if fmt.Sprintf("%p", conf.resolvers[1]) != fmt.Sprintf("%p", resolver2) {
+		t.Fatal("conf.resolvers[1] is wrong")
 	}
 }
 
