@@ -35,13 +35,22 @@ var (
 	pid = os.Getpid()
 )
 
+// AttrResolver resolves attrs from context.
+type AttrResolver = func(ctx context.Context) (attrs []slog.Attr)
+
+// Logger is the entry of logging in logit.
+// It has several levels including debug, info, warn and error.
+// It's also a syncer or closer if handler is a syncer or closer.
 type Logger struct {
 	handler slog.Handler
-	syncer  Syncer
-	closer  io.Closer
+
+	syncer Syncer
+	closer io.Closer
 
 	withSource bool
 	withPID    bool
+
+	resolvers []AttrResolver
 }
 
 // NewLogger creates a logger with given options or panics if failed.
@@ -75,6 +84,7 @@ func NewLoggerGracefully(opts ...Option) (*Logger, error) {
 		closer:     closer,
 		withSource: conf.withSource,
 		withPID:    conf.withPID,
+		resolvers:  conf.resolvers,
 	}
 
 	if conf.syncTimer > 0 {
@@ -197,7 +207,7 @@ func (l *Logger) PrintEnabled(ctx context.Context) bool {
 	return l.enabled(ctx, defaults.LevelPrint)
 }
 
-func (l *Logger) newRecord(level slog.Level, msg string, args []any) slog.Record {
+func (l *Logger) newRecord(ctx context.Context, level slog.Level, msg string, args []any) slog.Record {
 	var pc uintptr
 	if l.withSource {
 		var pcs [1]uintptr
@@ -215,6 +225,11 @@ func (l *Logger) newRecord(level slog.Level, msg string, args []any) slog.Record
 	attrs := l.newAttrs(args)
 	record.AddAttrs(attrs...)
 
+	for _, resolve := range l.resolvers {
+		attrs = resolve(ctx)
+		record.AddAttrs(attrs...)
+	}
+
 	return record
 }
 
@@ -227,7 +242,7 @@ func (l *Logger) log(ctx context.Context, level slog.Level, msg string, args ...
 		ctx = context.Background()
 	}
 
-	record := l.newRecord(level, msg, args)
+	record := l.newRecord(ctx, level, msg, args)
 
 	if err := l.handler.Handle(ctx, record); err != nil {
 		defaults.HandleError("Logger.handler.Handle", err)

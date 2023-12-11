@@ -217,6 +217,22 @@ Package logit provides an easy way to use foundation for your logging operations
 
 7. context:
 
+	func resolveUser(ctx context.Context) []slog.Attr {
+		userID, ok := ctx.Value("user_id").(int)
+		if !ok {
+			return nil
+		}
+
+		username, ok := ctx.Value("username").(string)
+		if !ok {
+			return nil
+		}
+
+		return []slog.Attr{
+			slog.Int("user_id", userID), slog.String("username", username),
+		}
+	}
+
 	// We provide a way for getting logger from a context.
 	// By default, the default logger will be returned if there is no logit.Logger in context.
 	ctx := context.Background()
@@ -244,6 +260,17 @@ Package logit provides an easy way to use foundation for your logging operations
 	logger.WarnContext(ctx, "warn context")
 	logger.ErrorContext(ctx, "error context")
 
+	// You can carry some attributes through context.
+	ctx = context.WithValue(ctx, "user_id", 123456)
+	ctx = context.WithValue(ctx, "username", "fishgoddess")
+
+	// Then use AttrResolver resolves attributes from context, see WithAttrResolvers.
+	logger = logit.NewLogger(logit.WithAttrResolvers(resolveUser))
+	logger.InfoContext(ctx, "see what attributes in this log")
+
+	// However, attributes are gone if log without context.
+	logger.Info("see what attributes in this log")
+
 8. default:
 
 	// We set a defaults package that setups all shared fields.
@@ -269,5 +296,5 @@ package logit // import "github.com/FishGoddess/logit"
 
 const (
 	// Version is the version string representation of logit.
-	Version = "v1.5.0-alpha"
+	Version = "v1.5.1-alpha"
 )

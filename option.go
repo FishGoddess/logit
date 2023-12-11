@@ -206,6 +206,13 @@ func WithPID() Option {
 	}
 }
 
+// WithAttrResolvers sets resolvers to config.
+func WithAttrResolvers(resolvers ...AttrResolver) Option {
+	return func(conf *config) {
+		conf.resolvers = append(conf.resolvers, resolvers...)
+	}
+}
+
 // WithSyncTimer sets a sync timer duration to config.
 // It will call Sync() so it depends on the handler used by logger.
 func WithSyncTimer(d time.Duration) Option {

@@ -16,9 +16,26 @@ package main
 
 import (
 	"context"
+	"log/slog"
 
 	"github.com/FishGoddess/logit"
 )
+
+func resolveUser(ctx context.Context) []slog.Attr {
+	userID, ok := ctx.Value("user_id").(int)
+	if !ok {
+		return nil
+	}
+
+	username, ok := ctx.Value("username").(string)
+	if !ok {
+		return nil
+	}
+
+	return []slog.Attr{
+		slog.Int("user_id", userID), slog.String("username", username),
+	}
+}
 
 func main() {
 	// We provide a way for getting logger from a context.
@@ -47,4 +64,15 @@ func main() {
 	logger.InfoContext(ctx, "info context")
 	logger.WarnContext(ctx, "warn context")
 	logger.ErrorContext(ctx, "error context")
+
+	// You can carry some attributes through context.
+	ctx = context.WithValue(ctx, "user_id", 123456)
+	ctx = context.WithValue(ctx, "username", "fishgoddess")
+
+	// Then use AttrResolver resolves attributes from context, see WithAttrResolvers.
+	logger = logit.NewLogger(logit.WithAttrResolvers(resolveUser))
+	logger.InfoContext(ctx, "see what attributes in this log")
+
+	// However, attributes are gone if log without context.
+	logger.Info("see what attributes in this log")
 }
