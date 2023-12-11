@@ -28,6 +28,8 @@ applications.
 
 _Check [HISTORY.md](./HISTORY.md) and [FUTURE.md](./FUTURE.md) to know about more information._
 
+> We redesigned api of logit after v1.5.0 because Go1.21 introduced slog package.
+
 ### 🚀 Installation
 
 ```bash
