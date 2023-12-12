@@ -28,8 +28,8 @@ type testConfigHandler struct {
 	opts slog.HandlerOptions
 }
 
-// go test -v -cover -count=1 -test.cpu=1 -run=^TestConfigHandlerOptions$
-func TestConfigHandlerOptions(t *testing.T) {
+// go test -v -cover -count=1 -test.cpu=1 -run=^TestConfigNewHandlerOptions$
+func TestConfigNewHandlerOptions(t *testing.T) {
 	replaceAttr := func(groups []string, attr slog.Attr) slog.Attr { return attr }
 
 	conf := &config{
@@ -38,7 +38,7 @@ func TestConfigHandlerOptions(t *testing.T) {
 		replaceAttr: replaceAttr,
 	}
 
-	opts := conf.handlerOptions()
+	opts := conf.newHandlerOptions()
 
 	if opts.Level != conf.level {
 		t.Fatalf("opts.Level %v != conf.level %v", opts.Level, conf.level)
@@ -53,27 +53,29 @@ func TestConfigHandlerOptions(t *testing.T) {
 	}
 }
 
-// go test -v -cover -count=1 -test.cpu=1 -run=^TestConfigHandler$
-func TestConfigHandler(t *testing.T) {
+// go test -v -cover -count=1 -test.cpu=1 -run=^TestConfigNewHandler$
+func TestConfigNewHandler(t *testing.T) {
+	handlerName := t.Name()
+
+	RegisterHandler(handlerName, func(w io.Writer, opts *slog.HandlerOptions) slog.Handler {
+		return &testConfigHandler{
+			w:    w,
+			opts: *opts,
+		}
+	})
+
+	newWriter := func() (io.Writer, error) { return os.Stderr, nil }
 	replaceAttr := func(groups []string, attr slog.Attr) slog.Attr { return attr }
 
 	conf := &config{
 		level:       slog.LevelWarn,
-		withSource:  true,
+		handler:     handlerName,
+		newWriter:   newWriter,
 		replaceAttr: replaceAttr,
-
-		newWriter: func() (io.Writer, error) {
-			return os.Stderr, nil
-		},
-		newHandler: func(w io.Writer, opts *slog.HandlerOptions) slog.Handler {
-			return &testConfigHandler{
-				w:    w,
-				opts: *opts,
-			}
-		},
+		withSource:  true,
 	}
 
-	handler, syncer, closer, err := conf.handler()
+	handler, syncer, closer, err := conf.newHandler()
 	if err != nil {
 		t.Fatal(err)
 	}

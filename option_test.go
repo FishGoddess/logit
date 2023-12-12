@@ -18,7 +18,6 @@ import (
 	"bytes"
 	"context"
 	"fmt"
-	"io"
 	"log/slog"
 	"os"
 	"path/filepath"
@@ -287,13 +286,32 @@ func TestWithBatch(t *testing.T) {
 
 // go test -v -cover -count=1 -test.cpu=1 -run=^TestWithHandler$
 func TestWithHandler(t *testing.T) {
-	newHandler := func(w io.Writer, opts *slog.HandlerOptions) slog.Handler { return nil }
+	handler := t.Name()
+	conf := &config{handler: ""}
+	WithHandler(handler).applyTo(conf)
 
-	conf := &config{newHandler: nil}
-	WithHandler(newHandler).applyTo(conf)
+	if conf.handler != handler {
+		t.Fatal("conf.handler is wrong")
+	}
+}
 
-	if fmt.Sprintf("%p", conf.newHandler) != fmt.Sprintf("%p", newHandler) {
-		t.Fatal("conf.newHandler is wrong")
+// go test -v -cover -count=1 -test.cpu=1 -run=^TestWithTextHandler$
+func TestWithTextHandler(t *testing.T) {
+	conf := &config{handler: ""}
+	WithTextHandler().applyTo(conf)
+
+	if conf.handler != "text" {
+		t.Fatal("conf.handler is wrong")
+	}
+}
+
+// go test -v -cover -count=1 -test.cpu=1 -run=^TestWithJsonHandler$
+func TestWithJsonHandler(t *testing.T) {
+	conf := &config{handler: ""}
+	WithJsonHandler().applyTo(conf)
+
+	if conf.handler != "json" {
+		t.Fatal("conf.handler is wrong")
 	}
 }
 

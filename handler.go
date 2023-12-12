@@ -14,28 +14,57 @@
 
 package logit
 
-import "io"
+import (
+	"fmt"
+	"io"
+	"log/slog"
+	"sync"
+)
 
-// Syncer is an interface that syncs data to somewhere.
-type Syncer interface {
-	Sync() error
+const (
+	handlerText = "text"
+	handlerJson = "json"
+)
+
+var (
+	newHandlers = map[string]HandlerFunc{
+		handlerText: func(w io.Writer, opts *slog.HandlerOptions) slog.Handler {
+			return slog.NewTextHandler(w, opts)
+		},
+		handlerJson: func(w io.Writer, opts *slog.HandlerOptions) slog.Handler {
+			return slog.NewJSONHandler(w, opts)
+		},
+	}
+)
+
+var (
+	newHandlersLock sync.RWMutex
+)
+
+// HandlerFunc is a function for creating slog.Handler with w and opts.
+type HandlerFunc func(w io.Writer, opts *slog.HandlerOptions) slog.Handler
+
+// getHandlerFunc gets new handler func with name and returns an error if failed.
+func getHandlerFunc(name string) (HandlerFunc, error) {
+	newHandlersLock.RLock()
+	defer newHandlersLock.RUnlock()
+
+	if newHandler, ok := newHandlers[name]; ok {
+		return newHandler, nil
+	}
+
+	return nil, fmt.Errorf("logit: handler %s unknown", name)
 }
 
-// Writer is an interface which have sync, write and close functions.
-type Writer interface {
-	io.Writer
-	Syncer
-	io.Closer
-}
+// RegisterHandler registers newHandler with name to logit.
+func RegisterHandler(name string, newHandler HandlerFunc) error {
+	newHandlersLock.Lock()
+	defer newHandlersLock.Unlock()
 
-type nilSyncer struct{}
+	if _, registered := newHandlers[name]; registered {
+		return fmt.Errorf("logit: handler %s has been registered", name)
+	}
 
-func (nilSyncer) Sync() error {
-	return nil
-}
-
-type nilCloser struct{}
-
-func (nilCloser) Close() error {
+	newHandlers[name] = newHandler
 	return nil
 }

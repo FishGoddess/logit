@@ -138,7 +138,7 @@ func WithRotateFile(path string, opts ...rotate.Option) Option {
 // You should specify a buffer size in bytes.
 // The remained data in buffer may discard if you kill the process without syncing or closing the logger.
 func WithBuffer(bufferSize uint64) Option {
-	wrapWriter := func(w io.Writer) Writer {
+	wrapWriter := func(w io.Writer) io.Writer {
 		return writer.Buffer(w, bufferSize)
 	}
 
@@ -151,7 +151,7 @@ func WithBuffer(bufferSize uint64) Option {
 // You should specify a batch size in count.
 // The remained logs in batch may discard if you kill the process without syncing or closing the logger.
 func WithBatch(batchSize uint64) Option {
-	wrapWriter := func(w io.Writer) Writer {
+	wrapWriter := func(w io.Writer) io.Writer {
 		return writer.Batch(w, batchSize)
 	}
 
@@ -161,25 +161,24 @@ func WithBatch(batchSize uint64) Option {
 }
 
 // WithHandler sets handler to config.
-// It's a function returning a slog.Handler instance.
-// You can return slog's handlers or your customizing handlers by this function.
-func WithHandler(newHandler func(w io.Writer, opts *slog.HandlerOptions) slog.Handler) Option {
+// See RegisterHandler.
+func WithHandler(handler string) Option {
 	return func(conf *config) {
-		conf.newHandler = newHandler
+		conf.handler = handler
 	}
 }
 
 // WithTextHandler sets text handler to config.
 func WithTextHandler() Option {
 	return func(conf *config) {
-		conf.newHandler = NewTextHandler
+		conf.handler = handlerText
 	}
 }
 
 // WithJsonHandler sets json handler to config.
 func WithJsonHandler() Option {
 	return func(conf *config) {
-		conf.newHandler = NewJsonHandler
+		conf.handler = handlerJson
 	}
 }
 
