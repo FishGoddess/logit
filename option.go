@@ -171,14 +171,14 @@ func WithHandler(handler string) Option {
 // WithTextHandler sets text handler to config.
 func WithTextHandler() Option {
 	return func(conf *config) {
-		conf.handler = "text"
+		conf.handler = handlerText
 	}
 }
 
 // WithJsonHandler sets json handler to config.
 func WithJsonHandler() Option {
 	return func(conf *config) {
-		conf.handler = "json"
+		conf.handler = handlerJson
 	}
 }
 

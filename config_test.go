@@ -56,6 +56,7 @@ func TestConfigNewHandlerOptions(t *testing.T) {
 // go test -v -cover -count=1 -test.cpu=1 -run=^TestConfigNewHandler$
 func TestConfigNewHandler(t *testing.T) {
 	handlerName := t.Name()
+
 	RegisterHandler(handlerName, func(w io.Writer, opts *slog.HandlerOptions) slog.Handler {
 		return &testConfigHandler{
 			w:    w,
