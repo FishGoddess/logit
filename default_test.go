@@ -52,16 +52,18 @@ func TestDefault(t *testing.T) {
 
 // go test -v -cover -count=1 -test.cpu=1 -run=^TestDefaultLogger$
 func TestDefaultLogger(t *testing.T) {
+	handler := t.Name()
+
 	newHandler := func(w io.Writer, opts *slog.HandlerOptions) slog.Handler {
 		return slog.NewTextHandler(w, opts)
 	}
 
-	RegisterHandler(t.Name(), newHandler)
+	RegisterHandler(handler, newHandler)
 
 	ctx := context.Background()
 	buffer := bytes.NewBuffer(make([]byte, 0, 1024))
 	logger := NewLogger(
-		WithDebugLevel(), WithHandler(t.Name()), WithWriter(buffer), WithSource(), WithPID(),
+		WithDebugLevel(), WithHandler(handler), WithWriter(buffer), WithSource(), WithPID(),
 	)
 
 	SetDefault(logger)

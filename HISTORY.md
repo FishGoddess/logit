@@ -1,11 +1,16 @@
 ## ✒ 历史版本的特性介绍 (Features in old versions)
 
-### v1.5.2-alpha (Coming soon)
+### v1.5.3-alpha (Coming soon)
 
-> 此版本发布于 2024-01-01
+> 此版本发布于 2023-12-20
 
-* 自定义 handler 来提高性能
 * 提高单元测试覆盖率到 70%
+
+### v1.5.2-alpha
+
+> 此版本发布于 2023-12-12
+
+* 优化 handler 和 writer 设计
 
 ### v1.5.1-alpha
 

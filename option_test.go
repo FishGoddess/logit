@@ -286,10 +286,31 @@ func TestWithBatch(t *testing.T) {
 
 // go test -v -cover -count=1 -test.cpu=1 -run=^TestWithHandler$
 func TestWithHandler(t *testing.T) {
+	handler := t.Name()
 	conf := &config{handler: ""}
-	WithHandler(t.Name()).applyTo(conf)
+	WithHandler(handler).applyTo(conf)
 
-	if conf.handler != t.Name() {
+	if conf.handler != handler {
+		t.Fatal("conf.handler is wrong")
+	}
+}
+
+// go test -v -cover -count=1 -test.cpu=1 -run=^TestWithTextHandler$
+func TestWithTextHandler(t *testing.T) {
+	conf := &config{handler: ""}
+	WithTextHandler().applyTo(conf)
+
+	if conf.handler != "text" {
+		t.Fatal("conf.handler is wrong")
+	}
+}
+
+// go test -v -cover -count=1 -test.cpu=1 -run=^TestWithJsonHandler$
+func TestWithJsonHandler(t *testing.T) {
+	conf := &config{handler: ""}
+	WithJsonHandler().applyTo(conf)
+
+	if conf.handler != "json" {
 		t.Fatal("conf.handler is wrong")
 	}
 }

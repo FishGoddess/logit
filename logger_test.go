@@ -31,13 +31,14 @@ type testLoggerHandler struct {
 
 // go test -v -cover -count=1 -test.cpu=1 -run=^TestNewLogger$
 func TestNewLogger(t *testing.T) {
+	handlerName := t.Name()
 	handler := &testLoggerHandler{}
 
-	RegisterHandler(t.Name(), func(w io.Writer, opts *slog.HandlerOptions) slog.Handler {
+	RegisterHandler(handlerName, func(w io.Writer, opts *slog.HandlerOptions) slog.Handler {
 		return handler
 	})
 
-	logger := NewLogger(WithHandler(t.Name()))
+	logger := NewLogger(WithHandler(handlerName))
 	if logger.handler != handler {
 		t.Fatalf("logger.handler %+v != handler %+v", logger.handler, handler)
 	}
@@ -184,16 +185,18 @@ func removeTimeAndSource(str string) string {
 
 // go test -v -cover -count=1 -test.cpu=1 -run=^TestLogger$
 func TestLogger(t *testing.T) {
+	handler := t.Name()
+
 	newHandler := func(w io.Writer, opts *slog.HandlerOptions) slog.Handler {
 		return slog.NewTextHandler(w, opts)
 	}
 
-	RegisterHandler(t.Name(), newHandler)
+	RegisterHandler(handler, newHandler)
 
 	ctx := context.Background()
 	buffer := bytes.NewBuffer(make([]byte, 0, 1024))
 	logger := NewLogger(
-		WithDebugLevel(), WithHandler(t.Name()), WithWriter(buffer), WithSource(), WithPID(),
+		WithDebugLevel(), WithHandler(handler), WithWriter(buffer), WithSource(), WithPID(),
 	)
 
 	logger.Debug("debug msg", "key1", 1)

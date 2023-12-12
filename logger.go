@@ -38,6 +38,11 @@ var (
 // AttrResolver resolves attrs from context.
 type AttrResolver = func(ctx context.Context) (attrs []slog.Attr)
 
+// Syncer is an interface that syncs data to somewhere.
+type Syncer interface {
+	Sync() error
+}
+
 // Logger is the entry of logging in logit.
 // It has several levels including debug, info, warn and error.
 // It's also a syncer or closer if handler is a syncer or closer.

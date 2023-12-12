@@ -138,7 +138,7 @@ func WithRotateFile(path string, opts ...rotate.Option) Option {
 // You should specify a buffer size in bytes.
 // The remained data in buffer may discard if you kill the process without syncing or closing the logger.
 func WithBuffer(bufferSize uint64) Option {
-	wrapWriter := func(w io.Writer) Writer {
+	wrapWriter := func(w io.Writer) io.Writer {
 		return writer.Buffer(w, bufferSize)
 	}
 
@@ -151,7 +151,7 @@ func WithBuffer(bufferSize uint64) Option {
 // You should specify a batch size in count.
 // The remained logs in batch may discard if you kill the process without syncing or closing the logger.
 func WithBatch(batchSize uint64) Option {
-	wrapWriter := func(w io.Writer) Writer {
+	wrapWriter := func(w io.Writer) io.Writer {
 		return writer.Batch(w, batchSize)
 	}
 

@@ -21,10 +21,19 @@ import (
 	"sync"
 )
 
+const (
+	handlerText = "text"
+	handlerJson = "json"
+)
+
 var (
-	newHandlers = map[string]NewHandlerFunc{
-		"text": newTextHandler,
-		"json": newJsonHandler,
+	newHandlers = map[string]HandlerFunc{
+		handlerText: func(w io.Writer, opts *slog.HandlerOptions) slog.Handler {
+			return slog.NewTextHandler(w, opts)
+		},
+		handlerJson: func(w io.Writer, opts *slog.HandlerOptions) slog.Handler {
+			return slog.NewJSONHandler(w, opts)
+		},
 	}
 )
 
@@ -32,19 +41,11 @@ var (
 	newHandlersLock sync.RWMutex
 )
 
-// NewHandlerFunc is a function for creating slog.Handler with w and opts.
-type NewHandlerFunc func(w io.Writer, opts *slog.HandlerOptions) slog.Handler
+// HandlerFunc is a function for creating slog.Handler with w and opts.
+type HandlerFunc func(w io.Writer, opts *slog.HandlerOptions) slog.Handler
 
-func newTextHandler(w io.Writer, opts *slog.HandlerOptions) slog.Handler {
-	return slog.NewTextHandler(w, opts)
-}
-
-func newJsonHandler(w io.Writer, opts *slog.HandlerOptions) slog.Handler {
-	return slog.NewJSONHandler(w, opts)
-}
-
-// PickHandler picks the handler with name and returns an error if failed.
-func PickHandler(name string) (NewHandlerFunc, error) {
+// getHandlerFunc gets new handler func with name and returns an error if failed.
+func getHandlerFunc(name string) (HandlerFunc, error) {
 	newHandlersLock.RLock()
 	defer newHandlersLock.RUnlock()
 
@@ -56,7 +57,7 @@ func PickHandler(name string) (NewHandlerFunc, error) {
 }
 
 // RegisterHandler registers newHandler with name to logit.
-func RegisterHandler(name string, newHandler NewHandlerFunc) error {
+func RegisterHandler(name string, newHandler HandlerFunc) error {
 	newHandlersLock.Lock()
 	defer newHandlersLock.Unlock()
 
@@ -65,29 +66,5 @@ func RegisterHandler(name string, newHandler NewHandlerFunc) error {
 	}
 
 	newHandlers[name] = newHandler
-	return nil
-}
-
-// Syncer is an interface that syncs data to somewhere.
-type Syncer interface {
-	Sync() error
-}
-
-// Writer is an interface which have sync, write and close functions.
-type Writer interface {
-	io.Writer
-	Syncer
-	io.Closer
-}
-
-type nilSyncer struct{}
-
-func (nilSyncer) Sync() error {
-	return nil
-}
-
-type nilCloser struct{}
-
-func (nilCloser) Close() error {
 	return nil
 }

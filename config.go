@@ -15,19 +15,30 @@
 package logit
 
 import (
-	"errors"
 	"io"
 	"log/slog"
 	"os"
 	"time"
 )
 
+type nilSyncer struct{}
+
+func (nilSyncer) Sync() error {
+	return nil
+}
+
+type nilCloser struct{}
+
+func (nilCloser) Close() error {
+	return nil
+}
+
 type config struct {
 	level   slog.Level
 	handler string
 
 	newWriter   func() (io.Writer, error)
-	wrapWriter  func(io.Writer) Writer
+	wrapWriter  func(io.Writer) io.Writer
 	replaceAttr func(groups []string, attr slog.Attr) slog.Attr
 
 	withSource bool
@@ -45,7 +56,7 @@ func newDefaultConfig() *config {
 
 	conf := &config{
 		level:       slog.LevelDebug,
-		handler:     "text",
+		handler:     handlerText,
 		newWriter:   newWriter,
 		wrapWriter:  nil,
 		replaceAttr: nil,
@@ -93,13 +104,9 @@ func (c *config) newHandlerOptions() *slog.HandlerOptions {
 }
 
 func (c *config) newHandler() (slog.Handler, Syncer, io.Closer, error) {
-	newHandler, err := PickHandler(c.handler)
+	newHandler, err := getHandlerFunc(c.handler)
 	if err != nil {
 		return nil, nil, nil, err
-	}
-
-	if c.newWriter == nil {
-		return nil, nil, nil, errors.New("logit: newWriter in config is nil")
 	}
 
 	writer, err := c.newWriter()
