@@ -23,12 +23,11 @@ import (
 )
 
 type config struct {
-	level slog.Level
+	level   slog.Level
+	handler string
 
-	newWriter  func() (io.Writer, error)
-	wrapWriter func(io.Writer) Writer
-
-	newHandler  func(w io.Writer, opts *slog.HandlerOptions) slog.Handler
+	newWriter   func() (io.Writer, error)
+	wrapWriter  func(io.Writer) Writer
 	replaceAttr func(groups []string, attr slog.Attr) slog.Attr
 
 	withSource bool
@@ -46,9 +45,9 @@ func newDefaultConfig() *config {
 
 	conf := &config{
 		level:       slog.LevelDebug,
+		handler:     "text",
 		newWriter:   newWriter,
 		wrapWriter:  nil,
-		newHandler:  NewTextHandler,
 		replaceAttr: nil,
 		withSource:  false,
 		withPID:     false,
@@ -83,7 +82,7 @@ func (c *config) newCloser(handler slog.Handler, writer io.Writer) io.Closer {
 	return nilCloser{}
 }
 
-func (c *config) handlerOptions() *slog.HandlerOptions {
+func (c *config) newHandlerOptions() *slog.HandlerOptions {
 	opts := &slog.HandlerOptions{
 		Level:       c.level,
 		AddSource:   c.withSource,
@@ -93,13 +92,14 @@ func (c *config) handlerOptions() *slog.HandlerOptions {
 	return opts
 }
 
-func (c *config) handler() (slog.Handler, Syncer, io.Closer, error) {
-	if c.newWriter == nil {
-		return nil, nil, nil, errors.New("logit: newWriter in config is nil")
+func (c *config) newHandler() (slog.Handler, Syncer, io.Closer, error) {
+	newHandler, err := PickHandler(c.handler)
+	if err != nil {
+		return nil, nil, nil, err
 	}
 
-	if c.newHandler == nil {
-		return nil, nil, nil, errors.New("logit: newHandler in config is nil")
+	if c.newWriter == nil {
+		return nil, nil, nil, errors.New("logit: newWriter in config is nil")
 	}
 
 	writer, err := c.newWriter()
@@ -111,8 +111,8 @@ func (c *config) handler() (slog.Handler, Syncer, io.Closer, error) {
 		writer = c.wrapWriter(writer)
 	}
 
-	opts := c.handlerOptions()
-	handler := c.newHandler(writer, opts)
+	opts := c.newHandlerOptions()
+	handler := newHandler(writer, opts)
 	syncer := c.newSyncer(handler, writer)
 	closer := c.newCloser(handler, writer)
 

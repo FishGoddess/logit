@@ -18,7 +18,6 @@ import (
 	"bytes"
 	"context"
 	"fmt"
-	"io"
 	"log/slog"
 	"os"
 	"path/filepath"
@@ -287,13 +286,11 @@ func TestWithBatch(t *testing.T) {
 
 // go test -v -cover -count=1 -test.cpu=1 -run=^TestWithHandler$
 func TestWithHandler(t *testing.T) {
-	newHandler := func(w io.Writer, opts *slog.HandlerOptions) slog.Handler { return nil }
+	conf := &config{handler: ""}
+	WithHandler(t.Name()).applyTo(conf)
 
-	conf := &config{newHandler: nil}
-	WithHandler(newHandler).applyTo(conf)
-
-	if fmt.Sprintf("%p", conf.newHandler) != fmt.Sprintf("%p", newHandler) {
-		t.Fatal("conf.newHandler is wrong")
+	if conf.handler != t.Name() {
+		t.Fatal("conf.handler is wrong")
 	}
 }
 

@@ -161,9 +161,7 @@ type Config struct {
 	Level string `json:"level" yaml:"level" toml:"level" bson:"level"`
 
 	// Handler is how the handler handles the logs.
-	// Values: "text", "json", "slog.text", "slog.json".
-	// These handlers with "slog" prefix are from slog package of Go.
-	// We recommend you to use our faster handlers, and feel free if you want to use slog's handlers.
+	// Values: "text", "json".
 	// Also, you can register your handlers to logit, see RegisterHandler.
 	Handler string `json:"handler" yaml:"handler" toml:"handler" bson:"handler"`
 
@@ -219,13 +217,8 @@ func (c *Config) appendHandlerOptions(opts []logit.Option) ([]logit.Option, erro
 	}
 
 	handler := strings.ToLower(c.Handler)
+	opts = append(opts, logit.WithHandler(handler))
 
-	newHandler, err := pickHandler(handler)
-	if err != nil {
-		return nil, err
-	}
-
-	opts = append(opts, logit.WithHandler(newHandler))
 	return opts, nil
 }
 

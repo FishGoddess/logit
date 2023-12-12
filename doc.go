@@ -104,16 +104,19 @@ Package logit provides an easy way to use foundation for your logging operations
 	logger = logit.NewLogger(logit.WithJsonHandler())
 	logger.Info("using json handler")
 
-	// Or you want to use slog's handlers in Go:
+	// Or you want to use customized handlers, try RegisterHandler.
 	newHandler := func(w io.Writer, opts *slog.HandlerOptions) slog.Handler {
 		return slog.NewTextHandler(w, opts)
 	}
 
-	logger = logit.NewLogger(logit.WithHandler(newHandler))
-	logger.Info("using slog text handler")
+	if err := logit.RegisterHandler("demo", newHandler); err != nil {
+		panic(err)
+	}
+
+	logger = logit.NewLogger(logit.WithHandler("demo"))
+	logger.Info("using demo handler")
 
 	// As you can see, our handler is slog's handler, so you can use any handlers implement this interface.
-	// Like slog's json handler, too:
 	newHandler = func(w io.Writer, opts *slog.HandlerOptions) slog.Handler {
 		return slog.NewJSONHandler(w, opts)
 	}
@@ -189,7 +192,7 @@ Package logit provides an easy way to use foundation for your logging operations
 	logit.WithDebugLevel()
 
 	// Change logger handler:
-	logit.WithHandler(nil)
+	logit.WithHandler("xxx")
 	logit.WithTextHandler()
 	logit.WithJsonHandler()
 

@@ -33,11 +33,11 @@ type testLoggerHandler struct {
 func TestNewLogger(t *testing.T) {
 	handler := &testLoggerHandler{}
 
-	newHandler := func(w io.Writer, opts *slog.HandlerOptions) slog.Handler {
+	RegisterHandler(t.Name(), func(w io.Writer, opts *slog.HandlerOptions) slog.Handler {
 		return handler
-	}
+	})
 
-	logger := NewLogger(WithHandler(newHandler))
+	logger := NewLogger(WithHandler(t.Name()))
 	if logger.handler != handler {
 		t.Fatalf("logger.handler %+v != handler %+v", logger.handler, handler)
 	}
@@ -188,10 +188,12 @@ func TestLogger(t *testing.T) {
 		return slog.NewTextHandler(w, opts)
 	}
 
+	RegisterHandler(t.Name(), newHandler)
+
 	ctx := context.Background()
 	buffer := bytes.NewBuffer(make([]byte, 0, 1024))
 	logger := NewLogger(
-		WithDebugLevel(), WithHandler(newHandler), WithWriter(buffer), WithSource(), WithPID(),
+		WithDebugLevel(), WithHandler(t.Name()), WithWriter(buffer), WithSource(), WithPID(),
 	)
 
 	logger.Debug("debug msg", "key1", 1)

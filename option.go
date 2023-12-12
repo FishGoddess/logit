@@ -161,25 +161,24 @@ func WithBatch(batchSize uint64) Option {
 }
 
 // WithHandler sets handler to config.
-// It's a function returning a slog.Handler instance.
-// You can return slog's handlers or your customizing handlers by this function.
-func WithHandler(newHandler func(w io.Writer, opts *slog.HandlerOptions) slog.Handler) Option {
+// See RegisterHandler.
+func WithHandler(handler string) Option {
 	return func(conf *config) {
-		conf.newHandler = newHandler
+		conf.handler = handler
 	}
 }
 
 // WithTextHandler sets text handler to config.
 func WithTextHandler() Option {
 	return func(conf *config) {
-		conf.newHandler = NewTextHandler
+		conf.handler = "text"
 	}
 }
 
 // WithJsonHandler sets json handler to config.
 func WithJsonHandler() Option {
 	return func(conf *config) {
-		conf.newHandler = NewJsonHandler
+		conf.handler = "json"
 	}
 }
 

@@ -14,7 +14,59 @@
 
 package logit
 
-import "io"
+import (
+	"fmt"
+	"io"
+	"log/slog"
+	"sync"
+)
+
+var (
+	newHandlers = map[string]NewHandlerFunc{
+		"text": newTextHandler,
+		"json": newJsonHandler,
+	}
+)
+
+var (
+	newHandlersLock sync.RWMutex
+)
+
+// NewHandlerFunc is a function for creating slog.Handler with w and opts.
+type NewHandlerFunc func(w io.Writer, opts *slog.HandlerOptions) slog.Handler
+
+func newTextHandler(w io.Writer, opts *slog.HandlerOptions) slog.Handler {
+	return slog.NewTextHandler(w, opts)
+}
+
+func newJsonHandler(w io.Writer, opts *slog.HandlerOptions) slog.Handler {
+	return slog.NewJSONHandler(w, opts)
+}
+
+// PickHandler picks the handler with name and returns an error if failed.
+func PickHandler(name string) (NewHandlerFunc, error) {
+	newHandlersLock.RLock()
+	defer newHandlersLock.RUnlock()
+
+	if newHandler, ok := newHandlers[name]; ok {
+		return newHandler, nil
+	}
+
+	return nil, fmt.Errorf("logit: handler %s unknown", name)
+}
+
+// RegisterHandler registers newHandler with name to logit.
+func RegisterHandler(name string, newHandler NewHandlerFunc) error {
+	newHandlersLock.Lock()
+	defer newHandlersLock.Unlock()
+
+	if _, registered := newHandlers[name]; registered {
+		return fmt.Errorf("logit: handler %s has been registered", name)
+	}
+
+	newHandlers[name] = newHandler
+	return nil
+}
 
 // Syncer is an interface that syncs data to somewhere.
 type Syncer interface {

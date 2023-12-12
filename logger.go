@@ -73,7 +73,7 @@ func NewLoggerGracefully(opts ...Option) (*Logger, error) {
 		opt.applyTo(conf)
 	}
 
-	handler, syncer, closer, err := conf.handler()
+	handler, syncer, closer, err := conf.newHandler()
 	if err != nil {
 		return nil, err
 	}

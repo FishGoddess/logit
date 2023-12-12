@@ -56,10 +56,12 @@ func TestDefaultLogger(t *testing.T) {
 		return slog.NewTextHandler(w, opts)
 	}
 
+	RegisterHandler(t.Name(), newHandler)
+
 	ctx := context.Background()
 	buffer := bytes.NewBuffer(make([]byte, 0, 1024))
 	logger := NewLogger(
-		WithDebugLevel(), WithHandler(newHandler), WithWriter(buffer), WithSource(), WithPID(),
+		WithDebugLevel(), WithHandler(t.Name()), WithWriter(buffer), WithSource(), WithPID(),
 	)
 
 	SetDefault(logger)
