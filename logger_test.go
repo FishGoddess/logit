@@ -16,7 +16,6 @@ package logit
 
 import (
 	"bytes"
-	"context"
 	"io"
 	"log/slog"
 	"strings"
@@ -142,22 +141,21 @@ func TestLoggerWithGroup(t *testing.T) {
 
 // go test -v -cover -count=1 -test.cpu=1 -run=^TestLoggerEnabled$
 func TestLoggerEnabled(t *testing.T) {
-	ctx := context.Background()
 	logger := NewLogger(WithErrorLevel())
 
-	if logger.enabled(ctx, slog.LevelDebug) {
+	if logger.enabled(slog.LevelDebug) {
 		t.Fatal("logger enabled debug")
 	}
 
-	if logger.enabled(ctx, slog.LevelInfo) {
+	if logger.enabled(slog.LevelInfo) {
 		t.Fatal("logger enabled info")
 	}
 
-	if logger.enabled(ctx, slog.LevelWarn) {
+	if logger.enabled(slog.LevelWarn) {
 		t.Fatal("logger enabled warn")
 	}
 
-	if !logger.enabled(ctx, slog.LevelError) {
+	if !logger.enabled(slog.LevelError) {
 		t.Fatal("logger enabled error")
 	}
 }
@@ -193,7 +191,6 @@ func TestLogger(t *testing.T) {
 
 	RegisterHandler(handler, newHandler)
 
-	ctx := context.Background()
 	buffer := bytes.NewBuffer(make([]byte, 0, 1024))
 	logger := NewLogger(
 		WithDebugLevel(), WithHandler(handler), WithWriter(buffer), WithSource(), WithPID(),
@@ -204,11 +201,6 @@ func TestLogger(t *testing.T) {
 	logger.Warn("warn msg", "key3", 3)
 	logger.Error("error msg", "key4", 4)
 
-	logger.DebugContext(ctx, "debug msg with context", "key5", 5)
-	logger.InfoContext(ctx, "info msg with context", "key6", 6)
-	logger.WarnContext(ctx, "warn msg with context", "key7", 7)
-	logger.ErrorContext(ctx, "error msg with context", "key8", 8)
-
 	opts := &slog.HandlerOptions{AddSource: true, Level: slog.LevelDebug}
 	wantBuffer := bytes.NewBuffer(make([]byte, 0, 1024))
 	slogLogger := slog.New(newHandler(wantBuffer, opts)).With(keyPID, pid)
@@ -217,11 +209,6 @@ func TestLogger(t *testing.T) {
 	slogLogger.Info("info msg", "key2", 2)
 	slogLogger.Warn("warn msg", "key3", 3)
 	slogLogger.Error("error msg", "key4", 4)
-
-	slogLogger.DebugContext(ctx, "debug msg with context", "key5", 5)
-	slogLogger.InfoContext(ctx, "info msg with context", "key6", 6)
-	slogLogger.WarnContext(ctx, "warn msg with context", "key7", 7)
-	slogLogger.ErrorContext(ctx, "error msg with context", "key8", 8)
 
 	got := removeTimeAndSource(buffer.String())
 	want := removeTimeAndSource(wantBuffer.String())

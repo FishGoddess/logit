@@ -31,12 +31,12 @@ func main() {
 		return time.Unix(666, 0).In(time.Local)
 	}
 
-	logit.Print("println log is info level")
+	logit.Default().Print("println log is info level")
 
 	// If you want change the level of old-school logging methods:
 	defaults.LevelPrint = slog.LevelDebug
 
-	logit.Print("println log is debug level now")
+	logit.Default().Print("println log is debug level now")
 
 	// More fields see defaults package.
 	defaults.HandleError = func(label string, err error) {

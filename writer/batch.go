@@ -18,8 +18,6 @@ import (
 	"fmt"
 	"io"
 	"sync"
-
-	"github.com/FishGoddess/logit/defaults"
 )
 
 const (
@@ -63,7 +61,7 @@ func Batch(writer io.Writer, batchSize uint64) *BatchWriter {
 		writer:         writer,
 		maxBatches:     batchSize,
 		currentBatches: 0,
-		buffer:         bytes.NewBuffer(make([]byte, 0, defaults.BufferSize)),
+		buffer:         bytes.NewBuffer(make([]byte, 0, defaultBufferSize)),
 	}
 
 	return bw

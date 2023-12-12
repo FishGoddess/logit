@@ -39,6 +39,7 @@ $ go get -u github.com/FishGoddess/logit
 package main
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/FishGoddess/logit"
@@ -47,7 +48,7 @@ import (
 func main() {
 	// Use default logger to log.
 	// By default, logs will be output to stdout.
-	logit.Info("hello from logit", "key", 123)
+	logit.Default().Info("hello from logit", "key", 123)
 
 	// Use a new logger to log.
 	// By default, logs will be output to stdout.
@@ -67,9 +68,7 @@ func main() {
 	// What if I want to use default logger and output logs to a file? Try SetDefault.
 	// It sets a logger to default and you can use it by package function or Default().
 	logit.SetDefault(logger)
-
-	logit.Warn("this is from default logger", "pi", 3.14, "default", true)
-	logit.Default().Warn("this is from default logger, too", "pi", 3.14, "default", true)
+	logit.Default().Warn("this is from default logger", "pi", 3.14, "default", true)
 
 	// If you want to change level of logger to info, try WithInfoLevel.
 	// Other levels is similar to info level.
@@ -77,6 +76,12 @@ func main() {
 
 	logger.Debug("debug logs will be ignored")
 	logger.Info("info logs can be logged")
+
+	// If you want to pass logger by context, use NewContext and FromContext.
+	ctx := logit.NewContext(context.Background(), logger)
+
+	logger = logit.FromContext(ctx)
+	logger.Info("logger from context", "from", "context")
 
 	// Don't want to panic when new a logger? Try NewLoggerGracefully.
 	logger, err := logit.NewLoggerGracefully(logit.WithFile(""))
@@ -100,18 +105,18 @@ goos: linux
 goarch: amd64
 cpu: AMD EPYC 7K62 48-Core Processor
 
-BenchmarkLogitLoggerTextHandler-2         986158              1142 ns/op               0 B/op          0 allocs/op
-BenchmarkLogitLoggerJsonHandler-2         783831              1493 ns/op             120 B/op          3 allocs/op
-BenchmarkLogitLoggerPrint-2               717104              1642 ns/op              48 B/op          1 allocs/op
+BenchmarkLogitLoggerTextHandler-2        1000000              1089 ns/op               0 B/op          0 allocs/op
+BenchmarkLogitLoggerJsonHandler-2         800017              1437 ns/op             120 B/op          3 allocs/op
+BenchmarkLogitLoggerPrint-2               751623              1567 ns/op              48 B/op          1 allocs/op
 BenchmarkSlogLoggerTextHandler-2          725522              1629 ns/op               0 B/op          0 allocs/op
 BenchmarkSlogLoggerJsonHandler-2          583214              2030 ns/op             120 B/op          3 allocs/op
 BenchmarkZeroLogLogger-2                 1929276               613 ns/op               0 B/op          0 allocs/op
 BenchmarkZapLogger-2                      976855              1168 ns/op             216 B/op          2 allocs/op
 BenchmarkLogrusLogger-2                   231723              4927 ns/op            2080 B/op         32 allocs/op
 
-BenchmarkLogitFile-2                      485911              2491 ns/op               0 B/op          0 allocs/op
-BenchmarkLogitFileWithBuffer-2            938728              1235 ns/op               0 B/op          0 allocs/op
-BenchmarkLogitFileWithBatch-2             957915              1263 ns/op               0 B/op          0 allocs/op
+BenchmarkLogitFile-2                      454489              2366 ns/op               0 B/op          0 allocs/op
+BenchmarkLogitFileWithBuffer-2           1038120              1154 ns/op               0 B/op          0 allocs/op
+BenchmarkLogitFileWithBatch-2            1026002              1179 ns/op               0 B/op          0 allocs/op
 BenchmarkSlogFile-2                       407590              2944 ns/op               0 B/op          0 allocs/op
 BenchmarkZeroLogFile-2                    634375              1810 ns/op               0 B/op          0 allocs/op
 BenchmarkZapFile-2                        382790              2641 ns/op             216 B/op          2 allocs/op

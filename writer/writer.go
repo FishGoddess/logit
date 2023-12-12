@@ -19,6 +19,10 @@ import (
 	"os"
 )
 
+const (
+	defaultBufferSize = 64 * 1024 // 64KB
+)
+
 // notStdoutAndStderr returns true if w isn't stdout and stderr.
 func notStdoutAndStderr(w io.Writer) bool {
 	return w != os.Stdout && w != os.Stderr

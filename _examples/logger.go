@@ -15,7 +15,6 @@
 package main
 
 import (
-	"context"
 	"io"
 
 	"github.com/FishGoddess/logit"
@@ -42,7 +41,7 @@ func main() {
 	logger.Error("error group", "err", io.EOF)
 
 	// If you want to check if one level can be logged, try this:
-	if logger.DebugEnabled(context.Background()) {
+	if logger.DebugEnabled() {
 		logger.Debug("debug enabled")
 	}
 

@@ -205,13 +205,6 @@ func WithPID() Option {
 	}
 }
 
-// WithAttrResolvers sets resolvers to config.
-func WithAttrResolvers(resolvers ...AttrResolver) Option {
-	return func(conf *config) {
-		conf.resolvers = append(conf.resolvers, resolvers...)
-	}
-}
-
 // WithSyncTimer sets a sync timer duration to config.
 // It will call Sync() so it depends on the handler used by logger.
 func WithSyncTimer(d time.Duration) Option {
@@ -223,11 +216,10 @@ func WithSyncTimer(d time.Duration) Option {
 // ProductionOptions returns some options that we think they are useful in production.
 // We recommend you to use them, so we provide this convenient way to create such a logger.
 // The logger using these options will use rotate file and batch writer.
-// Also, source and pid will be carried in all logs.
 func ProductionOptions() []Option {
 	opts := []Option{
-		WithInfoLevel(), WithSource(), WithPID(),
-		WithBatch(16), WithRotateFile("./logit.log"),
+		WithInfoLevel(), WithPID(), WithRotateFile("./logit.log"),
+		WithBatch(16), WithSyncTimer(time.Second),
 	}
 
 	return opts

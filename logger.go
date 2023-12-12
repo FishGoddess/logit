@@ -54,8 +54,6 @@ type Logger struct {
 
 	withSource bool
 	withPID    bool
-
-	resolvers []AttrResolver
 }
 
 // NewLogger creates a logger with given options or panics if failed.
@@ -89,7 +87,6 @@ func NewLoggerGracefully(opts ...Option) (*Logger, error) {
 		closer:     closer,
 		withSource: conf.withSource,
 		withPID:    conf.withPID,
-		resolvers:  conf.resolvers,
 	}
 
 	if conf.syncTimer > 0 {
@@ -179,40 +176,36 @@ func (l *Logger) WithGroup(name string) *Logger {
 }
 
 // enabled reports whether the logger should ignore logs whose level is lower.
-func (l *Logger) enabled(ctx context.Context, level slog.Level) bool {
-	if ctx == nil {
-		ctx = context.Background()
-	}
-
-	return l.handler.Enabled(ctx, level)
+func (l *Logger) enabled(level slog.Level) bool {
+	return l.handler.Enabled(context.Background(), level)
 }
 
 // DebugEnabled reports whether the logger should ignore logs whose level is lower than debug.
-func (l *Logger) DebugEnabled(ctx context.Context) bool {
-	return l.enabled(ctx, slog.LevelDebug)
+func (l *Logger) DebugEnabled() bool {
+	return l.enabled(slog.LevelDebug)
 }
 
 // InfoEnabled reports whether the logger should ignore logs whose level is lower than info.
-func (l *Logger) InfoEnabled(ctx context.Context) bool {
-	return l.enabled(ctx, slog.LevelInfo)
+func (l *Logger) InfoEnabled() bool {
+	return l.enabled(slog.LevelInfo)
 }
 
 // WarnEnabled reports whether the logger should ignore logs whose level is lower than warn.
-func (l *Logger) WarnEnabled(ctx context.Context) bool {
-	return l.enabled(ctx, slog.LevelWarn)
+func (l *Logger) WarnEnabled() bool {
+	return l.enabled(slog.LevelWarn)
 }
 
 // ErrorEnabled reports whether the logger should ignore logs whose level is lower than error.
-func (l *Logger) ErrorEnabled(ctx context.Context) bool {
-	return l.enabled(ctx, slog.LevelError)
+func (l *Logger) ErrorEnabled() bool {
+	return l.enabled(slog.LevelError)
 }
 
 // PrintEnabled reports whether the logger should ignore logs whose level is lower than print.
-func (l *Logger) PrintEnabled(ctx context.Context) bool {
-	return l.enabled(ctx, defaults.LevelPrint)
+func (l *Logger) PrintEnabled() bool {
+	return l.enabled(defaults.LevelPrint)
 }
 
-func (l *Logger) newRecord(ctx context.Context, level slog.Level, msg string, args []any) slog.Record {
+func (l *Logger) newRecord(level slog.Level, msg string, args []any) slog.Record {
 	var pc uintptr
 	if l.withSource {
 		var pcs [1]uintptr
@@ -233,89 +226,60 @@ func (l *Logger) newRecord(ctx context.Context, level slog.Level, msg string, ar
 		record.AddAttrs(attr)
 	}
 
-	for _, resolve := range l.resolvers {
-		attrs := resolve(ctx)
-		record.AddAttrs(attrs...)
-	}
-
 	return record
 }
 
-func (l *Logger) log(ctx context.Context, level slog.Level, msg string, args ...any) {
-	if !l.handler.Enabled(ctx, level) {
+func (l *Logger) log(level slog.Level, msg string, args ...any) {
+	if !l.enabled(level) {
 		return
 	}
 
-	if ctx == nil {
-		ctx = context.Background()
-	}
+	record := l.newRecord(level, msg, args)
 
-	record := l.newRecord(ctx, level, msg, args)
-
-	if err := l.handler.Handle(ctx, record); err != nil {
+	if err := l.handler.Handle(context.Background(), record); err != nil {
 		defaults.HandleError("Logger.handler.Handle", err)
 	}
 }
 
 // Debug logs a log with msg and args in debug level.
 func (l *Logger) Debug(msg string, args ...any) {
-	l.log(context.Background(), slog.LevelDebug, msg, args...)
+	l.log(slog.LevelDebug, msg, args...)
 }
 
 // Info logs a log with msg and args in info level.
 func (l *Logger) Info(msg string, args ...any) {
-	l.log(context.Background(), slog.LevelInfo, msg, args...)
+	l.log(slog.LevelInfo, msg, args...)
 }
 
 // Warn logs a log with msg and args in warn level.
 func (l *Logger) Warn(msg string, args ...any) {
-	l.log(context.Background(), slog.LevelWarn, msg, args...)
+	l.log(slog.LevelWarn, msg, args...)
 }
 
 // Error logs a log with msg and args in error level.
 func (l *Logger) Error(msg string, args ...any) {
-	l.log(context.Background(), slog.LevelError, msg, args...)
-}
-
-// DebugContext logs a log with ctx, msg and args in debug level.
-func (l *Logger) DebugContext(ctx context.Context, msg string, args ...any) {
-	l.log(ctx, slog.LevelDebug, msg, args...)
-}
-
-// InfoContext logs a log with ctx, msg and args in info level.
-func (l *Logger) InfoContext(ctx context.Context, msg string, args ...any) {
-	l.log(ctx, slog.LevelInfo, msg, args...)
-}
-
-// WarnContext logs a log with ctx, msg and args in warn level.
-func (l *Logger) WarnContext(ctx context.Context, msg string, args ...any) {
-	l.log(ctx, slog.LevelWarn, msg, args...)
-}
-
-// ErrorContext logs a log with ctx, msg and args in error level.
-func (l *Logger) ErrorContext(ctx context.Context, msg string, args ...any) {
-	l.log(ctx, slog.LevelError, msg, args...)
+	l.log(slog.LevelError, msg, args...)
 }
 
 // Printf logs a log with format and args in print level.
 // It a old-school way to log.
 func (l *Logger) Printf(format string, args ...interface{}) {
 	msg := fmt.Sprintf(format, args...)
-	l.log(context.Background(), defaults.LevelPrint, msg)
+	l.log(defaults.LevelPrint, msg)
 }
 
 // Print logs a log with args in print level.
 // It a old-school way to log.
 func (l *Logger) Print(args ...interface{}) {
 	msg := fmt.Sprint(args...)
-	l.log(context.Background(), defaults.LevelPrint, msg)
+	l.log(defaults.LevelPrint, msg)
 }
 
 // Println logs a log with args in print level.
 // It a old-school way to log.
 func (l *Logger) Println(args ...interface{}) {
 	msg := fmt.Sprintln(args...)
-	l.log(context.Background(), defaults.LevelPrint, msg)
+	l.log(defaults.LevelPrint, msg)
 }
 
 // Sync syncs the logger and returns an error if failed.
