@@ -33,6 +33,14 @@ func main() {
 	logger.Debug("new version of logit", "version", "1.5.0-alpha", "date", 20231122)
 	logger.Error("new version of logit", "version", "1.5.0-alpha", "date", 20231122)
 
+	type user struct {
+		ID   int64  `json:"id"`
+		Name string `json:"name"`
+	}
+
+	u := user{123456, "fishgoddess"}
+	logger.Info("user information", "user", u, "pi", 3.14)
+
 	// Yep, I know you want to output logs to a file, try WithFile option.
 	// The path in WithFile is where the log file will be stored.
 	// Also, it's a good choice to call logger.Close() when program shutdown.
