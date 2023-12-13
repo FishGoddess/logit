@@ -1,11 +1,10 @@
 ## ✒ 历史版本的特性介绍 (Features in old versions)
 
-### v1.5.5-alpha (Coming soon)
+### v1.5.4-alpha (Coming soon)
 
 > 此版本发布于 2023-12-20
 
-* 增加一个适合查看的 handler 实现
-* 提高单元测试覆盖率到 70%
+* 增加一个可读性高的 handler 实现
 
 ### v1.5.3-alpha
 

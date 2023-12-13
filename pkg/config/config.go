@@ -161,7 +161,7 @@ type Config struct {
 	Level string `json:"level" yaml:"level" toml:"level" bson:"level"`
 
 	// Handler is how the handler handles the logs.
-	// Values: "text", "json".
+	// Values: "standard", "text", "json".
 	// Also, you can register your handlers to logit, see RegisterHandler.
 	Handler string `json:"handler" yaml:"handler" toml:"handler" bson:"handler"`
 

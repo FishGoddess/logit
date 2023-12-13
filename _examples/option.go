@@ -34,6 +34,7 @@ func main() {
 
 	// Change logger handler:
 	logit.WithHandler("xxx")
+	logit.WithStandardHandler()
 	logit.WithTextHandler()
 	logit.WithJsonHandler()
 

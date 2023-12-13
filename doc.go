@@ -107,9 +107,9 @@ Package logit provides an easy way to use foundation for your logging operations
 
 3. handler:
 
-	// By default, logit uses text handler to output logs.
+	// By default, logit uses mix handler to output logs.
 	logger := logit.NewLogger()
-	logger.Info("default handler is text")
+	logger.Info("default handler logging")
 
 	// You can change it to other handlers by options.
 	// For example, use json handler:
@@ -204,7 +204,7 @@ Package logit provides an easy way to use foundation for your logging operations
 	logit.WithDebugLevel()
 
 	// Change logger handler:
-	logit.WithHandler("xxx")
+	logit.WithHandler("standard")
 	logit.WithTextHandler()
 	logit.WithJsonHandler()
 
@@ -277,5 +277,5 @@ package logit // import "github.com/FishGoddess/logit"
 
 const (
 	// Version is the version string representation of logit.
-	Version = "v1.5.3-alpha"
+	Version = "v1.5.4-alpha"
 )

@@ -30,7 +30,7 @@ const (
 var (
 	newHandlers = map[string]HandlerFunc{
 		handlerStandard: func(w io.Writer, opts *slog.HandlerOptions) slog.Handler {
-			return newStandardHandler(w, opts)
+			return NewStandardHandler(w, opts)
 		},
 		handlerText: func(w io.Writer, opts *slog.HandlerOptions) slog.Handler {
 			return slog.NewTextHandler(w, opts)

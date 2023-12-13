@@ -40,6 +40,14 @@ var (
 )
 
 var (
+	// MinBufferSize is the min buffer size used in bytes.
+	MinBufferSize = 1 * 1024
+
+	// MaxBufferSize is the max buffer size used in bytes.
+	MaxBufferSize = 16 * 1024
+)
+
+var (
 	// FileMode is the permission bits
 	FileMode os.FileMode = 0644
 

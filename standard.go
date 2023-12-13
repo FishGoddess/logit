@@ -17,67 +17,53 @@ package logit
 import (
 	"bytes"
 	"context"
+	"encoding/json"
+	"fmt"
 	"io"
 	"log/slog"
 	"runtime"
 	"strconv"
 	"sync"
+	"time"
+
+	"github.com/FishGoddess/logit/defaults"
 )
 
 const (
-	timeFormat = "2006-01-02 15:04:05.000"
-)
+	zero      = '0'
+	lineBreak = '\n'
 
-const (
-	minBufferSize = 1 * 1024  // 1KB
-	maxBufferSize = 16 * 1024 // 16KB
-)
+	dateConnector       = '-'
+	clockConnector      = ':'
+	timeConnector       = ' '
+	timeMillisConnector = '.'
 
-const (
-	lineBreak         = '\n'
-	KeyValueConnector = '='
-	SourceConnector   = ':'
+	keyValueSeparator = '='
+	sourceSeparator   = ':'
+	groupSeparator    = "."
 )
 
 var (
-	attrNone      = []byte("-")
-	attrSeparator = []byte("¦")
+	attrSeparator = []byte(" ¦ ")
 )
 
 var (
 	emptyAttr = slog.Attr{}
 )
 
-var bufferPool = sync.Pool{
-	New: func() any {
-		bs := make([]byte, 0, minBufferSize)
-		return &bs
-	},
-}
-
-func newBuffer() *[]byte {
-	return bufferPool.Get().(*[]byte)
-}
-
-func freeBuffer(b *[]byte) {
-	// Return only smaller buffers for reducing peak allocation.
-	if cap(*b) <= maxBufferSize {
-		*b = (*b)[:0]
-		bufferPool.Put(b)
-	}
-}
-
 type standardHandler struct {
 	w    io.Writer
 	opts slog.HandlerOptions
 
+	group      string
 	attrsBytes []byte
-	groupBytes []byte
 
 	lock *sync.Mutex
 }
 
-func newStandardHandler(w io.Writer, opts *slog.HandlerOptions) slog.Handler {
+// NewStandardHandler creates a standard handler with w and opts.
+// This handler is more readable and faster than slog's handlers.
+func NewStandardHandler(w io.Writer, opts *slog.HandlerOptions) slog.Handler {
 	if opts == nil {
 		opts = &slog.HandlerOptions{
 			Level: slog.LevelInfo,
@@ -85,10 +71,9 @@ func newStandardHandler(w io.Writer, opts *slog.HandlerOptions) slog.Handler {
 	}
 
 	handler := &standardHandler{
-		w:          w,
-		opts:       *opts,
-		groupBytes: attrNone,
-		lock:       &sync.Mutex{},
+		w:    w,
+		opts: *opts,
+		lock: &sync.Mutex{},
 	}
 
 	return handler
@@ -101,9 +86,7 @@ func (sh *standardHandler) WithAttrs(attrs []slog.Attr) slog.Handler {
 	}
 
 	handler := *sh
-	for _, attr := range attrs {
-		handler.attrsBytes = sh.appendAttr(handler.attrsBytes, attr)
-	}
+	handler.attrsBytes = sh.appendGroupAttrs(handler.attrsBytes, sh.group, attrs)
 
 	return &handler
 }
@@ -115,7 +98,7 @@ func (sh *standardHandler) WithGroup(name string) slog.Handler {
 	}
 
 	handler := *sh
-	handler.groupBytes = []byte(name)
+	handler.group = name
 
 	return &handler
 }
@@ -123,6 +106,123 @@ func (sh *standardHandler) WithGroup(name string) slog.Handler {
 // Enabled reports whether the logger should ignore logs whose level is lower than passed level.
 func (sh *standardHandler) Enabled(ctx context.Context, level slog.Level) bool {
 	return level >= sh.opts.Level.Level()
+}
+
+func (sh *standardHandler) appendGroupAttrs(bs []byte, group string, attrs []slog.Attr) []byte {
+	for _, groupAttr := range attrs {
+		if group != "" {
+			groupAttr.Key = group + groupSeparator + groupAttr.Key
+		}
+
+		bs = sh.appendAttr(bs, groupAttr)
+	}
+
+	return bs
+}
+
+func (sh *standardHandler) appendTimeAttr(bs []byte, key string, value time.Time) []byte {
+	if key != "" {
+		bs = append(bs, key...)
+		bs = append(bs, keyValueSeparator)
+	}
+
+	// Time format is an usual but expensive operation if using time.AppendFormat,
+	// so we use a stupid but faster way to format time.
+	// The result formatted is like "2006-01-02 15:04:05.000".
+	year, month, day := value.Date()
+	hour, minute, second := value.Clock()
+	millisecond := time.Duration(value.Nanosecond()) / time.Millisecond
+
+	if year < 10 {
+		bs = append(bs, zero, zero, zero)
+	} else if year < 100 {
+		bs = append(bs, zero, zero)
+	} else if year < 1000 {
+		bs = append(bs, zero)
+	}
+
+	bs = strconv.AppendInt(bs, int64(year), 10)
+	bs = append(bs, dateConnector)
+
+	if month < 10 {
+		bs = append(bs, zero)
+	}
+
+	bs = strconv.AppendInt(bs, int64(month), 10)
+	bs = append(bs, dateConnector)
+
+	if day < 10 {
+		bs = append(bs, zero)
+	}
+
+	bs = strconv.AppendInt(bs, int64(day), 10)
+	bs = append(bs, timeConnector)
+
+	if hour < 10 {
+		bs = append(bs, zero)
+	}
+
+	bs = strconv.AppendInt(bs, int64(hour), 10)
+	bs = append(bs, clockConnector)
+
+	if minute < 10 {
+		bs = append(bs, zero)
+	}
+
+	bs = strconv.AppendInt(bs, int64(minute), 10)
+	bs = append(bs, clockConnector)
+
+	if second < 10 {
+		bs = append(bs, zero)
+	}
+
+	bs = strconv.AppendInt(bs, int64(second), 10)
+	bs = append(bs, timeMillisConnector)
+
+	if millisecond < 10 {
+		bs = append(bs, zero, zero)
+	} else if millisecond < 100 {
+		bs = append(bs, zero)
+	}
+
+	bs = strconv.AppendInt(bs, int64(millisecond), 10)
+	bs = append(bs, attrSeparator...)
+
+	return bs
+}
+
+func (sh *standardHandler) appendAnyAttr(bs []byte, key string, value any) []byte {
+	if key != "" {
+		bs = append(bs, key...)
+		bs = append(bs, keyValueSeparator)
+	}
+
+	marshaled, err := json.Marshal(value)
+	if err == nil {
+		bs = append(bs, marshaled...)
+		bs = append(bs, attrSeparator...)
+
+		return bs
+	}
+
+	defaults.HandleError("json.Marshal", err)
+
+	bs = fmt.Appendf(bs, "%+v", value)
+	bs = append(bs, attrSeparator...)
+
+	return bs
+}
+
+func (sh *standardHandler) appendStringAttr(bs []byte, key string, value string) []byte {
+	if key != "" {
+		bs = append(bs, key...)
+		bs = append(bs, keyValueSeparator)
+	}
+
+	bs = append(bs, value...)
+	bs = append(bs, attrSeparator...)
+
+	return bs
 }
 
 func (sh *standardHandler) appendAttr(bs []byte, attr slog.Attr) []byte {
@@ -133,70 +233,56 @@ func (sh *standardHandler) appendAttr(bs []byte, attr slog.Attr) []byte {
 		return bs
 	}
 
-	kind := attr.Value.Kind()
+	switch attr.Value.Kind() {
+	case slog.KindGroup:
+		bs = sh.appendGroupAttrs(bs, attr.Key, attr.Value.Group())
+	case slog.KindTime:
+		bs = sh.appendTimeAttr(bs, attr.Key, attr.Value.Time())
+	case slog.KindAny:
+		bs = sh.appendAnyAttr(bs, attr.Key, attr.Value.Any())
+	default:
+		bs = sh.appendStringAttr(bs, attr.Key, attr.Value.String())
+	}
 
-	// Group should append attrs in group.
-	if kind == slog.KindGroup {
-		attrs := attr.Value.Group()
+	return bs
+}
 
-		for _, groupAttr := range attrs {
-			groupAttr.Key = attr.Key + "." + groupAttr.Key
-			bs = sh.appendAttr(bs, groupAttr)
-		}
-
+func (sh *standardHandler) appendSource(bs []byte, pc uintptr) []byte {
+	if pc == 0 {
 		return bs
 	}
 
-	// Time format is a spent operation so we use AppendFormat to speed up.
-	if kind == slog.KindTime {
-		bs = append(bs, attr.Key...)
-		bs = append(bs, KeyValueConnector)
-		bs = attr.Value.Time().AppendFormat(bs, timeFormat)
-		bs = append(bs, attrSeparator...)
+	frames := runtime.CallersFrames([]uintptr{pc})
+	frame, _ := frames.Next()
 
-		return bs
-	}
-
-	// Other kinds can convert to string and append to bs.
-	bs = append(bs, attr.Key...)
-	bs = append(bs, KeyValueConnector)
-	bs = append(bs, attr.Value.String()...)
+	bs = append(bs, slog.SourceKey...)
+	bs = append(bs, keyValueSeparator)
+	bs = append(bs, frame.File...)
+	bs = append(bs, sourceSeparator)
+	bs = strconv.AppendInt(bs, int64(frame.Line), 10)
 	bs = append(bs, attrSeparator...)
 
 	return bs
 }
 
-func (sh *standardHandler) appendRecord(buffer []byte, record slog.Record) []byte {
-	if record.Time.IsZero() {
-		buffer = append(buffer, attrNone...)
-		buffer = append(buffer, attrSeparator...)
-	} else {
-		// TODO optimize time format
-		buffer = record.Time.AppendFormat(buffer, timeFormat)
-		buffer = append(buffer, attrSeparator...)
-	}
+// Handle handles one record and returns an error if failed.
+func (sh *standardHandler) Handle(ctx context.Context, record slog.Record) error {
+	// Setup a buffer for handling record.
+	bufferPtr := newBuffer()
+	buffer := *bufferPtr
 
-	buffer = append(buffer, record.Level.String()...)
-	buffer = append(buffer, attrSeparator...)
-	buffer = append(buffer, sh.groupBytes...)
-	buffer = append(buffer, attrSeparator...)
-	buffer = append(buffer, record.Message...)
-	buffer = append(buffer, attrSeparator...)
+	defer func() {
+		bufferPtr = &buffer
+		freeBuffer(bufferPtr)
+	}()
 
-	if record.PC != 0 {
-		fs := runtime.CallersFrames([]uintptr{record.PC})
-		f, _ := fs.Next()
-
-		buffer = append(buffer, slog.SourceKey...)
-		buffer = append(buffer, KeyValueConnector)
-		buffer = append(buffer, f.File...)
-		buffer = append(buffer, SourceConnector)
-		buffer = strconv.AppendInt(buffer, int64(f.Line), 10)
-		buffer = append(buffer, attrSeparator...)
-	}
+	// Handling record.
+	buffer = sh.appendTimeAttr(buffer, "", record.Time)
+	buffer = sh.appendStringAttr(buffer, "", record.Level.String())
+	buffer = sh.appendStringAttr(buffer, "", record.Message)
+	buffer = sh.appendSource(buffer, record.PC)
 
 	buffer = append(buffer, sh.attrsBytes...)
-
 	if record.NumAttrs() > 0 {
 		record.Attrs(func(attr slog.Attr) bool {
 			buffer = sh.appendAttr(buffer, attr)
@@ -207,20 +293,10 @@ func (sh *standardHandler) appendRecord(buffer []byte, record slog.Record) []byt
 	buffer = bytes.TrimSuffix(buffer, attrSeparator)
 	buffer = append(buffer, lineBreak)
 
-	return buffer
-}
-
-// Handle handles one record and returns an error if failed.
-func (sh *standardHandler) Handle(ctx context.Context, record slog.Record) error {
-	buffer := newBuffer()
-	defer freeBuffer(buffer)
-
-	// Encode record to bytes and append them to buffer.
-	*buffer = sh.appendRecord(*buffer, record)
-
+	// Write handled record.
 	sh.lock.Lock()
 	defer sh.lock.Unlock()
 
-	_, err := sh.w.Write(*buffer)
+	_, err := sh.w.Write(buffer)
 	return err
 }

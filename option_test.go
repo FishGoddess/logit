@@ -294,6 +294,16 @@ func TestWithHandler(t *testing.T) {
 	}
 }
 
+// go test -v -cover -count=1 -test.cpu=1 -run=^TestWithStandardHandler$
+func TestWithStandardHandler(t *testing.T) {
+	conf := &config{handler: ""}
+	WithStandardHandler().applyTo(conf)
+
+	if conf.handler != handlerStandard {
+		t.Fatal("conf.handler is wrong")
+	}
+}
+
 // go test -v -cover -count=1 -test.cpu=1 -run=^TestWithTextHandler$
 func TestWithTextHandler(t *testing.T) {
 	conf := &config{handler: ""}

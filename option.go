@@ -168,6 +168,13 @@ func WithHandler(handler string) Option {
 	}
 }
 
+// WithStandardHandler sets standard handler to config.
+func WithStandardHandler() Option {
+	return func(conf *config) {
+		conf.handler = handlerStandard
+	}
+}
+
 // WithTextHandler sets text handler to config.
 func WithTextHandler() Option {
 	return func(conf *config) {

@@ -22,9 +22,9 @@ import (
 )
 
 func main() {
-	// By default, logit uses text handler to output logs.
+	// By default, logit uses mix handler to output logs.
 	logger := logit.NewLogger()
-	logger.Info("default handler is text")
+	logger.Info("default handler logging")
 
 	// You can change it to other handlers by options.
 	// For example, use json handler:
