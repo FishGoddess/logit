@@ -22,12 +22,16 @@ import (
 )
 
 const (
-	handlerText = "text"
-	handlerJson = "json"
+	handlerConsole = "console"
+	handlerText    = "text"
+	handlerJson    = "json"
 )
 
 var (
 	newHandlers = map[string]HandlerFunc{
+		handlerConsole: func(w io.Writer, opts *slog.HandlerOptions) slog.Handler {
+			return newConsoleHandler(w, opts)
+		},
 		handlerText: func(w io.Writer, opts *slog.HandlerOptions) slog.Handler {
 			return slog.NewTextHandler(w, opts)
 		},
