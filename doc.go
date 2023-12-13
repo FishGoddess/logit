@@ -19,7 +19,7 @@ Package logit provides an easy way to use foundation for your logging operations
 
 	// Use default logger to log.
 	// By default, logs will be output to stdout.
-	logit.Info("hello from logit", "key", 123)
+	logit.Default().Info("hello from logit", "key", 123)
 
 	// Use a new logger to log.
 	// By default, logs will be output to stdout.
@@ -27,6 +27,14 @@ Package logit provides an easy way to use foundation for your logging operations
 
 	logger.Debug("new version of logit", "version", "1.5.0-alpha", "date", 20231122)
 	logger.Error("new version of logit", "version", "1.5.0-alpha", "date", 20231122)
+
+	type user struct {
+		ID   int64  `json:"id"`
+		Name string `json:"name"`
+	}
+
+	u := user{123456, "fishgoddess"}
+	logger.Info("user information", "user", u, "pi", 3.14)
 
 	// Yep, I know you want to output logs to a file, try WithFile option.
 	// The path in WithFile is where the log file will be stored.
@@ -39,9 +47,7 @@ Package logit provides an easy way to use foundation for your logging operations
 	// What if I want to use default logger and output logs to a file? Try SetDefault.
 	// It sets a logger to default and you can use it by package function or Default().
 	logit.SetDefault(logger)
-
-	logit.Warn("this is from default logger", "pi", 3.14, "default", true)
-	logit.Default().Warn("this is from default logger, too", "pi", 3.14, "default", true)
+	logit.Default().Warn("this is from default logger", "pi", 3.14, "default", true)
 
 	// If you want to change level of logger to info, try WithInfoLevel.
 	// Other levels is similar to info level.
@@ -49,6 +55,12 @@ Package logit provides an easy way to use foundation for your logging operations
 
 	logger.Debug("debug logs will be ignored")
 	logger.Info("info logs can be logged")
+
+	// If you want to pass logger by context, use NewContext and FromContext.
+	ctx := logit.NewContext(context.Background(), logger)
+
+	logger = logit.FromContext(ctx)
+	logger.Info("logger from context", "from", "context")
 
 	// Don't want to panic when new a logger? Try NewLoggerGracefully.
 	logger, err := logit.NewLoggerGracefully(logit.WithFile(""))
@@ -78,7 +90,7 @@ Package logit provides an easy way to use foundation for your logging operations
 	logger.Error("error group", "err", io.EOF)
 
 	// If you want to check if one level can be logged, try this:
-	if logger.DebugEnabled(context.Background()) {
+	if logger.DebugEnabled() {
 		logger.Debug("debug enabled")
 	}
 
@@ -220,22 +232,6 @@ Package logit provides an easy way to use foundation for your logging operations
 
 7. context:
 
-	func resolveUser(ctx context.Context) []slog.Attr {
-		userID, ok := ctx.Value("user_id").(int)
-		if !ok {
-			return nil
-		}
-
-		username, ok := ctx.Value("username").(string)
-		if !ok {
-			return nil
-		}
-
-		return []slog.Attr{
-			slog.Int("user_id", userID), slog.String("username", username),
-		}
-	}
-
 	// We provide a way for getting logger from a context.
 	// By default, the default logger will be returned if there is no logit.Logger in context.
 	ctx := context.Background()
@@ -249,30 +245,12 @@ Package logit provides an easy way to use foundation for your logging operations
 
 	// Use NewContext to set a logger to context.
 	// We use WithGroup here to make a difference to default logger.
-	logger = logit.NewLogger().WithGroup("context")
+	logger = logit.NewLogger().WithGroup("context").With("user_id", 123456)
 	ctx = logit.NewContext(ctx, logger)
 
 	// Then you can get the logger from context.
 	logger = logit.FromContext(ctx)
 	logger.Debug("logger from context debug", "key", "value")
-
-	// Maybe you have noticed logger has some methods with context.
-	// These methods will pass the context to underlying handler so that we can use it to process some logics.
-	logger.DebugContext(ctx, "debug context")
-	logger.InfoContext(ctx, "info context")
-	logger.WarnContext(ctx, "warn context")
-	logger.ErrorContext(ctx, "error context")
-
-	// You can carry some attributes through context.
-	ctx = context.WithValue(ctx, "user_id", 123456)
-	ctx = context.WithValue(ctx, "username", "fishgoddess")
-
-	// Then use AttrResolver resolves attributes from context, see WithAttrResolvers.
-	logger = logit.NewLogger(logit.WithAttrResolvers(resolveUser))
-	logger.InfoContext(ctx, "see what attributes in this log")
-
-	// However, attributes are gone if log without context.
-	logger.Info("see what attributes in this log")
 
 8. default:
 
@@ -283,12 +261,12 @@ Package logit provides an easy way to use foundation for your logging operations
 		return time.Unix(666, 0).In(time.Local)
 	}
 
-	logit.Print("println log is info level")
+	logit.Default().Print("println log is info level")
 
 	// If you want change the level of old-school logging methods:
 	defaults.LevelPrint = slog.LevelDebug
 
-	logit.Print("println log is debug level now")
+	logit.Default().Print("println log is debug level now")
 
 	// More fields see defaults package.
 	defaults.HandleError = func(label string, err error) {
@@ -299,5 +277,5 @@ package logit // import "github.com/FishGoddess/logit"
 
 const (
 	// Version is the version string representation of logit.
-	Version = "v1.5.2-alpha"
+	Version = "v1.5.3-alpha"
 )

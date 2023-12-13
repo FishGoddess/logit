@@ -37,14 +37,13 @@ type config struct {
 	level   slog.Level
 	handler string
 
-	newWriter   func() (io.Writer, error)
-	wrapWriter  func(io.Writer) io.Writer
+	newWriter  func() (io.Writer, error)
+	wrapWriter func(io.Writer) io.Writer
+
 	replaceAttr func(groups []string, attr slog.Attr) slog.Attr
 
 	withSource bool
 	withPID    bool
-
-	resolvers []AttrResolver
 
 	syncTimer time.Duration
 }
@@ -62,7 +61,6 @@ func newDefaultConfig() *config {
 		replaceAttr: nil,
 		withSource:  false,
 		withPID:     false,
-		resolvers:   nil,
 		syncTimer:   0,
 	}
 

@@ -24,6 +24,7 @@ import (
 
 type testConfigHandler struct {
 	slog.TextHandler
+
 	w    io.Writer
 	opts slog.HandlerOptions
 }

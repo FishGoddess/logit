@@ -19,8 +19,6 @@ import (
 	"os"
 	"testing"
 	"time"
-
-	"github.com/FishGoddess/logit/defaults"
 )
 
 // go test -v -cover -count=1 -test.cpu=1 -run=^TestBuffer$
@@ -45,7 +43,7 @@ func TestBuffer(t *testing.T) {
 func TestBufferWriter(t *testing.T) {
 	buffer := bytes.NewBuffer(make([]byte, 0, 4096))
 
-	writer := Buffer(buffer, defaults.BufferSize)
+	writer := Buffer(buffer, 65536)
 	defer writer.Close()
 
 	writer.Write([]byte("abc"))

@@ -15,6 +15,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/FishGoddess/logit"
@@ -23,7 +24,7 @@ import (
 func main() {
 	// Use default logger to log.
 	// By default, logs will be output to stdout.
-	logit.Info("hello from logit", "key", 123)
+	logit.Default().Info("hello from logit", "key", 123)
 
 	// Use a new logger to log.
 	// By default, logs will be output to stdout.
@@ -31,6 +32,14 @@ func main() {
 
 	logger.Debug("new version of logit", "version", "1.5.0-alpha", "date", 20231122)
 	logger.Error("new version of logit", "version", "1.5.0-alpha", "date", 20231122)
+
+	type user struct {
+		ID   int64  `json:"id"`
+		Name string `json:"name"`
+	}
+
+	u := user{123456, "fishgoddess"}
+	logger.Info("user information", "user", u, "pi", 3.14)
 
 	// Yep, I know you want to output logs to a file, try WithFile option.
 	// The path in WithFile is where the log file will be stored.
@@ -43,9 +52,7 @@ func main() {
 	// What if I want to use default logger and output logs to a file? Try SetDefault.
 	// It sets a logger to default and you can use it by package function or Default().
 	logit.SetDefault(logger)
-
-	logit.Warn("this is from default logger", "pi", 3.14, "default", true)
-	logit.Default().Warn("this is from default logger, too", "pi", 3.14, "default", true)
+	logit.Default().Warn("this is from default logger", "pi", 3.14, "default", true)
 
 	// If you want to change level of logger to info, try WithInfoLevel.
 	// Other levels is similar to info level.
@@ -53,6 +60,12 @@ func main() {
 
 	logger.Debug("debug logs will be ignored")
 	logger.Info("info logs can be logged")
+
+	// If you want to pass logger by context, use NewContext and FromContext.
+	ctx := logit.NewContext(context.Background(), logger)
+
+	logger = logit.FromContext(ctx)
+	logger.Info("logger from context", "from", "context")
 
 	// Don't want to panic when new a logger? Try NewLoggerGracefully.
 	logger, err := logit.NewLoggerGracefully(logit.WithFile(""))
