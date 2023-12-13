@@ -23,8 +23,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/FishGoddess/logit/rotate"
-	"github.com/FishGoddess/logit/writer"
+	"github.com/FishGoddess/logit/core/handler"
+	"github.com/FishGoddess/logit/core/rotate"
+	"github.com/FishGoddess/logit/core/writer"
 )
 
 // go test -v -cover -count=1 -test.cpu=1 -run=^TestWithDebugLevel$
@@ -294,12 +295,12 @@ func TestWithHandler(t *testing.T) {
 	}
 }
 
-// go test -v -cover -count=1 -test.cpu=1 -run=^TestWithStandardHandler$
-func TestWithStandardHandler(t *testing.T) {
+// go test -v -cover -count=1 -test.cpu=1 -run=^TestWithMixHandler$
+func TestWithMixHandler(t *testing.T) {
 	conf := &config{handler: ""}
-	WithStandardHandler().applyTo(conf)
+	WithMixHandler().applyTo(conf)
 
-	if conf.handler != handlerStandard {
+	if conf.handler != handler.Mix {
 		t.Fatal("conf.handler is wrong")
 	}
 }
@@ -309,7 +310,7 @@ func TestWithTextHandler(t *testing.T) {
 	conf := &config{handler: ""}
 	WithTextHandler().applyTo(conf)
 
-	if conf.handler != handlerText {
+	if conf.handler != handler.Text {
 		t.Fatal("conf.handler is wrong")
 	}
 }
@@ -319,7 +320,7 @@ func TestWithJsonHandler(t *testing.T) {
 	conf := &config{handler: ""}
 	WithJsonHandler().applyTo(conf)
 
-	if conf.handler != handlerJson {
+	if conf.handler != handler.Json {
 		t.Fatal("conf.handler is wrong")
 	}
 }

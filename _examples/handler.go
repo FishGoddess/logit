@@ -19,6 +19,7 @@ import (
 	"log/slog"
 
 	"github.com/FishGoddess/logit"
+	"github.com/FishGoddess/logit/core/handler"
 )
 
 func main() {
@@ -31,12 +32,12 @@ func main() {
 	logger = logit.NewLogger(logit.WithJsonHandler())
 	logger.Info("using json handler")
 
-	// Or you want to use customized handlers, try RegisterHandler.
+	// Or you want to use customized handlers, try Register.
 	newHandler := func(w io.Writer, opts *slog.HandlerOptions) slog.Handler {
 		return slog.NewTextHandler(w, opts)
 	}
 
-	if err := logit.RegisterHandler("demo", newHandler); err != nil {
+	if err := handler.Register("demo", newHandler); err != nil {
 		panic(err)
 	}
 

@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package logit
+package handler
 
 import (
 	"bytes"
@@ -51,7 +51,7 @@ var (
 	emptyAttr = slog.Attr{}
 )
 
-type standardHandler struct {
+type mixHandler struct {
 	w    io.Writer
 	opts slog.HandlerOptions
 
@@ -61,16 +61,16 @@ type standardHandler struct {
 	lock *sync.Mutex
 }
 
-// NewStandardHandler creates a standard handler with w and opts.
+// NewMixHandler creates a mix handler with w and opts.
 // This handler is more readable and faster than slog's handlers.
-func NewStandardHandler(w io.Writer, opts *slog.HandlerOptions) slog.Handler {
+func NewMixHandler(w io.Writer, opts *slog.HandlerOptions) slog.Handler {
 	if opts == nil {
 		opts = &slog.HandlerOptions{
 			Level: slog.LevelInfo,
 		}
 	}
 
-	handler := &standardHandler{
+	handler := &mixHandler{
 		w:    w,
 		opts: *opts,
 		lock: &sync.Mutex{},
@@ -80,47 +80,35 @@ func NewStandardHandler(w io.Writer, opts *slog.HandlerOptions) slog.Handler {
 }
 
 // WithAttrs returns a new handler with attrs.
-func (sh *standardHandler) WithAttrs(attrs []slog.Attr) slog.Handler {
+func (mh *mixHandler) WithAttrs(attrs []slog.Attr) slog.Handler {
 	if len(attrs) <= 0 {
-		return sh
+		return mh
 	}
 
-	handler := *sh
-	handler.attrsBytes = sh.appendGroupAttrs(handler.attrsBytes, sh.group, attrs)
+	handler := *mh
+	handler.attrsBytes = mh.appendGroupAttrs(handler.attrsBytes, mh.group, attrs)
 
 	return &handler
 }
 
 // WithGroup returns a new handler with group.
-func (sh *standardHandler) WithGroup(name string) slog.Handler {
+func (mh *mixHandler) WithGroup(name string) slog.Handler {
 	if name == "" {
-		return sh
+		return mh
 	}
 
-	handler := *sh
+	handler := *mh
 	handler.group = name
 
 	return &handler
 }
 
 // Enabled reports whether the logger should ignore logs whose level is lower than passed level.
-func (sh *standardHandler) Enabled(ctx context.Context, level slog.Level) bool {
-	return level >= sh.opts.Level.Level()
+func (mh *mixHandler) Enabled(ctx context.Context, level slog.Level) bool {
+	return level >= mh.opts.Level.Level()
 }
 
-func (sh *standardHandler) appendGroupAttrs(bs []byte, group string, attrs []slog.Attr) []byte {
-	for _, groupAttr := range attrs {
-		if group != "" {
-			groupAttr.Key = group + groupSeparator + groupAttr.Key
-		}
-
-		bs = sh.appendAttr(bs, groupAttr)
-	}
-
-	return bs
-}
-
-func (sh *standardHandler) appendTimeAttr(bs []byte, key string, value time.Time) []byte {
+func (mh *mixHandler) appendTimeAttr(bs []byte, key string, value time.Time) []byte {
 	if key != "" {
 		bs = append(bs, key...)
 		bs = append(bs, keyValueSeparator)
@@ -191,10 +179,24 @@ func (sh *standardHandler) appendTimeAttr(bs []byte, key string, value time.Time
 	return bs
 }
 
-func (sh *standardHandler) appendAnyAttr(bs []byte, key string, value any) []byte {
+func (mh *mixHandler) appendAnyAttr(bs []byte, key string, value any) []byte {
 	if key != "" {
 		bs = append(bs, key...)
 		bs = append(bs, keyValueSeparator)
+	}
+
+	if err, ok := value.(error); ok {
+		bs = append(bs, err.Error()...)
+		bs = append(bs, attrSeparator...)
+
+		return bs
+	}
+
+	if stringer, ok := value.(fmt.Stringer); ok {
+		bs = append(bs, stringer.String()...)
+		bs = append(bs, attrSeparator...)
+
+		return bs
 	}
 
 	marshaled, err := json.Marshal(value)
@@ -213,7 +215,7 @@ func (sh *standardHandler) appendAnyAttr(bs []byte, key string, value any) []byt
 	return bs
 }
 
-func (sh *standardHandler) appendStringAttr(bs []byte, key string, value string) []byte {
+func (mh *mixHandler) appendStringAttr(bs []byte, key string, value string) []byte {
 	if key != "" {
 		bs = append(bs, key...)
 		bs = append(bs, keyValueSeparator)
@@ -225,7 +227,19 @@ func (sh *standardHandler) appendStringAttr(bs []byte, key string, value string)
 	return bs
 }
 
-func (sh *standardHandler) appendAttr(bs []byte, attr slog.Attr) []byte {
+func (mh *mixHandler) appendGroupAttrs(bs []byte, group string, attrs []slog.Attr) []byte {
+	for _, groupAttr := range attrs {
+		if group != "" {
+			groupAttr.Key = group + groupSeparator + groupAttr.Key
+		}
+
+		bs = mh.appendAttr(bs, groupAttr)
+	}
+
+	return bs
+}
+
+func (mh *mixHandler) appendAttr(bs []byte, attr slog.Attr) []byte {
 	// Resolve the Attr's value before doing anything else.
 	attr.Value = attr.Value.Resolve()
 
@@ -234,21 +248,21 @@ func (sh *standardHandler) appendAttr(bs []byte, attr slog.Attr) []byte {
 	}
 
 	switch attr.Value.Kind() {
-	case slog.KindGroup:
-		bs = sh.appendGroupAttrs(bs, attr.Key, attr.Value.Group())
 	case slog.KindTime:
-		bs = sh.appendTimeAttr(bs, attr.Key, attr.Value.Time())
+		bs = mh.appendTimeAttr(bs, attr.Key, attr.Value.Time())
 	case slog.KindAny:
-		bs = sh.appendAnyAttr(bs, attr.Key, attr.Value.Any())
+		bs = mh.appendAnyAttr(bs, attr.Key, attr.Value.Any())
+	case slog.KindGroup:
+		bs = mh.appendGroupAttrs(bs, attr.Key, attr.Value.Group())
 	default:
-		bs = sh.appendStringAttr(bs, attr.Key, attr.Value.String())
+		bs = mh.appendStringAttr(bs, attr.Key, attr.Value.String())
 	}
 
 	return bs
 }
 
-func (sh *standardHandler) appendSource(bs []byte, pc uintptr) []byte {
-	if pc == 0 {
+func (mh *mixHandler) appendSource(bs []byte, pc uintptr) []byte {
+	if !mh.opts.AddSource || pc == 0 {
 		return bs
 	}
 
@@ -266,7 +280,7 @@ func (sh *standardHandler) appendSource(bs []byte, pc uintptr) []byte {
 }
 
 // Handle handles one record and returns an error if failed.
-func (sh *standardHandler) Handle(ctx context.Context, record slog.Record) error {
+func (mh *mixHandler) Handle(ctx context.Context, record slog.Record) error {
 	// Setup a buffer for handling record.
 	bufferPtr := newBuffer()
 	buffer := *bufferPtr
@@ -277,15 +291,15 @@ func (sh *standardHandler) Handle(ctx context.Context, record slog.Record) error
 	}()
 
 	// Handling record.
-	buffer = sh.appendTimeAttr(buffer, "", record.Time)
-	buffer = sh.appendStringAttr(buffer, "", record.Level.String())
-	buffer = sh.appendStringAttr(buffer, "", record.Message)
-	buffer = sh.appendSource(buffer, record.PC)
+	buffer = mh.appendTimeAttr(buffer, "", record.Time)
+	buffer = mh.appendStringAttr(buffer, "", record.Level.String())
+	buffer = mh.appendStringAttr(buffer, "", record.Message)
+	buffer = mh.appendSource(buffer, record.PC)
 
-	buffer = append(buffer, sh.attrsBytes...)
+	buffer = append(buffer, mh.attrsBytes...)
 	if record.NumAttrs() > 0 {
 		record.Attrs(func(attr slog.Attr) bool {
-			buffer = sh.appendAttr(buffer, attr)
+			buffer = mh.appendAttr(buffer, attr)
 			return true
 		})
 	}
@@ -294,9 +308,9 @@ func (sh *standardHandler) Handle(ctx context.Context, record slog.Record) error
 	buffer = append(buffer, lineBreak)
 
 	// Write handled record.
-	sh.lock.Lock()
-	defer sh.lock.Unlock()
+	mh.lock.Lock()
+	defer mh.lock.Unlock()
 
-	_, err := sh.w.Write(buffer)
+	_, err := mh.w.Write(buffer)
 	return err
 }

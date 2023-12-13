@@ -116,12 +116,12 @@ Package logit provides an easy way to use foundation for your logging operations
 	logger = logit.NewLogger(logit.WithJsonHandler())
 	logger.Info("using json handler")
 
-	// Or you want to use customized handlers, try RegisterHandler.
+	// Or you want to use customized handlers, try Register.
 	newHandler := func(w io.Writer, opts *slog.HandlerOptions) slog.Handler {
 		return slog.NewTextHandler(w, opts)
 	}
 
-	if err := logit.RegisterHandler("demo", newHandler); err != nil {
+	if err := handler.Register("demo", newHandler); err != nil {
 		panic(err)
 	}
 
@@ -204,7 +204,8 @@ Package logit provides an easy way to use foundation for your logging operations
 	logit.WithDebugLevel()
 
 	// Change logger handler:
-	logit.WithHandler("standard")
+	logit.WithHandler("xxx")
+	logit.WithMixHandler()
 	logit.WithTextHandler()
 	logit.WithJsonHandler()
 

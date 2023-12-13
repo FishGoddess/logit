@@ -21,9 +21,10 @@ import (
 	"path/filepath"
 	"time"
 
+	"github.com/FishGoddess/logit/core/handler"
+	"github.com/FishGoddess/logit/core/rotate"
+	"github.com/FishGoddess/logit/core/writer"
 	"github.com/FishGoddess/logit/defaults"
-	"github.com/FishGoddess/logit/rotate"
-	"github.com/FishGoddess/logit/writer"
 )
 
 // Option sets some fields to config.
@@ -168,24 +169,24 @@ func WithHandler(handler string) Option {
 	}
 }
 
-// WithStandardHandler sets standard handler to config.
-func WithStandardHandler() Option {
+// WithMixHandler sets mix handler to config.
+func WithMixHandler() Option {
 	return func(conf *config) {
-		conf.handler = handlerStandard
+		conf.handler = handler.Mix
 	}
 }
 
 // WithTextHandler sets text handler to config.
 func WithTextHandler() Option {
 	return func(conf *config) {
-		conf.handler = handlerText
+		conf.handler = handler.Text
 	}
 }
 
 // WithJsonHandler sets json handler to config.
 func WithJsonHandler() Option {
 	return func(conf *config) {
-		conf.handler = handlerJson
+		conf.handler = handler.Json
 	}
 }
 

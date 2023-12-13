@@ -59,7 +59,7 @@ BenchmarkLogrusFile-2                     174944              6491 ns/op        
 func BenchmarkLogitLogger(b *testing.B) {
 	logger := logit.NewLogger(
 		logit.WithInfoLevel(),
-		logit.WithStandardHandler(),
+		logit.WithMixHandler(),
 		logit.WithWriter(io.Discard),
 	)
 
@@ -107,7 +107,7 @@ func BenchmarkLogitLoggerJsonHandler(b *testing.B) {
 func BenchmarkLogitLoggerPrint(b *testing.B) {
 	logger := logit.NewLogger(
 		logit.WithInfoLevel(),
-		logit.WithStandardHandler(),
+		logit.WithMixHandler(),
 		logit.WithWriter(io.Discard),
 	)
 
@@ -226,7 +226,7 @@ func BenchmarkLogitFile(b *testing.B) {
 
 	logger := logit.NewLogger(
 		logit.WithInfoLevel(),
-		logit.WithStandardHandler(),
+		logit.WithMixHandler(),
 		logit.WithFile(path),
 	)
 
@@ -244,7 +244,7 @@ func BenchmarkLogitFileWithBuffer(b *testing.B) {
 
 	logger := logit.NewLogger(
 		logit.WithInfoLevel(),
-		logit.WithStandardHandler(),
+		logit.WithMixHandler(),
 		logit.WithFile(path),
 		logit.WithBuffer(65536),
 	)
@@ -265,7 +265,7 @@ func BenchmarkLogitFileWithBatch(b *testing.B) {
 
 	logger := logit.NewLogger(
 		logit.WithInfoLevel(),
-		logit.WithStandardHandler(),
+		logit.WithMixHandler(),
 		logit.WithFile(path),
 		logit.WithBatch(64),
 	)
