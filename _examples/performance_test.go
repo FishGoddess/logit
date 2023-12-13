@@ -54,6 +54,22 @@ BenchmarkZapFile-2                        382790              2641 ns/op        
 BenchmarkLogrusFile-2                     174944              6491 ns/op            2080 B/op         32 allocs/op
 */
 
+// go test -v ./_examples/performance_test.go -bench=^BenchmarkLogitLoggerStandardHandler$ -benchtime=1s
+func BenchmarkLogitLoggerStandardHandler(b *testing.B) {
+	logger := logit.NewLogger(
+		logit.WithInfoLevel(),
+		logit.WithHandler("standard"),
+		logit.WithWriter(io.Discard),
+	)
+
+	b.ReportAllocs()
+	b.StartTimer()
+
+	for i := 0; i < b.N; i++ {
+		logger.Info("info...", "trace", "xxx", "id", 123, "pi", 3.14)
+	}
+}
+
 // go test -v ./_examples/performance_test.go -bench=^BenchmarkLogitLoggerTextHandler$ -benchtime=1s
 func BenchmarkLogitLoggerTextHandler(b *testing.B) {
 	logger := logit.NewLogger(
