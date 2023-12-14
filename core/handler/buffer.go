@@ -23,18 +23,22 @@ import (
 var bufferPool = sync.Pool{
 	New: func() any {
 		bs := make([]byte, 0, defaults.MinBufferSize)
-		return &bs
+		return &buffer{bs: bs}
 	},
 }
 
-func newBuffer() *[]byte {
-	return bufferPool.Get().(*[]byte)
+type buffer struct {
+	bs []byte
 }
 
-func freeBuffer(b *[]byte) {
+func newBuffer() *buffer {
+	return bufferPool.Get().(*buffer)
+}
+
+func freeBuffer(buffer *buffer) {
 	// Return only smaller buffers for reducing peak allocation.
-	if cap(*b) <= defaults.MaxBufferSize {
-		*b = (*b)[:0]
-		bufferPool.Put(b)
+	if cap(buffer.bs) <= defaults.MaxBufferSize {
+		buffer.bs = buffer.bs[:0]
+		bufferPool.Put(buffer)
 	}
 }

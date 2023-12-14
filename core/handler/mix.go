@@ -117,8 +117,43 @@ func (mh *mixHandler) appendKey(bs []byte, key string) []byte {
 	return bs
 }
 
+func (mh *mixHandler) appendBool(bs []byte, value bool) []byte {
+	bs = strconv.AppendBool(bs, value)
+	bs = append(bs, attrSeparator...)
+
+	return bs
+}
+
+func (mh *mixHandler) appendInt64(bs []byte, value int64) []byte {
+	bs = strconv.AppendInt(bs, value, 10)
+	bs = append(bs, attrSeparator...)
+
+	return bs
+}
+
+func (mh *mixHandler) appendUint64(bs []byte, value uint64) []byte {
+	bs = strconv.AppendUint(bs, value, 10)
+	bs = append(bs, attrSeparator...)
+
+	return bs
+}
+
+func (mh *mixHandler) appendFloat64(bs []byte, value float64) []byte {
+	bs = strconv.AppendFloat(bs, value, 'f', -1, 64)
+	bs = append(bs, attrSeparator...)
+
+	return bs
+}
+
 func (mh *mixHandler) appendString(bs []byte, value string) []byte {
 	bs = appendEscapedString(bs, value)
+	bs = append(bs, attrSeparator...)
+
+	return bs
+}
+
+func (mh *mixHandler) appendDuration(bs []byte, value time.Duration) []byte {
+	bs = append(bs, value.String()...)
 	bs = append(bs, attrSeparator...)
 
 	return bs
@@ -232,12 +267,22 @@ func (mh *mixHandler) appendAttr(bs []byte, attr slog.Attr) []byte {
 	bs = mh.appendKey(bs, attr.Key)
 
 	switch attr.Value.Kind() {
-	case slog.KindGroup:
-		bs = mh.appendGroupAttrs(bs, attr.Key, attr.Value.Group())
+	case slog.KindBool:
+		bs = mh.appendBool(bs, attr.Value.Bool())
+	case slog.KindInt64:
+		bs = mh.appendInt64(bs, attr.Value.Int64())
+	case slog.KindUint64:
+		bs = mh.appendUint64(bs, attr.Value.Uint64())
+	case slog.KindFloat64:
+		bs = mh.appendFloat64(bs, attr.Value.Float64())
+	case slog.KindDuration:
+		bs = mh.appendDuration(bs, attr.Value.Duration())
 	case slog.KindTime:
 		bs = mh.appendTime(bs, attr.Value.Time())
 	case slog.KindAny:
 		bs = mh.appendAny(bs, attr.Value.Any())
+	case slog.KindGroup:
+		bs = mh.appendGroupAttrs(bs, attr.Key, attr.Value.Group())
 	default:
 		bs = mh.appendString(bs, attr.Value.String())
 	}
@@ -278,35 +323,35 @@ func (mh *mixHandler) appendSource(bs []byte, pc uintptr) []byte {
 // Handle handles one record and returns an error if failed.
 func (mh *mixHandler) Handle(ctx context.Context, record slog.Record) error {
 	// Setup a buffer for handling record.
-	bufferPtr := newBuffer()
-	buffer := *bufferPtr
+	buffer := newBuffer()
+	bs := buffer.bs
 
 	defer func() {
-		bufferPtr = &buffer
-		freeBuffer(bufferPtr)
+		buffer.bs = bs
+		freeBuffer(buffer)
 	}()
 
 	// Handling record.
-	buffer = mh.appendTime(buffer, record.Time)
-	buffer = mh.appendString(buffer, record.Level.String())
-	buffer = mh.appendString(buffer, record.Message)
-	buffer = mh.appendSource(buffer, record.PC)
+	bs = mh.appendTime(bs, record.Time)
+	bs = mh.appendString(bs, record.Level.String())
+	bs = mh.appendString(bs, record.Message)
+	bs = mh.appendSource(bs, record.PC)
 
-	buffer = append(buffer, mh.attrsBytes...)
+	bs = append(bs, mh.attrsBytes...)
 	if record.NumAttrs() > 0 {
 		record.Attrs(func(attr slog.Attr) bool {
-			buffer = mh.appendAttr(buffer, attr)
+			bs = mh.appendAttr(bs, attr)
 			return true
 		})
 	}
 
-	buffer = bytes.TrimSuffix(buffer, attrSeparator)
-	buffer = append(buffer, lineBreak)
+	bs = bytes.TrimSuffix(bs, attrSeparator)
+	bs = append(bs, lineBreak)
 
 	// Write handled record.
 	mh.lock.Lock()
 	defer mh.lock.Unlock()
 
-	_, err := mh.w.Write(buffer)
+	_, err := mh.w.Write(bs)
 	return err
 }

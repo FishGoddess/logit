@@ -36,19 +36,19 @@ goos: linux
 goarch: amd64
 cpu: AMD EPYC 7K62 48-Core Processor
 
-BenchmarkLogitLogger-2                   1079007               984 ns/op              56 B/op          5 allocs/op
-BenchmarkLogitLoggerTextHandler-2        1000000              1102 ns/op               0 B/op          0 allocs/op
-BenchmarkLogitLoggerJsonHandler-2         813913              1419 ns/op             120 B/op          3 allocs/op
-BenchmarkLogitLoggerPrint-2              1000000              1038 ns/op              72 B/op          2 allocs/op
+BenchmarkLogitLogger-2                   1465222               815 ns/op               0 B/op          0 allocs/op
+BenchmarkLogitLoggerTextHandler-2        1000000              1097 ns/op               0 B/op          0 allocs/op
+BenchmarkLogitLoggerJsonHandler-2         803572              1414 ns/op             120 B/op          3 allocs/op
+BenchmarkLogitLoggerPrint-2              1213560               999 ns/op              48 B/op          1 allocs/op
 BenchmarkSlogLoggerTextHandler-2          725522              1629 ns/op               0 B/op          0 allocs/op
 BenchmarkSlogLoggerJsonHandler-2          583214              2030 ns/op             120 B/op          3 allocs/op
 BenchmarkZeroLogLogger-2                 1929276               613 ns/op               0 B/op          0 allocs/op
 BenchmarkZapLogger-2                      976855              1168 ns/op             216 B/op          2 allocs/op
 BenchmarkLogrusLogger-2                   231723              4927 ns/op            2080 B/op         32 allocs/op
 
-BenchmarkLogitFile-2                      539060              2243 ns/op              56 B/op          5 allocs/op
-BenchmarkLogitFileWithBuffer-2           1000000              1062 ns/op              56 B/op          5 allocs/op
-BenchmarkLogitFileWithBatch-2            1000000              1088 ns/op              56 B/op          5 allocs/op
+BenchmarkLogitFile-2                      580012              2011 ns/op               0 B/op          0 allocs/op
+BenchmarkLogitFileWithBuffer-2           1391960               865 ns/op               0 B/op          0 allocs/op
+BenchmarkLogitFileWithBatch-2            1331029               894 ns/op               0 B/op          0 allocs/op
 BenchmarkSlogFile-2                       407590              2944 ns/op               0 B/op          0 allocs/op
 BenchmarkZeroLogFile-2                    634375              1810 ns/op               0 B/op          0 allocs/op
 BenchmarkZapFile-2                        382790              2641 ns/op             216 B/op          2 allocs/op

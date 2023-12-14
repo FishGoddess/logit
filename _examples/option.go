@@ -51,7 +51,6 @@ func main() {
 
 	// More options can be found in logit package which have prefix "With".
 	// What's more? We provide a options pack that we think it's useful in production.
-	// It outputs logs to a rotate file using batch write, so you should call Sync() or Close() when shutdown.
 	opts := logit.ProductionOptions()
 
 	logger = logit.NewLogger(opts...)

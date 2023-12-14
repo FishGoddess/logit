@@ -223,11 +223,9 @@ func WithSyncTimer(d time.Duration) Option {
 
 // ProductionOptions returns some options that we think they are useful in production.
 // We recommend you to use them, so we provide this convenient way to create such a logger.
-// The logger using these options will use rotate file and batch writer.
 func ProductionOptions() []Option {
 	opts := []Option{
 		WithInfoLevel(), WithPID(), WithRotateFile("./logit.log"),
-		WithBatch(16), WithSyncTimer(time.Second),
 	}
 
 	return opts

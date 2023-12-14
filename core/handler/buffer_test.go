@@ -24,22 +24,24 @@ import (
 func TestBufferPool(t *testing.T) {
 	for i := 0; i < 100; i++ {
 		bs := make([]byte, 0, 2*defaults.MaxBufferSize)
-		freeBuffer(&bs)
+		buffer := &buffer{bs: bs}
+		freeBuffer(buffer)
 	}
 
 	for i := 0; i < 100; i++ {
 		buffer := newBuffer()
+		bs := buffer.bs
 
-		if len(*buffer) != 0 {
-			t.Fatalf("len %d of buffer is wrong", len(*buffer))
+		if len(bs) != 0 {
+			t.Fatalf("len %d of buffer is wrong", len(bs))
 		}
 
-		if cap(*buffer) < defaults.MinBufferSize {
-			t.Fatalf("cap %d of buffer too small", cap(*buffer))
+		if cap(bs) < defaults.MinBufferSize {
+			t.Fatalf("cap %d of buffer too small", cap(bs))
 		}
 
-		if cap(*buffer) > defaults.MaxBufferSize {
-			t.Fatalf("cap %d of buffer too large", cap(*buffer))
+		if cap(bs) > defaults.MaxBufferSize {
+			t.Fatalf("cap %d of buffer too large", cap(bs))
 		}
 	}
 }
