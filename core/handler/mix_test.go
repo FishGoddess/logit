@@ -33,13 +33,14 @@ func (d *demo) String() string {
 // go test -v -cover -count=1 -test.cpu=1 -run=^TestMixHandler$
 func TestMixHandler(t *testing.T) {
 	handler := NewMixHandler(os.Stdout, nil)
+	//handler := slog.NewTextHandler(os.Stdout, nil)
 
 	logger1 := slog.New(handler).WithGroup("group1").With("id", 123456)
 	logger1.Info("using console handler 1", slog.Group("log_group1", "k1", 666), "err", io.EOF)
 
 	logger2 := logger1.WithGroup("group2").With("name", "fishgoddess")
-	logger2.Info("using console handler 2", slog.Group("log_group2", "k2", 888), "t", time.Date(1977, 10, 24, 25, 35, 17, 222000000, time.Local))
+	logger2.Info("using console handler 2", slog.Group("log_group2", "k2", 888, "k3", "xxx"), "t", time.Date(1977, 10, 24, 25, 35, 17, 222000000, time.Local))
 
 	demo := &demo{"xxx"}
-	logger1.Info("using console handler 1", slog.Group("log_group1", "k1", 666), "demo", demo)
+	logger1.Info("using console handler 1", slog.Group("log_group1", "k1", 666), "demo", demo, "err", nil)
 }

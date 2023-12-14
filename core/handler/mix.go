@@ -38,13 +38,13 @@ const (
 	timeConnector       = ' '
 	timeMillisConnector = '.'
 
-	keyValueSeparator = '='
-	sourceSeparator   = ':'
-	groupSeparator    = "."
+	keyValueConnector = '='
+	sourceConnector   = ':'
+	groupConnector    = "."
 )
 
 var (
-	attrSeparator = []byte(" ¦ ")
+	attrConnector = []byte(" ¦ ")
 )
 
 var (
@@ -55,7 +55,7 @@ type mixHandler struct {
 	w    io.Writer
 	opts slog.HandlerOptions
 
-	group      string
+	groupBytes []byte
 	attrsBytes []byte
 
 	lock *sync.Mutex
@@ -86,7 +86,13 @@ func (mh *mixHandler) WithAttrs(attrs []slog.Attr) slog.Handler {
 	}
 
 	handler := *mh
-	handler.attrsBytes = mh.appendGroupAttrs(handler.attrsBytes, mh.group, attrs)
+
+	if len(handler.groupBytes) > 0 {
+		group := string(mh.groupBytes)
+		handler.attrsBytes = mh.appendGroupAttrs(handler.attrsBytes, group, attrs)
+	} else {
+		handler.attrsBytes = mh.appendGroupAttrs(handler.attrsBytes, "", attrs)
+	}
 
 	return &handler
 }
@@ -98,7 +104,13 @@ func (mh *mixHandler) WithGroup(name string) slog.Handler {
 	}
 
 	handler := *mh
-	handler.group = name
+
+	if len(handler.groupBytes) > 0 {
+		handler.groupBytes = append(handler.groupBytes, groupConnector...)
+		handler.groupBytes = appendEscapedString(handler.groupBytes, name)
+	} else {
+		handler.groupBytes = appendEscapedString(handler.groupBytes, name)
+	}
 
 	return &handler
 }
@@ -109,52 +121,54 @@ func (mh *mixHandler) Enabled(ctx context.Context, level slog.Level) bool {
 }
 
 func (mh *mixHandler) appendKey(bs []byte, key string) []byte {
-	if key != "" {
-		bs = appendEscapedString(bs, key)
-		bs = append(bs, keyValueSeparator)
+	if key == "" {
+		return bs
 	}
+
+	bs = appendEscapedString(bs, key)
+	bs = append(bs, keyValueConnector)
 
 	return bs
 }
 
 func (mh *mixHandler) appendBool(bs []byte, value bool) []byte {
 	bs = strconv.AppendBool(bs, value)
-	bs = append(bs, attrSeparator...)
+	bs = append(bs, attrConnector...)
 
 	return bs
 }
 
 func (mh *mixHandler) appendInt64(bs []byte, value int64) []byte {
 	bs = strconv.AppendInt(bs, value, 10)
-	bs = append(bs, attrSeparator...)
+	bs = append(bs, attrConnector...)
 
 	return bs
 }
 
 func (mh *mixHandler) appendUint64(bs []byte, value uint64) []byte {
 	bs = strconv.AppendUint(bs, value, 10)
-	bs = append(bs, attrSeparator...)
+	bs = append(bs, attrConnector...)
 
 	return bs
 }
 
 func (mh *mixHandler) appendFloat64(bs []byte, value float64) []byte {
 	bs = strconv.AppendFloat(bs, value, 'f', -1, 64)
-	bs = append(bs, attrSeparator...)
+	bs = append(bs, attrConnector...)
 
 	return bs
 }
 
 func (mh *mixHandler) appendString(bs []byte, value string) []byte {
 	bs = appendEscapedString(bs, value)
-	bs = append(bs, attrSeparator...)
+	bs = append(bs, attrConnector...)
 
 	return bs
 }
 
 func (mh *mixHandler) appendDuration(bs []byte, value time.Duration) []byte {
 	bs = append(bs, value.String()...)
-	bs = append(bs, attrSeparator...)
+	bs = append(bs, attrConnector...)
 
 	return bs
 }
@@ -220,7 +234,7 @@ func (mh *mixHandler) appendTime(bs []byte, value time.Time) []byte {
 	}
 
 	bs = strconv.AppendInt(bs, int64(millisecond), 10)
-	bs = append(bs, attrSeparator...)
+	bs = append(bs, attrConnector...)
 
 	return bs
 }
@@ -228,14 +242,14 @@ func (mh *mixHandler) appendTime(bs []byte, value time.Time) []byte {
 func (mh *mixHandler) appendAny(bs []byte, value any) []byte {
 	if err, ok := value.(error); ok {
 		bs = append(bs, err.Error()...)
-		bs = append(bs, attrSeparator...)
+		bs = append(bs, attrConnector...)
 
 		return bs
 	}
 
 	if stringer, ok := value.(fmt.Stringer); ok {
 		bs = append(bs, stringer.String()...)
-		bs = append(bs, attrSeparator...)
+		bs = append(bs, attrConnector...)
 
 		return bs
 	}
@@ -243,7 +257,7 @@ func (mh *mixHandler) appendAny(bs []byte, value any) []byte {
 	marshaled, err := json.Marshal(value)
 	if err == nil {
 		bs = append(bs, marshaled...)
-		bs = append(bs, attrSeparator...)
+		bs = append(bs, attrConnector...)
 
 		return bs
 	}
@@ -251,7 +265,7 @@ func (mh *mixHandler) appendAny(bs []byte, value any) []byte {
 	defaults.HandleError("json.Marshal", err)
 
 	bs = fmt.Appendf(bs, "%+v", value)
-	bs = append(bs, attrSeparator...)
+	bs = append(bs, attrConnector...)
 
 	return bs
 }
@@ -264,9 +278,16 @@ func (mh *mixHandler) appendAttr(bs []byte, attr slog.Attr) []byte {
 		return bs
 	}
 
+	kind := attr.Value.Kind()
+	if kind == slog.KindGroup {
+		bs = mh.appendGroupAttrs(bs, attr.Key, attr.Value.Group())
+
+		return bs
+	}
+
 	bs = mh.appendKey(bs, attr.Key)
 
-	switch attr.Value.Kind() {
+	switch kind {
 	case slog.KindBool:
 		bs = mh.appendBool(bs, attr.Value.Bool())
 	case slog.KindInt64:
@@ -281,8 +302,6 @@ func (mh *mixHandler) appendAttr(bs []byte, attr slog.Attr) []byte {
 		bs = mh.appendTime(bs, attr.Value.Time())
 	case slog.KindAny:
 		bs = mh.appendAny(bs, attr.Value.Any())
-	case slog.KindGroup:
-		bs = mh.appendGroupAttrs(bs, attr.Key, attr.Value.Group())
 	default:
 		bs = mh.appendString(bs, attr.Value.String())
 	}
@@ -293,7 +312,7 @@ func (mh *mixHandler) appendAttr(bs []byte, attr slog.Attr) []byte {
 func (mh *mixHandler) appendGroupAttrs(bs []byte, group string, attrs []slog.Attr) []byte {
 	for _, groupAttr := range attrs {
 		if group != "" {
-			groupAttr.Key = group + groupSeparator + groupAttr.Key
+			groupAttr.Key = group + groupConnector + groupAttr.Key
 		}
 
 		bs = mh.appendAttr(bs, groupAttr)
@@ -311,11 +330,11 @@ func (mh *mixHandler) appendSource(bs []byte, pc uintptr) []byte {
 	frame, _ := frames.Next()
 
 	bs = append(bs, slog.SourceKey...)
-	bs = append(bs, keyValueSeparator)
+	bs = append(bs, keyValueConnector)
 	bs = appendEscapedString(bs, frame.File)
-	bs = append(bs, sourceSeparator)
+	bs = append(bs, sourceConnector)
 	bs = strconv.AppendInt(bs, int64(frame.Line), 10)
-	bs = append(bs, attrSeparator...)
+	bs = append(bs, attrConnector...)
 
 	return bs
 }
@@ -345,7 +364,7 @@ func (mh *mixHandler) Handle(ctx context.Context, record slog.Record) error {
 		})
 	}
 
-	bs = bytes.TrimSuffix(bs, attrSeparator)
+	bs = bytes.TrimSuffix(bs, attrConnector)
 	bs = append(bs, lineBreak)
 
 	// Write handled record.
