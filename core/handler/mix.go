@@ -108,12 +108,23 @@ func (mh *mixHandler) Enabled(ctx context.Context, level slog.Level) bool {
 	return level >= mh.opts.Level.Level()
 }
 
-func (mh *mixHandler) appendTimeAttr(bs []byte, key string, value time.Time) []byte {
+func (mh *mixHandler) appendKey(bs []byte, key string) []byte {
 	if key != "" {
-		bs = append(bs, key...)
+		bs = appendEscapedString(bs, key)
 		bs = append(bs, keyValueSeparator)
 	}
 
+	return bs
+}
+
+func (mh *mixHandler) appendString(bs []byte, value string) []byte {
+	bs = appendEscapedString(bs, value)
+	bs = append(bs, attrSeparator...)
+
+	return bs
+}
+
+func (mh *mixHandler) appendTime(bs []byte, value time.Time) []byte {
 	// Time format is an usual but expensive operation if using time.AppendFormat,
 	// so we use a stupid but faster way to format time.
 	// The result formatted is like "2006-01-02 15:04:05.000".
@@ -179,12 +190,7 @@ func (mh *mixHandler) appendTimeAttr(bs []byte, key string, value time.Time) []b
 	return bs
 }
 
-func (mh *mixHandler) appendAnyAttr(bs []byte, key string, value any) []byte {
-	if key != "" {
-		bs = append(bs, key...)
-		bs = append(bs, keyValueSeparator)
-	}
-
+func (mh *mixHandler) appendAny(bs []byte, value any) []byte {
 	if err, ok := value.(error); ok {
 		bs = append(bs, err.Error()...)
 		bs = append(bs, attrSeparator...)
@@ -215,14 +221,26 @@ func (mh *mixHandler) appendAnyAttr(bs []byte, key string, value any) []byte {
 	return bs
 }
 
-func (mh *mixHandler) appendStringAttr(bs []byte, key string, value string) []byte {
-	if key != "" {
-		bs = append(bs, key...)
-		bs = append(bs, keyValueSeparator)
+func (mh *mixHandler) appendAttr(bs []byte, attr slog.Attr) []byte {
+	// Resolve the Attr's value before doing anything else.
+	attr.Value = attr.Value.Resolve()
+
+	if attr.Equal(emptyAttr) {
+		return bs
 	}
 
-	bs = append(bs, value...)
-	bs = append(bs, attrSeparator...)
+	bs = mh.appendKey(bs, attr.Key)
+
+	switch attr.Value.Kind() {
+	case slog.KindGroup:
+		bs = mh.appendGroupAttrs(bs, attr.Key, attr.Value.Group())
+	case slog.KindTime:
+		bs = mh.appendTime(bs, attr.Value.Time())
+	case slog.KindAny:
+		bs = mh.appendAny(bs, attr.Value.Any())
+	default:
+		bs = mh.appendString(bs, attr.Value.String())
+	}
 
 	return bs
 }
@@ -239,28 +257,6 @@ func (mh *mixHandler) appendGroupAttrs(bs []byte, group string, attrs []slog.Att
 	return bs
 }
 
-func (mh *mixHandler) appendAttr(bs []byte, attr slog.Attr) []byte {
-	// Resolve the Attr's value before doing anything else.
-	attr.Value = attr.Value.Resolve()
-
-	if attr.Equal(emptyAttr) {
-		return bs
-	}
-
-	switch attr.Value.Kind() {
-	case slog.KindTime:
-		bs = mh.appendTimeAttr(bs, attr.Key, attr.Value.Time())
-	case slog.KindAny:
-		bs = mh.appendAnyAttr(bs, attr.Key, attr.Value.Any())
-	case slog.KindGroup:
-		bs = mh.appendGroupAttrs(bs, attr.Key, attr.Value.Group())
-	default:
-		bs = mh.appendStringAttr(bs, attr.Key, attr.Value.String())
-	}
-
-	return bs
-}
-
 func (mh *mixHandler) appendSource(bs []byte, pc uintptr) []byte {
 	if !mh.opts.AddSource || pc == 0 {
 		return bs
@@ -271,7 +267,7 @@ func (mh *mixHandler) appendSource(bs []byte, pc uintptr) []byte {
 
 	bs = append(bs, slog.SourceKey...)
 	bs = append(bs, keyValueSeparator)
-	bs = append(bs, frame.File...)
+	bs = appendEscapedString(bs, frame.File)
 	bs = append(bs, sourceSeparator)
 	bs = strconv.AppendInt(bs, int64(frame.Line), 10)
 	bs = append(bs, attrSeparator...)
@@ -291,9 +287,9 @@ func (mh *mixHandler) Handle(ctx context.Context, record slog.Record) error {
 	}()
 
 	// Handling record.
-	buffer = mh.appendTimeAttr(buffer, "", record.Time)
-	buffer = mh.appendStringAttr(buffer, "", record.Level.String())
-	buffer = mh.appendStringAttr(buffer, "", record.Message)
+	buffer = mh.appendTime(buffer, record.Time)
+	buffer = mh.appendString(buffer, record.Level.String())
+	buffer = mh.appendString(buffer, record.Message)
 	buffer = mh.appendSource(buffer, record.PC)
 
 	buffer = append(buffer, mh.attrsBytes...)
