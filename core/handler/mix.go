@@ -65,9 +65,11 @@ type mixHandler struct {
 // This handler is more readable and faster than slog's handlers.
 func NewMixHandler(w io.Writer, opts *slog.HandlerOptions) slog.Handler {
 	if opts == nil {
-		opts = &slog.HandlerOptions{
-			Level: slog.LevelInfo,
-		}
+		opts = new(slog.HandlerOptions)
+	}
+
+	if opts.Level == nil {
+		opts.Level = slog.LevelInfo
 	}
 
 	handler := &mixHandler{
