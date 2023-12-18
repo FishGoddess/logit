@@ -169,10 +169,10 @@ func WithHandler(handler string) Option {
 	}
 }
 
-// WithMixHandler sets mix handler to config.
-func WithMixHandler() Option {
+// WithTapeHandler sets tape handler to config.
+func WithTapeHandler() Option {
 	return func(conf *config) {
-		conf.handler = handler.Mix
+		conf.handler = handler.Tape
 	}
 }
 

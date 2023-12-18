@@ -295,12 +295,12 @@ func TestWithHandler(t *testing.T) {
 	}
 }
 
-// go test -v -cover -count=1 -test.cpu=1 -run=^TestWithMixHandler$
-func TestWithMixHandler(t *testing.T) {
+// go test -v -cover -count=1 -test.cpu=1 -run=^TestWithTapeHandler$
+func TestWithTapeHandler(t *testing.T) {
 	conf := &config{handler: ""}
-	WithMixHandler().applyTo(conf)
+	WithTapeHandler().applyTo(conf)
 
-	if conf.handler != handler.Mix {
+	if conf.handler != handler.Tape {
 		t.Fatal("conf.handler is wrong")
 	}
 }

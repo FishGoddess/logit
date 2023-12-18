@@ -107,7 +107,7 @@ Package logit provides an easy way to use foundation for your logging operations
 
 3. handler:
 
-	// By default, logit uses mix handler to output logs.
+	// By default, logit uses tape handler to output logs.
 	logger := logit.NewLogger()
 	logger.Info("default handler logging")
 
@@ -205,7 +205,7 @@ Package logit provides an easy way to use foundation for your logging operations
 
 	// Change logger handler:
 	logit.WithHandler("xxx")
-	logit.WithMixHandler()
+	logit.WithTapeHandler()
 	logit.WithTextHandler()
 	logit.WithJsonHandler()
 

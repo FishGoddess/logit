@@ -1,11 +1,18 @@
 ## ✒ 历史版本的特性介绍 (Features in old versions)
 
-### v1.5.4-alpha (Coming soon)
+### v1.5.5-alpha (Coming soon)
 
-> 此版本发布于 2023-12-20
+> 此版本发布于 2023-12-25
 
-* 增加一个可读性高的 handler 实现
-* 新的 mix handler 性能提升了 33%，且 print 类函数性能提升了 50%
+* 继续优化代码，包括设计和质量
+* 完善单元测试，提高覆盖率到 70%
+
+### v1.5.4-alpha
+
+> 此版本发布于 2023-12-18
+
+* 增加一个高可读性且高性能的 handler 实现 —— TapeHandler
+* 新的 tape handler 性能提升了 33%，且 print 类函数性能提升了 50%
 
 ### v1.5.3-alpha
 

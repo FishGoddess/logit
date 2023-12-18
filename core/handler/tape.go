@@ -51,7 +51,7 @@ var (
 	emptyAttr = slog.Attr{}
 )
 
-type mixHandler struct {
+type tapeHandler struct {
 	w    io.Writer
 	opts slog.HandlerOptions
 
@@ -62,9 +62,9 @@ type mixHandler struct {
 	lock *sync.Mutex
 }
 
-// NewMixHandler creates a mix handler with w and opts.
+// NewTapeHandler creates a tape handler with w and opts.
 // This handler is more readable and faster than slog's handlers.
-func NewMixHandler(w io.Writer, opts *slog.HandlerOptions) slog.Handler {
+func NewTapeHandler(w io.Writer, opts *slog.HandlerOptions) slog.Handler {
 	if opts == nil {
 		opts = new(slog.HandlerOptions)
 	}
@@ -73,7 +73,7 @@ func NewMixHandler(w io.Writer, opts *slog.HandlerOptions) slog.Handler {
 		opts.Level = slog.LevelInfo
 	}
 
-	handler := &mixHandler{
+	handler := &tapeHandler{
 		w:    w,
 		opts: *opts,
 		lock: &sync.Mutex{},
@@ -83,24 +83,24 @@ func NewMixHandler(w io.Writer, opts *slog.HandlerOptions) slog.Handler {
 }
 
 // WithAttrs returns a new handler with attrs.
-func (mh *mixHandler) WithAttrs(attrs []slog.Attr) slog.Handler {
+func (th *tapeHandler) WithAttrs(attrs []slog.Attr) slog.Handler {
 	if len(attrs) <= 0 {
-		return mh
+		return th
 	}
 
-	handler := *mh
+	handler := *th
 	handler.attrs = append(handler.attrs, attrs...)
 
 	return &handler
 }
 
 // WithGroup returns a new handler with group.
-func (mh *mixHandler) WithGroup(name string) slog.Handler {
+func (th *tapeHandler) WithGroup(name string) slog.Handler {
 	if name == "" {
-		return mh
+		return th
 	}
 
-	handler := *mh
+	handler := *th
 	if handler.group != "" {
 		handler.group = handler.group + groupConnector
 	}
@@ -111,14 +111,14 @@ func (mh *mixHandler) WithGroup(name string) slog.Handler {
 	return &handler
 }
 
-func (mh *mixHandler) copyGroups(group string) []string {
-	cap := cap(mh.groups)
+func (th *tapeHandler) copyGroups(group string) []string {
+	cap := cap(th.groups)
 	if group != "" {
 		cap += 1
 	}
 
 	groups := make([]string, 0, cap)
-	groups = append(groups, mh.groups...)
+	groups = append(groups, th.groups...)
 
 	if group != "" {
 		groups = append(groups, group)
@@ -128,17 +128,17 @@ func (mh *mixHandler) copyGroups(group string) []string {
 }
 
 // Enabled reports whether the logger should ignore logs whose level is lower than passed level.
-func (mh *mixHandler) Enabled(ctx context.Context, level slog.Level) bool {
-	return level >= mh.opts.Level.Level()
+func (th *tapeHandler) Enabled(ctx context.Context, level slog.Level) bool {
+	return level >= th.opts.Level.Level()
 }
 
-func (mh *mixHandler) appendKey(bs []byte, group string, key string) []byte {
+func (th *tapeHandler) appendKey(bs []byte, group string, key string) []byte {
 	if key == "" {
 		return bs
 	}
 
-	if mh.group != "" {
-		bs = appendEscapedString(bs, mh.group)
+	if th.group != "" {
+		bs = appendEscapedString(bs, th.group)
 		bs = append(bs, groupConnector...)
 	}
 
@@ -153,49 +153,49 @@ func (mh *mixHandler) appendKey(bs []byte, group string, key string) []byte {
 	return bs
 }
 
-func (mh *mixHandler) appendBool(bs []byte, value bool) []byte {
+func (th *tapeHandler) appendBool(bs []byte, value bool) []byte {
 	bs = strconv.AppendBool(bs, value)
 	bs = append(bs, attrConnector...)
 
 	return bs
 }
 
-func (mh *mixHandler) appendInt64(bs []byte, value int64) []byte {
+func (th *tapeHandler) appendInt64(bs []byte, value int64) []byte {
 	bs = strconv.AppendInt(bs, value, 10)
 	bs = append(bs, attrConnector...)
 
 	return bs
 }
 
-func (mh *mixHandler) appendUint64(bs []byte, value uint64) []byte {
+func (th *tapeHandler) appendUint64(bs []byte, value uint64) []byte {
 	bs = strconv.AppendUint(bs, value, 10)
 	bs = append(bs, attrConnector...)
 
 	return bs
 }
 
-func (mh *mixHandler) appendFloat64(bs []byte, value float64) []byte {
+func (th *tapeHandler) appendFloat64(bs []byte, value float64) []byte {
 	bs = strconv.AppendFloat(bs, value, 'f', -1, 64)
 	bs = append(bs, attrConnector...)
 
 	return bs
 }
 
-func (mh *mixHandler) appendString(bs []byte, value string) []byte {
+func (th *tapeHandler) appendString(bs []byte, value string) []byte {
 	bs = appendEscapedString(bs, value)
 	bs = append(bs, attrConnector...)
 
 	return bs
 }
 
-func (mh *mixHandler) appendDuration(bs []byte, value time.Duration) []byte {
+func (th *tapeHandler) appendDuration(bs []byte, value time.Duration) []byte {
 	bs = append(bs, value.String()...)
 	bs = append(bs, attrConnector...)
 
 	return bs
 }
 
-func (mh *mixHandler) appendTime(bs []byte, value time.Time) []byte {
+func (th *tapeHandler) appendTime(bs []byte, value time.Time) []byte {
 	// Time format is an usual but expensive operation if using time.AppendFormat,
 	// so we use a stupid but faster way to format time.
 	// The result formatted is like "2006-01-02 15:04:05.000".
@@ -267,7 +267,7 @@ func (mh *mixHandler) appendTime(bs []byte, value time.Time) []byte {
 	return bs
 }
 
-func (mh *mixHandler) appendAny(bs []byte, value any) []byte {
+func (th *tapeHandler) appendAny(bs []byte, value any) []byte {
 	if err, ok := value.(error); ok {
 		bs = append(bs, err.Error()...)
 		bs = append(bs, attrConnector...)
@@ -298,12 +298,12 @@ func (mh *mixHandler) appendAny(bs []byte, value any) []byte {
 	return bs
 }
 
-func (mh *mixHandler) appendAttr(bs []byte, group string, attr slog.Attr) []byte {
+func (th *tapeHandler) appendAttr(bs []byte, group string, attr slog.Attr) []byte {
 	kind := attr.Value.Kind()
-	replaceAttr := mh.opts.ReplaceAttr
+	replaceAttr := th.opts.ReplaceAttr
 
 	if replaceAttr != nil && kind != slog.KindGroup {
-		groups := mh.copyGroups(group)
+		groups := th.copyGroups(group)
 		attr.Value = attr.Value.Resolve()
 		attr = replaceAttr(groups, attr)
 	}
@@ -316,45 +316,45 @@ func (mh *mixHandler) appendAttr(bs []byte, group string, attr slog.Attr) []byte
 	}
 
 	if kind == slog.KindGroup {
-		bs = mh.appendAttrs(bs, attr.Key, attr.Value.Group())
+		bs = th.appendAttrs(bs, attr.Key, attr.Value.Group())
 
 		return bs
 	}
 
-	bs = mh.appendKey(bs, group, attr.Key)
+	bs = th.appendKey(bs, group, attr.Key)
 
 	switch kind {
 	case slog.KindBool:
-		bs = mh.appendBool(bs, attr.Value.Bool())
+		bs = th.appendBool(bs, attr.Value.Bool())
 	case slog.KindInt64:
-		bs = mh.appendInt64(bs, attr.Value.Int64())
+		bs = th.appendInt64(bs, attr.Value.Int64())
 	case slog.KindUint64:
-		bs = mh.appendUint64(bs, attr.Value.Uint64())
+		bs = th.appendUint64(bs, attr.Value.Uint64())
 	case slog.KindFloat64:
-		bs = mh.appendFloat64(bs, attr.Value.Float64())
+		bs = th.appendFloat64(bs, attr.Value.Float64())
 	case slog.KindDuration:
-		bs = mh.appendDuration(bs, attr.Value.Duration())
+		bs = th.appendDuration(bs, attr.Value.Duration())
 	case slog.KindTime:
-		bs = mh.appendTime(bs, attr.Value.Time())
+		bs = th.appendTime(bs, attr.Value.Time())
 	case slog.KindAny:
-		bs = mh.appendAny(bs, attr.Value.Any())
+		bs = th.appendAny(bs, attr.Value.Any())
 	default:
-		bs = mh.appendString(bs, attr.Value.String())
+		bs = th.appendString(bs, attr.Value.String())
 	}
 
 	return bs
 }
 
-func (mh *mixHandler) appendAttrs(bs []byte, group string, attrs []slog.Attr) []byte {
+func (th *tapeHandler) appendAttrs(bs []byte, group string, attrs []slog.Attr) []byte {
 	for _, attr := range attrs {
-		bs = mh.appendAttr(bs, group, attr)
+		bs = th.appendAttr(bs, group, attr)
 	}
 
 	return bs
 }
 
-func (mh *mixHandler) appendSource(bs []byte, pc uintptr) []byte {
-	if !mh.opts.AddSource || pc == 0 {
+func (th *tapeHandler) appendSource(bs []byte, pc uintptr) []byte {
+	if !th.opts.AddSource || pc == 0 {
 		return bs
 	}
 
@@ -372,7 +372,7 @@ func (mh *mixHandler) appendSource(bs []byte, pc uintptr) []byte {
 }
 
 // Handle handles one record and returns an error if failed.
-func (mh *mixHandler) Handle(ctx context.Context, record slog.Record) error {
+func (th *tapeHandler) Handle(ctx context.Context, record slog.Record) error {
 	// Setup a buffer for handling record.
 	buffer := newBuffer()
 	bs := buffer.bs
@@ -383,15 +383,15 @@ func (mh *mixHandler) Handle(ctx context.Context, record slog.Record) error {
 	}()
 
 	// Handling record.
-	bs = mh.appendTime(bs, record.Time)
-	bs = mh.appendString(bs, record.Level.String())
-	bs = mh.appendString(bs, record.Message)
-	bs = mh.appendSource(bs, record.PC)
-	bs = mh.appendAttrs(bs, "", mh.attrs)
+	bs = th.appendTime(bs, record.Time)
+	bs = th.appendString(bs, record.Level.String())
+	bs = th.appendString(bs, record.Message)
+	bs = th.appendSource(bs, record.PC)
+	bs = th.appendAttrs(bs, "", th.attrs)
 
 	if record.NumAttrs() > 0 {
 		record.Attrs(func(attr slog.Attr) bool {
-			bs = mh.appendAttr(bs, "", attr)
+			bs = th.appendAttr(bs, "", attr)
 			return true
 		})
 	}
@@ -400,9 +400,9 @@ func (mh *mixHandler) Handle(ctx context.Context, record slog.Record) error {
 	bs = append(bs, lineBreak)
 
 	// Write handled record.
-	mh.lock.Lock()
-	defer mh.lock.Unlock()
+	th.lock.Lock()
+	defer th.lock.Unlock()
 
-	_, err := mh.w.Write(bs)
+	_, err := th.w.Write(bs)
 	return err
 }

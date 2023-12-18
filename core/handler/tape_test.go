@@ -30,11 +30,11 @@ func (d *demo) String() string {
 	return d.value
 }
 
-// go test -v -cover -count=1 -test.cpu=1 -run=^TestMixHandler$
-func TestMixHandler(t *testing.T) {
+// go test -v -cover -count=1 -test.cpu=1 -run=^TestTapeHandler$
+func TestTapeHandler(t *testing.T) {
 	opts := &slog.HandlerOptions{}
 
-	handler := NewMixHandler(os.Stdout, opts)
+	handler := NewTapeHandler(os.Stdout, opts)
 	//handler := slog.NewTextHandler(os.Stdout, opts)
 
 	logger1 := slog.New(handler).WithGroup("group1").With("id", 123456)

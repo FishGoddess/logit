@@ -22,15 +22,15 @@ import (
 )
 
 const (
-	Mix  = "mix"
+	Tape = "tape"
 	Text = "text"
 	Json = "json"
 )
 
 var (
 	newHandlers = map[string]NewHandlerFunc{
-		Mix: func(w io.Writer, opts *slog.HandlerOptions) slog.Handler {
-			return NewMixHandler(w, opts)
+		Tape: func(w io.Writer, opts *slog.HandlerOptions) slog.Handler {
+			return NewTapeHandler(w, opts)
 		},
 		Text: func(w io.Writer, opts *slog.HandlerOptions) slog.Handler {
 			return slog.NewTextHandler(w, opts)

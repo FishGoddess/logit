@@ -23,7 +23,7 @@ import (
 )
 
 func main() {
-	// By default, logit uses mix handler to output logs.
+	// By default, logit uses tape handler to output logs.
 	logger := logit.NewLogger()
 	logger.Info("default handler logging")
 
