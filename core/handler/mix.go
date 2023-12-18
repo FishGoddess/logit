@@ -201,7 +201,7 @@ func (mh *mixHandler) appendTime(bs []byte, value time.Time) []byte {
 	// The result formatted is like "2006-01-02 15:04:05.000".
 	year, month, day := value.Date()
 	hour, minute, second := value.Clock()
-	millisecond := time.Duration(value.Nanosecond()) / time.Millisecond
+	mircosecond := time.Duration(value.Nanosecond()) / time.Microsecond
 
 	if year < 10 {
 		bs = append(bs, zero, zero, zero)
@@ -249,13 +249,19 @@ func (mh *mixHandler) appendTime(bs []byte, value time.Time) []byte {
 	bs = strconv.AppendInt(bs, int64(second), 10)
 	bs = append(bs, timeMillisConnector)
 
-	if millisecond < 10 {
+	if mircosecond < 10 {
+		bs = append(bs, zero, zero, zero, zero, zero)
+	} else if mircosecond < 100 {
+		bs = append(bs, zero, zero, zero, zero)
+	} else if mircosecond < 1000 {
+		bs = append(bs, zero, zero, zero)
+	} else if mircosecond < 10000 {
 		bs = append(bs, zero, zero)
-	} else if millisecond < 100 {
+	} else if mircosecond < 100000 {
 		bs = append(bs, zero)
 	}
 
-	bs = strconv.AppendInt(bs, int64(millisecond), 10)
+	bs = strconv.AppendInt(bs, int64(mircosecond), 10)
 	bs = append(bs, attrConnector...)
 
 	return bs
