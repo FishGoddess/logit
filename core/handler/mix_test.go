@@ -32,7 +32,12 @@ func (d *demo) String() string {
 
 // go test -v -cover -count=1 -test.cpu=1 -run=^TestMixHandler$
 func TestMixHandler(t *testing.T) {
-	opts := &slog.HandlerOptions{}
+	opts := &slog.HandlerOptions{
+		ReplaceAttr: func(groups []string, a slog.Attr) slog.Attr {
+			t.Log(groups, a)
+			return a
+		},
+	}
 
 	//handler := NewMixHandler(os.Stdout, opts)
 	handler := slog.NewTextHandler(os.Stdout, opts)

@@ -55,8 +55,9 @@ type mixHandler struct {
 	w    io.Writer
 	opts slog.HandlerOptions
 
-	groupBytes []byte
-	attrsBytes []byte
+	group  string
+	groups []string
+	attrs  []slog.Attr
 
 	lock *sync.Mutex
 }
@@ -88,13 +89,7 @@ func (mh *mixHandler) WithAttrs(attrs []slog.Attr) slog.Handler {
 	}
 
 	handler := *mh
-
-	if len(handler.groupBytes) > 0 {
-		group := string(mh.groupBytes)
-		handler.attrsBytes = mh.appendGroupAttrs(handler.attrsBytes, group, attrs)
-	} else {
-		handler.attrsBytes = mh.appendGroupAttrs(handler.attrsBytes, "", attrs)
-	}
+	handler.attrs = append(handler.attrs, attrs...)
 
 	return &handler
 }
@@ -106,15 +101,30 @@ func (mh *mixHandler) WithGroup(name string) slog.Handler {
 	}
 
 	handler := *mh
-
-	if len(handler.groupBytes) > 0 {
-		handler.groupBytes = append(handler.groupBytes, groupConnector...)
-		handler.groupBytes = appendEscapedString(handler.groupBytes, name)
-	} else {
-		handler.groupBytes = appendEscapedString(handler.groupBytes, name)
+	if handler.group != "" {
+		handler.group = handler.group + groupConnector
 	}
 
+	handler.group = handler.group + name
+	handler.groups = append(handler.groups, name)
+
 	return &handler
+}
+
+func (mh *mixHandler) copyGroups(group string) []string {
+	cap := cap(mh.groups)
+	if group != "" {
+		cap += 1
+	}
+
+	groups := make([]string, 0, cap)
+	groups = append(groups, mh.groups...)
+
+	if group != "" {
+		groups = append(groups, group)
+	}
+
+	return groups
 }
 
 // Enabled reports whether the logger should ignore logs whose level is lower than passed level.
@@ -122,9 +132,19 @@ func (mh *mixHandler) Enabled(ctx context.Context, level slog.Level) bool {
 	return level >= mh.opts.Level.Level()
 }
 
-func (mh *mixHandler) appendKey(bs []byte, key string) []byte {
+func (mh *mixHandler) appendKey(bs []byte, group string, key string) []byte {
 	if key == "" {
 		return bs
+	}
+
+	if mh.group != "" {
+		bs = appendEscapedString(bs, mh.group)
+		bs = append(bs, groupConnector...)
+	}
+
+	if group != "" {
+		bs = appendEscapedString(bs, group)
+		bs = append(bs, groupConnector...)
 	}
 
 	bs = appendEscapedString(bs, key)
@@ -272,7 +292,16 @@ func (mh *mixHandler) appendAny(bs []byte, value any) []byte {
 	return bs
 }
 
-func (mh *mixHandler) appendAttr(bs []byte, attr slog.Attr) []byte {
+func (mh *mixHandler) appendAttr(bs []byte, group string, attr slog.Attr) []byte {
+	kind := attr.Value.Kind()
+	replaceAttr := mh.opts.ReplaceAttr
+
+	if replaceAttr != nil && kind != slog.KindGroup {
+		groups := mh.copyGroups(group)
+		attr.Value = attr.Value.Resolve()
+		attr = replaceAttr(groups, attr)
+	}
+
 	// Resolve the Attr's value before doing anything else.
 	attr.Value = attr.Value.Resolve()
 
@@ -280,14 +309,13 @@ func (mh *mixHandler) appendAttr(bs []byte, attr slog.Attr) []byte {
 		return bs
 	}
 
-	kind := attr.Value.Kind()
 	if kind == slog.KindGroup {
-		bs = mh.appendGroupAttrs(bs, attr.Key, attr.Value.Group())
+		bs = mh.appendAttrs(bs, attr.Key, attr.Value.Group())
 
 		return bs
 	}
 
-	bs = mh.appendKey(bs, attr.Key)
+	bs = mh.appendKey(bs, group, attr.Key)
 
 	switch kind {
 	case slog.KindBool:
@@ -311,13 +339,9 @@ func (mh *mixHandler) appendAttr(bs []byte, attr slog.Attr) []byte {
 	return bs
 }
 
-func (mh *mixHandler) appendGroupAttrs(bs []byte, group string, attrs []slog.Attr) []byte {
-	for _, groupAttr := range attrs {
-		if group != "" {
-			groupAttr.Key = group + groupConnector + groupAttr.Key
-		}
-
-		bs = mh.appendAttr(bs, groupAttr)
+func (mh *mixHandler) appendAttrs(bs []byte, group string, attrs []slog.Attr) []byte {
+	for _, attr := range attrs {
+		bs = mh.appendAttr(bs, group, attr)
 	}
 
 	return bs
@@ -357,11 +381,11 @@ func (mh *mixHandler) Handle(ctx context.Context, record slog.Record) error {
 	bs = mh.appendString(bs, record.Level.String())
 	bs = mh.appendString(bs, record.Message)
 	bs = mh.appendSource(bs, record.PC)
+	bs = mh.appendAttrs(bs, "", mh.attrs)
 
-	bs = append(bs, mh.attrsBytes...)
 	if record.NumAttrs() > 0 {
 		record.Attrs(func(attr slog.Attr) bool {
-			bs = mh.appendAttr(bs, attr)
+			bs = mh.appendAttr(bs, "", attr)
 			return true
 		})
 	}
