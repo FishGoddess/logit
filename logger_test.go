@@ -20,6 +20,8 @@ import (
 	"log/slog"
 	"strings"
 	"testing"
+
+	"github.com/FishGoddess/logit/core/handler"
 )
 
 type testLoggerHandler struct {
@@ -31,15 +33,15 @@ type testLoggerHandler struct {
 // go test -v -cover -count=1 -test.cpu=1 -run=^TestNewLogger$
 func TestNewLogger(t *testing.T) {
 	handlerName := t.Name()
-	handler := &testLoggerHandler{}
+	testHandler := &testLoggerHandler{}
 
-	RegisterHandler(handlerName, func(w io.Writer, opts *slog.HandlerOptions) slog.Handler {
-		return handler
+	handler.Register(handlerName, func(w io.Writer, opts *slog.HandlerOptions) slog.Handler {
+		return testHandler
 	})
 
 	logger := NewLogger(WithHandler(handlerName))
-	if logger.handler != handler {
-		t.Fatalf("logger.handler %+v != handler %+v", logger.handler, handler)
+	if logger.handler != testHandler {
+		t.Fatalf("logger.handler %+v != testHandler %+v", logger.handler, testHandler)
 	}
 }
 
@@ -183,17 +185,17 @@ func removeTimeAndSource(str string) string {
 
 // go test -v -cover -count=1 -test.cpu=1 -run=^TestLogger$
 func TestLogger(t *testing.T) {
-	handler := t.Name()
+	handlerName := t.Name()
 
 	newHandler := func(w io.Writer, opts *slog.HandlerOptions) slog.Handler {
 		return slog.NewTextHandler(w, opts)
 	}
 
-	RegisterHandler(handler, newHandler)
+	handler.Register(handlerName, newHandler)
 
 	buffer := bytes.NewBuffer(make([]byte, 0, 1024))
 	logger := NewLogger(
-		WithDebugLevel(), WithHandler(handler), WithWriter(buffer), WithSource(), WithPID(),
+		WithDebugLevel(), WithHandler(handlerName), WithWriter(buffer), WithSource(), WithPID(),
 	)
 
 	logger.Debug("debug msg", "key1", 1)

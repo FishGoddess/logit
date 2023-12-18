@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package logit
+package handler
 
 import (
 	"fmt"
@@ -22,16 +22,20 @@ import (
 )
 
 const (
-	handlerText = "text"
-	handlerJson = "json"
+	Tape = "tape"
+	Text = "text"
+	Json = "json"
 )
 
 var (
-	newHandlers = map[string]HandlerFunc{
-		handlerText: func(w io.Writer, opts *slog.HandlerOptions) slog.Handler {
+	newHandlers = map[string]NewHandlerFunc{
+		Tape: func(w io.Writer, opts *slog.HandlerOptions) slog.Handler {
+			return NewTapeHandler(w, opts)
+		},
+		Text: func(w io.Writer, opts *slog.HandlerOptions) slog.Handler {
 			return slog.NewTextHandler(w, opts)
 		},
-		handlerJson: func(w io.Writer, opts *slog.HandlerOptions) slog.Handler {
+		Json: func(w io.Writer, opts *slog.HandlerOptions) slog.Handler {
 			return slog.NewJSONHandler(w, opts)
 		},
 	}
@@ -41,11 +45,11 @@ var (
 	newHandlersLock sync.RWMutex
 )
 
-// HandlerFunc is a function for creating slog.Handler with w and opts.
-type HandlerFunc func(w io.Writer, opts *slog.HandlerOptions) slog.Handler
+// NewHandlerFunc is a function for creating slog.Handler with w and opts.
+type NewHandlerFunc func(w io.Writer, opts *slog.HandlerOptions) slog.Handler
 
-// getHandlerFunc gets new handler func with name and returns an error if failed.
-func getHandlerFunc(name string) (HandlerFunc, error) {
+// Get gets new handler func with name and returns an error if failed.
+func Get(name string) (NewHandlerFunc, error) {
 	newHandlersLock.RLock()
 	defer newHandlersLock.RUnlock()
 
@@ -53,11 +57,11 @@ func getHandlerFunc(name string) (HandlerFunc, error) {
 		return newHandler, nil
 	}
 
-	return nil, fmt.Errorf("logit: handler %s unknown", name)
+	return nil, fmt.Errorf("logit: handler %s not found", name)
 }
 
-// RegisterHandler registers newHandler with name to logit.
-func RegisterHandler(name string, newHandler HandlerFunc) error {
+// Register registers newHandler with name.
+func Register(name string, newHandler NewHandlerFunc) error {
 	newHandlersLock.Lock()
 	defer newHandlersLock.Unlock()
 

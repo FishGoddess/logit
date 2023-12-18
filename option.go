@@ -21,9 +21,10 @@ import (
 	"path/filepath"
 	"time"
 
+	"github.com/FishGoddess/logit/core/handler"
+	"github.com/FishGoddess/logit/core/rotate"
+	"github.com/FishGoddess/logit/core/writer"
 	"github.com/FishGoddess/logit/defaults"
-	"github.com/FishGoddess/logit/rotate"
-	"github.com/FishGoddess/logit/writer"
 )
 
 // Option sets some fields to config.
@@ -168,17 +169,24 @@ func WithHandler(handler string) Option {
 	}
 }
 
+// WithTapeHandler sets tape handler to config.
+func WithTapeHandler() Option {
+	return func(conf *config) {
+		conf.handler = handler.Tape
+	}
+}
+
 // WithTextHandler sets text handler to config.
 func WithTextHandler() Option {
 	return func(conf *config) {
-		conf.handler = handlerText
+		conf.handler = handler.Text
 	}
 }
 
 // WithJsonHandler sets json handler to config.
 func WithJsonHandler() Option {
 	return func(conf *config) {
-		conf.handler = handlerJson
+		conf.handler = handler.Json
 	}
 }
 
@@ -215,11 +223,9 @@ func WithSyncTimer(d time.Duration) Option {
 
 // ProductionOptions returns some options that we think they are useful in production.
 // We recommend you to use them, so we provide this convenient way to create such a logger.
-// The logger using these options will use rotate file and batch writer.
 func ProductionOptions() []Option {
 	opts := []Option{
 		WithInfoLevel(), WithPID(), WithRotateFile("./logit.log"),
-		WithBatch(16), WithSyncTimer(time.Second),
 	}
 
 	return opts

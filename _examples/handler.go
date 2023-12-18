@@ -19,24 +19,25 @@ import (
 	"log/slog"
 
 	"github.com/FishGoddess/logit"
+	"github.com/FishGoddess/logit/core/handler"
 )
 
 func main() {
-	// By default, logit uses text handler to output logs.
+	// By default, logit uses tape handler to output logs.
 	logger := logit.NewLogger()
-	logger.Info("default handler is text")
+	logger.Info("default handler logging")
 
 	// You can change it to other handlers by options.
 	// For example, use json handler:
 	logger = logit.NewLogger(logit.WithJsonHandler())
 	logger.Info("using json handler")
 
-	// Or you want to use customized handlers, try RegisterHandler.
+	// Or you want to use customized handlers, try Register.
 	newHandler := func(w io.Writer, opts *slog.HandlerOptions) slog.Handler {
 		return slog.NewTextHandler(w, opts)
 	}
 
-	if err := logit.RegisterHandler("demo", newHandler); err != nil {
+	if err := handler.Register("demo", newHandler); err != nil {
 		panic(err)
 	}
 

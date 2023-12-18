@@ -107,21 +107,21 @@ Package logit provides an easy way to use foundation for your logging operations
 
 3. handler:
 
-	// By default, logit uses text handler to output logs.
+	// By default, logit uses tape handler to output logs.
 	logger := logit.NewLogger()
-	logger.Info("default handler is text")
+	logger.Info("default handler logging")
 
 	// You can change it to other handlers by options.
 	// For example, use json handler:
 	logger = logit.NewLogger(logit.WithJsonHandler())
 	logger.Info("using json handler")
 
-	// Or you want to use customized handlers, try RegisterHandler.
+	// Or you want to use customized handlers, try Register.
 	newHandler := func(w io.Writer, opts *slog.HandlerOptions) slog.Handler {
 		return slog.NewTextHandler(w, opts)
 	}
 
-	if err := logit.RegisterHandler("demo", newHandler); err != nil {
+	if err := handler.Register("demo", newHandler); err != nil {
 		panic(err)
 	}
 
@@ -205,6 +205,7 @@ Package logit provides an easy way to use foundation for your logging operations
 
 	// Change logger handler:
 	logit.WithHandler("xxx")
+	logit.WithTapeHandler()
 	logit.WithTextHandler()
 	logit.WithJsonHandler()
 
@@ -221,7 +222,6 @@ Package logit provides an easy way to use foundation for your logging operations
 
 	// More options can be found in logit package which have prefix "With".
 	// What's more? We provide a options pack that we think it's useful in production.
-	// It outputs logs to a rotate file using batch write, so you should call Sync() or Close() when shutdown.
 	opts := logit.ProductionOptions()
 
 	logger = logit.NewLogger(opts...)
@@ -277,5 +277,5 @@ package logit // import "github.com/FishGoddess/logit"
 
 const (
 	// Version is the version string representation of logit.
-	Version = "v1.5.3-alpha"
+	Version = "v1.5.4-alpha"
 )

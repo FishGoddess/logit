@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package logit
+package handler
 
 import (
 	"fmt"
@@ -30,7 +30,7 @@ func TestGetHandlerFunc(t *testing.T) {
 	handler := t.Name()
 	newHandlers[handler] = newHandler
 
-	got, err := getHandlerFunc(handler)
+	got, err := Get(handler)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -40,10 +40,10 @@ func TestGetHandlerFunc(t *testing.T) {
 	}
 }
 
-// go test -v -cover -count=1 -test.cpu=1 -run=^TestRegisterHandler$
-func TestRegisterHandler(t *testing.T) {
+// go test -v -cover -count=1 -test.cpu=1 -run=^TestRegister$
+func TestRegister(t *testing.T) {
 	for name := range newHandlers {
-		if err := RegisterHandler(name, nil); err == nil {
+		if err := Register(name, nil); err == nil {
 			t.Fatal("register an existed handler func should be failed")
 		}
 	}
@@ -51,7 +51,7 @@ func TestRegisterHandler(t *testing.T) {
 	handler := t.Name()
 	newHandler := func(w io.Writer, opts *slog.HandlerOptions) slog.Handler { return nil }
 
-	if err := RegisterHandler(handler, newHandler); err != nil {
+	if err := Register(handler, newHandler); err != nil {
 		t.Fatal(err)
 	}
 

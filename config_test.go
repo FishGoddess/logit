@@ -20,6 +20,8 @@ import (
 	"log/slog"
 	"os"
 	"testing"
+
+	"github.com/FishGoddess/logit/core/handler"
 )
 
 type testConfigHandler struct {
@@ -58,7 +60,7 @@ func TestConfigNewHandlerOptions(t *testing.T) {
 func TestConfigNewHandler(t *testing.T) {
 	handlerName := t.Name()
 
-	RegisterHandler(handlerName, func(w io.Writer, opts *slog.HandlerOptions) slog.Handler {
+	handler.Register(handlerName, func(w io.Writer, opts *slog.HandlerOptions) slog.Handler {
 		return &testConfigHandler{
 			w:    w,
 			opts: *opts,

@@ -19,6 +19,8 @@ import (
 	"log/slog"
 	"os"
 	"time"
+
+	"github.com/FishGoddess/logit/core/handler"
 )
 
 type nilSyncer struct{}
@@ -55,7 +57,7 @@ func newDefaultConfig() *config {
 
 	conf := &config{
 		level:       slog.LevelDebug,
-		handler:     handlerText,
+		handler:     handler.Tape,
 		newWriter:   newWriter,
 		wrapWriter:  nil,
 		replaceAttr: nil,
@@ -102,7 +104,7 @@ func (c *config) newHandlerOptions() *slog.HandlerOptions {
 }
 
 func (c *config) newHandler() (slog.Handler, Syncer, io.Closer, error) {
-	newHandler, err := getHandlerFunc(c.handler)
+	newHandler, err := handler.Get(c.handler)
 	if err != nil {
 		return nil, nil, nil, err
 	}
