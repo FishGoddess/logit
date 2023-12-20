@@ -19,7 +19,7 @@ import (
 	"log/slog"
 
 	"github.com/FishGoddess/logit"
-	"github.com/FishGoddess/logit/core/handler"
+	"github.com/FishGoddess/logit/handler"
 )
 
 func main() {

@@ -35,9 +35,6 @@ var (
 	pid = os.Getpid()
 )
 
-// AttrResolver resolves attrs from context.
-type AttrResolver = func(ctx context.Context) (attrs []slog.Attr)
-
 // Syncer is an interface that syncs data to somewhere.
 type Syncer interface {
 	Sync() error

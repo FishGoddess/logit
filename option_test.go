@@ -23,9 +23,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/FishGoddess/logit/core/handler"
-	"github.com/FishGoddess/logit/core/rotate"
-	"github.com/FishGoddess/logit/core/writer"
+	"github.com/FishGoddess/logit/handler"
+	"github.com/FishGoddess/logit/rotate"
+	"github.com/FishGoddess/logit/writer"
 )
 
 // go test -v -cover -count=1 -test.cpu=1 -run=^TestWithDebugLevel$

@@ -19,7 +19,7 @@ import (
 	"strings"
 
 	"github.com/FishGoddess/logit"
-	"github.com/FishGoddess/logit/core/rotate"
+	"github.com/FishGoddess/logit/rotate"
 )
 
 type WriterConfig struct {
@@ -222,6 +222,16 @@ func (c *Config) appendHandlerOptions(opts []logit.Option) ([]logit.Option, erro
 	return opts, nil
 }
 
+func (c *Config) appendWriterOptions(opts []logit.Option) ([]logit.Option, error) {
+	writerOpts, err := c.Writer.Options()
+	if err != nil {
+		return nil, err
+	}
+
+	opts = append(opts, writerOpts...)
+	return opts, nil
+}
+
 func (c *Config) appendFlagOptions(opts []logit.Option) ([]logit.Option, error) {
 	if c.WithSource {
 		opts = append(opts, logit.WithSource())
@@ -254,7 +264,7 @@ func (c *Config) Options() (opts []logit.Option, err error) {
 	opts = make([]logit.Option, 0, 4)
 
 	appendFuncs := []func(opts []logit.Option) ([]logit.Option, error){
-		c.appendLevelOptions, c.appendHandlerOptions, c.appendFlagOptions, c.appendSyncOptions,
+		c.appendLevelOptions, c.appendHandlerOptions, c.appendWriterOptions, c.appendFlagOptions, c.appendSyncOptions,
 	}
 
 	for _, append := range appendFuncs {
