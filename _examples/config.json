@@ -1,0 +1,16 @@
+{
+    "level": "debug",
+    "handler": "tape",
+    "writer": {
+        "target": "logit.log",
+        "file_rotate": true,
+        "file_max_size": "1GB",
+        "file_max_age": "7d",
+        "file_max_backups": 30,
+        "buffer_size": "64KB",
+        "batch_size": 16
+    },
+    "with_source": false,
+    "with_pid": true,
+    "sync_timer": "1s"
+}
