@@ -108,7 +108,6 @@ _More examples can be found in [_examples](./_examples)._
 
 ```bash
 $ make bench
-$ make benchfile
 ```
 
 ```bash

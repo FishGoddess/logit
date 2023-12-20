@@ -105,7 +105,6 @@ _更多使用案例请查看 [_examples](./_examples) 目录。_
 
 ```bash
 $ make bench
-$ make benchfile
 ```
 
 ```bash

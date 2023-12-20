@@ -20,7 +20,7 @@ import (
 	"os"
 	"time"
 
-	"github.com/FishGoddess/logit/core/handler"
+	"github.com/FishGoddess/logit/handler"
 )
 
 type nilSyncer struct{}

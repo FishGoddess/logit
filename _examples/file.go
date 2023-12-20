@@ -16,7 +16,7 @@ package main
 
 import (
 	"github.com/FishGoddess/logit"
-	"github.com/FishGoddess/logit/core/rotate"
+	"github.com/FishGoddess/logit/rotate"
 )
 
 func main() {

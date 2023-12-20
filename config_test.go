@@ -21,7 +21,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/FishGoddess/logit/core/handler"
+	"github.com/FishGoddess/logit/handler"
 )
 
 type testConfigHandler struct {

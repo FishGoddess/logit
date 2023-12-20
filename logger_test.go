@@ -21,7 +21,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/FishGoddess/logit/core/handler"
+	"github.com/FishGoddess/logit/handler"
 )
 
 type testLoggerHandler struct {
