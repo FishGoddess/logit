@@ -88,3 +88,48 @@ func TestDefaultLogger(t *testing.T) {
 		t.Fatalf("got %s != want %s", got, want)
 	}
 }
+
+// go test -v -cover -count=1 -test.cpu=1 -run=^TestDefaultLoggerSync$
+func TestDefaultLoggerSync(t *testing.T) {
+	syncer := &testSyncer{
+		synced: false,
+	}
+
+	logger := &Logger{
+		syncer: syncer,
+	}
+
+	SetDefault(logger)
+	Sync()
+
+	if !syncer.synced {
+		t.Fatal("syncer.synced is wrong")
+	}
+}
+
+// go test -v -cover -count=1 -test.cpu=1 -run=^TestDefaultLoggerClose$
+func TestDefaultLoggerClose(t *testing.T) {
+	syncer := &testSyncer{
+		synced: false,
+	}
+
+	closer := &testCloser{
+		closed: false,
+	}
+
+	logger := &Logger{
+		syncer: syncer,
+		closer: closer,
+	}
+
+	SetDefault(logger)
+	Close()
+
+	if !syncer.synced {
+		t.Fatal("syncer.synced is wrong")
+	}
+
+	if !closer.closed {
+		t.Fatal("closer.closed is wrong")
+	}
+}

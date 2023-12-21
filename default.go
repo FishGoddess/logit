@@ -78,3 +78,13 @@ func Println(args ...interface{}) {
 	msg := fmt.Sprintln(args...)
 	Default().log(defaults.LevelPrint, msg)
 }
+
+// Sync syncs the default logger and returns an error if failed.
+func Sync() error {
+	return Default().Sync()
+}
+
+// Close closes the default logger and returns an error if failed.
+func Close() error {
+	return Default().Close()
+}

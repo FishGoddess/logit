@@ -1,5 +1,11 @@
 ## ✒ 历史版本的特性介绍 (Features in old versions)
 
+### v1.5.7-alpha
+
+> 此版本发布于 2023-12-22
+
+* 增加包级别的 Sync 和 Close 函数
+
 ### v1.5.6-alpha
 
 > 此版本发布于 2023-12-21

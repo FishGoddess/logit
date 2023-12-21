@@ -30,6 +30,24 @@ type testLoggerHandler struct {
 	opts slog.HandlerOptions
 }
 
+type testSyncer struct {
+	synced bool
+}
+
+func (ts *testSyncer) Sync() error {
+	ts.synced = true
+	return nil
+}
+
+type testCloser struct {
+	closed bool
+}
+
+func (tc *testCloser) Close() error {
+	tc.closed = true
+	return nil
+}
+
 // go test -v -cover -count=1 -test.cpu=1 -run=^TestNewLogger$
 func TestNewLogger(t *testing.T) {
 	handlerName := t.Name()
@@ -217,5 +235,48 @@ func TestLogger(t *testing.T) {
 
 	if got != want {
 		t.Fatalf("got %s != want %s", got, want)
+	}
+}
+
+// go test -v -cover -count=1 -test.cpu=1 -run=^TestLoggerSync$
+func TestLoggerSync(t *testing.T) {
+	syncer := &testSyncer{
+		synced: false,
+	}
+
+	logger := &Logger{
+		syncer: syncer,
+	}
+
+	logger.Sync()
+
+	if !syncer.synced {
+		t.Fatal("syncer.synced is wrong")
+	}
+}
+
+// go test -v -cover -count=1 -test.cpu=1 -run=^TestLoggerClose$
+func TestLoggerClose(t *testing.T) {
+	syncer := &testSyncer{
+		synced: false,
+	}
+
+	closer := &testCloser{
+		closed: false,
+	}
+
+	logger := &Logger{
+		syncer: syncer,
+		closer: closer,
+	}
+
+	logger.Close()
+
+	if !syncer.synced {
+		t.Fatal("syncer.synced is wrong")
+	}
+
+	if !closer.closed {
+		t.Fatal("closer.closed is wrong")
 	}
 }
