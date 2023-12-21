@@ -15,7 +15,11 @@
 package logit
 
 import (
+	"fmt"
+	"log/slog"
 	"sync/atomic"
+
+	"github.com/FishGoddess/logit/defaults"
 )
 
 var defaultLogger atomic.Value
@@ -32,4 +36,45 @@ func SetDefault(logger *Logger) {
 // Default returns the default logger.
 func Default() *Logger {
 	return defaultLogger.Load().(*Logger)
+}
+
+// Debug logs a log with msg and args in debug level.
+func Debug(msg string, args ...any) {
+	Default().log(slog.LevelDebug, msg, args...)
+}
+
+// Info logs a log with msg and args in info level.
+func Info(msg string, args ...any) {
+	Default().log(slog.LevelInfo, msg, args...)
+}
+
+// Warn logs a log with msg and args in warn level.
+func Warn(msg string, args ...any) {
+	Default().log(slog.LevelWarn, msg, args...)
+}
+
+// Error logs a log with msg and args in error level.
+func Error(msg string, args ...any) {
+	Default().log(slog.LevelError, msg, args...)
+}
+
+// Printf logs a log with format and args in print level.
+// It a old-school way to log.
+func Printf(format string, args ...interface{}) {
+	msg := fmt.Sprintf(format, args...)
+	Default().log(defaults.LevelPrint, msg)
+}
+
+// Print logs a log with args in print level.
+// It a old-school way to log.
+func Print(args ...interface{}) {
+	msg := fmt.Sprint(args...)
+	Default().log(defaults.LevelPrint, msg)
+}
+
+// Println logs a log with args in print level.
+// It a old-school way to log.
+func Println(args ...interface{}) {
+	msg := fmt.Sprintln(args...)
+	Default().log(defaults.LevelPrint, msg)
 }

@@ -19,6 +19,8 @@ Package logit provides an easy way to use foundation for your logging operations
 
 	// Use default logger to log.
 	// By default, logs will be output to stdout.
+	// logit.Default() returns the default logger, but we also provide some common logging functions.
+	logit.Info("hello from logit", "key", 123)
 	logit.Default().Info("hello from logit", "key", 123)
 
 	// Use a new logger to log.
@@ -45,9 +47,9 @@ Package logit provides an easy way to use foundation for your logging operations
 	logger.Info("check where I'm logged", "file", "logit.log")
 
 	// What if I want to use default logger and output logs to a file? Try SetDefault.
-	// It sets a logger to default and you can use it by package function or Default().
+	// It sets a logger to default and you can use it by package functions or Default().
 	logit.SetDefault(logger)
-	logit.Default().Warn("this is from default logger", "pi", 3.14, "default", true)
+	logit.Warn("this is from default logger", "pi", 3.14, "default", true)
 
 	// If you want to change level of logger to info, try WithInfoLevel.
 	// Other levels is similar to info level.
@@ -261,12 +263,12 @@ Package logit provides an easy way to use foundation for your logging operations
 		return time.Unix(666, 0).In(time.Local)
 	}
 
-	logit.Default().Print("println log is info level")
+	logit.Print("println log is info level")
 
 	// If you want change the level of old-school logging methods:
 	defaults.LevelPrint = slog.LevelDebug
 
-	logit.Default().Print("println log is debug level now")
+	logit.Print("println log is debug level now")
 
 	// More fields see defaults package.
 	defaults.HandleError = func(label string, err error) {
@@ -315,5 +317,5 @@ package logit // import "github.com/FishGoddess/logit"
 
 const (
 	// Version is the version string representation of logit.
-	Version = "v1.5.5-alpha"
+	Version = "v1.5.6-alpha"
 )

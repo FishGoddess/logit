@@ -24,6 +24,8 @@ import (
 func main() {
 	// Use default logger to log.
 	// By default, logs will be output to stdout.
+	// logit.Default() returns the default logger, but we also provide some common logging functions.
+	logit.Info("hello from logit", "key", 123)
 	logit.Default().Info("hello from logit", "key", 123)
 
 	// Use a new logger to log.
@@ -50,9 +52,9 @@ func main() {
 	logger.Info("check where I'm logged", "file", "logit.log")
 
 	// What if I want to use default logger and output logs to a file? Try SetDefault.
-	// It sets a logger to default and you can use it by package function or Default().
+	// It sets a logger to default and you can use it by package functions or Default().
 	logit.SetDefault(logger)
-	logit.Default().Warn("this is from default logger", "pi", 3.14, "default", true)
+	logit.Warn("this is from default logger", "pi", 3.14, "default", true)
 
 	// If you want to change level of logger to info, try WithInfoLevel.
 	// Other levels is similar to info level.
