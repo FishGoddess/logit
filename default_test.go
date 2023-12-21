@@ -15,7 +15,12 @@
 package logit
 
 import (
+	"bytes"
+	"io"
+	"log/slog"
 	"testing"
+
+	"github.com/FishGoddess/logit/handler"
 )
 
 // go test -v -cover -count=1 -test.cpu=1 -run=^TestSetDefault$
@@ -43,5 +48,43 @@ func TestDefault(t *testing.T) {
 	gotLogger := Default()
 	if gotLogger != logger {
 		t.Fatalf("gotLogger %+v != logger %+v", gotLogger, logger)
+	}
+}
+
+// go test -v -cover -count=1 -test.cpu=1 -run=^TestDefaultLogger$
+func TestDefaultLogger(t *testing.T) {
+	handlerName := t.Name()
+
+	newHandler := func(w io.Writer, opts *slog.HandlerOptions) slog.Handler {
+		return slog.NewTextHandler(w, opts)
+	}
+
+	handler.Register(handlerName, newHandler)
+
+	buffer := bytes.NewBuffer(make([]byte, 0, 1024))
+	logger := NewLogger(
+		WithDebugLevel(), WithHandler(handlerName), WithWriter(buffer), WithSource(), WithPID(),
+	)
+
+	SetDefault(logger)
+	Debug("debug msg", "key1", 1)
+	Info("info msg", "key2", 2)
+	Warn("warn msg", "key3", 3)
+	Error("error msg", "key4", 4)
+
+	opts := &slog.HandlerOptions{AddSource: true, Level: slog.LevelDebug}
+	wantBuffer := bytes.NewBuffer(make([]byte, 0, 1024))
+	slogLogger := slog.New(newHandler(wantBuffer, opts)).With(keyPID, pid)
+
+	slogLogger.Debug("debug msg", "key1", 1)
+	slogLogger.Info("info msg", "key2", 2)
+	slogLogger.Warn("warn msg", "key3", 3)
+	slogLogger.Error("error msg", "key4", 4)
+
+	got := removeTimeAndSource(buffer.String())
+	want := removeTimeAndSource(wantBuffer.String())
+
+	if got != want {
+		t.Fatalf("got %s != want %s", got, want)
 	}
 }
