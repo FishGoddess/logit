@@ -50,6 +50,7 @@ type Logger struct {
 	closer io.Closer
 
 	withSource bool
+	withPID    bool
 }
 
 // NewLogger creates a logger with given options or panics if failed.
@@ -82,10 +83,7 @@ func NewLoggerGracefully(opts ...Option) (*Logger, error) {
 		syncer:     syncer,
 		closer:     closer,
 		withSource: conf.withSource,
-	}
-
-	if conf.withPID {
-		logger = logger.With(keyPID, pid)
+		withPID:    conf.withPID,
 	}
 
 	if conf.syncTimer > 0 {
@@ -214,6 +212,10 @@ func (l *Logger) newRecord(level slog.Level, msg string, args []any) slog.Record
 
 	now := defaults.CurrentTime()
 	record := slog.NewRecord(now, level, msg, pc)
+
+	if l.withPID {
+		record.AddAttrs(slog.Int(keyPID, pid))
+	}
 
 	var attr slog.Attr
 	for len(args) > 0 {

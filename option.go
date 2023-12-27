@@ -225,7 +225,7 @@ func WithSyncTimer(d time.Duration) Option {
 // We recommend you to use them, so we provide this convenient way to create such a logger.
 func ProductionOptions() []Option {
 	opts := []Option{
-		WithInfoLevel(), WithPID(), WithRotateFile("./logit.log"),
+		WithInfoLevel(), WithRotateFile("./logit.log"),
 	}
 
 	return opts
