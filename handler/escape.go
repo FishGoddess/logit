@@ -20,17 +20,15 @@ import (
 )
 
 // needEscapedByte returns if value need to escape.
-// The main character should be escaped is ascii less than \u0020 and \ and ".
+// The main character should be escaped is ascii less than \u0020.
 func needEscapedByte(value byte) bool {
-	return value < 32 || value == '"' || value == '\\'
+	return value < 32
 }
 
 // appendEscapedByte appends escaped value to dst.
-// The main character should be escaped is ascii less than \u0020 and \ and ".
+// The main character should be escaped is ascii less than \u0020.
 func appendEscapedByte(dst []byte, value byte) []byte {
 	switch value {
-	case '"', '\\':
-		return append(dst, '\\', value)
 	case '\b':
 		return append(dst, '\\', 'b')
 	case '\f':
@@ -57,7 +55,7 @@ func appendEscapedByte(dst []byte, value byte) []byte {
 }
 
 // appendEscapedString appends escaped value to dst.
-// The main character should be escaped is ascii less than \u0020 and \ and ".
+// The main character should be escaped is ascii less than \u0020.
 func appendEscapedString(dst []byte, value string) []byte {
 	start := 0
 	escaped := false
