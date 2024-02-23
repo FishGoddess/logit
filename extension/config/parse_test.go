@@ -80,7 +80,9 @@ func TestParseTimeDuration(t *testing.T) {
 		{name: "12s", s: "12s", want: 12 * time.Second, wantErr: false},
 		{name: "3m", s: "3m", want: 3 * time.Minute, wantErr: false},
 		{name: "24h", s: "24h", want: 24 * time.Hour, wantErr: false},
+		{name: "24h50m12s", s: "24h50m12s", want: 24*time.Hour + 50*time.Minute + 12*time.Second, wantErr: false},
 		{name: "7d", s: "7d", want: 7 * 24 * time.Hour, wantErr: false},
+		{name: "90D", s: "90D", want: 90 * 24 * time.Hour, wantErr: false},
 		{name: "''", s: "", want: 0, wantErr: true},
 		{name: "14", s: "14", want: 0, wantErr: true},
 	}

@@ -1,4 +1,4 @@
-.PHONY: test bench benchfile fmt
+.PHONY: test bench fmt
 
 all: test bench
 
