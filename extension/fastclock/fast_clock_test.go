@@ -41,12 +41,40 @@ func BenchmarkFastClockNow(b *testing.B) {
 	}
 }
 
+// go test -v -run=^$ -bench=^BenchmarkFastClockNowNanos$ -benchtime=1s
+func BenchmarkFastClockNowNanos(b *testing.B) {
+	b.ReportAllocs()
+	b.ResetTimer()
+
+	for i := 0; i < b.N; i++ {
+		NowNanos()
+	}
+}
+
 // go test -v -cover -count=1 -test.cpu=1 -run=^TestNow$
 func TestNow(t *testing.T) {
 	duration := 100 * time.Millisecond
 
 	for i := 0; i < 100; i++ {
 		got := Now()
+		gap := time.Since(got)
+		t.Logf("got: %v, gap: %v", got, gap)
+
+		if math.Abs(float64(gap.Nanoseconds())) > float64(duration)*1.1 {
+			t.Errorf("now %v is wrong", got)
+		}
+
+		time.Sleep(time.Duration(rand.Int63n(int64(duration))))
+	}
+}
+
+// go test -v -cover -count=1 -test.cpu=1 -run=^TestNowNanos$
+func TestNowNanos(t *testing.T) {
+	duration := 100 * time.Millisecond
+
+	for i := 0; i < 100; i++ {
+		gotNanos := NowNanos()
+		got := time.Unix(0, gotNanos)
 		gap := time.Since(got)
 		t.Logf("got: %v, gap: %v", got, gap)
 

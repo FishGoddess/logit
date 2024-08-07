@@ -28,15 +28,16 @@ import (
 // In my linux server with 2 cores:
 // BenchmarkTimeNow-2               19150246                62.26 ns/op           0 B/op          0 allocs/op
 // BenchmarkFastClockNow-2         357209233                 3.46 ns/op           0 B/op          0 allocs/op
+// BenchmarkFastClockNowNanos-2    467461363                 2.55 ns/op           0 B/op          0 allocs/op
 //
 // However, the performance of time.Now is faster enough for 99.9% situations, so we hope you never use it :)
 type fastClock struct {
-	nowNanos int64
+	nanos int64
 }
 
 func newClock() *fastClock {
 	clock := &fastClock{
-		nowNanos: time.Now().UnixNano(),
+		nanos: time.Now().UnixNano(),
 	}
 
 	go clock.start()
@@ -49,17 +50,16 @@ func (fc *fastClock) start() {
 	for {
 		for i := 0; i < 9; i++ {
 			time.Sleep(duration)
-			atomic.AddInt64(&fc.nowNanos, int64(duration))
+			atomic.AddInt64(&fc.nanos, int64(duration))
 		}
 
 		time.Sleep(duration)
-		atomic.StoreInt64(&fc.nowNanos, time.Now().UnixNano())
+		atomic.StoreInt64(&fc.nanos, time.Now().UnixNano())
 	}
 }
 
-func (fc *fastClock) now() time.Time {
-	nanos := atomic.LoadInt64(&fc.nowNanos)
-	return time.Unix(0, nanos)
+func (fc *fastClock) Nanos() int64 {
+	return atomic.LoadInt64(&fc.nanos)
 }
 
 var (
@@ -73,5 +73,15 @@ func Now() time.Time {
 		clock = newClock()
 	})
 
-	return clock.now()
+	nanos := NowNanos()
+	return time.Unix(0, nanos)
+}
+
+// NowNanos returns the current time in nanos from fast clock.
+func NowNanos() int64 {
+	clockOnce.Do(func() {
+		clock = newClock()
+	})
+
+	return clock.Nanos()
 }
