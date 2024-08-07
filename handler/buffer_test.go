@@ -1,4 +1,4 @@
-// Copyright 2023 FishGoddess. All Rights Reserved.
+// Copyright 2024 FishGoddess. All Rights Reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -20,7 +20,7 @@ import (
 	"github.com/FishGoddess/logit/defaults"
 )
 
-// go test -v -cover -count=1 -test.cpu=1 -run=^TestNewBuffer$
+// go test -v -cover -count=1 -test.cpu=1 -run=^TestBufferPool$
 func TestBufferPool(t *testing.T) {
 	for i := 0; i < 100; i++ {
 		bs := make([]byte, 0, 2*defaults.MaxBufferSize)

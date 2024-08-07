@@ -1,4 +1,4 @@
-// Copyright 2023 FishGoddess. All Rights Reserved.
+// Copyright 2024 FishGoddess. All Rights Reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -18,8 +18,8 @@ import "testing"
 
 // go test -v -cover -count=1 -test.cpu=1 -run=^TestAppendEscapedByte$
 func TestAppendEscapedByte(t *testing.T) {
-	testcases := []byte{'a', '0', '\n', '\t', '\\', '\b', '\f', '\r', '"'}
-	want := `a0\n\t\\b\f\r"`
+	testcases := []byte{'a', '0', '\n', '\t', '\\', '\b', '\f', '\r', '"', 15, 31}
+	want := `a0\n\t\\b\f\r"\u000f\u001f`
 
 	buffer := make([]byte, 0, 16)
 	for _, b := range testcases {
@@ -33,8 +33,8 @@ func TestAppendEscapedByte(t *testing.T) {
 
 // go test -v -cover -count=1 -test.cpu=1 -run=^TestAppendEscapedString$
 func TestAppendEscapedString(t *testing.T) {
-	testcases := []string{"a0国\n\t\\b\f\r\""}
-	want := `a0国\n\t\b\f\r"`
+	testcases := []string{"a0国\n\t\\\b\f\r\"\\b" + string([]byte{15}) + string([]byte{31})}
+	want := `a0国\n\t\\b\f\r"\b\u000f\u001f`
 
 	buffer := make([]byte, 0, 16)
 	for _, str := range testcases {
