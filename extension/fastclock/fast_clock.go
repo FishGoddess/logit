@@ -1,4 +1,4 @@
-// Copyright 2024 FishGoddess. All Rights Reserved.
+// Copyright 2025 FishGoddess. All Rights Reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -69,10 +69,6 @@ var (
 
 // Now returns the current time from fast clock.
 func Now() time.Time {
-	clockOnce.Do(func() {
-		clock = newClock()
-	})
-
 	nanos := NowNanos()
 	return time.Unix(0, nanos)
 }
