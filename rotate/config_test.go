@@ -20,16 +20,17 @@ import (
 
 // go test -v -cover -count=1 -test.cpu=1 -run=^TestNewDefaultConfig$
 func TestNewDefaultConfig(t *testing.T) {
-	c := newDefaultConfig()
+	conf := newDefaultConfig("xxx")
 
-	want := config{
+	want := &config{
+		path:       "xxx",
 		timeFormat: "20060102150405",
 		maxSize:    128 * MB,
 		maxAge:     60 * Day,
 		maxBackups: 90,
 	}
 
-	if c != want {
-		t.Fatalf("c %+v != want %+v", c, want)
+	if *conf != *want {
+		t.Fatalf("conf %+v != want %+v", conf, want)
 	}
 }

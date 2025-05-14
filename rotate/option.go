@@ -18,30 +18,29 @@ import (
 	"time"
 )
 
-// Option sets some fields to config.
-type Option func(c *config)
+type Option func(conf *config)
 
-func (o Option) apply(c *config) {
-	o(c)
+func (o Option) applyTo(conf *config) {
+	o(conf)
 }
 
 // WithMaxSize sets max size to config.
 func WithMaxSize(size uint64) Option {
-	return func(c *config) {
-		c.maxSize = size
+	return func(conf *config) {
+		conf.maxSize = size
 	}
 }
 
 // WithMaxAge sets max age to config.
 func WithMaxAge(age time.Duration) Option {
-	return func(c *config) {
-		c.maxAge = age
+	return func(conf *config) {
+		conf.maxAge = age
 	}
 }
 
 // WithMaxBackups sets max backups to config.
 func WithMaxBackups(backups uint32) Option {
-	return func(c *config) {
-		c.maxBackups = backups
+	return func(conf *config) {
+		conf.maxBackups = backups
 	}
 }

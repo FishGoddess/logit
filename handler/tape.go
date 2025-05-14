@@ -90,7 +90,6 @@ func (th *tapeHandler) WithAttrs(attrs []slog.Attr) slog.Handler {
 
 	handler := *th
 	handler.attrs = append(handler.attrs, attrs...)
-
 	return &handler
 }
 
@@ -107,7 +106,6 @@ func (th *tapeHandler) WithGroup(name string) slog.Handler {
 
 	handler.group = handler.group + name
 	handler.groups = append(handler.groups, name)
-
 	return &handler
 }
 
@@ -149,49 +147,42 @@ func (th *tapeHandler) appendKey(bs []byte, group string, key string) []byte {
 
 	bs = appendEscapedString(bs, key)
 	bs = append(bs, keyValueConnector)
-
 	return bs
 }
 
 func (th *tapeHandler) appendBool(bs []byte, value bool) []byte {
 	bs = strconv.AppendBool(bs, value)
 	bs = append(bs, attrConnector...)
-
 	return bs
 }
 
 func (th *tapeHandler) appendInt64(bs []byte, value int64) []byte {
 	bs = strconv.AppendInt(bs, value, 10)
 	bs = append(bs, attrConnector...)
-
 	return bs
 }
 
 func (th *tapeHandler) appendUint64(bs []byte, value uint64) []byte {
 	bs = strconv.AppendUint(bs, value, 10)
 	bs = append(bs, attrConnector...)
-
 	return bs
 }
 
 func (th *tapeHandler) appendFloat64(bs []byte, value float64) []byte {
 	bs = strconv.AppendFloat(bs, value, 'f', -1, 64)
 	bs = append(bs, attrConnector...)
-
 	return bs
 }
 
 func (th *tapeHandler) appendString(bs []byte, value string) []byte {
 	bs = appendEscapedString(bs, value)
 	bs = append(bs, attrConnector...)
-
 	return bs
 }
 
 func (th *tapeHandler) appendDuration(bs []byte, value time.Duration) []byte {
 	bs = append(bs, value.String()...)
 	bs = append(bs, attrConnector...)
-
 	return bs
 }
 
@@ -263,7 +254,6 @@ func (th *tapeHandler) appendTime(bs []byte, value time.Time) []byte {
 
 	bs = strconv.AppendInt(bs, int64(mircosecond), 10)
 	bs = append(bs, attrConnector...)
-
 	return bs
 }
 
@@ -271,14 +261,12 @@ func (th *tapeHandler) appendAny(bs []byte, value any) []byte {
 	if err, ok := value.(error); ok {
 		bs = append(bs, err.Error()...)
 		bs = append(bs, attrConnector...)
-
 		return bs
 	}
 
 	if stringer, ok := value.(fmt.Stringer); ok {
 		bs = append(bs, stringer.String()...)
 		bs = append(bs, attrConnector...)
-
 		return bs
 	}
 
@@ -286,7 +274,6 @@ func (th *tapeHandler) appendAny(bs []byte, value any) []byte {
 	if err == nil {
 		bs = append(bs, marshaled...)
 		bs = append(bs, attrConnector...)
-
 		return bs
 	}
 
@@ -294,7 +281,6 @@ func (th *tapeHandler) appendAny(bs []byte, value any) []byte {
 
 	bs = fmt.Appendf(bs, "%+v", value)
 	bs = append(bs, attrConnector...)
-
 	return bs
 }
 
@@ -317,7 +303,6 @@ func (th *tapeHandler) appendAttr(bs []byte, group string, attr slog.Attr) []byt
 
 	if kind == slog.KindGroup {
 		bs = th.appendAttrs(bs, attr.Key, attr.Value.Group())
-
 		return bs
 	}
 
@@ -367,7 +352,6 @@ func (th *tapeHandler) appendSource(bs []byte, pc uintptr) []byte {
 	bs = append(bs, sourceConnector)
 	bs = strconv.AppendInt(bs, int64(frame.Line), 10)
 	bs = append(bs, attrConnector...)
-
 	return bs
 }
 

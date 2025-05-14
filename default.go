@@ -22,7 +22,7 @@ import (
 	"github.com/FishGoddess/logit/defaults"
 )
 
-var defaultLogger atomic.Value
+var defaultLogger atomic.Pointer[*Logger]
 
 func init() {
 	SetDefault(NewLogger())
@@ -30,12 +30,12 @@ func init() {
 
 // SetDefault sets logger as the default logger.
 func SetDefault(logger *Logger) {
-	defaultLogger.Store(logger)
+	defaultLogger.Store(&logger)
 }
 
 // Default returns the default logger.
 func Default() *Logger {
-	return defaultLogger.Load().(*Logger)
+	return *defaultLogger.Load()
 }
 
 // Debug logs a log with msg and args in debug level.

@@ -24,6 +24,9 @@ const (
 )
 
 type config struct {
+	// path is the path of file.
+	path string
+
 	// timeFormat is the time format of backup path.
 	timeFormat string
 
@@ -40,8 +43,9 @@ type config struct {
 	maxBackups uint32
 }
 
-func newDefaultConfig() config {
-	return config{
+func newDefaultConfig(path string) *config {
+	return &config{
+		path:       path,
 		timeFormat: "20060102150405",
 		maxSize:    128 * MB,
 		maxAge:     60 * Day,

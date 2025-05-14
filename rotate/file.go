@@ -28,13 +28,10 @@ import (
 // It has max size and file will rotate if size exceeds max size.
 // It has max age and max backups, so rotated files will be cleaned which is beneficial to space.
 type File struct {
-	config
-	path string
-
-	// size is the current size of writing in file.
-	size uint64
+	conf *config
 
 	file *os.File
+	size uint64
 	ch   chan struct{}
 
 	lock sync.Mutex
@@ -58,39 +55,39 @@ func New(path string, opts ...Option) (*File, error) {
 
 // newFile creates a new file.
 func newFile(path string, opts []Option) *File {
-	c := newDefaultConfig()
+	conf := newDefaultConfig(path)
 
 	for _, opt := range opts {
-		opt.apply(&c)
+		opt.applyTo(conf)
 	}
 
 	f := &File{
-		config: c,
-		path:   path,
-		ch:     make(chan struct{}, 1),
+		conf: conf,
+		ch:   make(chan struct{}, 1),
 	}
 
 	return f
 }
 
 func (f *File) mkdir() error {
-	dir := filepath.Dir(f.path)
+	dir := filepath.Dir(f.conf.path)
+
 	return defaults.OpenFileDir(dir, defaults.FileDirMode)
 }
 
 func (f *File) open() (*os.File, error) {
-	return defaults.OpenFile(f.path, defaults.FileMode)
+	return defaults.OpenFile(f.conf.path, defaults.FileMode)
 }
 
 func (f *File) listBackups() ([]backup, error) {
-	dir := filepath.Dir(f.path)
+	dir := filepath.Dir(f.conf.path)
 
 	files, err := os.ReadDir(dir)
 	if err != nil {
 		return nil, err
 	}
 
-	baseName := filepath.Base(f.path)
+	baseName := filepath.Base(f.conf.path)
 	prefix, ext := backupPrefixAndExt(baseName)
 
 	var backups []backup
@@ -109,7 +106,7 @@ func (f *File) listBackups() ([]backup, error) {
 			continue
 		}
 
-		t, err := parseBackupTime(filename, prefix, ext, f.timeFormat)
+		t, err := parseBackupTime(filename, prefix, ext, f.conf.timeFormat)
 		if err != nil {
 			defaults.HandleError("rotate.parseBackupTime", err)
 			continue
@@ -128,15 +125,15 @@ func (f *File) listBackups() ([]backup, error) {
 func (f *File) removeStaleBackups(backups []backup) {
 	staleBackups := make(map[string]struct{}, 16)
 
-	if f.maxBackups > 0 {
-		exceeds := len(backups) - int(f.maxBackups)
+	if f.conf.maxBackups > 0 {
+		exceeds := len(backups) - int(f.conf.maxBackups)
 		for i := 0; i < exceeds; i++ {
 			staleBackups[backups[i].path] = struct{}{}
 		}
 	}
 
-	if f.maxAge > 0 {
-		deadline := defaults.CurrentTime().Add(-f.maxAge)
+	if f.conf.maxAge > 0 {
+		deadline := defaults.CurrentTime().Add(-f.conf.maxAge)
 
 		for _, backup := range backups {
 			if !backup.before(deadline) {
@@ -187,12 +184,11 @@ func (f *File) openNewFile() error {
 
 	f.file = file
 	f.size = uint64(info.Size())
-
 	return nil
 }
 
 func (f *File) nextBackupPath() (string, error) {
-	backupPath := backupPath(f.path, f.timeFormat)
+	backupPath := backupPath(f.conf.path, f.conf.timeFormat)
 
 	_, err := os.Stat(backupPath)
 	if os.IsNotExist(err) {
@@ -203,8 +199,9 @@ func (f *File) nextBackupPath() (string, error) {
 		return "", err
 	}
 
-	// Backup path conflict...
-	return "", fmt.Errorf("logit: extension.file wants a backup path %s but conflict", backupPath)
+	// Backup path conflicted...
+	err = fmt.Errorf("logit: rotate.file wants a backup path %s but conflicted", backupPath)
+	return "", err
 }
 
 func (f *File) closeOldFile() (err error) {
@@ -226,7 +223,7 @@ func (f *File) closeOldFile() (err error) {
 	}
 
 	fileClosed = true
-	err = os.Rename(f.path, backupPath)
+	err = os.Rename(f.conf.path, backupPath)
 	return err
 }
 
@@ -249,16 +246,15 @@ func (f *File) Write(p []byte) (n int, err error) {
 	defer f.lock.Unlock()
 
 	writeSize := uint64(len(p))
-	if f.size+writeSize > f.maxSize {
+	if f.size+writeSize > f.conf.maxSize {
 		// Ignore rotating error so this p won't be discarded.
 		if rotateErr := f.rotate(); rotateErr != nil {
-			defaults.HandleError("File.rotate", rotateErr)
+			defaults.HandleError("rotate.File.rotate", rotateErr)
 		}
 	}
 
 	n, err = f.file.Write(p)
 	f.size += uint64(n)
-
 	return n, err
 }
 

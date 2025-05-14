@@ -116,7 +116,7 @@ func TestFileRotate(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	f.maxSize = 4
+	f.conf.maxSize = 4
 	defer f.Close()
 
 	data := []byte("test")
@@ -185,7 +185,7 @@ func TestFileRotate(t *testing.T) {
 
 	var bs []byte
 	for second > 1 {
-		backup := backupPath(path, f.timeFormat)
+		backup := backupPath(path, f.conf.timeFormat)
 		if bs, err = os.ReadFile(backup); err != nil {
 			t.Fatal(err)
 		}

@@ -27,7 +27,6 @@ import (
 	"github.com/FishGoddess/logit/writer"
 )
 
-// Option sets some fields to config.
 type Option func(conf *config)
 
 func (o Option) applyTo(conf *config) {
