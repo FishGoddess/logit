@@ -122,6 +122,5 @@ func (c *config) newHandler() (slog.Handler, Syncer, io.Closer, error) {
 	handler := newHandler(writer, opts)
 	syncer := c.newSyncer(handler, writer)
 	closer := c.newCloser(handler, writer)
-
 	return handler, syncer, closer, nil
 }

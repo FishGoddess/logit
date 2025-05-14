@@ -21,45 +21,45 @@ import (
 
 // go test -v -cover -count=1 -test.cpu=1 -run=^TestWithMaxSize$
 func TestWithMaxSize(t *testing.T) {
-	c := newDefaultConfig()
-	c.maxSize = 0
+	conf := newDefaultConfig(t.Name())
+	conf.maxSize = 0
 
-	WithMaxSize(4 * 1024).apply(&c)
+	WithMaxSize(4 * 1024).applyTo(conf)
 
-	want := newDefaultConfig()
+	want := newDefaultConfig(t.Name())
 	want.maxSize = 4 * 1024
 
-	if c != want {
-		t.Fatalf("c %+v != want %+v", c, want)
+	if *conf != *want {
+		t.Fatalf("conf %+v != want %+v", conf, want)
 	}
 }
 
 // go test -v -cover -count=1 -test.cpu=1 -run=^TestWithMaxAge$
 func TestWithMaxAge(t *testing.T) {
-	c := newDefaultConfig()
-	c.maxAge = 0
+	conf := newDefaultConfig(t.Name())
+	conf.maxAge = 0
 
-	WithMaxAge(24 * time.Hour).apply(&c)
+	WithMaxAge(24 * time.Hour).applyTo(conf)
 
-	want := newDefaultConfig()
+	want := newDefaultConfig(t.Name())
 	want.maxAge = 24 * time.Hour
 
-	if c != want {
-		t.Fatalf("c %+v != want %+v", c, want)
+	if *conf != *want {
+		t.Fatalf("conf %+v != want %+v", conf, want)
 	}
 }
 
 // go test -v -cover -count=1 -test.cpu=1 -run=^TestWithMaxBackups$
 func TestWithMaxBackups(t *testing.T) {
-	c := newDefaultConfig()
-	c.maxBackups = 0
+	conf := newDefaultConfig(t.Name())
+	conf.maxBackups = 0
 
-	WithMaxBackups(30).apply(&c)
+	WithMaxBackups(30).applyTo(conf)
 
-	want := newDefaultConfig()
+	want := newDefaultConfig(t.Name())
 	want.maxBackups = 30
 
-	if c != want {
-		t.Fatalf("c %+v != want %+v", c, want)
+	if *conf != *want {
+		t.Fatalf("conf %+v != want %+v", conf, want)
 	}
 }

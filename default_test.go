@@ -25,17 +25,18 @@ import (
 
 // go test -v -cover -count=1 -test.cpu=1 -run=^TestSetDefault$
 func TestSetDefault(t *testing.T) {
-	defaultLogger.Store(NewLogger())
-
 	logger := NewLogger()
+	defaultLogger.Store(&logger)
+
+	logger = NewLogger()
 	SetDefault(logger)
 
-	gotLogger, ok := defaultLogger.Load().(*Logger)
-	if !ok {
-		t.Fatalf("logger type %T is wrong", defaultLogger.Load())
+	gotLogger := defaultLogger.Load()
+	if gotLogger == nil {
+		t.Fatal("gotLogger == nil")
 	}
 
-	if gotLogger != logger {
+	if *gotLogger != logger {
 		t.Fatalf("gotLogger %+v != logger %+v", gotLogger, logger)
 	}
 }
@@ -43,7 +44,7 @@ func TestSetDefault(t *testing.T) {
 // go test -v -cover -count=1 -test.cpu=1 -run=^TestDefault$
 func TestDefault(t *testing.T) {
 	logger := NewLogger()
-	defaultLogger.Store(logger)
+	defaultLogger.Store(&logger)
 
 	gotLogger := Default()
 	if gotLogger != logger {

@@ -101,7 +101,7 @@ func (l *Logger) runSyncTimer(d time.Duration) {
 		select {
 		case <-timer.C:
 			if err := l.Sync(); err != nil {
-				defaults.HandleError("Logger.Sync", err)
+				defaults.HandleError("logit.Logger.Sync", err)
 			}
 		}
 	}
@@ -109,6 +109,7 @@ func (l *Logger) runSyncTimer(d time.Duration) {
 
 func (l *Logger) clone() *Logger {
 	newLogger := *l
+
 	return &newLogger
 }
 
@@ -153,7 +154,6 @@ func (l *Logger) With(args ...any) *Logger {
 
 	newLogger := l.clone()
 	newLogger.handler = l.handler.WithAttrs(attrs)
-
 	return newLogger
 }
 
@@ -167,7 +167,6 @@ func (l *Logger) WithGroup(name string) *Logger {
 
 	newLogger := l.clone()
 	newLogger.handler = l.handler.WithGroup(name)
-
 	return newLogger
 
 }
@@ -204,6 +203,7 @@ func (l *Logger) PrintEnabled() bool {
 
 func (l *Logger) newRecord(level slog.Level, msg string, args []any) slog.Record {
 	var pc uintptr
+
 	if l.withSource {
 		var pcs [1]uintptr
 		runtime.Callers(defaults.CallerDepth, pcs[:])
