@@ -7,12 +7,16 @@ on:
 
 jobs:
   test-project:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     steps:
+      - run: uname -a
+      - run: lsb_release -a
+
       - name: Setup
         uses: actions/setup-go@v4
         with:
           go-version: "1.21"
+
       - run: go version
 
       - name: Checkout
